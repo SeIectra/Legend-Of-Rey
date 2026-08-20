@@ -1,81 +1,101 @@
-Legend of Rey
+# LORE — Legend of Rey: Echoes
 
-🏆 About the Game
+2D yandan kaydırmalı aksiyon-platformer. Samsung tuşlu telefonlardaki
+*Forgotten Warrior*'dan ilham alır: silahsız başlarsın, gizlice vurursun,
+ilerledikçe kılıcı ve büyüleri kazanırsın.
 
-Legend of Rey is an exciting 2D action-adventure platformer where you control Rey, a brave warrior fighting through dangerous levels filled with enemies, spikes, and hidden traps.
+> **Durum:** Faz 1–6 tamamlandı (motor, sanat üretimi, oynanış, dünya,
+> düşmanlar, arayüz). Act I oynanabilir. Kalan içerik için
+> [docs/ROADMAP.md](docs/ROADMAP.md).
 
-🎮 Gameplay Features
+## Hikâye
 
-Melee Combat: Attack enemies with close-range sword strikes.
+Aethelmoor'da *Bölünme* dünyanın Özü'nü paramparça etti. Kırılan anılar
+"Yankı" olarak geride kaldı. Rey uyurken Kül Korosu kardeşi Ardo'yu
+kaçırır; ağabeyi Cael sesiyle ona yol gösterir — ama Cael'in kendisi de bir
+yankıdır.
 
-Ranged Attacks: Shoot projectiles at enemies with Rey's special ability.
+**Rey** — esmer, uzun koyu saçlı bir kadın savaşçı. Silahsız başlar; Echobrand'i
+Act I'in sonunda kuşanır.
 
-Challenging Levels: Navigate through different levels with increasing difficulty.
+## Kurulum
 
-Enemies & Bosses: Face off against goblins, spiders, skeletons, and more.
+```bash
+python -m venv .venv
+.venv/Scripts/python -m pip install -r requirements.txt   # Windows
+.venv/Scripts/python run.py
+```
 
-Health & Power-ups: Collect hearts to restore health and enhance Rey’s abilities.
+Linux/macOS'ta `.venv/bin/python`. Python 3.11+ gerekir.
 
-Epic Pixel Art: Enjoy beautifully designed pixel-art levels and characters.
+## Kontroller
 
-🕹️ Controls
+| Tuş | Eylem |
+|-----|-------|
+| `←` `→` / `A` `D` | Hareket |
+| `Space` / `W` / `↑` / `Z` | Zıpla — **basılı tut = daha yüksek** |
+| `J` / `X` | Saldır (kılıçla 3'lü kombo) |
+| `Shift` / `L` | Atılma *(Act I sonunda açılır)* |
+| `E` | Etkileşim (sandık, kapı, Echo Shrine) |
+| `Esc` | Duraklat |
+| `F3` `F11` `F12` | Hata ayıklama · Tam ekran · Ekran görüntüsü |
 
-Key
+Gamepad desteklenir (A zıpla, X saldır, RB atılma, Start duraklat).
 
-Action
+### Kaçınma
 
-Arrow Keys / WASD
+Üç yolu var, sırayla açılırlar:
 
-Move Rey
+1. **Baştan itibaren:** düşmanın kırmızı yanıp sönen *hazırlık pozunu* gör ve
+   menzilden çık. Her saldırının uyarısı vardır; zorluk tepki hızından değil,
+   ne zaman geri çekileceğine karar vermekten gelir.
+2. **Zıplama:** yerdeki saldırıların çoğu havada ıskalar.
+3. **Atılma** (`Shift`) — Act I sonunda açılır. 50 piksel ileri sıçrar ve
+   **süresince hasar almazsın** (i-frame). Saldırıyı iptal edip atılabilirsin;
+   akıcı savaşın anahtarı budur. 0.42 saniye bekleme süresi var.
 
-Z
+## Oynanış
 
-Melee Attack
+**Silahsız başlarsın.** Act I boyunca tek gerçek saldırın **sırttan vuruş**:
+seni fark etmemiş bir düşmana arkadan vurmak üç kat hasar verir ve goblini tek
+vuruşta düşürür. Koşarak yaklaşırsan ayak sesin seni ele verir — yavaş git.
 
-X
+**Her düşman saldırmadan önce hazırlanır.** Kırmızı yanıp sönen hazırlık pozunu
+görürsün: kaç, vur ya da beklemeyi seç. Zorluk tepki hızından değil, karardan
+gelir.
 
-Shoot Projectile
+**Essence** hem para hem tecrübe. Düşenler sana doğru çekilir.
 
-Esc
+## Teknik
 
-Pause Menu
+- **480×270 sanal çözünürlük**, tam sayı katıyla ölçeklenir → keskin pixel art
+- **Sabit 1/60 zaman adımı** → fizik makineden bağımsız ve deterministik
+- **Prosedürel sanat**: tüm sprite, tile, efekt ve arka planlar kodla üretilir;
+  tek palet, tutarlı stil, sıfır dış asset bağımlılığı
+- **Dinamik 2B ışıklandırma**, parçacık sistemi, hitstop, travma tabanlı
+  ekran sarsıntısı, Act'e göre renk derecelendirme
+- **Veri odaklı bölümler**: ASCII harita + JSON, kodda bölüm mantığı yok
 
-🏗️ Installation
+## Geliştirme
 
-Download the latest Legend of Rey executable (.exe) from [your link].
+```bash
+python tools/make_levels.py     # Bölüm tasarla + doğrula
+python tools/smoke_test.py      # Uçtan uca başsız test
+python tools/combat_test.py     # Savaş sistemleri
+python tools/sprite_sheet.py    # Sprite kontakt sayfası
+```
 
-Run Legend_of_Rey.exe to start playing. No installation required!
+Mimari notlar: [CLAUDE.md](CLAUDE.md) · Yol haritası: [docs/ROADMAP.md](docs/ROADMAP.md)
 
-(Optional) Extract all files if packaged as a zip.
+`legacy/` ilk sürümün kaynağıdır; referans olarak duruyor, çalışmıyor.
 
-⚔️ How to Play
+## Erişilebilirlik
 
-Defeat enemies using melee or ranged attacks.
+Ayarlar menüsünden ekran sarsıntısı ve flaş şiddeti tamamen kapatılabilir.
+Fotosensitivite bir tercih değil, bir gerekliliktir.
 
-Avoid spikes and traps.
+## Geliştirici
 
-Reach the exit door to advance to the next level.
+Arda Güner — <ardaguner2000@gmail.com> · [ardeko.itch.io](https://ardeko.itch.io/legend-of-rey)
 
-If Rey’s health reaches zero, the game is over.
-
-📥 Download
-
-Download the latest version of Legend of Rey from https://ardeko.itch.io/legend-of-rey
-
-👨‍💻 Developer
-
-Created by: Arda Güner📧 Contact: ardaguner2000@gmail.com🌐 
-
-📜 License
-
-This game is for personal use and entertainment only. Any distribution, modification, or reproduction without permission is prohibited.
-
-🚀 Future Plans
-
-More levels and enemy types
-
-Advanced combat mechanics
-
-Multiplayer mode (TBD)
-
-Have fun playing Legend of Rey! 🎮🔥
+Lisans: [LICENSE](LICENSE)

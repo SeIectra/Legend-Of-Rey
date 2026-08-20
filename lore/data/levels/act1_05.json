@@ -1,0 +1,96 @@
+{
+  "id": "act1_05",
+  "name": "Echobrand",
+  "act": 1,
+  "theme": "hollow",
+  "weather": "none",
+  "rows": [
+    "................................................................................",
+    "................................................................................",
+    "................................................................................",
+    "..............bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..........",
+    "..............bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..........",
+    "..............bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..........",
+    "..............bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..........",
+    "..............bbbbbbbbbb=====bbbbbbbbbbbbbbbbb=====bbbbbbbbbbbbbbbbbbb..........",
+    "..............bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..........",
+    "..............bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..........",
+    ".......=====..bbbbbbbb=====bbb=====bbbbbbb=====bbbbbbbbbbbbbbbbbbbbbbb..........",
+    "..............bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..........",
+    ".....bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb..........",
+    "################################################################################",
+    "################################################################################",
+    "################################################################################",
+    "################################################################################"
+  ],
+  "spawn": [
+    3,
+    12
+  ],
+  "intro": "Cael: Su tasin ustunde. Al onu.",
+  "entities": [
+    {
+      "type": "grunt",
+      "x": 40,
+      "y": 12,
+      "patrol": 30
+    },
+    {
+      "type": "grunt",
+      "x": 52,
+      "y": 12,
+      "patrol": 24
+    },
+    {
+      "type": "skeleton",
+      "x": 64,
+      "y": 12,
+      "patrol": 20
+    }
+  ],
+  "props": [
+    {
+      "type": "shrine",
+      "x": 6,
+      "y": 12,
+      "id": "act1_05_shrine"
+    },
+    {
+      "type": "torch",
+      "x": 18,
+      "y": 12
+    },
+    {
+      "type": "chest",
+      "x": 24,
+      "y": 12,
+      "contents": "blade",
+      "id": "act1_05_blade"
+    },
+    {
+      "type": "torch",
+      "x": 46,
+      "y": 12
+    },
+    {
+      "type": "chest",
+      "x": 32,
+      "y": 9,
+      "contents": "dash",
+      "id": "act1_05_dash"
+    },
+    {
+      "type": "torch",
+      "x": 68,
+      "y": 12
+    },
+    {
+      "type": "door",
+      "x": 74,
+      "y": 12,
+      "target": "",
+      "boss": true
+    }
+  ],
+  "next": ""
+}
