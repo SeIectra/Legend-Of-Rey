@@ -111,9 +111,23 @@ class HUD:
             self._draw_hearts(surface, player)
             self._draw_essence(surface, player)
             self._draw_spell(surface, player)
+        self._draw_boss(surface, scene)
         self._draw_prompt(surface)
         self._draw_toast(surface)
         self._draw_level_title(surface)
+
+    def _draw_boss(self, surface: pygame.Surface, scene) -> None:
+        boss = getattr(scene, "boss", None) if scene is not None else None
+        if boss is None or boss.dead or boss.max_health <= 0:
+            return
+        width = 200
+        rect = pygame.Rect(VIRTUAL_W // 2 - width // 2, 12, width, 8)
+        panel(surface, pygame.Rect(rect.x - 4, rect.y - 13, width + 8, 25),
+              alpha=190)
+        gfx_text.draw_text(surface, boss.display_name, rect.centerx, rect.y - 11,
+                           color=UI_TEXT_HILITE, align="center", shadow=True)
+        ratio = clamp(boss.health / boss.max_health, 0.0, 1.0)
+        bar(surface, rect, ratio, RAMPS["blood"][3])
 
     def _draw_hearts(self, surface: pygame.Surface, player) -> None:
         # Iki birim = bir kalp. Yarim kalp gostermek yerine kalbi soluklastir:

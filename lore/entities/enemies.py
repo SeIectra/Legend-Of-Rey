@@ -615,6 +615,11 @@ ENEMY_TYPES: dict[str, type[Enemy]] = {
 
 def spawn_enemy(scene, kind: str, x: float, y: float, **options) -> Enemy | None:
     cls = ENEMY_TYPES.get(kind)
+    if cls is None and kind == "gaoler":
+        # Gecikmeli import: boss.py bu dosyayi (Enemy icin) ust seviyede
+        # import ediyor, tersi daire olusturur.
+        from lore.entities.boss import Gaoler
+        cls = Gaoler
     if cls is None:
         print(f"[enemies] bilinmeyen dusman turu: {kind}")
         return None

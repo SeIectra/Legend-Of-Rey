@@ -18,6 +18,7 @@ kalmaz, ritim tutturmaya odaklanir.
 """
 from __future__ import annotations
 
+from dataclasses import replace
 
 from lore.constants import MASK_ENEMY, MASK_PLAYER
 from lore.core.input import Action
@@ -108,12 +109,36 @@ class Player(Entity):
         self.can_double_jump = False
 
     # --- Kurulum ------------------------------------------------------------
+    def _wound_tier(self) -> int:
+        """Can yuzdesine gore yara kademesi (0 saglikli .. 3 olum esigi).
+
+        Oransal hesaplanir (max_health'e gore), yetenek agacinda kalp
+        parcasi kazanilip max can degistiginde de dogru kademeyi verir.
+        """
+        if self.max_health <= 0:
+            return 0
+        frac = self.health / self.max_health
+        if frac > 0.75:
+            return 0
+        if frac > 0.5:
+            return 1
+        if frac > 0.25:
+            return 2
+        return 3
+
     def _build_sprites(self) -> None:
         key = "rey_armed" if self.has_blade else "rey"
+        tier = self._wound_tier()
         spec = ARCHETYPES[key]
+        if tier > 0:
+            spec = replace(spec, wound=tier)
         self.sprite_foot_y = spec.foot_y
         sprite_set = self.scene.app.assets.generated(
-            f"sprites:{key}", lambda: build_sprite_set(spec))
+            f"sprites:{key}:wound{tier}", lambda: build_sprite_set(spec))
+        # Kademe degisince sprite seti yenilenir ama oynanan animasyon
+        # durumu korunur - aksi halde her can kaybinda karakter "idle"a
+        # sicrar.
+        prev_state = self.anim.state if self.anim else "idle"
         self.anim = Animator(
             sprite_set,
             fps={"idle": 7, "run": 13, "fall": 8, "land": 14, "dash": 16,
@@ -125,6 +150,8 @@ class Player(Entity):
                      "attack1": False, "attack2": False, "attack3": False,
                      "crouch": False, "cast": False},
         )
+        self.anim.play(prev_state, restart=False)
+        self._wound_tier_cached = tier
 
     def grant_blade(self) -> None:
         if self.has_blade:
@@ -158,6 +185,10 @@ class Player(Entity):
         self.dash_cooldown = max(0.0, self.dash_cooldown - dt)
         self.combo_window = max(0.0, self.combo_window - dt)
         self.wall_stick = max(0.0, self.wall_stick - dt)
+
+        # Can esigi degistiyse (hasar veya iyilesme) yara izlerini yenile.
+        if self._wound_tier() != self._wound_tier_cached:
+            self._build_sprites()
 
         if self.hurt_timer > 0.0:
             self._update_hurt(dt)

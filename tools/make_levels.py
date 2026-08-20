@@ -189,6 +189,28 @@ ACT1_05 = """
 ################################################################################
 """
 
+# --- 5b. The Gaoler (boss arenasi) -------------------------------------------
+# Act I finali. Duz, tek katli bir oda - AI'nin kenar sezinlemesiyle
+# ugrasmasi gerekmez, kovalamaca fazinda oyuncuya kacacak yer birakir.
+# Zemin tepesi 12 -> basilabilir 11
+ACT1_05_BOSS = """
+................................................................................
+................................................................................
+................................................................................
+..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb............................................
+..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb............................................
+..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb............................................
+..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb............................................
+..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb............................................
+..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb............................................
+..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb............................................
+..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb............................................
+................................................................................
+################################################################################
+################################################################################
+################################################################################
+"""
+
 
 LEVELS = [
     level(
@@ -294,7 +316,26 @@ LEVELS = [
             {"type": "chest", "x": 32, "y": 9, "contents": "dash",
              "id": "act1_05_dash"},
             {"type": "torch", "x": 68, "y": 12},
-            {"type": "door", "x": 74, "y": 12, "target": "", "boss": True},
+            {"type": "door", "x": 74, "y": 12, "target": "act1_05_boss",
+             "boss": True},
+        ],
+        next="act1_05_boss",
+    ),
+    level(
+        "act1_05_boss",
+        name="The Gaoler",
+        act=1, theme="hollow", weather="none",
+        rows=rows_from(ACT1_05_BOSS),
+        spawn=[4, 11],
+        intro="Kudretli bir kukreme yankilanir.",
+        entities=[
+            {"type": "gaoler", "x": 28, "y": 11},
+        ],
+        props=[
+            {"type": "torch", "x": 6, "y": 11},
+            {"type": "torch", "x": 20, "y": 11},
+            {"type": "torch", "x": 32, "y": 11},
+            {"type": "door", "x": 36, "y": 11, "target": "", "locked": True},
         ],
         next="",
     ),

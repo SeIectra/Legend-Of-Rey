@@ -75,6 +75,7 @@ class CharSpec:
     glow_eyes: int = 0          # 0 = kapali, >0 = parlaklik
     weapon: str = "none"        # none sword knife bow club staff scythe
     scale: float = 1.0
+    wound: int = 0               # Yara izi kademesi: 0 saglikli .. 3 olum esigi
 
 
 @dataclass
@@ -274,6 +275,47 @@ def _draw_head(c: Canvas, cx: float, cy: float, spec: CharSpec,
                 2.2, 0.8, "bone", 4)
 
 
+def _draw_wounds(c: Canvas, spec: CharSpec, cx: float, head_x: float,
+                 head_y: float, shoulder_y: float, hip_y: float) -> None:
+    """Can azaldikca beliren yara izleri.
+
+    `spec.wound` 0..3 (0 saglikli, 3 olum esigi). Isaretlerin konumu poza
+    gore hesaplanir, zar atilmaz - boylece ayni kare her uretildiginde ayni
+    yarayi verir ve animasyon kareler arasi titremez. Kademe arttikca hem
+    kan lekesi sayisi hem govdedeki yayilim artar; agir yarada govdede
+    yirtik bir kumas cizgisi, olum esiginde de yuzde bir kan izi eklenir.
+    """
+    tier = spec.wound
+    if tier <= 0:
+        return
+    r = spec.head_r
+    torso_l = cx - spec.torso_w * 0.5
+    torso_r = cx + spec.torso_w * 0.5
+
+    spots = [
+        (cx - spec.torso_w * 0.20, shoulder_y + 2.5),
+        (cx + spec.torso_w * 0.15, hip_y - 3.0),
+        (torso_r - 0.5, shoulder_y + 5.0),
+        (torso_l + 0.5, hip_y - 5.5),
+        (head_x + r * 0.35, head_y + r * 0.5),
+        (cx, shoulder_y + 1.0),
+    ]
+    count = {1: 2, 2: 4, 3: 6}[tier]
+    for sx, sy in spots[:count]:
+        c.px(int(sx), int(sy), "blood", 2)
+        c.px(int(sx), int(sy) + 1, "blood", 1)
+
+    if tier >= 2:
+        # Yirtik kumas: govde kenarinda koyu bir catlak.
+        c.line(torso_l + 1.0, shoulder_y + 3.0, torso_l + 2.5, hip_y - 1.0,
+               1.0, "ink", 0)
+
+    if tier >= 3:
+        # Yuzdeki kan izi: sadece olum esiginde.
+        c.line(head_x + r * 0.15, head_y - r * 0.1, head_x + r * 0.4,
+               head_y + r * 0.7, 0.8, "blood", 1)
+
+
 def draw_character(spec: CharSpec, pose: Pose) -> Canvas:
     """Bir pozu tam sprite'a cevirir."""
     c = Canvas(spec.cell_w, spec.cell_h)
@@ -362,6 +404,8 @@ def draw_character(spec: CharSpec, pose: Pose) -> Canvas:
     if spec.tail:
         c.taper(cx - spec.torso_w * 0.3, hip_y, cx - spec.torso_w * 0.3 - 6,
                 hip_y + 3, 2.4, 0.8, spec.skin, 2)
+
+    _draw_wounds(c, spec, cx, head_x, head_y, shoulder_y, hip_y)
 
     c.shade()
     c.outline("ink", 0)
@@ -649,9 +693,9 @@ def mirror_set(sprite_set: dict[str, list[pygame.Surface]]) -> dict[str, list[py
 # --- Karakter kutuphanesi ---------------------------------------------------
 # Rey - Yankisoyleyen.
 #
-# Uzun, gur, duz ve neredeyse siyah sac; koyu kahve badem gozler; esmer ve
-# purcuksuz ten; rahat dokumlu bir tunik. Sag kopruck kemiginin altinda
-# geyik dovmesi.
+# Uzun, gur, duz ve neredeyse siyah sac; koyu kahve badem gozler; solgun/
+# beyaz ve purcuksuz ten; rahat dokumlu bir tunik. Sag kopruck kemiginin
+# altinda geyik dovmesi.
 #
 # Bu olcekte (26 piksel boy) yuz ayrintisi kaybolur; karakteri tasiyan sey
 # siluettir: sirta dokulen agir sac, dar omuz ve acilan etek. Dovme burada
@@ -661,7 +705,7 @@ REY_UNARMED = CharSpec(
     head_r=4.0, torso_h=7.2, torso_w=6.4,
     thigh=4.8, shin=4.8, upper_arm=4.0, fore_arm=4.0,
     limb_w=2.4, shoulder_w=5.2,
-    skin="flesh", skin_step=2,          # esmer, purcuksuz (gurultu uygulanmaz)
+    skin="pale", skin_step=3,           # solgun/beyaz, purcuksuz (gurultu uygulanmaz)
     cloth="azure", cloth_dark="ink", armor="gold",
     hair="ink", hair_step=3,            # gur, duz, neredeyse siyah (parlak tel)
     accent="ember",

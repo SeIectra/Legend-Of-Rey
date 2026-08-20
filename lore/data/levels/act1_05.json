@@ -88,9 +88,9 @@
       "type": "door",
       "x": 74,
       "y": 12,
-      "target": "",
+      "target": "act1_05_boss",
       "boss": true
     }
   ],
-  "next": ""
+  "next": "act1_05_boss"
 }

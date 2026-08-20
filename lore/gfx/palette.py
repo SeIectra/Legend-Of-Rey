@@ -32,6 +32,10 @@ RAMPS: dict[str, tuple[Color, ...]] = {
     "violet": ((30, 16, 48), (52, 28, 82), (84, 46, 124), (126, 78, 174), (176, 132, 220)),
     # Ten
     "flesh":  ((62, 34, 30), (104, 62, 48), (152, 100, 74), (198, 146, 110), (232, 190, 156)),
+    # Solgun/beyaz ten - Rey'e ozel. "flesh" ile ayni yapida (5 basamak,
+    # govde golgesinden isik vurgusuna) ama daha soguk ve acik; diger
+    # insansi karakterler (ornegin Mage) "flesh" kullanmaya devam eder.
+    "pale":   ((74, 48, 46), (128, 90, 82), (182, 138, 120), (222, 180, 160), (250, 220, 202)),
     # Altin, hazine, UI vurgusu
     "gold":   ((70, 44, 12), (118, 78, 20), (176, 128, 34), (224, 180, 60), (255, 226, 132)),
     # Kul, sis, Act IV

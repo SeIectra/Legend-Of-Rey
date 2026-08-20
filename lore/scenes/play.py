@@ -24,7 +24,7 @@ from lore.core.input import Action
 from lore.core.mathx import rand_range
 from lore.core.scene import Scene
 from lore.entities.enemies import spawn_enemy
-from lore.entities.pickups import EssenceOrb, HeartPickup, spawn_prop
+from lore.entities.pickups import Door, EssenceOrb, HeartPickup, spawn_prop
 from lore.entities.player import Player
 from lore.gfx import text as gfx_text
 from lore.gfx.lighting import GlowLayer, LightMap
@@ -89,6 +89,7 @@ class PlayScene(Scene):
         self.hud = HUD(self.app)
 
         self.player: Player | None = None
+        self.boss = None
         self.level: Level | None = None
         self.parallax: Parallax | None = None
         self.weather = Weather("none")
@@ -147,6 +148,12 @@ class PlayScene(Scene):
             enemy = spawn_enemy(self, kind, x, y, **options)
             if enemy is not None:
                 self.enemies.append(enemy)
+
+        # Bolumde boss varsa HUD can barinin okuyacagi referans budur. Her
+        # bolum yuklemesinde yeniden hesaplanir - olumden sonra yeniden
+        # denemede boss da tam canla sifirlanir.
+        self.boss = next((e for e in self.enemies if getattr(e, "is_boss", False)),
+                         None)
 
         for kind, x, y, options in self.level.prop_spawns():
             prop = spawn_prop(self, kind, x, y, **options)
@@ -350,6 +357,25 @@ class PlayScene(Scene):
                 self.pickups.append(HeartPickup(self, pos[0], pos[1]))
         if self.save:
             self.save.kills += 1
+
+    def on_boss_defeated(self, boss) -> None:
+        """Boss.die() tarafindan cagrilir - on_enemy_died'in ustune biner."""
+        pos = (boss.body.centerx, boss.body.centery)
+        self.boss = None
+        self.camera.add_trauma(0.6)
+        self.app.hitstop(0.2)
+        self.spawn_particles(pos, 24, ramp="blood")
+        self.spawn_effect("ring", pos, ramp="gold", radius=40)
+        for _ in range(14):
+            self.pickups.append(EssenceOrb(self, pos[0], pos[1], 1))
+        # Arenanin kilitli kapisi: boss dusunce acilir. Genel kural -
+        # odada kilitli kapi varsa o, o odanin cikisidir.
+        for prop in self.props:
+            if isinstance(prop, Door) and prop.locked:
+                prop.locked = False
+        if self.save:
+            self.save.flags["act1_boss_cleared"] = True
+        self.hud.show_toast(f"{boss.display_name} dustu.", 3.0)
 
     def on_player_hurt(self, amount: int) -> None:
         self.postfx.flash((220, 40, 50), 0.45, 0.2)

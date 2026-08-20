@@ -26,6 +26,7 @@ def key(k, down=True):
 def main():
     from lore.core.app import App
     from lore.core.save import SaveData
+    from lore.entities.pickups import Door
     from lore.scenes.play import PlayScene
 
     app = App()
@@ -162,6 +163,46 @@ def main():
         print(f"diken {spike}: can {before_hp} -> {p.health}")
         if p.health >= before_hp:
             errors.append("diken hasar vermedi")
+
+    # --- 7) Boss: Gaoler faz gecisi, olum, kapi kilidi ---------------------
+    scene.load_level("act1_05_boss")
+    step(4)
+    p = scene.player
+    boss = scene.boss
+    print(f"boss: {type(boss).__name__ if boss else None} "
+          f"can={boss.health if boss else '-'}")
+    if boss is None:
+        errors.append("act1_05_boss'ta scene.boss set edilmedi")
+    else:
+        before_speed = boss.chase_speed
+        threshold_hp = int(boss.max_health * 0.4)
+        while boss.health > threshold_hp:
+            boss.iframes = 0.0
+            boss.take_damage(1, source=p, direction=1)
+        print(f"esik sonrasi faz={boss._phase} hiz={boss.chase_speed} "
+              f"can={boss.health}")
+        if boss._phase < 1:
+            errors.append("boss can esigini gecince faz degismedi")
+        if boss.chase_speed <= before_speed:
+            errors.append("faz 2'de boss hizlanmadi")
+
+        guard = 0
+        while not boss.dead and guard < 60:
+            guard += 1
+            boss.iframes = 0.0
+            boss.take_damage(2, source=p, direction=1)
+        step(20, "06_boss_death")
+        locked = [pr for pr in scene.props if isinstance(pr, Door) and pr.locked]
+        print(f"boss olu={boss.dead} scene.boss={scene.boss} "
+              f"kilitli_kapi={len(locked)} flag={save.flags.get('act1_boss_cleared')}")
+        if not boss.dead:
+            errors.append(f"boss {guard} vurustan sonra olmedi (can={boss.health})")
+        if scene.boss is not None:
+            errors.append("boss oldukten sonra scene.boss temizlenmedi")
+        if locked:
+            errors.append("boss oldukten sonra kilitli kapi kaldi")
+        if save.flags.get("act1_boss_cleared") is not True:
+            errors.append("boss odul bayragi (act1_boss_cleared) ayarlanmadi")
 
     app.shutdown()
     return shots, errors
