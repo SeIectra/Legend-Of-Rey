@@ -16,8 +16,8 @@ görev sırası `GOREVLER.md`'de.
 |---|---|---|
 | 0 — Temel kurulum | ✅ | Palet, font, döngü, boru hattı |
 | 1 — Dövüş çekirdeği | ✅ | Zincir, hitstop, kaçınma, kill cancel |
-| 2 — Düşman AI | ⬜ | **Sıradaki mantıklı adım** |
-| 3 — Yankı sistemi | ⬜ | |
+| 2 — Düşman AI | ✅ | 3 tip, saldırı hakkı, ritim imzaları |
+| 3 — Yankı sistemi | ⬜ | **Sıradaki mantıklı adım** |
 | 4 — Bölüm 2 | ⬜ | Dikey dilim |
 | 5 — Ara değerlendirme | ⬜ | **Arda'nın işi**, Claude'a verilmez |
 | 6 — Menü ve UI | ✅ | Sıra dışı yapıldı (Arda istedi) |
@@ -26,7 +26,7 @@ görev sırası `GOREVLER.md`'de.
 | 9 — Sanat geçişi | 🟡 | Sprite sistemi hazır; tileset ve düşmanlar eksik |
 | 10 — Ses + son cila | ⬜ | Dikiş hazır, gövde boş |
 
-Toplam ~7.500 satır. Dört test paketi de yeşil.
+Toplam ~8.400 satır. Yedi test paketi de yeşil.
 
 ---
 
@@ -91,6 +91,7 @@ python tests/test_combat.py       # dövüş kare değerleri (BAĞLAYICI)
 python tests/test_menu.py         # menü UX + kayıt güvenliği
 python tests/test_lang.py         # dil tabloları + kod/tablo örtüşmesi
 python tests/test_window.py       # tam ekran / ölçekleme matematiği
+python tests/test_enemy.py        # saldırı hakkı, tell, ritim, ekoloji
 python -m pyflakes src tools tests main.py
 ```
 
@@ -157,7 +158,25 @@ Bunların hepsi gerçek hataydı, testle yakalandı. Tekrarlama.
     (TR `%100`, EN `100%`), süre birimi (`dk`/`m`), ve büyük harf kuralı —
     `tr_upper("Continue")` noktalı İ ile `CONTİNUE` verir.
 
-13. **`pygame.SCALED` KULLANMA.** O bayrak pygame'in kendi ölçeklemesini
+13. **Hitbox sahibini vurmaz.** Yakın dövüşte fark edilmiyordu (kutu önde
+    açılıyor); radyal patlamada kutu patlayanın üzerinde duruyor, ilk hedef
+    kendisi çıkıyor ve `pierce=False` ise orada tükeniyor — patlama kimseye
+    ulaşmıyor.
+
+14. **`body_colour` RENK adı tutar, gölge zinciri adı değil.** `"rot"` bir
+    zincir; kutu kipi ilk açılışta `PaletteError` ile çöküyordu. Kutu kipi
+    hata ayıklama yolu olduğu için normal oyunda aylarca görünmeyebilir.
+
+15. **Kalıcı durum için `tint_strength < 1.0` kullan.** Tam güç sprite'ı tek
+    renge düzleştirir — iki karelik vuruş flaşı için doğru, "az can" gibi
+    ölene kadar süren bir durum için değil. Ayrıca çok silik bir tint hiçbir
+    bilgi vermez: 0.30 denendi, sağlam düşmandan ayırt edilemiyordu.
+
+16. **Test kendi koşulunu kurduğundan emin olmalı.** Düşmanlar odaya
+    yayılmıştı, altısının ancak ikisi oyuncuyu görüyordu — "kalabalık
+    okunabilir mi?" sorusu hiç sorulmuyordu ama test geçiyordu.
+
+17. **`pygame.SCALED` KULLANMA.** O bayrak pygame'in kendi ölçeklemesini
     devreye sokar ve ölçek tam sayı olmak zorunda değildir: 1920×1080
     ekranda mantıksal 1440×810 yüzey 1.333× gerilir, piksel art bozulur.
     Ayrıca `screen.get_size()` fiziksel değil **mantıksal** boyutu döner,
@@ -186,14 +205,17 @@ src/
 │   └── particles.py   Sütun tabanlı, üst sınır 200
 ├── combat/
 │   ├── combo.py       3'lü zincir, kaçınma, combo sayacı
+│   ├── attack_token.py ★ aynı anda en fazla 2 saldırgan
 │   └── hitbox.py      Kare bazlı hitbox — kimse doğrudan hasar vermez
 ├── entities/          actor · player · player_render · character_stats · dummy
+│   ├── enemy.py       Durum makinesi, tell, poise — 10 tipe genişler
+│   └── enemies/       shambler · climber · bloated
 ├── systems/           save (yedekli) · settings
 ├── ui/                text (tr_upper!) · widgets · menu · character_select
 │                      settings_scene · pause · hud · font_data
 │   ├── i18n.py        t() — TR/EN, çizim anında çözülür
 │   └── lang/          tr.json (kanonik) · en.json
-├── world/tilemap.py   16×16 tile, ASCII'den kurulur
+├── world/             tilemap (16×16, ASCII) · decals (kalıcı izler)
 └── scenes/            combat_room · foundation_check
 ```
 
@@ -259,15 +281,14 @@ değiştirmeden önce ilgili commit'e bakmakta fayda var.
 
 ## 8. SIRADAKİ ADIM
 
-Paket sırasına göre **Görev 2 — Düşman AI**:
-3 tip (Sürüklenen, Tırmanan, Şişkin) + saldırı hakkı sistemi (aynı anda en
-fazla 2 saldıran) + poise/sendeleme + ritim imzaları + renk kodlu tehlike.
+Paket sırasına göre **Görev 3 — Yankı Sistemi**:
+3 kademe (Berrak/Bulanık/Sessiz), soru sorma, kolye pusulası, kırılabilir
+duvar, vinyet ile diegetik anlatım.
 
-`GOREVLER.md`'deki Görev 2 promptunu oku, `docs/gdd.md` §7 ve
-`docs/dovus-sistemi.md` §6 bağlayıcı.
+`GOREVLER.md`'deki Görev 3 promptunu oku, `docs/gdd.md` §4 bağlayıcı.
 
-Altyapı hazır: `Actor` poise ve stagger tutuyor, `Hitbox` takım maskesi var,
-`TrainingDummy` örnek olarak duruyor, `config.py`'de tell süreleri tanımlı.
+Altyapı hazır: `config.py`'de `ECHO_*` sabitleri tanımlı, kayıt dosyası
+`echo_tier` tutuyor, HUD kademeyi okuyor, ayarlarda `echo_penalty` var.
 
 **Ama önce Arda'ya sor** — sırayı bir kez değiştirdi, yine değiştirebilir.
 
