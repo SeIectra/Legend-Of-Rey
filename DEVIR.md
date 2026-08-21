@@ -342,13 +342,9 @@ Sıra gelmediği için değil, gözden kaçmasın diye burada:
 
 Uzak depo: `https://github.com/Ardeko/Legend-Of-Rey.git`
 
-> ### ⚠ Dal henüz push edilmedi
-> `origin`'de yalnızca `main` (v2.1) var. Yani **v3'ün tamamı sadece bu
-> bilgisayarda.** Başka bir makinede devam etmeden önce:
->
-> ```bash
-> git push -u origin v3-yeniden-yapilandirma
-> ```
+> ### ✅ Dal push edildi (22.08.2026)
+> `origin/v3-yeniden-yapilandirma` GitHub'da duruyor. `main` v2.1'de
+> bırakıldı — birleştirme kararı Arda'nın.
 >
 > Diğer bilgisayarda:
 >
@@ -362,8 +358,9 @@ Uzak depo: `https://github.com/Ardeko/Legend-Of-Rey.git`
 > python main.py                   # intro'dan başlar
 > ```
 >
-> Push edilmezse klasörü elle kopyalamak gerekir. `.venv/` ve `build/`
-> kopyalanmasın — ikisi de yeniden üretilebilir.
+> `.venv/` ve `build/` klonlanmaz, ikisi de yeniden üretilebilir.
+> Çalışmaya devam etmeden önce `git pull` — iki makinede paralel
+> çalışılırsa dal ayrışır.
 
 Commit mesajları **niçin** öyle yapıldığını anlatıyor — bir davranışı
 değiştirmeden önce ilgili commit'e bakmakta fayda var. Son commit:
