@@ -152,6 +152,11 @@
     "controls": "Arrows · Space jump · J attack · Shift dodge · Esc menu"
   },
 
+  "echo": {
+    "tier_up": "The Echo clears",
+    "tier_down": "The Echo weakens"
+  },
+
   "keys": {
     "shift": "Shift",
     "enter": "Enter",

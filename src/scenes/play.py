@@ -21,13 +21,17 @@ from src.combat.hitbox import HitboxManager, Team
 from src.config import (
     COMBO_THRESHOLD_HIGH, COMBO_THRESHOLD_MID, INTERNAL_WIDTH,
 )
+from src.systems.echo import COMBO_TO_RESTORE
 from src.core.camera import Camera
 from src.core.input import Action
 from src.core.juice import ImpactEvent, ImpactWeight, Juice
 from src.core.scene import Scene
 from src.entities.character_stats import ARDO, REY
 from src.entities.player import Player
+from src.systems.compass import Compass
+from src.systems.echo import EchoState
 from src.systems.save import read_save
+from src.ui import echo_view
 from src.ui import text
 from src.ui.hud import HUD
 from src.ui.i18n import t
@@ -65,6 +69,13 @@ class PlayScene(Scene):
         self.camera = Camera()
         self.save_data, _ = read_save()
         self.hud = HUD(self.game)
+
+        # Yanki yalnizca Rey'de. Ardo'da `None` kalir ve kod her yerde
+        # "Yanki var mi?" diye dallanmaz - `has_echo` tek yerde sorulur.
+        self.echo = (EchoState(tier=self.echo_tier)
+                     if self.character != "ardo" else None)
+        self.compass = Compass()
+        self.breakables: list = []
 
         self.setup()
 
@@ -113,6 +124,12 @@ class PlayScene(Scene):
                            facing=self.player.facing,
                            grounded=self.player.body.grounded)
 
+        if self.echo is not None:
+            self.echo.update(self.game.input.held(Action.ECHO))
+            if self.game.input.pressed(Action.ECHO_ASK):
+                self.on_echo_ask()
+        self.compass.update(self.player)
+
         self.hud.update(self.player, self.gold, self.echo_tier)
         if self.toast_frames > 0:
             self.toast_frames -= 1
@@ -120,6 +137,19 @@ class PlayScene(Scene):
 
     def update_scene(self) -> None:
         """Alt sinifa ait kare islemleri (tetikleyiciler, anlatim)."""
+
+    # --- Yanki --------------------------------------------------------------
+    def on_echo_ask(self) -> None:
+        """Oyuncu Yanki'ya soru sordu. Alt sinif cevabin **anlamini** verir.
+
+        Taban yalnizca cevabin turunu uretiyor (dogru/eksik/yalan); o
+        cevabin neyi gosterdigine bolum karar veriyor - cikis mi, gizli oda
+        mi, Cemo mu.
+        """
+        if self.echo is None:
+            return
+        self.echo.ask()
+        self.game.play_ui_sound("echo_ask")
 
     def draw(self, surface: pygame.Surface) -> None:
         surface.fill(palette.color("abyss_dark"))
@@ -133,6 +163,18 @@ class PlayScene(Scene):
         self.player.draw(surface, offset)
         self.particles.draw(surface, offset)
         self.draw_foreground(surface, offset)
+
+        # Kazanc **dunya katmaninda**: siluetler sahnenin icinde duruyor.
+        if self.echo is not None:
+            echo_view.draw_reveal(surface, offset, self.echo, self.player,
+                                  self.enemies, self.breakables)
+            echo_view.draw_answer(surface, offset, self.echo, self.player)
+
+        # Bedel **en ustte**: vinyet ve kromatik kayma her seyi kapsar,
+        # arayuz dahil. Yanki acikken oyuncu her seyi biraz daha zor
+        # goruyor - bedelin arayuzu es gecmesi onu ucuzlatirdi.
+        if self.echo is not None:
+            echo_view.draw_cost(surface, self.echo)
 
         if self.game.debug_overlay:
             self._draw_hitboxes(surface, offset)
@@ -203,6 +245,11 @@ class PlayScene(Scene):
         self.decals.scorch(enemy.body.center_x, enemy.body.feet[1])
 
     def on_combo_threshold(self, player, threshold: int) -> None:
+        # Saldirgan oynayan kademesini geri kazanir (GOREVLER Gorev 3.1).
+        # Korkak oynayan iyilesemez - can siseleri nadir tutuluyor.
+        if (threshold >= COMBO_TO_RESTORE and self.echo is not None
+                and self.echo.restore()):
+            self.on_echo_tier_changed(self.echo.tier, gained=True)
         if threshold >= COMBO_THRESHOLD_HIGH:
             self.show_toast(t("combat.combo_echo", count=threshold))
         elif threshold >= COMBO_THRESHOLD_MID:
@@ -240,7 +287,20 @@ class PlayScene(Scene):
     def on_player_hurt(self, player, result) -> None:
         self.show_toast(t("combat.hurt"))
 
+    def on_echo_tier_changed(self, tier: int, gained: bool) -> None:
+        """Kademe degisti. Asamali aciga cikarma: yalnizca **degisince**
+        gosteriliyor (CLAUDE.md 9)."""
+        # Anahtarlar **acikca** yazili: f-string ile kurulan anahtari
+        # tests/test_lang.py kaynak taramasinda goremiyor ve "olu anahtar"
+        # sayiyor. Bu tuzaga ikinci kez dusuldu.
+        self.show_toast(t("echo.tier_up" if gained else "echo.tier_down"),
+                        frames=120)
+
     def on_player_died(self, player) -> None:
+        # Olunce Yanki bir kademe zayiflar. Dip SESSIZ - daha asagi inmez,
+        # olum sarmali boyle engelleniyor (docs/gdd.md 4).
+        if self.echo is not None and self.echo.weaken():
+            self.on_echo_tier_changed(self.echo.tier, gained=False)
         self.show_toast(t("combat.died"))
 
     def _emit_particles(self, event: ImpactEvent) -> None:

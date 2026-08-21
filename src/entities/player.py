@@ -342,7 +342,17 @@ class Player(Actor):
 
     # --- Hasar --------------------------------------------------------------
     def take_damage(self, box, direction):
-        result = super().take_damage(box, direction)
+        # Yanki acikken savunma duser - bedelin en somut parcasi.
+        # Carpani hasar **uygulanmadan** once bindiriyoruz; sonradan
+        # duzeltmek olum esigini kaydirirdi.
+        echo = getattr(self.scene, "echo", None)
+        original = box.damage
+        if echo is not None and echo.active:
+            box.damage = max(1, round(box.damage * echo.damage_multiplier))
+        try:
+            result = super().take_damage(box, direction)
+        finally:
+            box.damage = original
         if result.hit:
             self.chain.cancel()
             self.combo.reset()

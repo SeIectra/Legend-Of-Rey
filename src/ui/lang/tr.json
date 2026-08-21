@@ -152,6 +152,11 @@
     "controls": "Yön · Boşluk zıpla · J saldır · Shift kaçın · Esc menü"
   },
 
+  "echo": {
+    "tier_up": "Yankı berraklaşıyor",
+    "tier_down": "Yankı zayıflıyor"
+  },
+
   "keys": {
     "shift": "Shift",
     "enter": "Enter",
