@@ -79,7 +79,7 @@
   },
   "_zincirler": "Golge zincirleri - rampa asabilir. Karakter ve nesne tonlamasi bunlari kullanir; 32 renk siniri bozulmadan her parca 4 basamak tonlanir.",
   "shade_chains": {
-    "hair_dark": ["void", "earth_dark", "earth", "flesh"],
+    "hair_dark": ["void", "ink", "earth_dark", "earth"],
     "skin_tan": ["earth_dark", "flesh_dark", "flesh", "flesh_light"],
     "cloth_blue": ["abyss_dark", "abyss", "abyss_light", "stone_light"],
     "cloth_grey": ["ink_soft", "stone_darkest", "stone_dark", "stone"],

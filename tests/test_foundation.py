@@ -71,6 +71,29 @@ check(palette.nearest_name((250, 250, 250)) in ("white_flash", "bone"),
       "quantize en yakin rengi buluyor",
       palette.nearest_name((250, 250, 250)))
 
+# Golge zincirleri **monoton parlaklasmali**: 0 en koyu golge, son basamak en
+# parlak isik. Ters donen bir zincir isiklandirmayi tersine cevirir ve sprite
+# hatali degil, sadece "yanlis" gorunur - goz bunu kolay kolay yakalamaz.
+# hair_dark bir kez bu hataya dustu, bu yuzden test var.
+for chain_name in palette.SHADE_CHAINS:
+    steps = palette.chain(chain_name)
+    lums = [palette.luminance(palette.color(n)) for n in steps]
+    rising = all(b > a for a, b in zip(lums, lums[1:]))
+    check(rising, f"zincir monoton parlaklasiyor: {chain_name}",
+          " -> ".join(f"{n}({l:.2f})" for n, l in zip(steps, lums)))
+
+# Basamaklar birbirine cok yakinsa tonlama duz gorunur - golge okunmaz.
+# 0.03 parlaklik ~ 8-bit'te 8 seviye: 480x270'te ayri ton olarak okunmanin
+# alt siniri. Mevcut zincirlerin en dari 0.038 (shadow ve hair_dark).
+MIN_STEP_GAP = 0.03
+for chain_name in palette.SHADE_CHAINS:
+    steps = palette.chain(chain_name)
+    lums = [palette.luminance(palette.color(n)) for n in steps]
+    gaps = [b - a for a, b in zip(lums, lums[1:])]
+    check(min(gaps) >= MIN_STEP_GAP,
+          f"zincir basamaklari ayirt edilebilir: {chain_name}",
+          f"en dar aralik {min(gaps):.3f}")
+
 # --- 2. Font ----------------------------------------------------------------
 print("\n--- font ---")
 pygame.init()
