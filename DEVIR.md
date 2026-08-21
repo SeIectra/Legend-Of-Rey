@@ -32,8 +32,12 @@ Toplam ~10.700 satır. Sekiz test paketi de yeşil.
 
 **Arda'nın seçtiği sıra:** Görev 7 ✅ → Bölüm 1 + prolog ✅ → Görev 3 ✅
 
-**Kanon kararı:** Goblin ayrı bir düşman olarak eklenmiyor; Katman 2'nin
-**Kalkanlı**'sı goblin'in ruhuyla yapılacak (Görev 4+).
+**Kanon kararları:**
+- Goblin ayrı düşman olarak eklenmiyor; Katman 2'nin **Kalkanlı**'sı
+  goblin'in ruhuyla yapılacak (Görev 4+).
+- **Oyun artık diyalogsuz değil** (22.08.2026). `docs/gdd.md` §2'yi geçersiz
+  kılar. Konuşma bir kanal *ekliyor*; jest ve ikon balonu duruyor.
+  Yankı'nın **kutusu yok** — kafadaki ses cerçeveli kutuya konmaz.
 
 ---
 
