@@ -337,30 +337,31 @@ Sıra gelmediği için değil, gözden kaçmasın diye burada:
 
 ## 7. GİT DURUMU — **BAŞKA BİLGİSAYARA GEÇERKEN ÖNCE BURAYI OKU**
 
-Çalışma **`v3-yeniden-yapilandirma`** dalında, **30 commit** halinde kayıtlı.
-`main` hâlâ v2.1'de (eski motor) — geri dönmek gerekirse orada duruyor.
+**v3 artık `main`.** 22.08.2026'da `v3-yeniden-yapilandirma` dalı
+fast-forward ile main'e alındı ve push edildi. İkisi de aynı commit'te
+duruyor; v3 dalı silinmedi ama artık main'den farkı yok.
 
 Uzak depo: `https://github.com/Ardeko/Legend-Of-Rey.git`
 
-> ### ✅ Dal push edildi (22.08.2026)
-> `origin/v3-yeniden-yapilandirma` GitHub'da duruyor. `main` v2.1'de
-> bırakıldı — birleştirme kararı Arda'nın.
->
-> Diğer bilgisayarda:
+**Eski motor `v2.1` etiketinde:** `git checkout v2.1` ile v3 öncesine
+dönülebilir. main'in geçmişinde ata commit olarak duruyor, kaybolmadı.
+
+> ### Diğer bilgisayarda
 >
 > ```bash
 > git clone https://github.com/Ardeko/Legend-Of-Rey.git
 > cd Legend-Of-Rey
-> git checkout v3-yeniden-yapilandirma
 > python -m venv .venv
 > .venv/Scripts/activate           # Windows (Git Bash)
 > pip install pygame-ce numpy
 > python main.py                   # intro'dan başlar
 > ```
 >
+> Dal değiştirmene gerek yok, `main` doğru yer.
 > `.venv/` ve `build/` klonlanmaz, ikisi de yeniden üretilebilir.
-> Çalışmaya devam etmeden önce `git pull` — iki makinede paralel
-> çalışılırsa dal ayrışır.
+>
+> **İki makinede çalışırken:** başlamadan `git pull`, bitirince `git push`.
+> Unutulursa dallar ayrışır ve birleştirmek zahmetli olur.
 
 Commit mesajları **niçin** öyle yapıldığını anlatıyor — bir davranışı
 değiştirmeden önce ilgili commit'e bakmakta fayda var. Son commit:
@@ -369,8 +370,10 @@ değiştirmeden önce ilgili commit'e bakmakta fayda var. Son commit:
 Bolum 2 - Ilk Inis: 8 oda, gizli odacik, mini-boss, bolum sonu ekrani
 ```
 
-Arda birleştirmek isterse:
-`git checkout main && git merge v3-yeniden-yapilandirma`
+Bir şey ters giderse: **commit'lenmiş hiçbir şey kaybolmaz.**
+`git log --oneline --all` bütün dalları, `git reflog` ise nereye
+gidildiğini gösterir. Yanlış dala geçmek veri kaybı değildir —
+`git status` temizse `git checkout main` her şeyi geri getirir.
 
 ---
 
