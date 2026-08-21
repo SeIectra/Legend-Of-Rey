@@ -17,16 +17,18 @@ görev sırası `GOREVLER.md`'de.
 | 0 — Temel kurulum | ✅ | Palet, font, döngü, boru hattı |
 | 1 — Dövüş çekirdeği | ✅ | Zincir, hitstop, kaçınma, kill cancel |
 | 2 — Düşman AI | ✅ | 3 tip, saldırı hakkı, ritim imzaları |
-| 3 — Yankı sistemi | ⬜ | **Sıradaki mantıklı adım** |
+| 3 — Yankı sistemi | ⬜ | Bölüm 1'den sonra (Arda'nın sırası) |
 | 4 — Bölüm 2 | ⬜ | Dikey dilim |
 | 5 — Ara değerlendirme | ⬜ | **Arda'nın işi**, Claude'a verilmez |
 | 6 — Menü ve UI | ✅ | Sıra dışı yapıldı (Arda istedi) |
-| 7 — Menü sahnesi cilası | ⬜ | Mor alev, Ardeko intro, dikey yolculuk |
+| 7 — Menü sahnesi cilası | ✅ | Mor alev, Ardeko intro, dikey yolculuk |
 | 8 — Bölüm 3 | ⬜ | |
 | 9 — Sanat geçişi | 🟡 | Sprite sistemi hazır; tileset ve düşmanlar eksik |
 | 10 — Ses + son cila | ⬜ | Dikiş hazır, gövde boş |
 
-Toplam ~8.400 satır. Yedi test paketi de yeşil.
+Toplam ~9.800 satır. Sekiz test paketi de yeşil.
+
+**Arda'nın seçtiği sıra:** Görev 7 ✅ → **Bölüm 1 + prolog** → Görev 3.
 
 ---
 
