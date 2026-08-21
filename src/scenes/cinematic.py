@@ -19,26 +19,24 @@ basinca atla" derdi.
 Sinematikler **kare** sayar, saniye degil (CLAUDE.md 4). Hizlandirma
 ilerlemeyi hizlandirir, kare hizini degil - fizik sabit adimda kalir.
 
-## Hizlandirma ipucu
+## Hizlandirma **sessiz**
 
-Iki saniye sonra ekranin altinda beliriyor. Hemen gosterilse sinematigi
-bastan "atlanacak bir sey" gibi cerceveler; hic gosterilmese 20. acilista
-oyuncu beklemek zorunda kalir.
+`docs/menu-ui.md` 0.5 ekranin altinda "Hizlandirmak icin basili tut" ipucu
+istiyordu. Arda kaldirdi (22.08.2026) ve hakli: studyo logosunun uzerine
+"bunu gecebilirsin" yazmak, oyuncuya daha ilk saniyede izlediginin
+atlanacak bir sey oldugunu soyluyor.
+
+Davranis duruyor, yalnizca **yazi** yok. Tusa basan hizlanir, basmayan tam
+yasar; kimseye atlamasi soylenmiyor.
 """
 from __future__ import annotations
 
 import pygame
 
-from src.art import palette
-from src.config import FPS, INTERNAL_HEIGHT, INTERNAL_WIDTH
 from src.core.input import Action
 from src.core.scene import Scene
-from src.ui import text
-from src.ui.i18n import t
 
 SPEEDUP_FACTOR = 3.0
-HINT_DELAY_FRAMES = FPS * 2          # 2 saniye
-HINT_FADE_FRAMES = 20
 
 
 def smoothstep(t_value: float) -> float:
@@ -56,14 +54,12 @@ class CinematicScene(Scene):
 
     duration_frames: int = 120
     skippable: bool = True          # Bolum 3'teki "Mor" sahnesi False olacak
-    show_hint: bool = True
 
     def on_enter(self, **kwargs: object) -> None:
         self.elapsed = 0.0
         self.frame = 0
         self.finished = False
         self.speeding = False
-        self._hint_alpha = 0
 
     # --- Ilerleme -----------------------------------------------------------
     @property
@@ -86,10 +82,6 @@ class CinematicScene(Scene):
     def update(self) -> None:
         self.frame += 1
         self._advance()
-
-        if self.show_hint and self.skippable and self.frame > HINT_DELAY_FRAMES:
-            self._hint_alpha = min(180, self._hint_alpha + 180 // HINT_FADE_FRAMES)
-
         self.update_cinematic()
 
         if self.raw_progress >= 1.0 and not self.finished:
@@ -98,19 +90,6 @@ class CinematicScene(Scene):
 
     def draw(self, surface: pygame.Surface) -> None:
         self.draw_cinematic(surface, self.progress)
-        if self._hint_alpha > 0:
-            self._draw_hint(surface)
-
-    def _draw_hint(self, surface: pygame.Surface) -> None:
-        label = t("cinematic.hold_to_speed")
-        width = text.text_width(label)
-        strip = pygame.Surface((width + 8, 13), pygame.SRCALPHA)
-        strip.fill((*palette.color("void"), min(140, self._hint_alpha)))
-        surface.blit(strip, (INTERNAL_WIDTH // 2 - width // 2 - 4,
-                             INTERNAL_HEIGHT - 20))
-        text.draw(surface, label, INTERNAL_WIDTH // 2, INTERNAL_HEIGHT - 18,
-                  color=palette.role("ui_text_dim"), align="center",
-                  alpha=self._hint_alpha)
 
     # --- Alt sinif kancalari ------------------------------------------------
     def update_cinematic(self) -> None:
