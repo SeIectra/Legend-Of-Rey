@@ -79,6 +79,7 @@ python tests/test_foundation.py   # palet 32 renk, Türkçe font, tr_upper
 python tests/test_pipeline.py     # quantize → outline → shade → preview
 python tests/test_combat.py       # dövüş kare değerleri (BAĞLAYICI)
 python tests/test_menu.py         # menü UX + kayıt güvenliği
+python tests/test_lang.py         # dil tabloları + kod/tablo örtüşmesi
 python -m pyflakes src tools tests main.py
 ```
 
@@ -137,6 +138,14 @@ Bunların hepsi gerçek hataydı, testle yakalandı. Tekrarlama.
 10. **`BLEND_RGB_ADD` alfayı yok sayar.** Şiddeti `set_alpha` ile değil,
     renkleri `BLEND_RGB_MULT` ile kısarak ayarla.
 
+11. **Arayüz metni asla koda gömülmez.** `src/ui/lang/*.json` içine dil
+    anahtarı olarak yazılır, çizim anında `t()` ile çözülür. Modül
+    seviyesinde sabit metin dil değişimini etkisiz bırakır.
+
+12. **Dile bağlı olduğu fark edilmeyen şeyler:** yüzde işaretinin yeri
+    (TR `%100`, EN `100%`), süre birimi (`dk`/`m`), ve büyük harf kuralı —
+    `tr_upper("Continue")` noktalı İ ile `CONTİNUE` verir.
+
 ---
 
 ## 5. MİMARİ — HIZLI HARİTA
@@ -164,6 +173,8 @@ src/
 ├── systems/           save (yedekli) · settings
 ├── ui/                text (tr_upper!) · widgets · menu · character_select
 │                      settings_scene · pause · hud · font_data
+│   ├── i18n.py        t() — TR/EN, çizim anında çözülür
+│   └── lang/          tr.json (kanonik) · en.json
 ├── world/tilemap.py   16×16 tile, ASCII'den kurulur
 └── scenes/            combat_room · foundation_check
 ```
@@ -190,6 +201,7 @@ Sıra gelmediği için değil, gözden kaçmasın diye burada:
    `juice.pitch_variation()` hazır. Görev 10.
 2. **Renk körü modu, parlaklık, arayüz ölçeği** ayarlarda görünüyor ama
    uygulanmıyor. Palet tek kaynak olduğu için renk körü ucuz.
+   (Dil ayarı artık **çalışıyor** — TR/EN, anında geçiş.)
 3. **Ardo'nun oynanışı Rey'in aynısı** — sayılar farklı, İz Sürme mekaniği
    (`docs/derinlestirme.md` 2.4) yok.
 4. **Tileset placeholder.** `world/tilemap.py` düz renk çiziyor; 9-slice ve
@@ -215,6 +227,8 @@ Gorev 0/9: sanat boru hatti - prosedurel sprite uretimi
 Gorev 1: dovus cekirdegi - zincir, kacinma, kill cancel
 Gorev 6: menu, ayarlar, kayit - islevsel katman
 Testler, devir belgesi ve marka gorselleri
+Rey'in sacini koyulastir + golge zinciri testi
+Coklu dil destegi - Turkce ve Ingilizce
 ```
 
 Hiçbir şey push edilmedi. Arda birleştirmek isterse:
