@@ -22,6 +22,7 @@ Spec'ler: `src/art/animation.py :: CHARACTERS`
 | `shambler` | 40x36 | 31 | 44 | Katman 1 - Suruklenen |
 | `climber` | 40x36 | 30 | 44 | Katman 1 - Tirmanan |
 | `bloated` | 40x36 | 31 | 44 | Katman 1 - Sismek |
+| `cemo` | 40x32 | 27 | 44 | Rey'in kucuk kardesi - menu 5. asama |
 
 **Animasyon durumlari (kare sayisi):** attack1 (5) · attack2 (5) · attack3 (5) · death (6) · dodge (2) · fall (4) · hurt (2) · idle (6) · jump (1) · run (8)
 

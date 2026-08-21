@@ -60,6 +60,7 @@ class CharSpec:
 
     # Ozellikler
     long_hair: bool = False
+    curly_hair: bool = False
     hair_length: float = 0.0
     hood: bool = False
     skull: bool = False
@@ -217,6 +218,17 @@ def _draw_head(canvas: Canvas, cx: float, cy: float, spec: CharSpec) -> None:
                     dx, dy = x + 0.5 - cx, y + 0.5 - cy
                     if dx * dx + dy * dy <= radius * radius:
                         canvas.px(x, y, spec.hair, 1)
+            if spec.curly_hair:
+                # Kivircik: duz kalotun uzerine tepe cikintilari. Siluette
+                # tirtikli bir ust hat birakir - Rey'in duz sacindan bir
+                # bakista ayrilir, ki siluet testi bunu istiyor.
+                import math as _math
+                for i in range(5):
+                    angle = _math.pi + _math.pi * (i + 0.5) / 5.0
+                    bump_x = cx + _math.cos(angle) * radius * 0.86
+                    bump_y = cy + _math.sin(angle) * radius * 0.86
+                    canvas.disc(bump_x, bump_y, radius * 0.36, spec.hair,
+                                1 if i % 2 else 2)
             if spec.long_hair:
                 # Yuzu cerceveleyen tek piksellik tutamlar - kafanin kenarina,
                 # yuzun uzerine degil.

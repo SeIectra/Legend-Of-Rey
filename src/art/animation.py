@@ -319,10 +319,28 @@ BLOATED_SPEC = CharSpec(
     weapon="none",
 )
 
+# Cemo - Rey'in kucuk kardesi. Esmer, kivircik sacli, tatli bir cocuk.
+# **Cocuk oranlari:** kafa govdeye gore buyuk, uzuvlar kisa. Yetiskini
+# kucultmek cocuk yapmaz - oran degismeli, yoksa "uzaktaki yetiskin" okunur.
+# Bolum 1 ve 13 icerigi henuz yazilmadi; bu spec simdilik yalnizca menu
+# 5. asamasinda (oyun bitti) kullaniliyor.
+CEMO_SPEC = CharSpec(
+    name="cemo",
+    cell_width=40, cell_height=32, foot_y=27,
+    head_radius=3.6, torso_height=4.6, torso_width=4.8,
+    thigh=3.0, shin=3.0, upper_arm=2.8, fore_arm=2.8,
+    limb_width=2.0, shoulder_width=4.0,
+    skin="skin_tan", hair="hair_dark", cloth="leather",
+    cloth_dark="shadow", armor="rock", accent="brass",
+    curly_hair=True,
+    weapon="none",
+)
+
 CHARACTERS: dict[str, CharSpec] = {
     "rey": REY_SPEC,
     "ardo": ARDO_SPEC,
     "shambler": SHAMBLER_SPEC,
     "climber": CLIMBER_SPEC,
     "bloated": BLOATED_SPEC,
+    "cemo": CEMO_SPEC,
 }

@@ -31,6 +31,7 @@ ROLES = {
     "shambler": "Katman 1 - Suruklenen",
     "climber": "Katman 1 - Tirmanan",
     "bloated": "Katman 1 - Sismek",
+    "cemo": "Rey'in kucuk kardesi - menu 5. asama",
 }
 
 

@@ -14,7 +14,6 @@ kullanilamayan bir menuden iyidir.
 """
 from __future__ import annotations
 
-import math
 
 import pygame
 
@@ -25,6 +24,7 @@ from src.core.scene import Scene
 from src.systems.save import has_save, read_save
 from src.ui import text
 from src.ui.i18n import t, t_or_raw
+from src.ui.menu_scene import MenuBackdrop, stage_for
 from src.ui.font_data import GLYPH_HEIGHT, GLYPH_WIDTH
 from src.ui.widgets import Menu, MenuItem, panel
 
@@ -52,6 +52,8 @@ class MainMenuScene(Scene):
             self.notice_frames = 300
 
         self.menu = self._build_menu()
+        # Sahne kayittaki ilerlemeye gore kurulur (5 asama).
+        self.backdrop = MenuBackdrop(stage_for(self.save_data))
 
     def _build_menu(self) -> Menu:
         save_exists = has_save()
@@ -109,6 +111,7 @@ class MainMenuScene(Scene):
         # Karakter seciminden ya da ayarlardan donunce kayit degismis olabilir.
         self.save_data, self.save_status = read_save()
         self.menu = self._build_menu()
+        self.backdrop.stage = stage_for(self.save_data)
 
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -120,13 +123,13 @@ class MainMenuScene(Scene):
 
     def update(self) -> None:
         self.frame += 1
+        self.backdrop.update()
         self.notice_frames = max(0, self.notice_frames - 1)
         active = self.confirm_overwrite or self.menu
         active.update(self.game)
 
     def draw(self, surface: pygame.Surface) -> None:
-        surface.fill(palette.color("abyss_dark"))
-        self._draw_backdrop(surface)
+        self.backdrop.draw(surface)
         self._draw_title(surface)
 
         self.menu.draw(surface)
@@ -143,23 +146,6 @@ class MainMenuScene(Scene):
         active.draw_cursor(surface, self.game)
 
     # --- Cizim yardimcilari -------------------------------------------------
-    def _draw_backdrop(self, surface: pygame.Surface) -> None:
-        """Gorev 7'de mor alev sahnesi gelecek; simdilik sade bir mahzen."""
-        for index in range(5):
-            x = 300 + index * 34
-            height = 120 + (index % 3) * 26
-            surface.fill(palette.color("stone_darkest"),
-                         (x, INTERNAL_HEIGHT - height, 12, height))
-        surface.fill(palette.color("ink_soft"),
-                     (0, INTERNAL_HEIGHT - 34, INTERNAL_WIDTH, 34))
-        # Hafif nabiz atan bir isik - sahne "olu" gorunmesin.
-        pulse = 0.5 + 0.5 * math.sin(self.frame * 0.02)
-        radius = int(26 + pulse * 5)
-        pygame.draw.circle(surface, palette.color("violet_dark"),
-                           (372, INTERNAL_HEIGHT - 58), radius)
-        pygame.draw.circle(surface, palette.color("violet"),
-                           (372, INTERNAL_HEIGHT - 58), max(2, radius // 3))
-
     def _draw_title(self, surface: pygame.Surface) -> None:
         """Baslik + kisaltma.
 
