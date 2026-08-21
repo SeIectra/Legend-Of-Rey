@@ -3,7 +3,7 @@
 Bu belge, projeyi devralan Claude Code oturumu içindir.
 **Önce `CLAUDE.md`'yi oku** (bağlayıcı anayasa), sonra burayı.
 
-Son güncelleme: 21.08.2026 · Ardeko Studios
+Son güncelleme: 22.08.2026 · Ardeko Studios
 
 ---
 
@@ -18,19 +18,24 @@ görev sırası `GOREVLER.md`'de.
 | 1 — Dövüş çekirdeği | ✅ | Zincir, hitstop, kaçınma, kill cancel |
 | 2 — Düşman AI | ✅ | 3 tip, saldırı hakkı, ritim imzaları |
 | 3 — Yankı sistemi | ✅ | 3 kademe, yalan, kolye pusulası, kırılabilir duvar |
-| 4 — Bölüm 2 | ⬜ | Dikey dilim |
+| 4 — Bölüm 2 | ✅ | Dikey dilim — 8 oda, gizli odacık, mini-boss |
 | 5 — Ara değerlendirme | ⬜ | **Arda'nın işi**, Claude'a verilmez |
 | 6 — Menü ve UI | ✅ | Sıra dışı yapıldı (Arda istedi) |
 | 7 — Menü sahnesi cilası | ✅ | Mor alev, Ardeko intro, dikey yolculuk |
 | 8 — Bölüm 3 | ⬜ | |
-| 9 — Sanat geçişi | 🟡 | Sprite sistemi hazır; tileset ve düşmanlar eksik |
+| 9 — Sanat geçişi | 🟡 | Sprite + mağara arka planı hazır; **tileset hâlâ placeholder** |
 | 10 — Ses + son cila | ⬜ | Dikiş hazır, gövde boş |
 
-Toplam ~10.700 satır. Sekiz test paketi de yeşil.
+Toplam ~12.500 satır. **On bir test paketi de yeşil.**
 
-**Oynanabilir akış:** intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)**
+**Oynanabilir akış:**
+intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)** →
+**Bölüm 2 (İlk İniş)** → bölüm sonu ekranı → ana menü
 
-**Arda'nın seçtiği sıra:** Görev 7 ✅ → Bölüm 1 + prolog ✅ → Görev 3 ✅
+Bölüm 2'nin sonunda ana menüye dönülüyor çünkü Bölüm 3 henüz yok (Görev 8).
+Bu bilinçli bir uç, gizlenmiş bir placeholder değil.
+
+**Arda'nın seçtiği sıra:** Görev 7 ✅ → Bölüm 1 + prolog ✅ → Görev 3 ✅ → Görev 4 ✅
 
 **Kanon kararları:**
 - Goblin ayrı düşman olarak eklenmiyor; Katman 2'nin **Kalkanlı**'sı
@@ -96,6 +101,12 @@ Python 3.13.15, pygame-ce 2.5.8, numpy. Sanal ortam `.venv/`.
 ### Testler — değişiklikten sonra hepsini çalıştır
 
 ```bash
+for f in tests/test_*.py; do python "$f" || echo "KIRIK: $f"; done
+```
+
+Tek tek:
+
+```bash
 python tests/test_foundation.py   # palet 32 renk, Türkçe font, tr_upper
 python tests/test_pipeline.py     # quantize → outline → shade → preview
 python tests/test_combat.py       # dövüş kare değerleri (BAĞLAYICI)
@@ -103,6 +114,10 @@ python tests/test_menu.py         # menü UX + kayıt güvenliği
 python tests/test_lang.py         # dil tabloları + kod/tablo örtüşmesi
 python tests/test_window.py       # tam ekran / ölçekleme matematiği
 python tests/test_enemy.py        # saldırı hakkı, tell, ritim, ekoloji
+python tests/test_echo.py         # Yankı kademeleri, yalan, EKRAN PARLAKLIĞI
+python tests/test_level.py        # bölüm haritaları zıplama zarfına uyuyor mu
+python tests/test_dialogue.py     # Yankı'nın kutusu yok, kutu boyutu sabit
+python tests/test_chapter02.py    # Bölüm 2 başsız oynanıyor — 40 kontrol
 python -m pyflakes src tools tests main.py
 ```
 
@@ -116,7 +131,14 @@ python tools/shot.py --scene src.ui.menu:MainMenuScene --out build/x.png
 python tools/sprite_sheet.py --karakter rey --durum idle,run,attack1
 python tools/sprite_sheet.py --siluet          # siluet testi
 python tools/measure_jump.py                   # zıplama zarfı
+python tools/reachability.py --ayrinti         # HER ODA GEÇİLEBİLİR Mİ
 ```
+
+**`tools/reachability.py` yeni bölüm yazarken şart.** Zıplama zarfını
+ölçüp haritada BFS yürüyor. Bölüm 1'de iki, Bölüm 2'de üç gerçek hata
+yakaladı (mühürlü oda, havada doğum noktası, erişilemez platform).
+Yeni bölüm eklerken `_known_rooms()` içine eklemeyi unutma — eklenmeyen
+oda doğrulanmaz ve sessizce bozuk kalır.
 
 Ekran görüntüleri `build/testshots/` altına düşer. **"Çalışıyor" deme,
 görüntüyü aç ve bak** — `CLAUDE.md` §13 bunu şart koşuyor.
@@ -194,6 +216,36 @@ Bunların hepsi gerçek hataydı, testle yakalandı. Tekrarlama.
     yani viewport hesabı gerçek ekranı hiç görmez. Ölçeği kendimiz
     hesaplıyoruz (`viewport_for()`), `tests/test_window.py` bekçilik ediyor.
 
+18. **Bölüm haritası yazınca `tools/reachability.py`'ı çalıştır — istisnasız.**
+    Bölüm 2'nin ilk hali üç ayrı biçimde bozuktu ve hiçbiri ASCII bloğa
+    bakınca görünmüyordu: doğum işareti zeminin bir tile üstündeydi
+    (`R` satır 12'de, zemin 14'te), Oda 1/4A/8 kendi yan duvarlarıyla
+    tamamen mühürlüydü (odayı çerçevelemek istemiştim, geçişi kapatmışım),
+    Oda 3 ve 7'nin platformları 4 ve 6 tile yukarıdaydı — zarf 3.
+    Elle oynayarak bulmak yarım saat sürerdi; araç iki saniyede söyledi.
+
+19. **Arka planda boş karanlık bırakma — "gökyüzü" gibi okunur.** Mağara
+    arka planının ilk hali düz tepeli dikdörtgenlerdi ve ekranda net bir
+    **şehir silueti** oluşuyordu. Sorun blokların şekli değil aralarındaki
+    boşluktu. Ekranın tamamı kaya olunca sorun kayboldu. İkinci tuzak:
+    orta katmanı en açık renk yapmıştım (abyss 46), göz onu arka plan
+    değil **nesne** sanıyordu — üç kademe tek yönde koyulaşmalı.
+
+20. **Çizilen her ışık kaynağı bir şeye bağlı olmalı.** Meşaleleri sabit
+    bir satıra koymuştum; odaların tavan yüksekliği farklı olduğu için
+    yarısı havada asılı kaldı. Artık her meşale kendi odasının tavanına
+    göre yazılıyor ve test üstünde gerçekten tile var mı diye bakıyor.
+
+21. **`Boss.draw_health_bar` vardı, hiçbir sahne çağırmıyordu.** "Sahne
+    çağırır" diye yazılmış bir metot, çağıran taraf yazılmadığı sürece
+    ölü koddur ve varlığı yanlış bir güven verir. Boss dövüşü barsız
+    oynanıyordu ve bunu ancak ekran görüntüsüne bakınca fark ettim.
+
+22. **Heredoc (`<<'EOF'`) Türkçe metin ve ters bölü ile güvenilmez.**
+    Bu oturumda iki kez içeriği bozdu (`` → bell karakteri, kaçış
+    dizileri). Uzun metin dosyalarını Write aracıyla yaz, kısa yamaları
+    Python betiğiyle uygula.
+
 ---
 
 ## 5. MİMARİ — HIZLI HARİTA
@@ -221,13 +273,21 @@ src/
 ├── entities/          actor · player · player_render · character_stats · dummy
 │   ├── enemy.py       Durum makinesi, tell, poise — 10 tipe genişler
 │   └── enemies/       shambler · climber · bloated
-├── systems/           save (yedekli) · settings
+├── systems/           save (yedekli) · settings · echo · compass
+│   ├── abilities.py   ★ Player.has() TEK kapı — yetenek kapısı dağıtılmaz
+│   └── charms.py      Koşullu tılsımlar; çarpan vuruş ÜRETİLİRKEN biner
 ├── ui/                text (tr_upper!) · widgets · menu · character_select
 │                      settings_scene · pause · hud · font_data
 │   ├── i18n.py        t() — TR/EN, çizim anında çözülür
 │   └── lang/          tr.json (kanonik) · en.json
 ├── world/             tilemap (16×16, ASCII) · decals (kalıcı izler)
-└── scenes/            combat_room · foundation_check
+│   ├── level.py       ASCII → zemin + yerleşim. join_rooms() odaları yan yana ekler
+│   ├── pickups.py     Sandık — dokununca açılır, tuşa basınca değil
+│   ├── cave_backdrop.py  Yeraltı arka planı, üç kaya kademesi (B2, B3, B5...)
+│   └── rooms/         chapter01 · chapter02 — oda verisi, ASCII blok olarak
+└── scenes/            combat_room · foundation_check · intro · menu_reveal
+                       vertical_journey · cinematic · chapter01 · chapter02
+    └── play.py        ★ PlayScene — bütün game feel kancaları BURADA
 ```
 
 ### Değiştirmeden önce bilinmesi gerekenler
@@ -262,46 +322,92 @@ Sıra gelmediği için değil, gözden kaçmasın diye burada:
    "prototipteki sprite kalitesi" maddeleri artık geçersiz.
 7. **`_prototype/` içinde işe yarar kod var** — parallax, ışıklandırma,
    post-fx, tile üreteci. Referans olarak bak, **asla import etme.**
+8. **`game.music_hush` dolduruluyor ama kimse okumuyor.** Bölüm 2 gizli
+   odacığa girince 0→1 yükseltiyor; görsel yarısı (kenarlardan içeri çekilen
+   karanlık) çalışıyor, müziği kısacak taraf Görev 10'da yazılacak.
+9. **Bölüm 2'nin ödülünde eksik var:** belge mini-boss sonrası **ilk silah
+   seçimi** (Hançer / Balta) veriyor. Şu an sadece 55 altın veriliyor.
+   Silah sistemi (`SaveData.weapon` alanı duruyor) hiç yazılmadı — bilerek
+   bırakıldı, çünkü silah çeşitliliği tek başına bir görev.
+10. **Checkpoint yok.** Oyuncu ölünce sahne yeniden kurulmuyor; Bölüm 2'de
+   arena kapısı ölümde açılıyor ki oyuncu kilitli kalmasın, ama gerçek
+   çözüm bir yeniden doğma sistemi.
 
 ---
 
-## 7. GİT DURUMU
+## 7. GİT DURUMU — **BAŞKA BİLGİSAYARA GEÇERKEN ÖNCE BURAYI OKU**
 
-Çalışma **`v3-yeniden-yapilandirma`** dalında, 7 commit halinde kayıtlı.
+Çalışma **`v3-yeniden-yapilandirma`** dalında, **30 commit** halinde kayıtlı.
 `main` hâlâ v2.1'de (eski motor) — geri dönmek gerekirse orada duruyor.
 
-```
-Prototipi _prototype/ altina arsivle
-Tasarim paketini koke yerlestir - CLAUDE.md artik anayasa
-Gorev 0: temel katman - sabit adim dongu, palet, Turkce font
-Gorev 0/9: sanat boru hatti - prosedurel sprite uretimi
-Gorev 1: dovus cekirdegi - zincir, kacinma, kill cancel
-Gorev 6: menu, ayarlar, kayit - islevsel katman
-Testler, devir belgesi ve marka gorselleri
-Rey'in sacini koyulastir + golge zinciri testi
-Coklu dil destegi - Turkce ve Ingilizce
-```
+Uzak depo: `https://github.com/Ardeko/Legend-Of-Rey.git`
 
-Hiçbir şey push edilmedi. Arda birleştirmek isterse:
-`git checkout main && git merge v3-yeniden-yapilandirma`
+> ### ⚠ Dal henüz push edilmedi
+> `origin`'de yalnızca `main` (v2.1) var. Yani **v3'ün tamamı sadece bu
+> bilgisayarda.** Başka bir makinede devam etmeden önce:
+>
+> ```bash
+> git push -u origin v3-yeniden-yapilandirma
+> ```
+>
+> Diğer bilgisayarda:
+>
+> ```bash
+> git clone https://github.com/Ardeko/Legend-Of-Rey.git
+> cd Legend-Of-Rey
+> git checkout v3-yeniden-yapilandirma
+> python -m venv .venv
+> .venv/Scripts/activate           # Windows (Git Bash)
+> pip install pygame-ce numpy
+> python main.py                   # intro'dan başlar
+> ```
+>
+> Push edilmezse klasörü elle kopyalamak gerekir. `.venv/` ve `build/`
+> kopyalanmasın — ikisi de yeniden üretilebilir.
 
 Commit mesajları **niçin** öyle yapıldığını anlatıyor — bir davranışı
-değiştirmeden önce ilgili commit'e bakmakta fayda var.
+değiştirmeden önce ilgili commit'e bakmakta fayda var. Son commit:
+
+```
+Bolum 2 - Ilk Inis: 8 oda, gizli odacik, mini-boss, bolum sonu ekrani
+```
+
+Arda birleştirmek isterse:
+`git checkout main && git merge v3-yeniden-yapilandirma`
 
 ---
 
 ## 8. SIRADAKİ ADIM
 
-Paket sırasına göre **Görev 3 — Yankı Sistemi**:
-3 kademe (Berrak/Bulanık/Sessiz), soru sorma, kolye pusulası, kırılabilir
-duvar, vinyet ile diegetik anlatım.
+### Önce: **Görev 5 — Ara Değerlendirme.** Bu Arda'nın işi, Claude'a verilmez.
 
-`GOREVLER.md`'deki Görev 3 promptunu oku, `docs/gdd.md` §4 bağlayıcı.
+`CLAUDE.md` §14'ün dikey dilim kriteri: *"Bölüm 1-3 + menü bittiğinde
+oynayan biri 'bir bölüm daha oynayayım' demiyorsa, devam etmeden önce dur
+ve tartış."* Bölüm 2 bitti; Bölüm 3'e girmeden önce Arda'nın oturup
+oynaması gerekiyor.
 
-Altyapı hazır: `config.py`'de `ECHO_*` sabitleri tanımlı, kayıt dosyası
-`echo_tier` tutuyor, HUD kademeyi okuyor, ayarlarda `echo_penalty` var.
+```bash
+python main.py bolum2        # doğrudan Bölüm 2
+python main.py bolum1        # Bölüm 1, sonunda Bölüm 2'ye geçer
+python main.py               # tam akış: intro → menü → karakter → yolculuk
+```
 
-**Ama önce Arda'ya sor** — sırayı bir kez değiştirdi, yine değiştirebilir.
+Oynarken `F4` kutu kipi (game feel'i sprite'sız değerlendirmek için),
+`F3` hata ayıklama katmanı.
+
+### Sonra sırayla
+
+1. **Görev 8 — Bölüm 3 "Meşale Mahzeni"** (`docs/bolum-03.md`).
+   Meşale ekonomisi, ses haritası, Mum Bekçisi, Mor Alev kararı
+   (`SaveData.purple_flame_taken` alanı hazır bekliyor, B14'ün twist'ini
+   etkileyecek).
+2. **Görev 9 — Sanat geçişi.** En görünür eksik: tileset hâlâ düz renk.
+   `world/tilemap.py` 9-slice ve varyantlara genişleyecek.
+3. **Görev 10 — Ses.** `assets/audio/SES-LISTESI.md` içinde 72 ses / 84
+   dosya listelendi. Dikişler hazır: `game.play_ui_sound()`,
+   `game.music_hush`, `juice.pitch_variation()`.
+
+**Ama önce Arda'ya sor** — sırayı iki kez değiştirdi, yine değiştirebilir.
 
 ---
 
