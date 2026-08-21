@@ -202,10 +202,18 @@ def validate(rows: list[str], spawn_tile: Spot, name: str = "oda") -> Report:
 
 # --- Dahili odalar ----------------------------------------------------------
 def _known_rooms() -> list[tuple[str, list[str], Spot]]:
+    """Dogrulanacak odalar. **Yeni bolum eklendiginde buraya eklenir.**"""
     from src.scenes.combat_room import ROOM_ROWS, SPAWN_TILE
-    # SPAWN_TILE oyuncunun ayak bastigi satiri degil, durdugu hucreyi verir;
-    # zemin bir alt satir.
-    return [("dovus odasi", ROOM_ROWS, (SPAWN_TILE[0], SPAWN_TILE[1] + 1))]
+    from src.world.rooms import chapter01
+
+    rooms = [("dovus odasi", ROOM_ROWS,
+              (SPAWN_TILE[0], SPAWN_TILE[1] + 1))]
+
+    # Bolum odalari isaretleri de tasiyor; dogrulayici zemine bakar.
+    spawn = chapter01.LEVEL.first("player")
+    rooms.append(("bolum 1 - koy", chapter01.LEVEL.terrain_rows,
+                  (spawn.tile_x, spawn.tile_y + 1)))
+    return rooms
 
 
 def main() -> int:

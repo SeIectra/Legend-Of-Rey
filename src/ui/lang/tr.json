@@ -139,6 +139,13 @@
     "rumble": "Kol titreşimi"
   },
 
+  "chapter01": {
+    "hint_move": "{left} {right} ile yürü",
+    "hint_attack": "{key} ile saldır",
+    "echo_placeholder": "[ YANKI GÖRÜŞÜ — Görev 3'te gelecek ]",
+    "end_placeholder": "[ BÖLÜM 1 SONU — Bölüm 2 Görev 4'te ]"
+  },
+
   "combat": {
     "counter": "KARŞI VURUŞ",
     "combo": "{count} COMBO",

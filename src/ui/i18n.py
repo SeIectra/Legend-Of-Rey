@@ -97,8 +97,12 @@ def current() -> str:
     return _current
 
 
-def t(key: str, **kwargs: Any) -> str:
+def t(key: str, /, **kwargs: Any) -> str:
     """Anahtari aktif dilde cozer.
+
+    `key` **konumsal-yalniz** (`/`): aksi halde `{key}` yer tutuculu bir
+    dize `t("...", key=...)` diye cagrildiginda "birden fazla deger" hatasi
+    veriyor. Bolum 1'in "{key} ile saldir" metni tam bunu tetikledi.
 
     Eksikse kaynak dile duser ve kaydeder. O da yoksa anahtarin kendisini
     koseli parantez icinde dondurur - ekranda hemen goze batsin.

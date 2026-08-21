@@ -64,6 +64,10 @@ class Player(Actor):
         self.jump_held = False
         self.air_frames = 0
         self.hurt_frames = 0        # Hasar animasyonu suresi
+        # Anlatimin kontrolu kisa sureligine aldigi anlar (orn. Bolum 1'de
+        # sarsintinin Rey'i yere sermesi). Girdi **yok sayilir**, fizik
+        # surer - oyuncu dusup yuvarlanir, ekran donmaz.
+        self.control_locked = 0
         self.last_hit_was_counter = False
 
     # --- Durum sorgulari ----------------------------------------------------
@@ -107,7 +111,11 @@ class Player(Actor):
         if self.combo.update():
             self.scene.on_combo_reset()
 
-        if self.dodge.active:
+        if self.control_locked > 0:
+            self.control_locked -= 1
+            self.hurt_frames = max(self.hurt_frames, 1)   # yerde
+            self.body.approach_vx(0.0, 0.12)
+        elif self.dodge.active:
             self._update_dodge()
         else:
             self._update_chain(inp)

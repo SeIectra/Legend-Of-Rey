@@ -207,10 +207,11 @@ class VerticalJourneyScene(CinematicScene):
 
     # --- Gecis -------------------------------------------------------------
     def on_finished(self) -> None:
-        # Bolum verisi bu gecis oynarken yuklenmis olurdu; su an Bolum 1
-        # henuz yazilmadi, dovus odasina gidiyoruz.
-        from src.scenes.combat_room import CombatRoomScene
-        self.scenes.replace(CombatRoomScene, transition=False,
+        # Yukari cikis koye varir - Bolum 1. Asagi inis kaldigin bolume;
+        # su an yalnizca Bolum 1 var, ileri bolumler geldikce burasi
+        # bolum numarasina bakacak.
+        from src.scenes.chapter01 import Chapter01Scene
+        self.scenes.replace(Chapter01Scene, transition=False,
                             character=self.character)
 
     def debug_lines(self) -> list[str]:

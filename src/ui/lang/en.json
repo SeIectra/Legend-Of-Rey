@@ -139,6 +139,13 @@
     "rumble": "Controller rumble"
   },
 
+  "chapter01": {
+    "hint_move": "Walk with {left} {right}",
+    "hint_attack": "Attack with {key}",
+    "echo_placeholder": "[ ECHO SIGHT — coming in Task 3 ]",
+    "end_placeholder": "[ END OF CHAPTER 1 — Chapter 2 in Task 4 ]"
+  },
+
   "combat": {
     "counter": "COUNTER",
     "combo": "{count} COMBO",
