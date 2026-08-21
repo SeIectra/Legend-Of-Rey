@@ -135,6 +135,16 @@
     "rumble": "Kol titreşimi"
   },
 
+  "ability": {
+    "sword": "KILIÇ  ·  J ile saldır",
+    "dodge": "KAÇINMA  ·  Shift ile atıl",
+    "echo_sight": "YANKI GÖRÜŞÜ  ·  K ile bas ve tut",
+    "echo_ask": "YANKI'YA SOR  ·  F",
+    "double_jump": "ÇİFT ZIPLAMA",
+    "wall_jump": "DUVAR ZIPLAMASI",
+    "unknown": "?"
+  },
+
   "chapter01": {
     "hint_move": "{left} {right} ile yürü",
     "hint_attack": "{key} ile saldır",

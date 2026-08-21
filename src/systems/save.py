@@ -67,6 +67,10 @@ class SaveData:
 
     # Karakter
     character: str = "rey"           # rey | ardo
+    # Kazanilan yetenekler. **Liste**, bit maskesi degil: yeni yetenek
+    # eklemek kayit surumunu degistirmiyor, eski kayitlar sadece ona sahip
+    # olmuyor (src/systems/abilities.py).
+    abilities: list = field(default_factory=list)
     max_health: int = 80
     health: int = 80
 

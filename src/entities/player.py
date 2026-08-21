@@ -17,7 +17,7 @@ from src.combat.combo import (
 from src.combat.hitbox import Hitbox, Team, melee_rect
 from src.config import (
     APEX_GRAVITY_SCALE, APEX_SPEED_THRESHOLD, COYOTE_FRAMES, DODGE_SPEED,
-    DODGE_TOTAL_FRAMES, JUMP_CUT_MULTIPLIER, PLAYER_AIR_ACCEL,
+     JUMP_CUT_MULTIPLIER, PLAYER_AIR_ACCEL,
     PLAYER_AIR_FRICTION, PLAYER_GROUND_ACCEL, PLAYER_GROUND_FRICTION,
     PLAYER_JUMP_SPEED, PLAYER_RUN_SPEED,
 )
@@ -26,7 +26,9 @@ from src.art.animator import Animator
 from src.core.input import Action
 from src.entities.actor import Actor
 from src.entities.character_stats import CharacterStats, REY
+from src.entities.player_anim import attack_progress, update_animation
 from src.entities.player_render import draw_player
+from src.systems import abilities
 
 ATTACK_REACH = 22
 ATTACK_HEIGHT = 18
@@ -54,6 +56,10 @@ class Player(Actor):
         # Sprite hucresi karakterden buyuk; ayak cizgisini govdenin altina
         # hizalamak icin gerekli. Bilinmezse karakter havada durur.
         self.sprite_foot_y = CHARACTERS[stats.sprite_name].foot_y
+
+        # Yetenek kapisi **tek yerde**. Dagitilsaydi biri mutlaka bir yerde
+        # unutulur ve oyuncu henuz almadigi bir seyi yapabilirdi.
+        self.abilities: set[str] = abilities.starting_set(stats.name.lower())
 
         self.chain = ChainState(window_frames=stats.chain_window)
         self.dodge = DodgeState(charges=stats.dodge_charges,
@@ -128,54 +134,11 @@ class Player(Actor):
         self._update_animation()
 
     def _update_animation(self) -> None:
-        """Animasyon durumu oynanistan turer, tersi degil.
-
-        Saldirilar **ilerlemeyle** surulur: kare, saldirinin kendi kare
-        butcesindeki konumdan secilir. Boylece animasyon dovus zamanlamasini
-        asla kaydiramaz.
-        """
-        if self.dead:
-            self.animator.play("death")
-            self.animator.update()
-            return
-
-        if self.chain.busy:
-            state = f"attack{min(self.chain.index + 1, 3)}"
-            self.animator.play(state)
-            self.animator.set_progress(self._attack_progress())
-            return
-
-        if self.hurt_frames > 0:
-            self.animator.play("hurt")
-        elif self.dodge.active:
-            self.animator.play("dodge")
-            self.animator.set_progress(
-                1.0 - self.dodge.frames_left / max(1, DODGE_TOTAL_FRAMES))
-            return
-        elif not self.body.grounded:
-            self.animator.play("jump" if self.body.vy < -0.3 else "fall")
-        elif abs(self.body.vx) > 0.25:
-            self.animator.play("run")
-        else:
-            self.animator.play("idle")
-        self.animator.update()
+        update_animation(self)
 
     def _attack_progress(self) -> float:
-        """Su anki saldirinin 0..1 arasi ilerlemesi."""
-        spec = self.chain.spec
-        total = spec.total
-        if total <= 0:
-            return 1.0
-        if self.chain.phase is AttackPhase.WINDUP:
-            done = spec.windup - self.chain.phase_frames_left
-        elif self.chain.phase is AttackPhase.ACTIVE:
-            done = spec.windup + (spec.active - self.chain.phase_frames_left)
-        else:
-            done = (spec.windup + spec.active
-                    + (spec.recovery - self.chain.phase_frames_left))
-        return max(0.0, min(1.0, done / total))
+        return attack_progress(self)
 
-    # --- Hareket ------------------------------------------------------------
     def _update_movement(self, inp) -> None:
         move = inp.axis_x
         if abs(move) < 0.2:
@@ -200,6 +163,29 @@ class Player(Actor):
         else:
             self.body.approach_vx(0.0, friction)
 
+    def has(self, ability: str) -> bool:
+        return ability in self.abilities
+
+    def grant(self, ability: str) -> bool:
+        """Yetenek kazandirir. Zaten varsa False doner."""
+        if ability in self.abilities:
+            return False
+        self.abilities.add(ability)
+        if ability == abilities.SWORD:
+            self._equip_sword()
+        return True
+
+    def _equip_sword(self) -> None:
+        """Kilic alininca sprite degisir - eli bos Rey artik silahli.
+
+        Ayni iskeletten cikan iki spec oldugu icin degisim bedava; yalnizca
+        animator yeniden kuruluyor.
+        """
+        armed = f"{self.stats.sprite_name}_armed"
+        if armed in CHARACTERS:
+            self.animator = Animator(armed)
+            self.sprite_foot_y = CHARACTERS[armed].foot_y
+
     def _handle_actions(self, inp) -> None:
         # Kacinma once bakilir: saldiriyi iptal edebilir, akiciligin kalbi bu.
         if inp.buffered(Action.DODGE) and self._can_dodge():
@@ -216,7 +202,7 @@ class Player(Actor):
             self.body.vy *= JUMP_CUT_MULTIPLIER
             self.jump_held = False
 
-        if inp.buffered(Action.ATTACK):
+        if inp.buffered(Action.ATTACK) and self.has(abilities.SWORD):
             inp.consume(Action.ATTACK)
             self._request_attack()
 
@@ -225,6 +211,8 @@ class Player(Actor):
                 and not self.dodge.active)
 
     def _can_dodge(self) -> bool:
+        if not self.has(abilities.DODGE):
+            return False
         if not self.dodge.can_dodge:
             return False
         # Vurus 1 ve 2'nin recovery'si iptal edilebilir; bitiricininki edilemez.

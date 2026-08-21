@@ -34,6 +34,7 @@ MARKERS: dict[str, str] = {
     "b": "bloated",
     "d": "dummy",
     "K": "pickup_necklace",
+    "W": "pickup_sword",
     "X": "exit",
     "!": "trigger",      # bolume ozel tetikleyici
 }

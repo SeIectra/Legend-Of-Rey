@@ -28,10 +28,12 @@ from src.art.animator import Animator
 from src.art.glow import radial_glow
 from src.config import INTERNAL_HEIGHT, INTERNAL_WIDTH, TILE_SIZE
 from src.core.input import Action
+from src.core.juice import ImpactWeight
 from src.scenes.play import PlayScene
 from src.ui import balloon, text
 from src.ui.i18n import t
 from src.entities.enemies.shambler import Shambler
+from src.systems import abilities
 from src.world.rooms.chapter01 import (
     ECHO_TUTORIAL_TILE, LEVEL, PROLOGUE, RIFT_TILE, SCENERY,
     TUTORIAL_ATTACK_AFTER, TUTORIAL_MOVE_AFTER,
@@ -78,6 +80,13 @@ class Chapter01Scene(PlayScene):
         # yoksa Cemo'nun kacirilisi bir dovusun icinde kayboluyor.
         self.creatures_released = False
 
+        # Kilic: yaratiklardan once duruyor. Rey silahsiz basliyor ve ilk
+        # yaratigi gorunce kacacak yeri yok - kilici alma ani bir rahatlama
+        # oluyor. Once ihtiyaci hissettiriyoruz, sonra veriyoruz.
+        sword_at = LEVEL.first("pickup_sword")
+        self.sword_pos = ((sword_at.x, sword_at.feet_y - 10)
+                          if sword_at else None)
+
         # Ogreti durumu
         self.moved = False
         self.attacked = False
@@ -120,7 +129,6 @@ class Chapter01Scene(PlayScene):
     def _on_beat_start(self) -> None:
         if self.beat == "taken":
             # Yer sarsilir. Radyal - yarilmanin yonu yok.
-            from src.core.juice import ImpactWeight
             # Yarik Cemo'nun ayaginin dibinde acilir.
             self.rift_x = self.cemo_x
             self.rift_y = self.cemo_y
@@ -172,6 +180,13 @@ class Chapter01Scene(PlayScene):
     def _watch_player(self) -> None:
         if abs(self.player.body.vx) > 0.2:
             self.moved = True
+
+        if (self.sword_pos is not None
+                and abs(self.player.body.center_x - self.sword_pos[0]) < 12
+                and abs(self.player.body.center_y - self.sword_pos[1]) < 20):
+            self.sword_pos = None
+            if self.player.grant(abilities.SWORD):
+                self.on_ability_gained(abilities.SWORD)
         if self.player.chain.busy:
             self.attacked = True
 
@@ -187,6 +202,15 @@ class Chapter01Scene(PlayScene):
                 and abs(self.player.body.center_x - trigger.x) < TILE_SIZE):
             self.echo_taught = True
             self.on_echo_tutorial()
+
+    def on_ability_gained(self, ability: str) -> None:
+        """Yetenek kazanildi. Bir sey **kazanmis** olmali - sessiz gecmesin."""
+        self.show_toast(t(abilities.label_key(ability)), frames=180)
+        self.juice.explosion(self.player.body.center_x,
+                             self.player.body.center_y, ImpactWeight.NORMAL)
+        self.particles.burst(self.player.body.center_x,
+                             self.player.body.center_y, 14,
+                             path="spark", speed=(0.6, 2.2))
 
     def on_chapter_end(self) -> None:
         """Bolum 1 bitti - Rey zindana iner.
@@ -259,7 +283,31 @@ class Chapter01Scene(PlayScene):
                 surface.fill(palette.color("earth_dark"),
                              (x, base - height + 2, width, 1))
 
+    def _draw_sword(self, surface: pygame.Surface, offset) -> None:
+        """Yerde duran kilic - hafif suzulur ve parildar.
+
+        Toplanabilir bir seyin **toplanabilir gorunmesi** gerekiyor: durgun
+        bir sprite dekor sanilir.
+        """
+        if self.sword_pos is None:
+            return
+        ox, oy = offset
+        bob = int(round(math.sin(self.game.frame * 0.06) * 2))
+        x = int(self.sword_pos[0]) - ox
+        y = int(self.sword_pos[1]) - oy + bob
+
+        glow = radial_glow(14, palette.color("gold"), peak=0.30)
+        surface.blit(glow, (x - 14, y - 14),
+                     special_flags=pygame.BLEND_RGB_ADD)
+        # Kilic: dikey namlu + capraz balcak.
+        surface.fill(palette.color("stone_light"), (x, y - 9, 1, 14))
+        surface.fill(palette.color("bone"), (x, y - 9, 1, 3))
+        surface.fill(palette.color("brass" if False else "gold"),
+                     (x - 3, y + 2, 7, 1))
+        surface.fill(palette.color("earth_dark"), (x, y + 3, 1, 3))
+
     def draw_foreground(self, surface: pygame.Surface, offset) -> None:
+        self._draw_sword(surface, offset)
         self._draw_rift(surface, offset)
         if not self.cemo_gone:
             self._draw_cemo(surface, offset)
@@ -329,6 +377,7 @@ class Chapter01Scene(PlayScene):
                      left=self.game.input.binding_label(Action.LEFT),
                      right=self.game.input.binding_label(Action.RIGHT))
         elif (self.moved and not self.attacked and self.enemies
+                and self.player.has(abilities.SWORD)
                 and self.game.frame > TUTORIAL_ATTACK_AFTER):
             hint = t("chapter01.hint_attack",
                      key=self.game.input.binding_label(Action.ATTACK))

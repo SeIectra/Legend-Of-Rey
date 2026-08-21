@@ -26,6 +26,7 @@ from src.config import (  # noqa: E402
     HITSTOP_FINISHER, HITSTOP_KILL, HITSTOP_NORMAL, INPUT_BUFFER_FRAMES,
 )
 from src.core.game import Game  # noqa: E402
+from src.systems import abilities  # noqa: E402
 from src.scenes.combat_room import CombatRoomScene  # noqa: E402
 
 KEY_ATTACK = pygame.K_j
@@ -51,6 +52,18 @@ class Harness:
         self.game.scenes._flush()
         self.scene: CombatRoomScene = self.game.scenes.current
         self.player = self.scene.player
+        self.arm()
+
+    def arm(self) -> None:
+        """Dovus testleri kilici ve kacinmayi **varsayiyor**.
+
+        Rey artik silahsiz basliyor (`src/systems/abilities.py`); kilic
+        Bolum 1'de bulunuyor. Buradaki testler ilerlemeyi degil **kare
+        degerlerini** olcuyor, o yuzden ikisi pesinen veriliyor. Kapinin
+        kendisi asagida ayrica sinaniyor.
+        """
+        self.player.grant(abilities.SWORD)
+        self.player.grant(abilities.DODGE)
 
     def step(self, press: tuple[int, ...] = (), release: tuple[int, ...] = (),
              count: int = 1) -> None:
@@ -77,6 +90,7 @@ class Harness:
     def reset(self) -> None:
         self.scene.on_enter()
         self.player = self.scene.player
+        self.arm()
 
 
 def phase_lengths(harness: Harness) -> dict[str, int]:
@@ -310,6 +324,41 @@ def main() -> int:
           "hedef flasi tetiklendi")
 
     h.game.shutdown()
+
+    # --- Yetenek kapisi ----------------------------------------------------
+    # Prototipte iyi calisan bir seydi: kilici sonradan almak, atilmayi
+    # sonradan ogrenmek. Kapinin gercekten kapali oldugunu dogrula - yoksa
+    # "sonradan alma" hissi sessizce kaybolur ve kimse fark etmez.
+    print("\n--- yetenek kapisi ---")
+    gate = Harness()
+    gate.player.abilities.clear()          # koy kizi Rey: eli bos
+
+    # `tap` bas-birak yapar. `step(press=...)` yalnizca KEYDOWN gonderiyor
+    # ve tus basili kaldigi icin ikinci basis **yeni bir kenar uretmiyor** -
+    # bu tuzaga bir kez dusuldu, kod hatasi sanildi.
+    gate.tap(KEY_ATTACK)
+    gate.settle(12)
+    check(not gate.player.chain.busy,
+          "kilic yokken saldirilamiyor", gate.player.chain.phase.name)
+
+    gate.tap(KEY_DODGE)
+    gate.settle(4)
+    check(not gate.player.dodge.active, "kacinma ogrenilmeden atilamiyor")
+
+    check(gate.player.grant(abilities.SWORD), "kilic kazanildi")
+    check(not gate.player.grant(abilities.SWORD),
+          "ayni yetenek iki kez kazanilmiyor")
+
+    gate.tap(KEY_ATTACK)
+    check(gate.player.chain.busy, "kilictan sonra saldirilabiliyor",
+          gate.player.chain.phase.name)
+
+    gate.settle(45)
+    gate.player.grant(abilities.DODGE)
+    gate.tap(KEY_DODGE)
+    check(gate.player.dodge.active,
+          "kacinma ogrenildikten sonra atilabiliyor")
+    gate.game.shutdown()
 
     print("\n=== SONUC ===")
     if failures:

@@ -18,6 +18,7 @@ Spec'ler: `src/art/animation.py :: CHARACTERS`
 | Ad | Hucre | Taban (foot_y) | Kare | Rol |
 |---|---|---|---|---|
 | `rey` | 48x40 | 34 | 44 | Oynanabilir - Yankisoyleyen |
+| `rey_armed` | 48x40 | 34 | 44 | - |
 | `ardo` | 48x40 | 34 | 44 | Oynanabilir - yabanci |
 | `shambler` | 40x36 | 31 | 44 | Katman 1 - Suruklenen |
 | `climber` | 40x36 | 30 | 44 | Katman 1 - Tirmanan |

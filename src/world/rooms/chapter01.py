@@ -34,7 +34,11 @@ from __future__ import annotations
 from src.world.level import parse
 
 # Koy. Gece. Rey evin onunde, Cemo yaninda.
-#   R oyuncu   C Cemo   s Suruklenen   X cikis   ! Yanki ogretisi
+#   R oyuncu   C Cemo   W kilic   s Suruklenen   X cikis   ! Yanki ogretisi
+#
+# Kilic **yaratiklardan once** duruyor: Rey silahsiz basliyor ve ilk
+# yaratigi gorunce kacacak yeri yok. Kilici alma ani boylece bir
+# rahatlama oluyor - once ihtiyaci hissettiriyoruz, sonra veriyoruz.
 #
 # Basamaklar **tam 3 tile** araliklarla: zemin 12 -> 9 -> 6. Ilk halinde
 # satir 7 ve 4'te platformlar vardi ve zeminden 5 tile yukaridaydilar -
@@ -51,7 +55,7 @@ ROWS: list[str] = [
     "................................................................",
     "....................####....................####................",
     "................................................................",
-    "....RC....................................s........s....!......X",
+    "....RC..........................W.........s........s....!......X",
     "################################################################",
     "################################################################",
 ]

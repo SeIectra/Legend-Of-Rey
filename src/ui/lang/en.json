@@ -135,6 +135,16 @@
     "rumble": "Controller rumble"
   },
 
+  "ability": {
+    "sword": "SWORD  ·  attack with J",
+    "dodge": "DODGE  ·  dash with Shift",
+    "echo_sight": "ECHO SIGHT  ·  hold K",
+    "echo_ask": "ASK THE ECHO  ·  F",
+    "double_jump": "DOUBLE JUMP",
+    "wall_jump": "WALL JUMP",
+    "unknown": "?"
+  },
+
   "chapter01": {
     "hint_move": "Walk with {left} {right}",
     "hint_attack": "Attack with {key}",

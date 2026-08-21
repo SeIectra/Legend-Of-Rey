@@ -238,8 +238,13 @@ REY_SPEC = CharSpec(
     cloth_dark="shadow", armor="brass", accent="gore",
     long_hair=True, hair_length=11.0,
     hem=11.5, hem_length=6.0, tattoo=True, cape=True,
-    weapon="sword",
+    weapon="none",          # Bolum 1'de silahsiz; kilic sonradan bulunuyor
 )
+
+# Kilicli Rey. Bolum 1'de Rey **silahsiz** basliyor; kilic zindanda
+# bulunuyor (src/systems/abilities.py). Ayni iskeletten ciktigi icin
+# degisim bedava - tek fark silah.
+REY_ARMED_SPEC = replace(REY_SPEC, name="rey_armed", weapon="sword")
 
 # Ardo - yabanci. Daha agir, kapusonlu, Yanki'si yok.
 #
@@ -338,6 +343,7 @@ CEMO_SPEC = CharSpec(
 
 CHARACTERS: dict[str, CharSpec] = {
     "rey": REY_SPEC,
+    "rey_armed": REY_ARMED_SPEC,
     "ardo": ARDO_SPEC,
     "shambler": SHAMBLER_SPEC,
     "climber": CLIMBER_SPEC,
