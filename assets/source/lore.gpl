@@ -1,0 +1,39 @@
+GIMP Palette
+Name: LORE
+Columns: 8
+# Legend of Rey - 32 renk ana palet
+# KAYNAK: tools/palette.json - bu dosyayi elle duzenleme,
+# python tools/palette_to_gpl.py ile yeniden uret.
+#
+  6   5  11	void
+ 16  14  26	ink
+ 30  27  44	ink_soft
+ 40  44  60	stone_darkest
+ 58  64  84	stone_dark
+ 86  94 116	stone
+126 134 158	stone_light
+ 14  26  48	abyss_dark
+ 24  50  86	abyss
+ 40  88 136	abyss_light
+ 58  38  28	earth_dark
+104  70  44	earth
+ 92  32  20	ember_dark
+176  70  28	ember
+236 130  48	ember_light
+255 198  96	gold
+ 62  14  20	blood_dark
+138  26  34	blood
+212  56  54	blood_bright
+ 98  60  44	flesh_dark
+154 102  74	flesh
+202 152 118	flesh_light
+ 22  62  74	echo_dark
+ 54 142 154	echo
+130 222 228	echo_bright
+ 46  20  74	violet_dark
+106  52 160	violet
+180 126 234	violet_bright
+216  76  34	danger
+255 134  60	danger_bright
+228 222 204	bone
+252 250 246	white_flash
