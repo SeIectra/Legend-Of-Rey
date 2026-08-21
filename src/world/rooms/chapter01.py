@@ -35,6 +35,7 @@ from src.world.level import parse
 
 # Koy. Gece. Rey evin onunde, Cemo yaninda.
 #   R oyuncu   C Cemo   W kilic   s Suruklenen   X cikis   ! Yanki ogretisi
+#   B kirilabilir duvar - Yanki olmadan normal duvardan ayirt edilemez
 #
 # Kilic **yaratiklardan once** duruyor: Rey silahsiz basliyor ve ilk
 # yaratigi gorunce kacacak yeri yok. Kilici alma ani boylece bir
@@ -54,8 +55,8 @@ ROWS: list[str] = [
     "................................................................",
     "................................................................",
     "....................####....................####................",
-    "................................................................",
-    "....RC..........................W.........s........s....!......X",
+    "..........................................................BB....",
+    "....RC..........................W.........s........s....!.BB...X",
     "################################################################",
     "################################################################",
 ]

@@ -19,7 +19,7 @@ from src.art.particles import ParticleField
 from src.combat.attack_token import AttackTokenManager
 from src.combat.hitbox import HitboxManager, Team
 from src.config import (
-    COMBO_THRESHOLD_HIGH, COMBO_THRESHOLD_MID, INTERNAL_WIDTH,
+    COMBO_THRESHOLD_HIGH, COMBO_THRESHOLD_MID, INTERNAL_WIDTH, TILE_SIZE,
 )
 from src.systems.echo import COMBO_TO_RESTORE
 from src.core.camera import Camera
@@ -38,6 +38,15 @@ from src.ui.i18n import t
 from src.world.decals import DecalField
 
 HUD_MARGIN = 6
+
+
+class _WallTarget:
+    """Yanki'nin parlatacagi duvar. `echo_view` `.rect` bekliyor."""
+
+    __slots__ = ("rect",)
+
+    def __init__(self, rect) -> None:
+        self.rect = rect
 
 
 class PlayScene(Scene):
@@ -129,6 +138,10 @@ class PlayScene(Scene):
             if self.game.input.pressed(Action.ECHO_ASK):
                 self.on_echo_ask()
         self.compass.update(self.player)
+        # Kirilabilir duvarlar Yanki ile parliyor. Liste kucuk (oda basina
+        # birkac tane), her karede uretmek sorun degil.
+        self.breakables = [_WallTarget(r)
+                           for r in self.tilemap.breakable_rects()]
 
         self.hud.update(self.player, self.gold, self.echo_tier)
         if self.toast_frames > 0:
@@ -164,22 +177,24 @@ class PlayScene(Scene):
         self.particles.draw(surface, offset)
         self.draw_foreground(surface, offset)
 
-        # Kazanc **dunya katmaninda**: siluetler sahnenin icinde duruyor.
+        # Sira: once dunya kararir (bedel), sonra gizli seyler o karanligi
+        # delerek cikar (kazanc). Ters sirada Yanki acilinca ekran
+        # aydinlaniyordu - bedel tam tersine donmustu.
         if self.echo is not None:
+            echo_view.draw_dim(surface, self.echo)
             echo_view.draw_reveal(surface, offset, self.echo, self.player,
                                   self.enemies, self.breakables)
             echo_view.draw_answer(surface, offset, self.echo, self.player)
-
-        # Bedel **en ustte**: vinyet ve kromatik kayma her seyi kapsar,
-        # arayuz dahil. Yanki acikken oyuncu her seyi biraz daha zor
-        # goruyor - bedelin arayuzu es gecmesi onu ucuzlatirdi.
-        if self.echo is not None:
-            echo_view.draw_cost(surface, self.echo)
 
         if self.game.debug_overlay:
             self._draw_hitboxes(surface, offset)
         self._draw_hud(surface)
         self.draw_overlay(surface)
+
+        # Kromatik kayma en son: arayuz dahil her seyin uzerine. Yanki
+        # acikken oyuncu her seyi biraz daha zor goruyor.
+        if self.echo is not None:
+            echo_view.draw_fringe(surface, self.echo)
 
     def draw_background(self, surface, offset) -> None: ...
 
@@ -261,7 +276,33 @@ class PlayScene(Scene):
 
     def on_player_attack(self, player, index: int) -> None: ...
 
-    def on_attack_swing(self, player, box) -> None: ...
+    def on_attack_swing(self, player, box) -> None:
+        """Vurus kirilabilir duvara degdi mi?
+
+        Hitbox sistemi yalnizca **varliklara** bakiyor; duvar bir tile.
+        Burada ayrica sorulmasi gerekiyor - yoksa oyuncu duvara vurur ve
+        hicbir sey olmaz.
+        """
+        broken = False
+        for rect in self.tilemap.breakable_rects():
+            if not box.rect.colliderect(rect):
+                continue
+            tx = rect.x // TILE_SIZE
+            ty = rect.y // TILE_SIZE
+            if self.tilemap.break_at(tx, ty):
+                broken = True
+                self.particles.burst(rect.centerx, rect.centery, 8,
+                                     path="dust", speed=(0.5, 1.8))
+                self.decals.splatter(rect.centerx, rect.bottom, amount=4,
+                                     path="soot", spread=7.0)
+        if broken:
+            self.juice.explosion(player.body.center_x, player.body.center_y,
+                                 ImpactWeight.NORMAL)
+            self.on_wall_broken()
+
+    def on_wall_broken(self) -> None:
+        """Gizli gecit acildi. Alt sinif ozel tepki verebilir."""
+        self.show_toast(t("echo.wall_broken"), frames=120)
 
     def on_player_jump(self, player) -> None:
         self.particles.burst(player.body.feet[0], player.body.feet[1], 4,

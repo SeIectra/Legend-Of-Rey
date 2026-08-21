@@ -221,14 +221,14 @@ class Chapter01Scene(PlayScene):
         self.show_toast(t("chapter01.end_placeholder"), frames=200)
 
     def on_echo_tutorial(self) -> None:
-        """Yanki Gorusu burada tanitilacak (Gorev 3).
+        """Yanki Gorusu burada ogreniliyor.
 
-        Kanca bilincli olarak **simdiden** duruyor: bolum yeniden
-        yazilmadan sistem baglanabilsin. Su an yalnizca bir isaret gosterip
-        gecıyor - ve bunun eksik oldugu ekranda **acikca** yaziyor,
-        sessizce atlanmiyor (CLAUDE.md 12).
+        Ogretinin hemen **saginda** kirilabilir bir duvar var: oyuncu
+        yetenegi ogrenir ogrenmez kullanacagi bir sey buluyor. Once
+        ogretip sonra kullandirmak, ogretiyi hatirlanabilir yapan sey.
         """
-        self.show_toast(t("chapter01.echo_placeholder"), frames=150)
+        if self.player.grant(abilities.ECHO_SIGHT):
+            self.on_ability_gained(abilities.ECHO_SIGHT)
 
     # --- Cizim --------------------------------------------------------------
     def draw_background(self, surface: pygame.Surface, offset) -> None:

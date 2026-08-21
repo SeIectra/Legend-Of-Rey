@@ -23,8 +23,12 @@ EMPTY = 0
 SOLID = 1
 PLATFORM = 2
 SPIKE = 3
+# Kirilabilir duvar: kati gibi davranir ama vurulunca yok olur. Yanki
+# olmadan **normal duvardan ayirt edilemez** - gizli gecidin tamami bu
+# ayirt edilemezlik uzerine kurulu (docs/gdd.md 4).
+BREAKABLE = 4
 
-SOLID_TILES = frozenset({SOLID})
+SOLID_TILES = frozenset({SOLID, BREAKABLE})
 HAZARD_TILES = frozenset({SPIKE})
 
 LEGEND: dict[str, int] = {
@@ -32,15 +36,20 @@ LEGEND: dict[str, int] = {
     "#": SOLID,
     "=": PLATFORM,
     "^": SPIKE,
+    "B": BREAKABLE,
 }
 
 # Placeholder cizim renkleri. Gorev 9'da gercek tileset gelince degisecek.
 TILE_COLORS: dict[int, str] = {
+    # Kirilabilir duvar normal duvarla **ayni renkte** cizilir. Farkli
+    # cizilseydi Yanki'nin isi kalmazdi: oyuncu gizli gecidi zaten gorurdu.
+    BREAKABLE: "stone_dark",
     SOLID: "stone_dark",
     PLATFORM: "earth",
     SPIKE: "danger",
 }
 TILE_TOP_COLORS: dict[int, str] = {
+    BREAKABLE: "stone",
     SOLID: "stone",
     PLATFORM: "earth",
 }
@@ -79,6 +88,31 @@ class TileMap:
 
     def is_solid(self, tx: int, ty: int) -> bool:
         return self.at(tx, ty) in SOLID_TILES
+
+    def is_breakable(self, tx: int, ty: int) -> bool:
+        return self.at(tx, ty) == BREAKABLE
+
+    def break_at(self, tx: int, ty: int) -> bool:
+        """Kirilabilir duvari yikar. Yikildiysa True."""
+        if not self.is_breakable(tx, ty):
+            return False
+        row = self.tiles[ty]
+        row[tx] = EMPTY
+        return True
+
+    def breakable_rects(self) -> list[pygame.Rect]:
+        """Kalan kirilabilir duvarlarin dikdortgenleri.
+
+        Yanki bunlari parlatiyor. Liste kucuk - bir odada en fazla birkac
+        tane - o yuzden her karede yeniden uretmek sorun degil.
+        """
+        found: list[pygame.Rect] = []
+        for ty, row in enumerate(self.tiles):
+            for tx, value in enumerate(row):
+                if value == BREAKABLE:
+                    found.append(pygame.Rect(tx * TILE_SIZE, ty * TILE_SIZE,
+                                             TILE_SIZE, TILE_SIZE))
+        return found
 
     def is_platform(self, tx: int, ty: int) -> bool:
         return self.at(tx, ty) == PLATFORM

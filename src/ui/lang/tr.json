@@ -148,7 +148,6 @@
   "chapter01": {
     "hint_move": "{left} {right} ile yürü",
     "hint_attack": "{key} ile saldır",
-    "echo_placeholder": "[ YANKI GÖRÜŞÜ — Görev 3'te gelecek ]",
     "end_placeholder": "[ BÖLÜM 1 SONU — Bölüm 2 Görev 4'te ]"
   },
 
@@ -164,6 +163,7 @@
 
   "echo": {
     "tier_up": "Yankı berraklaşıyor",
+    "wall_broken": "Gizli geçit açıldı",
     "tier_down": "Yankı zayıflıyor"
   },
 

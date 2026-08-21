@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from src.config import TILE_SIZE
 
 # Zemin karakterleri - tilemap bunlari kendi cozer.
-TERRAIN = frozenset("#=.^")
+TERRAIN = frozenset("#=.^B")
 
 # Yerlesim isaretleri. Zeminde bosluk birakirlar.
 MARKERS: dict[str, str] = {

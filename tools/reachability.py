@@ -95,6 +95,20 @@ class Grid:
     def solid(self, tx: int, ty: int) -> bool:
         return self._char(tx, ty) == "#"
 
+    def breakable(self, tx: int, ty: int) -> bool:
+        """Kirilabilir duvar - Yanki ile bulunup kilicla yikilir.
+
+        Erisilebilirlik acisindan **gecilebilir** sayiliyor: arkasina
+        ulasilabiliyor, sadece bir adim gerekiyor. Kati saysaydik
+        dogrulayici her gizli gecidi "ulasilamaz" diye raporlardi ve
+        gercek hatalar bu gurultunun icinde kaybolurdu.
+
+        Bir varsayim var: oyuncu oraya varana kadar kilici almis oluyor.
+        Bolum tasariminda kilic her zaman ilk kirilabilir duvardan **once**
+        durmali.
+        """
+        return self._char(tx, ty) == "B"
+
     def platform(self, tx: int, ty: int) -> bool:
         return self._char(tx, ty) == "="
 

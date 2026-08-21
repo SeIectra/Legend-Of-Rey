@@ -202,6 +202,55 @@ def main() -> int:
     check(not contradicts(compass, player, echo_direction=0),
           "Yanki sessizken celiski yok")
 
+    # --- 7. Bedel gercekten bedel mi (ekranda olculur) ----------------------
+    # Bu kontrol bir hatayi yakalamak icin degil, **yasanani tekrar
+    # yasamamak** icin var. Yanki'nin bedeli uc kez ust uste ters yone
+    # dondu: `BLEND_RGB_ADD` alfayi agirlik olarak kullanmadigi icin ekran
+    # kararacagina parliyordu, bir keresinde de cizim sirasi yuzunden -
+    # siluetler ve duvar parlamalari karartmanin ustune biniyordu.
+    #
+    # Goz bunu "biraz aydinlik olmus" diye gecistirebiliyor. Olcum
+    # gecistirmiyor.
+    print("\n--- bedel ekranda olculuyor ---")
+    import numpy as np
+
+    from src.config import INTERNAL_HEIGHT, INTERNAL_WIDTH
+    from src.core.game import Game
+    from src.scenes.chapter01 import Chapter01Scene
+    from src.systems import abilities as ab
+
+    game = Game()
+    game.scenes.set_root(Chapter01Scene, transition=False, character="rey")
+    game.scenes._flush()
+    scene = game.scenes.current
+    scene.player.grant(ab.ECHO_SIGHT)
+    scene.beat_index = 99                      # prologu atla
+    canvas = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT))
+
+    def brightness() -> float:
+        canvas.fill((0, 0, 0))
+        scene.draw(canvas)
+        return float(np.mean(pygame.surfarray.array3d(canvas)))
+
+    def run(frames: int, echo_key: bool) -> None:
+        for _ in range(frames):
+            game.input.begin_frame()
+            if echo_key:
+                game.input.handle_event(
+                    pygame.event.Event(pygame.KEYDOWN, key=pygame.K_k))
+            game.input.end_frame()
+            scene.update()
+
+    run(20, echo_key=False)
+    lit = brightness()
+    run(25, echo_key=True)
+    dimmed = brightness()
+
+    check(dimmed < lit, "Yanki acilinca ekran KARARIYOR (parlamiyor)",
+          f"{lit:.1f} -> {dimmed:.1f}")
+    check(lit - dimmed > 0.5, "kararma fark edilir olcude",
+          f"{lit - dimmed:.2f}")
+    game.shutdown()
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")

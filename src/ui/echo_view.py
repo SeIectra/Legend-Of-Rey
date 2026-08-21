@@ -99,15 +99,23 @@ def _draw_crack(surface, wall, ox: int, oy: int, echo) -> None:
     pygame.draw.rect(surface, palette.color("echo_bright"), rect, 1)
 
 
-def draw_cost(surface: pygame.Surface, echo) -> None:
-    """Bedel tarafi: vinyet ve kromatik kayma.
+def draw_dim(surface: pygame.Surface, echo) -> None:
+    """Bedel: dunya kararir. **Ortaya cikanlardan ONCE cizilir.**
 
-    **Tek karartma yuzeyi** (CLAUDE.md 4): Yanki vinyeti ayri bir gecis
-    acmiyor, ayni yuzeyi kullaniyor.
+    Sira onemli. Once bedeli sonra kazanci cizmistim ve Yanki acilinca ekran
+    kararacagina **aydinlaniyordu**: siluetler ve duvar parlamalari
+    karartmanin ustune biniyordu. Dogrusu dunyanin geri cekilmesi, gizli
+    seylerin o karanligi **delerek** cikmasi. Kontrast da boyle olusuyor -
+    parlamalar parlak oldugu icin degil, geri kalan sondugu icin one cikiyor.
+
+    Iki katman: butun ekrana hafif bir sonme + kenarlarda vinyet.
     """
     if not echo.active:
         return
-    _draw_chroma(surface, echo)
+
+    # Genel sonme - carpimla, alfayla degil. Yanki dunyayi **geri cekiyor**.
+    fade = int(255 * (1.0 - 0.22 * echo.strength))
+    surface.fill((fade, fade, fade), special_flags=pygame.BLEND_RGB_MULT)
 
     strength = echo.vignette
     if strength <= 0.0:
@@ -120,6 +128,12 @@ def draw_cost(surface: pygame.Surface, echo) -> None:
             _vignette_cache.clear()
         _vignette_cache[key] = veil
     surface.blit(veil, (0, 0))
+
+
+def draw_fringe(surface: pygame.Surface, echo) -> None:
+    """Kromatik kayma - en son, her seyin uzerine."""
+    if echo.active:
+        _draw_chroma(surface, echo)
 
 
 def _build_vignette(strength: float, tier: int) -> pygame.Surface:
@@ -138,14 +152,27 @@ def _build_vignette(strength: float, tier: int) -> pygame.Surface:
 
 
 def _draw_chroma(surface: pygame.Surface, echo) -> None:
-    """Kanallari bir piksel ayirir - "baska bir sey duyuyorum" hissi."""
+    """Kromatik kayma - tek kanal, bir piksel.
+
+    **Ilk hali ekrani aydinlatiyordu.** Tum goruntuyu `set_alpha` ile
+    solduruğ iki kez eklemeli harmanliyordum; `BLEND_RGB_ADD` alfayi agirlik
+    olarak kullanmiyor, RGB'yi oldugu gibi ekliyor. Sonuc: Yanki acilinca
+    ekran kararacagina parliyordu - bedel tam tersine donmustu.
+
+    Dogrusu **gercek kromatik sapma**: yalnizca mavi kanal bir piksel
+    kaydiriliyor ve eklemeden once carpimla kisiliyor. Kenarlarda mor bir
+    hale birakiyor, goruntuyu aydinlatmiyor.
+
+    Bu ders projede ucuncu kez ogrenildi (DEVIR.md 10). `tests/test_echo.py`
+    artik parlakligi olcup bekciligini yapiyor.
+    """
     if echo.strength < 0.4:
         return
-    shift = CHROMA_SHIFT
     ghost = surface.copy()
-    ghost.set_alpha(int(46 * echo.strength))
-    surface.blit(ghost, (shift, 0), special_flags=pygame.BLEND_RGB_ADD)
-    surface.blit(ghost, (-shift, 0), special_flags=pygame.BLEND_RGB_ADD)
+    # Kirmizi ve yesili sifirla, maviyi kis: geriye ince bir mor fringe kalir.
+    level = int(90 * echo.strength)
+    ghost.fill((0, 0, level), special_flags=pygame.BLEND_RGB_MULT)
+    surface.blit(ghost, (CHROMA_SHIFT, 0), special_flags=pygame.BLEND_RGB_ADD)
 
 
 def draw_answer(surface: pygame.Surface, offset: tuple[int, int],
