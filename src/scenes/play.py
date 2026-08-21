@@ -32,6 +32,7 @@ from src.systems.compass import Compass
 from src.systems.echo import EchoState
 from src.systems.save import read_save
 from src.ui import echo_view
+from src.ui.dialogue import Dialogue
 from src.ui import text
 from src.ui.hud import HUD
 from src.ui.i18n import t
@@ -85,6 +86,10 @@ class PlayScene(Scene):
                      if self.character != "ardo" else None)
         self.compass = Compass()
         self.breakables: list = []
+        # Diyalog oynanisi **durdurmuyor**: oyuncu konusma surerken
+        # yuruyebilir. Durdursaydik her replik bir kesinti olurdu ve oyuncu
+        # okumak yerine gecmeye calisirdi.
+        self.dialogue = Dialogue()
 
         self.setup()
 
@@ -138,6 +143,7 @@ class PlayScene(Scene):
             if self.game.input.pressed(Action.ECHO_ASK):
                 self.on_echo_ask()
         self.compass.update(self.player)
+        self.dialogue.update(self.game)
         # Kirilabilir duvarlar Yanki ile parliyor. Liste kucuk (oda basina
         # birkac tane), her karede uretmek sorun degil.
         self.breakables = [_WallTarget(r)
@@ -150,6 +156,10 @@ class PlayScene(Scene):
 
     def update_scene(self) -> None:
         """Alt sinifa ait kare islemleri (tetikleyiciler, anlatim)."""
+
+    def say(self, *lines) -> None:
+        """Replik dizisi baslatir. `lines` `Line` nesneleri."""
+        self.dialogue.start(tuple(lines))
 
     # --- Yanki --------------------------------------------------------------
     def on_echo_ask(self) -> None:
@@ -189,6 +199,7 @@ class PlayScene(Scene):
         if self.game.debug_overlay:
             self._draw_hitboxes(surface, offset)
         self._draw_hud(surface)
+        self.dialogue.draw(surface, self.game.frame)
         self.draw_overlay(surface)
 
         # Kromatik kayma en son: arayuz dahil her seyin uzerine. Yanki

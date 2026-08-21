@@ -151,6 +151,23 @@
     "end_placeholder": "[ END OF CHAPTER 1 — Chapter 2 in Task 4 ]"
   },
 
+  "speaker": {
+    "rey": "REY",
+    "ardo": "ARDO",
+    "cemo": "CEMO",
+    "echo": "…"
+  },
+
+  "line": {
+    "ch01_cemo_gift": "Wear it. I made it myself.",
+    "ch01_rey_thanks": "Thanks, little one.",
+    "ch01_echo_first": "wake",
+    "ch01_echo_rift": "below... below...",
+    "ch01_echo_alone": "you can get him back. i know the way.",
+    "ch01_echo_sword": "take it. you will need it.",
+    "ch01_echo_wall": "it is thin here. can you hear it?"
+  },
+
   "combat": {
     "counter": "COUNTER",
     "combo": "{count} COMBO",

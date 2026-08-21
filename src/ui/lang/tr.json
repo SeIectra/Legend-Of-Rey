@@ -151,6 +151,23 @@
     "end_placeholder": "[ BÖLÜM 1 SONU — Bölüm 2 Görev 4'te ]"
   },
 
+  "speaker": {
+    "rey": "REY",
+    "ardo": "ARDO",
+    "cemo": "CEMO",
+    "echo": "…"
+  },
+
+  "line": {
+    "ch01_cemo_gift": "Boynuna tak. Ben yapayım dedim.",
+    "ch01_rey_thanks": "Elin sağolsun, ufaklık.",
+    "ch01_echo_first": "uyan",
+    "ch01_echo_rift": "aşağıda... aşağıda...",
+    "ch01_echo_alone": "onu geri alabilirsin. ben yolu biliyorum.",
+    "ch01_echo_sword": "al onu. lazım olacak.",
+    "ch01_echo_wall": "burası ince. duyuyor musun?"
+  },
+
   "combat": {
     "counter": "KARŞI VURUŞ",
     "combo": "{count} COMBO",

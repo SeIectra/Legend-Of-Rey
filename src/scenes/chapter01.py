@@ -31,6 +31,7 @@ from src.core.input import Action
 from src.core.juice import ImpactWeight
 from src.scenes.play import PlayScene
 from src.ui import balloon, text
+from src.ui.dialogue import Line
 from src.ui.i18n import t
 from src.entities.enemies.shambler import Shambler
 from src.systems import abilities
@@ -92,6 +93,11 @@ class Chapter01Scene(PlayScene):
         self.attacked = False
         self.finished = False
 
+        # Ilk adimin kendisi de tetiklenmeli. `_on_beat_start` yalnizca
+        # adim **degisince** cagriliyor; ilk adim ("wake") icin hic
+        # calismiyordu ve o repligi kimse duymuyordu.
+        self._on_beat_start()
+
     @property
     def beat(self) -> str:
         if self.beat_index >= len(PROLOGUE):
@@ -127,6 +133,18 @@ class Chapter01Scene(PlayScene):
             self._on_beat_start()
 
     def _on_beat_start(self) -> None:
+        # Replikler jestin **yerine** degil yanina geliyor. Cemo'nun yariga
+        # cekildigi an ("chase") hala kelimesiz - orada bir replik ani
+        # ucuzlatirdi.
+        if self.beat == "wake":
+            # Sesin ilk kelimesi. Tek kelime - Rey uyanirken.
+            self.say(Line("echo", "line.ch01_echo_first"))
+        elif self.beat == "gift":
+            self.say(Line("cemo", "line.ch01_cemo_gift"),
+                     Line("rey", "line.ch01_rey_thanks"))
+        elif self.beat == "alone":
+            self.say(Line("echo", "line.ch01_echo_alone"))
+
         if self.beat == "taken":
             # Yer sarsilir. Radyal - yarilmanin yonu yok.
             # Yarik Cemo'nun ayaginin dibinde acilir.
@@ -140,6 +158,8 @@ class Chapter01Scene(PlayScene):
             self.player.control_locked = SHOCK_LOCK_FRAMES
             self.player.body.vx = -1.8
             self.player.body.vy = -1.2
+            # Ses ilk kez burada duyuluyor: yarik acilirken. Iki kelime.
+            self.say(Line("echo", "line.ch01_echo_rift"))
         elif self.beat == "alone":
             self.necklace = True
             self.cemo_gone = True
@@ -187,6 +207,7 @@ class Chapter01Scene(PlayScene):
             self.sword_pos = None
             if self.player.grant(abilities.SWORD):
                 self.on_ability_gained(abilities.SWORD)
+                self.say(Line("echo", "line.ch01_echo_sword"))
         if self.player.chain.busy:
             self.attacked = True
 
@@ -229,6 +250,7 @@ class Chapter01Scene(PlayScene):
         """
         if self.player.grant(abilities.ECHO_SIGHT):
             self.on_ability_gained(abilities.ECHO_SIGHT)
+            self.say(Line("echo", "line.ch01_echo_wall"))
 
     # --- Cizim --------------------------------------------------------------
     def draw_background(self, surface: pygame.Surface, offset) -> None:
