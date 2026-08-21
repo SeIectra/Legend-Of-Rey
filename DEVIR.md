@@ -17,7 +17,7 @@ görev sırası `GOREVLER.md`'de.
 | 0 — Temel kurulum | ✅ | Palet, font, döngü, boru hattı |
 | 1 — Dövüş çekirdeği | ✅ | Zincir, hitstop, kaçınma, kill cancel |
 | 2 — Düşman AI | ✅ | 3 tip, saldırı hakkı, ritim imzaları |
-| 3 — Yankı sistemi | ⬜ | Bölüm 1'den sonra (Arda'nın sırası) |
+| 3 — Yankı sistemi | ✅ | 3 kademe, yalan, kolye pusulası, kırılabilir duvar |
 | 4 — Bölüm 2 | ⬜ | Dikey dilim |
 | 5 — Ara değerlendirme | ⬜ | **Arda'nın işi**, Claude'a verilmez |
 | 6 — Menü ve UI | ✅ | Sıra dışı yapıldı (Arda istedi) |
@@ -30,7 +30,10 @@ Toplam ~10.700 satır. Sekiz test paketi de yeşil.
 
 **Oynanabilir akış:** intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)**
 
-**Arda'nın seçtiği sıra:** Görev 7 ✅ → Bölüm 1 + prolog ✅ → **Görev 3 (Yankı)**.
+**Arda'nın seçtiği sıra:** Görev 7 ✅ → Bölüm 1 + prolog ✅ → Görev 3 ✅
+
+**Kanon kararı:** Goblin ayrı bir düşman olarak eklenmiyor; Katman 2'nin
+**Kalkanlı**'sı goblin'in ruhuyla yapılacak (Görev 4+).
 
 ---
 
