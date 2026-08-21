@@ -1,0 +1,7 @@
+# Aseprite kaynak dosyalari binary - git diff/merge yapamaz.
+# Boyut buyurse Git LFS dusun.
+*.aseprite binary
+*.ase binary
+*.png binary
+*.ogg binary
+*.wav binary

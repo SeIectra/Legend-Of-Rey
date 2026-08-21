@@ -1,118 +1,314 @@
-# LORE — Legend of Rey: Echoes
+# CLAUDE.md — Legend of Rey (LORE)
 
-2D yandan kaydırmalı aksiyon-platformer. Python 3.13 + pygame-ce.
-İlham: Samsung tuşlu telefonlardaki *Forgotten Warrior* (2004, J2ME).
+Bu dosya, bu repoda çalışan Claude Code için bağlayıcı kurallardır. Her oturumda önce bunu, sonra `docs/` altındaki ilgili belgeyi oku.
 
-## Çalıştırma
+---
 
-```bash
-.venv/Scripts/python run.py          # Windows
-.venv/bin/python run.py              # Linux/macOS
-```
+## 1. PROJE
 
-Oyun içi: `F3` hata ayıklama katmanı · `F11` tam ekran · `F12` ekran görüntüsü · `Esc` duraklat
+**Legend of Rey (LORE)** — Pygame ile yapılan, yandan görünümlü aksiyon-RPG.
+Kafasının içindeki sesler yüzünden lanetli sayılan Rey, kaçırılan kardeşi Cemo'yu kurtarmak için zindana iner — ve o sesler ona yardım ederken, aslında onu çağırıyordur.
 
-## Araçlar
+**Stüdyo:** Ardeko Studios
+**Hedef platform:** PC (klavye + gamepad). **Mobil DEĞİL.**
+**Kapsam:** 18 bölüm, ~4 saat, 2 oynanabilir karakter
 
-```bash
-python tools/make_levels.py     # Bölümleri tasarla, doğrula ve JSON'a yaz
-python tools/smoke_test.py      # Başsız uçtan uca test (menü → oyun → duraklat)
-python tools/combat_test.py     # Savaş sistemlerini doğrula (hasar, ölüm, AI)
-python tools/sprite_sheet.py    # Tüm sprite'ları kontakt sayfası olarak bas
-```
+---
 
-Testler `SDL_VIDEODRIVER=dummy` ile pencere açmadan çalışır ve
-`build/testshots/` altına ekran görüntüsü bırakır. **Oynanışı etkileyen bir
-değişiklikten sonra ikisini de çalıştır.**
+## 2. TASARIM BELGELERİ
 
-## Mimari
+`docs/` altında. **Tamamını okuyabilirsin, hepsi bağlayıcıdır:**
+
+| Dosya | İçerik |
+|---|---|
+| `docs/gdd.md` | Ana tasarım belgesi — sistemler, karakterler, bölüm listesi |
+| `docs/dovus-sistemi.md` | Dövüş, combo, game feel, kare değerleri |
+| `docs/ekonomi-uretim.md` | Altın, zorluk eğrisi, üretim aşamaları |
+| `docs/asset-plani.md` | Asset listesi, stil kuralları, tutarlılık protokolü |
+| `docs/bolum-02.md` | Dikey dilim — Bölüm 2 oda oda tasarım |
+| `docs/bolum-03.md` | Bölüm 3 — Meşale Mahzeni, mor alev, Mum Bekçisi |
+| `docs/menu-ui.md` | Ana menü, karakter seçimi, ayarlar, HUD, UX prensipleri |
+| `docs/yapi.md` | 18 bölümün tam akışı |
+| `docs/derinlestirme.md` | Araştırma temelli ekler — ileri game feel, yenilikçi mekanikler, erişilebilirlik, Pygame performans |
+| `docs/asset-listesi.md` | Kalem kalem asset dökümü — kaç kare, hangi boyut |
+| `docs/asset-boru-hatti.md` | Asset üretim araçları — Pillow/NumPy boru hattı, quantize, siluet testi |
+
+---
+
+## 3. KAPSAM: MİMARİ SERBEST, İÇERİK SIRALI
+
+Belgeler tüm oyunu anlatır ki **mimariyi geleceğe hazır kurabilesin**. Kurallar:
+
+**Serbest — izin sorma:**
+- Görev için gerekli olan her şeyi yaz
+- Mimariyi geleceğe hazır kur; altyapıyı geniş tasarla
+- Gerekli gördüğün yardımcı modülleri, arayüzleri, soyutlamaları oluştur
+- Bir sistemi doğru kurmak için komşu sisteme kanca gerekiyorsa yaz
+
+**Sıraya bağlı — sırası gelmeden yazma:**
+- İleri bölümlerin **içeriği**: odaları, level verileri, düşman tipleri, boss'ları, ara sahneleri
+- Bunlar oynanış test edilmeden yazılırsa, test sonrası değişikliklerde çöpe gider
+
+**Görev bitince:**
+Gördüğün eksikleri, iyileştirme fikirlerini ve dikkatini çeken sorunları **liste halinde öner**. Kullanıcı karar versin.
+
+Kısacası: sistem altyapısında özgürsün, içerik üretiminde sıralısın.
+
+---
+
+## 4. TEKNİK STANDARTLAR
+
+| Karar | Değer | Neden |
+|---|---|---|
+| İç çözünürlük | 480×270 | 16:9, tam sayı ölçekleme (2×,3×,4×) |
+| Karakter | 32×32 | |
+| Tile | 16×16 | |
+| Kare hızı | **Sabit 60 FPS** | Dövüş kare hassasiyeti |
+| Fizik adımı | **Sabit** | Değişken adım combo penceresini bozar |
+| Zaman birimi | **Kare (frame)**, saniye değil | Tüm dövüş değerleri karede |
+| Kayıt formatı | JSON | |
+| Python | 3.11+ | |
+| Bağımlılık | `pygame-ce` + `numpy` | Başka kütüphane ekleme, önce sor |
+
+> **numpy onaylandı (21.08.2026).** Hem `tools/` boru hattında (quantize, shade,
+> outline — bu belgenin kendi önerisi) hem de çalışma zamanında (parçacık
+> alanı, ışık maskesi, tilemap) kullanılıyor. Parçacıkları saf Python'da
+> güncellemek kare bütçesini yiyordu. Üçüncü bir kütüphane hâlâ izne tabi.
+
+**Ölçekleme:** Her şey 480×270 yüzeye çizilir, sonra ekrana `pygame.transform.scale` ile büyütülür. `smoothscale` KULLANMA — piksel art bulanıklaşır.
+
+### Performans kuralları (zorunlu)
+- Yüklenen/üretilen **her yüzeyde** `.convert()` veya `.convert_alpha()` çağır. Unutulursa oyun 3-5 kat yavaşlar.
+- Çarpışma için **alt-dikdörtgen** kullan: hitbox sprite'tan küçük olsun. Piksel-mükemmel çarpışma yapma — hem yavaş hem gereksiz, ayrıca küçük hitbox oyuncu lehine affedicilik sağlar.
+- Sprite'lar başlangıçta **bir kez** üretilip atlas yüzeyinde saklanır. Her karede yeniden üretme.
+- Sadece görünür tile'ları çiz (kamera alanı + 2 tile marj).
+- Parçacık üst sınırı: ekranda aynı anda **max 200**.
+- Toplu çizim için `Surface.blits()` kullan.
+- Oyun kaydırmalı olduğu için **dirty rect tekniği işe yaramaz** — tam ekran çizim + yukarıdaki optimizasyonlar.
+- Işıklandırma: tek karartma yüzeyi, `BLEND_RGBA_SUB` ile ışık delikleri. Yankı vinyeti **aynı yüzeyi** kullansın, ikinci geçiş açma.
+
+---
+
+## 5. KLASÖR YAPISI
 
 ```
 lore/
-├── constants.py   Sanal çözünürlük, zaman adımı, tile boyutu, katman sırası
-├── core/          app · scene · input · assets · audio · config · save · camera · mathx
-├── gfx/           palette · forge · sprites · tiles · particles · lighting · postfx · text · ui
-├── world/         tilemap · level · parallax
-├── entities/      entity · player · enemies · projectile · pickups
-├── systems/       physics · combat
-├── scenes/        boot · title · play · pause · settings
-└── data/levels/   *.json  (tools/make_levels.py üretir — elle düzenleme)
+├── CLAUDE.md
+├── main.py
+├── requirements.txt
+├── docs/                  # tasarım belgeleri (salt okunur referans)
+├── src/
+│   ├── core/              # motor katmanı
+│   │   ├── game.py        # ana döngü, sabit adım
+│   │   ├── scene.py       # sahne yöneticisi
+│   │   ├── camera.py      # takip, sarsıntı, look-ahead
+│   │   ├── input.py       # girdi + tampon (buffer)
+│   │   └── juice.py       # hitstop, sarsıntı, flaş
+│   ├── entities/
+│   │   ├── actor.py       # temel varlık
+│   │   ├── player.py      # Rey / Ardo ortak
+│   │   ├── enemy.py       # düşman temel sınıfı
+│   │   └── enemies/       # tip başına dosya
+│   ├── combat/
+│   │   ├── hitbox.py
+│   │   ├── combo.py       # zincir, pencere, iptal
+│   │   └── damage.py
+│   ├── systems/
+│   │   ├── echo.py        # Yankı sistemi
+│   │   ├── economy.py
+│   │   ├── inventory.py
+│   │   └── save.py
+│   ├── world/
+│   │   ├── tilemap.py
+│   │   ├── level.py
+│   │   └── rooms/         # bölüm verileri
+│   ├── art/
+│   │   ├── palette.py     # ★ 32 renk — TEK KAYNAK
+│   │   ├── spritegen.py   # ★ prosedürel sprite üretimi
+│   │   └── particles.py
+│   ├── audio/
+│   └── ui/
+│       ├── text.py        # ★ tr_upper/tr_lower — Türkçe büyük/küçük harf
+│       ├── menu.py        # ana menü, karakter seçimi, ayarlar
+│       └── hud.py         # aşamalı açığa çıkarma, diegetik göstergeler
+├── tools/                 # ★ asset boru hattı (oyundan ayrı, docs/asset-boru-hatti.md)
+│   ├── palette.json       # 32 renk — TEK GERÇEK KAYNAK
+│   ├── quantize.py        # her görsel buradan geçer
+│   ├── outline.py         # otomatik kontur
+│   ├── shade.py           # sol-üst ışık kuralı otomatik
+│   ├── atlas.py           # spritesheet paketleme
+│   ├── preview.py         # kontak sayfası — tutarsızlığı görmek için
+│   ├── silhouette.py      # siluet testi otomasyonu
+│   └── colorblind.py      # renk körü palet varyantları
+├── assets/
+│   ├── sprites/
+│   ├── audio/
+│   ├── fonts/
+│   └── REGISTRY.md        # üretilen her asset'in kaydı
+└── tests/
 ```
 
-### Değiştirmeden önce bilmen gerekenler
+---
 
-**Sanal çözünürlük 480×270.** Her şey buna çizilir, sonra tam sayı katıyla
-büyütülür. Piksel koordinatları daima tam sayıya yuvarlanmalı; alt-piksel
-konumlar pixel art'ta titreme yaratır.
+## 6. SANAT TUTARLILIK PROTOKOLÜ ★ (en kritik bölüm)
 
-**Sabit zaman adımı 1/60.** `App._tick` fiziği sabit adımlarla sürer. Hiçbir
-yerde `dt`'siz sabit hız yazma. `dt == 0` gelebilir (hitstop sırasında) —
-sıfıra bölme kontrolü gerekir.
+Bu projenin en büyük riski, farklı oturumlarda üretilen sprite'ların birbirini tutmaması.
 
-**Renkle değil, palet indeksiyle çizilir.** `gfx/forge.py` içindeki `Canvas`
-her piksel için (rampa, basamak) tutar; `shade()` ve `outline()` bunun üstünde
-çalışır, `resolve()` gerçek renge çevirir. Yeni sprite eklerken doğrudan RGB
-yazma — palet tutarlılığı buradan geliyor.
+### Palet
+`src/art/palette.py` içinde **32 renk sabit** — kaynağı `tools/palette.json`. Her sprite bu paletten üretilir.
+**Palet dışı renk kullanmak yasaktır.** Yeni renk gerekiyorsa önce sor.
+*Tek istisna:* Ardeko Studios intro logosu (dışarıdan gelen marka varlığı).
 
-**Hasar tek yerden geçer.** Saldıran taraf `scene.combat.attack(...)` ile
-kısa ömürlü bir `Hitbox` yaratır; `CombatSystem` çözer, `PlayScene.on_hit`
-hitstop/sarsıntı/partikül/sesi verir. Doğrudan `target.take_damage()` çağırma.
+### Her görsel quantize'dan geçer
+Kaynağı ne olursa olsun — kod, elle çizim, harici araç — her görsel `tools/quantize.py` filtresinden geçer. Bu tek kural tutarsızlık riskini yapısal olarak çözer. Detay: `docs/asset-boru-hatti.md`
 
-**Sahne yığını.** Menüler oyunun *üstüne biner* (`blocks_update=True`,
-`blocks_draw=False`). Asla ikinci bir `while` döngüsü açma — eski kodun en
-büyük hatası buydu.
+**Blender veya 3D araç kullanılmaz.** 32×32 piksel sanat için yanlış araç. Boru hattı Pillow + NumPy üzerine kurulu.
 
-**Bölümler veri.** Yeni bölüm = `tools/make_levels.py` içine yeni ASCII +
-sözlük girdisi. Kodda bölüm numarasına bakan `if` yazma.
+### Sprite üretimi kod iledir
+Sprite'ları PNG olarak elle çizme. `src/art/spritegen.py` içinde fonksiyon olarak üret:
 
-### His ayarları
+```python
+def draw_humanoid(surf, palette, pose, outfit, facing): ...
+def draw_creature(surf, palette, body_type, pose): ...
+```
 
-Oynanışın "hissi" [lore/entities/player.py](lore/entities/player.py) başındaki
-sabitlerde. Tek tek değiştir, her değişiklikten sonra oyna:
-`RUN_SPEED`, `JUMP_SPEED`, `COYOTE_TIME`, `APEX_GRAVITY`, `DASH_*`, `COMBO`.
+Böylece Rey, Ardo ve muhafızlar **aynı iskeletten** çıkar. Tutarlılık garanti, varyasyon ucuz.
 
-### Zıplama zarfı — bölüm tasarımının sınırı
+### Stil sözleşmesi — istisnasız
+- **Işık kaynağı her zaman sol üstten**
+- **Kontur:** siyah değil, paletin en koyu 2. rengi
+- **Yüz:** 2 piksel göz, ağız yok
+- **Gölge:** karakterin altında 1 elips
+- **Animasyon hissi:** 8 FPS (her sanat karesi ≈ 7-8 oyun karesi)
+- **Siluet testi:** her sprite tek renk siyaha çevrildiğinde ne olduğu anlaşılmalı
 
-Ölçülmüş değerler (`python tools/measure_jump.py`): **60 px (3.75 tile) yükseklik,
-92 px (5.75 tile) menzil.** Tasarım sınırları marjla bunun altında:
+### Kayıt
+Her yeni asset `assets/REGISTRY.md` dosyasına eklenir: ad, boyut, kare sayısı, üretildiği fonksiyon.
 
-| Sabit | Değer | Anlamı |
-|-------|-------|--------|
-| `Level.MAX_JUMP_TILES` | 4 | Azami uçurum genişliği (kenarlar arası 5 tile yol) |
-| `Level.MAX_JUMP_HEIGHT_TILES` | 3 | Basılabilir satırlar arası azami dikey adım |
+---
 
-**En sık yapılan hata:** Rey platformun *üstünde* durur, yani işgal ettiği satır
-platform satırının bir üstüdür. 3 tile'lık bir adım için platform tepesi
-2 satır yukarıda olmalı — 3 değil. Zemin tepesi 16 ise platform tepeleri
-13, 10, 7 olur.
+## 7. DÖVÜŞ — DEĞİŞTİRİLEMEZ DEĞERLER
 
-`Level.validate()` doğuş noktasından BFS yaparak erişilemeyen platform ve
-prop'ları bildirir; `make_levels.py` bunu yazmadan önce çalıştırır. `JUMP_SPEED`
-veya `RUN_SPEED` değişirse **önce `measure_jump.py` çalıştır**, sonra bu iki
-sabiti güncelle, sonra `make_levels.py` ile bölümleri yeniden doğrula.
+`docs/dovus-sistemi.md` bağlayıcıdır. Kritik olanlar:
 
-### Sprite hizalama
+- Zincir penceresi: **12 kare** (Rey 14, Ardo 10)
+- Hitstop: normal **3**, bitirici **7**, öldürücü **12** kare
+- Kaçınma: **6 kare** dokunulmazlık, **18 kare** toplam
+- Karşı vuruş penceresi: kaçınmadan sonra **9 kare**
+- **Kill cancel:** düşman ölünce tüm recovery iptal
+- **Saldırı hakkı:** aynı anda en fazla **2 düşman** saldırabilir
+- **Tell süresi:** her düşman saldırısı en az **14 kare** önceden okunabilir
 
-Sprite hücresi karakterden büyüktür (silahın savrulmasına yer bırakır), bu
-yüzden ayakların altında boş piksel kalır. `Entity.sprite_foot_y`
-(`CharSpec.foot_y`) hücre içindeki taban çizgisini tutar ve çizim bunu gövdenin
-altına hizalar. Ayarlanmazsa karakter havada durur.
+Bu değerleri kendi kafana göre değiştirme. Denge sorunu görüyorsan söyle, birlikte karar veririz.
 
-### Düşman AI sözleşmesi
+### Game feel — bağlayıcı ek kurallar (`docs/derinlestirme.md` bölüm 1)
 
-`patrol → alert → chase → windup → attack → recover`. **Windup fazı zorunlu:**
-saldırıdan önce görünür bir hazırlık ve renk uyarısı olmalı. Uyarısız saldıran
-düşman "haksız" hissettirir.
+- **Üçlü senkron:** Hitstop, sarsıntı ve parçacık **tek bir `on_hit()` fonksiyonundan** tetiklenir. Ayrı çağrılırsa kare kayması olur, his bozulur.
+- **Yönlü sarsıntı:** Sarsıntı rastgele değil, darbe vektörü yönünde. Bitirici aşağı iter, patlama radyal.
+- **Rotasyon:** Orta/büyük sarsıntıya 0.3–0.8 derece rotasyon ekle. Saf öteleme hata gibi okunur, rotasyon kuvvet gibi okunur. Küçük sarsıntıda rotasyon yok.
+- **Parçacık renk yolu:** Her parçacık ömrü boyunca palet üzerinde bir yol izler (parlak → koyu → is). Yollar `palette.py` içinde tanımlı.
+- **Squash & stretch:** Yeni kare çizmeden `transform.scale` ile deformasyon. Zıplama 0.85/1.15, iniş 1.2/0.8, vuruş anında düşman 1.3/0.7.
+- **Ses perde varyasyonu:** Her tekrarlı ses efekti ±%8 rastgele perdeyle çalınır. Tek satır, tekrar hissini yok eder.
+- **Kalıcılık:** Kan lekeleri, moloz, kırık parçalar bölüm boyunca zeminde kalır.
+- **Renk kodlu tehlike:** Palette bir "tehlike" rengi bulunur; her düşman tell'inde bu renkle parlar. Renk körlüğü için parlama **ve** siluet değişimi birlikte.
+- **Düşman can barı yok.** Durum görsel olarak okunur (sendeleme, renk, hız). Sadece boss'larda bar var.
 
-Arkadan fark etme mesafesi (`sight_behind = 11`) yumruk menzilinden küçük
-tutulmalı; aksi halde Act I'in tek saldırı yolu olan sırttan vuruş çalışmaz.
-Koşarak yaklaşan oyuncu `sight_behind_running = 52` ile duyulur.
+---
 
-## Eski kod
+## 8. OYUNCU AFFI (sessiz yardımlar)
 
-`legacy/` altındaki dosyalar ilk sürümdür; referans olarak duruyor, çalışmıyor
-ve içe aktarılmıyor. Yeni koda örnek alma.
+Bunlar oyuncuya asla söylenmez, ama her zaman aktiftir:
+- **Coyote time:** platformdan düştükten sonra 6 kare zıplama hakkı
+- **Girdi tamponu:** tuş 8 kare önceden basılırsa hafızada tutulur
+- **Son şans:** can %15 altındayken öldürücü darbede 1 canla hayatta kal (bölüm başına 1)
+- **Kaçınma cömertliği:** dokunulmazlık görsel başlangıçtan 2 kare önce başlar
 
-## Yol haritası
+---
 
-[docs/ROADMAP.md](docs/ROADMAP.md) — 5 Act, 28 bölüm, faz faz plan.
+## 9. UI / UX KURALLARI
+
+Detay: `docs/menu-ui.md`. Bağlayıcı olanlar:
+
+- **Hiçbir menü geçişi 12 kareyi (200ms) geçmez.** Menü hızlı hissetmeli.
+- **Sinematik geçişler ani kesilmez.** Intro, dikey yolculuk ve ara sahnelerde tuşa basınca sert kesme YOK — basılı tutunca 3× hızlanır ve akıcı biçimde varır. (Menü içi geçişler bu kuralın dışında; onlar zaten kısa.)
+- **Dikey/yatay kaydırmada ofset daima tam sayıya yuvarlanır.** Ondalık ofset piksel art dokusunu titretir.
+- **DEVAM ET** her zaman en üstte ve önceden seçili. Kayıt yoksa **görünmez** (gri değil).
+- **Yıkıcı eylemlerde varsayılan seçim daima İPTAL.** (Yeni oyun üzerine yazma, ana menüye dönme.)
+- Ana menüye dönerken **kaydedildiğini açıkça yaz.** "Kaydedilmemiş ilerleme" belirsizliği asla oluşmasın.
+- **Aşamalı açığa çıkarma:** can göstergesi hasar sonrası 3 sn, altın sayacı toplayınca, Yankı göstergesi kademe değişince görünür. Keşifte ekran temiz kalabilir.
+- **Diegetik tercih et:** Yankı kademesi vinyet yoğunluğuyla, kolye pusulası boyundaki sprite parıltısıyla anlatılır — HUD çubuğuyla değil.
+- **Üç girdi yöntemi de eşzamanlı çalışır:** klavye, gamepad, fare. Mod değiştirme gerekmez. Fare hareket edince imleç görünür, klavye kullanılınca kaybolur.
+- **Kayıt güvenliği:** her zaman `save.json` + `save.bak.json`. Yazma sırasında çökme olursa yedekten dön.
+
+### Türkçe metin — kritik
+Gerekli karakterler: ğ Ğ ü Ü ş Ş ı I i İ ö Ö ç Ç
+
+Python'un `str.upper()` fonksiyonu Türkçe için **yanlıştır**: `i` → `I` yapar, Türkçe'de `İ` olmalı; `ı` → `I` doğru ama `I` → `i` yanlış (`ı` olmalı). Menüde büyük harf kullanılacaksa `src/ui/text.py` içinde özel `tr_upper()` / `tr_lower()` fonksiyonları yaz ve her yerde onları kullan.
+
+## 10. ERİŞİLEBİLİRLİK (baştan, sonradan değil)
+
+Palet tek kaynak olduğu için bunların çoğu neredeyse bedava. Ayarlar menüsü yazıldığında hepsi bulunmalı:
+
+- Ekran sarsıntısı kapatma
+- Tam tuş yeniden atama (klavye + gamepad)
+- Renk körü modu: 3 palet varyantı (protanopi, döteranopi, tritanopi)
+- Tehlike göstergesi asla sadece renkle anlatılmaz — renk + şekil/siluet birlikte
+- UI ölçekleme (2 kademe)
+- Granüler zorluk: alınan hasar (%50/75/100/150), düşman hızı (%75/100), Yankı cezası açık/kapalı, otomatik combo açık/kapalı
+- Dil: Türkçe + İngilizce. Diyalogsuz anlatım seçildiği için çeviri yükü sadece menülerde.
+
+## 11. KOD STANDARTLARI
+
+- **Türkçe:** yorumlar ve commit mesajları Türkçe. Değişken/fonksiyon adları İngilizce.
+- **Tip ipuçları** zorunlu.
+- **Sihirli sayı yok.** Tüm dövüş/denge değerleri `src/config.py` içinde adlandırılmış sabitler.
+- **Dosya başına tek sorumluluk.** 400 satırı geçen dosya bölünür.
+- **Global state yok.** Bağımlılıklar parametre olarak geçer.
+- **Kısa fonksiyon.** 50 satırı geçen fonksiyon bölünür.
+
+---
+
+## 12. YASAKLAR
+
+- ❌ Mobil/dokunmatik kod yazma
+- ❌ `smoothscale` ile piksel art ölçekleme
+- ❌ Palet dışı renk
+- ❌ Değişken zaman adımı (`dt` tabanlı fizik)
+- ❌ Sırası gelmemiş bölüm **içeriği** (odalar, düşman tipleri, boss'lar, ara sahneler) — altyapı serbest
+- ❌ Yeni bağımlılık (sormadan)
+- ❌ Placeholder yerine "geçici olarak basit sprite" üretip bırakmak — placeholder açıkça placeholder olsun
+- ❌ Tasarım belgesindeki sayısal değerleri sessizce değiştirmek
+
+---
+
+## 13. ÇALIŞMA DÜZENİ
+
+1. Görevi oku, `docs/` içinden ilgili belgeyi aç
+2. **Plan modunda başla.** Büyük görevlerde önce keşfet ve yazılı bir plan sun — kod yazmadan. Onay alınca uygula. Bir özellik 20 karar noktası içerir; her birinde %80 isabet, hepsinde doğru olma ihtimalini %1'e düşürür. Plan bu kararları önceden netleştirir.
+3. **Gürültülü araştırmayı alt-ajana ver.** Çok dosya okunması gerekiyorsa alt-ajanla yap, ana bağlamı temiz tut.
+4. Kodu yaz
+5. **Çalıştır ve kanıt göster.** "Çalışıyor" deme — test çıktısını, çalıştırdığın komutu ve döndürdüğünü göster. Kanıt yoksa başarı ilan etme.
+6. Ne yaptığını özetle, açık kalan noktaları belirt
+7. **Önerilerini listele** — gördüğün eksikler, iyileştirme fikirleri, riskler
+8. Dur. Sıradaki göreve kendiliğinden geçme.
+
+**Sandbox'ta çalışmayan bir adım varsa görevi "tamamlandı" ilan etme.** Neyin yapılamadığını açıkça söyle.
+
+---
+
+## 14. ÜRETİM SIRASI (mevcut durum)
+
+- [x] Faz -1: İlk prototip (hareket, kılıç, düşman, HUD) — mevcut
+- [ ] **Faz 0: Temel** — palet, font (Türkçe + tr_upper!), spritegen, klasör yapısı, sabit adım döngü
+- [ ] **Faz 1: Dövüş çekirdeği** — zincir, hitstop, kill cancel, kaçınma (placeholder kutularla)
+- [ ] **Faz 2: Düşman AI** — 3 tip + saldırı hakkı sistemi + ritim imzaları
+- [ ] **Faz 3: Yankı sistemi** — 3 kademe, soru sorma, kolye pusulası, kırılabilir duvar
+- [ ] **Faz 4: Bölüm 2** — 8 oda, mini-boss, gizli oda
+- [ ] **★ ARA DEĞERLENDİRME** — kutularla eğlenceli mi? Değilse dur.
+- [ ] **Faz 5: Menü ve UI** — işlevsel katman (menü, kayıt, ayarlar, HUD)
+- [ ] **Faz 6: Menü sahnesi** — mor alev, rüzgâr, 5 aşamalı evrim
+- [ ] **Faz 7: Bölüm 3** — meşale ekonomisi, ses haritası, Mum Bekçisi, Mor Alev
+- [ ] **Faz 8: Sanat geçişi** — placeholder → gerçek sprite
+- [ ] **Faz 9: Ses + son cila** — dikey katmanlama, erişilebilirlik
+
+**Dikey dilim kriteri:** Bölüm 1-3 + menü bittiğinde oynayan biri "bir bölüm daha oynayayım" demiyorsa, devam etmeden önce dur ve tartış.

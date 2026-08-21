@@ -1,2 +1,6 @@
 pygame-ce>=2.5.0
+
+# Boru hatti ve calisma zamani dizi islemleri.
+# CLAUDE.md 4 uyarinca ek bagimlilik izne tabidir - numpy kullanici
+# onayiyla eklendi (parcacik, isik, tilemap ve palet islemleri icin).
 numpy>=1.26
