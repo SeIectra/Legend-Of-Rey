@@ -26,9 +26,11 @@ görev sırası `GOREVLER.md`'de.
 | 9 — Sanat geçişi | 🟡 | Sprite sistemi hazır; tileset ve düşmanlar eksik |
 | 10 — Ses + son cila | ⬜ | Dikiş hazır, gövde boş |
 
-Toplam ~9.800 satır. Sekiz test paketi de yeşil.
+Toplam ~10.700 satır. Sekiz test paketi de yeşil.
 
-**Arda'nın seçtiği sıra:** Görev 7 ✅ → **Bölüm 1 + prolog** → Görev 3.
+**Oynanabilir akış:** intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)**
+
+**Arda'nın seçtiği sıra:** Görev 7 ✅ → Bölüm 1 + prolog ✅ → **Görev 3 (Yankı)**.
 
 ---
 
