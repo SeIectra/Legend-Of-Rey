@@ -14,9 +14,7 @@
   "common": {
     "on": "On",
     "off": "Off",
-    "cancel": "CANCEL",
-    "yes": "YES",
-    "no": "NO"
+    "cancel": "CANCEL"
   },
 
   "menu": {
@@ -59,7 +57,6 @@
 
   "character": {
     "heading": "WHO WILL YOU PLAY?",
-    "echo_label": "Echo: {value}",
     "recommend": "First time? Rey is recommended.",
     "controls": "[◂ ▸] select    [Enter] confirm    [Esc] back",
     "rey_quote": "\"There are voices inside her head.\"",
@@ -67,7 +64,25 @@
     "rey_trait_2": "Fragile",
     "ardo_quote": "\"He fights in silence.\"",
     "ardo_trait_1": "Heavy",
-    "ardo_trait_2": "Sturdy"
+    "ardo_trait_2": "Sturdy",
+    "stat_health": "Health",
+    "stat_speed": "Speed",
+    "stat_chain": "Combo window",
+    "stat_dodge": "Dodge",
+    "stat_note_rey": "Wins through knowledge",
+    "stat_note_ardo": "Wins through timing",
+    "echo_title_rey": "ECHO  ·  Rey's curse",
+    "echo_rey_1": "Reveals enemies behind walls",
+    "echo_rey_2": "Makes hidden passages glow, gives hints",
+    "echo_rey_3": "Three tiers: Clear · Murky · Silent",
+    "echo_rey_cost": "The cost: the screen darkens, sound muffles, defence drops.",
+    "echo_rey_loss": "Dying drops one tier. It never falls below Silent.",
+    "echo_title_ardo": "NO ECHO  ·  he fights in silence",
+    "echo_ardo_1": "No help: no enemies revealed, no hints",
+    "echo_ardo_2": "More health, heavier blows, tighter combo",
+    "echo_ardo_3": "Rey's hardest tier is Ardo's normal",
+    "echo_ardo_cost": "In return: chapters cleared without Echo pay more.",
+    "echo_ardo_loss": "Dying does not change how Ardo plays."
   },
 
   "settings": {

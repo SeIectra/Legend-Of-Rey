@@ -17,20 +17,74 @@ import pygame
 
 from src.art import palette
 from src.art.animator import Animator
-from src.config import INTERNAL_HEIGHT, INTERNAL_WIDTH
+from src.config import (
+    ARDO_CHAIN_WINDOW, ARDO_DODGE_CHARGES, ARDO_MAX_HEALTH,
+    ARDO_MOVE_MULTIPLIER, INTERNAL_HEIGHT, INTERNAL_WIDTH,
+    REY_CHAIN_WINDOW, REY_DODGE_CHARGES, REY_MAX_HEALTH,
+    REY_MOVE_MULTIPLIER,
+)
 from src.core.input import Action
 from src.core.scene import Scene
 from src.systems.save import SaveData, write_save
 from src.ui import text
 from src.ui.i18n import t
 from src.ui.font_data import GLYPH_HEIGHT
-from src.ui.widgets import panel
+from src.ui.widgets import panel, value_bar
 
-SELECTED_SCALE = 3
-UNSELECTED_SCALE = 2
-PORTRAIT_Y = 112
-LEFT_X = INTERNAL_WIDTH // 2 - 92
-RIGHT_X = INTERNAL_WIDTH // 2 + 92
+SELECTED_SCALE = 2
+UNSELECTED_SCALE = 1
+
+# 270 piksel dar; dikey butce bastan hesaplandi. Ilk denemede baslik
+# portrelerin, sutun basliklari tanitim yazisinin uzerine biniyordu ve
+# Yanki panelinin son iki satiri cerceveden tasiyordu.
+#   6   baslik
+#   22  portreler (52)
+#   76  adlar
+#   88  tanitim yazisi
+#   100 dort istatistik satiri (44)
+#   148 ozet satiri
+#   162 Yanki paneli (90)
+#   256 kontroller
+HEADING_Y = 4
+PORTRAIT_BOTTOM = 90       # Portrelerin ayak hizasi
+NAME_Y = 92
+TAGLINE_Y = 104
+STATS_Y = 118
+NOTE_Y = 164
+ECHO_PANEL = pygame.Rect(16, 176, INTERNAL_WIDTH - 32, 78)
+PANEL_STEP = 10            # Panel ici satir araligi - 78 piksele sigsin
+
+LEFT_X = INTERNAL_WIDTH // 2 - 96
+RIGHT_X = INTERNAL_WIDTH // 2 + 96
+# Etiketler ortada, cubuklar iki yanda. Ilk denemede etiket sag hizaliydi
+# ve "Combo penceresi" gibi uzun olanlar sol cubugun uzerine tasiyordu.
+STAT_LABEL_X = INTERNAL_WIDTH // 2
+BAR_COL_X = (INTERNAL_WIDTH // 2 - 104, INTERNAL_WIDTH // 2 + 104)
+BAR_WIDTH = 54
+BAR_HEIGHT = 5
+ROW_STEP = 11
+
+# Yanki panelinin metinleri. Anahtarlar **acikca** yaziliyor, f-string ile
+# kurulmuyor: tests/test_lang.py kaynagi tarayip kodun kullandigi her
+# anahtarin tabloda oldugunu dogruluyor ve f-string icindeki anahtari
+# goremiyor. Once dinamik kurmustum, test hepsini "olu anahtar" sandi -
+# hakliydi, cunku tarayici acisindan gercekten kullanilmiyorlardi.
+ECHO_TEXT = {
+    "rey": {
+        "title": "character.echo_title_rey",
+        "bullets": ("character.echo_rey_1", "character.echo_rey_2",
+                    "character.echo_rey_3"),
+        "cost": "character.echo_rey_cost",
+        "loss": "character.echo_rey_loss",
+    },
+    "ardo": {
+        "title": "character.echo_title_ardo",
+        "bullets": ("character.echo_ardo_1", "character.echo_ardo_2",
+                    "character.echo_ardo_3"),
+        "cost": "character.echo_ardo_cost",
+        "loss": "character.echo_ardo_loss",
+    },
+}
 
 
 class CharacterInfo:
@@ -59,10 +113,6 @@ class CharacterInfo:
     @property
     def traits(self) -> tuple[str, ...]:
         return tuple(t(k) for k in self.trait_keys)
-
-    @property
-    def echo_text(self) -> str:
-        return t("common.yes" if self.has_echo else "common.no")
 
 
 CHARACTERS = (
@@ -141,13 +191,15 @@ class CharacterSelectScene(Scene):
     def draw(self, surface: pygame.Surface) -> None:
         surface.fill(palette.color("abyss_dark"))
         text.draw(surface, t("character.heading"),
-                  INTERNAL_WIDTH // 2, 34,
+                  INTERNAL_WIDTH // 2, HEADING_Y,
                   color=palette.role("ui_text"), align="center", tracking=2)
 
         for index, info in enumerate(CHARACTERS):
             self._draw_character(surface, index, info)
 
         self._draw_details(surface, CHARACTERS[self.index])
+        self._draw_comparison(surface)
+        self._draw_echo_panel(surface, CHARACTERS[self.index])
         self._draw_footer(surface)
 
     def _draw_character(self, surface: pygame.Surface, index: int,
@@ -163,6 +215,12 @@ class CharacterSelectScene(Scene):
         )
         if image is None:
             return
+        # Hucre karakterden buyuk (silahin savrulmasina yer birakiyor).
+        # Kirpmadan olceklersek portre ekranin ustunden tasiyor ve basligin
+        # arkasina giriyordu.
+        bounds = image.get_bounding_rect()
+        if bounds.width and bounds.height:
+            image = image.subsurface(bounds).copy()
         big = pygame.transform.scale(
             image, (image.get_width() * scale, image.get_height() * scale))
         if not selected:
@@ -170,7 +228,7 @@ class CharacterSelectScene(Scene):
             big.set_alpha(150)
 
         rect = big.get_rect()
-        rect.midbottom = (centre_x, PORTRAIT_Y + 60)
+        rect.midbottom = (centre_x, PORTRAIT_BOTTOM)
 
         if selected:
             frame = rect.inflate(10, 8)
@@ -179,35 +237,103 @@ class CharacterSelectScene(Scene):
 
         colour = (palette.role("ui_text_bright") if selected
                   else palette.color("stone_dark"))
-        text.draw(surface, info.name, centre_x, PORTRAIT_Y + 66,
+        text.draw(surface, info.name, centre_x, NAME_Y,
                   color=colour, align="center", tracking=2,
                   outline=selected)
 
     def _draw_details(self, surface: pygame.Surface,
                       info: CharacterInfo) -> None:
-        y = PORTRAIT_Y + 86
-        text.draw(surface, info.tagline, INTERNAL_WIDTH // 2, y,
+        text.draw(surface, info.tagline, INTERNAL_WIDTH // 2, TAGLINE_Y,
                   color=palette.role("ui_text"), align="center")
-        y += GLYPH_HEIGHT + 5
 
-        traits = " · ".join(info.traits)
-        text.draw(surface, traits, INTERNAL_WIDTH // 2, y,
-                  color=palette.role("ui_text_dim"), align="center")
-        y += GLYPH_HEIGHT + 2
+    # --- Sayilarla karsilastirma -------------------------------------------
+    def _draw_comparison(self, surface: pygame.Surface) -> None:
+        """Iki karakter yan yana, gercek degerlerle.
 
-        echo_colour = (palette.color("echo_bright") if info.has_echo
-                       else palette.color("stone_dark"))
-        text.draw(surface, t("character.echo_label", value=info.echo_text),
-                  INTERNAL_WIDTH // 2, y,
-                  color=echo_colour, align="center")
+        Sifat degil sayi: "hizli" gorecelidir, iki cubuk yan yana degildir.
+        Oyuncu neyi sectigini **bakarak** anlamali.
+        """
+        rows = self._stat_rows()
+        # Cubuklar portrelerin **altina** hizali: portre altindaki ad zaten
+        # sutun basligi. Ayrica basliğı yazmak ikinci bir REY/ARDO satiri
+        # uretiyor ve tanitim yazisiyla cakisiyordu.
+        label_x = STAT_LABEL_X
+        col_x = BAR_COL_X
+
+        y = STATS_Y
+        for key, values, best_is_high in rows:
+            text.draw(surface, t(key), label_x, y,
+                      color=palette.role("ui_text_dim"), align="center")
+            for index in range(2):
+                ratio = values[index] / max(values) if max(values) else 0.0
+                selected = index == self.index
+                colour = (palette.color("echo") if selected
+                          else palette.color("stone_darkest"))
+                rect = pygame.Rect(col_x[index] - BAR_WIDTH // 2, y + 2,
+                                   BAR_WIDTH, BAR_HEIGHT)
+                value_bar(surface, rect, ratio, colour)
+            y += ROW_STEP
+
+        # Kimin neyle kazandigi - tek satirlik ozet.
+        note = t("character.stat_note_rey" if self.index == 0
+                 else "character.stat_note_ardo")
+        if self.index == 0:
+            # Ilk oynayis onerisi buraya kaynadi: ayri satir olarak
+            # cizilince Yanki paneliyle cakisiyordu.
+            note += "  ·  " + t("character.recommend")
+        text.draw(surface, note, INTERNAL_WIDTH // 2, NOTE_Y,
+                  color=palette.color("stone_light"), align="center")
+
+    def _stat_rows(self):
+        """(dil anahtari, (rey, ardo), yuksek olan mi iyi)"""
+        return (
+            ("character.stat_health",
+             (REY_MAX_HEALTH, ARDO_MAX_HEALTH), True),
+            ("character.stat_speed",
+             (REY_MOVE_MULTIPLIER, ARDO_MOVE_MULTIPLIER), True),
+            ("character.stat_chain",
+             (REY_CHAIN_WINDOW, ARDO_CHAIN_WINDOW), True),
+            ("character.stat_dodge",
+             (REY_DODGE_CHARGES, ARDO_DODGE_CHARGES), True),
+        )
+
+    # --- Yanki nedir --------------------------------------------------------
+    def _draw_echo_panel(self, surface: pygame.Surface,
+                         info: CharacterInfo) -> None:
+        """Oyunun ana mekanigi burada anlatiliyor.
+
+        Yanki yalnizca bir istatistik degil, oynanisin tamami; oyuncu
+        secmeden once ne oldugunu bilmeli. Bir cumlelik "Yanki: VAR"
+        hicbir sey anlatmiyordu.
+        """
+        panel(surface, ECHO_PANEL)
+        keys = ECHO_TEXT["rey" if info.has_echo else "ardo"]
+        accent = (palette.color("echo_bright") if info.has_echo
+                  else palette.color("stone_light"))
+
+        x = ECHO_PANEL.x + 8
+        y = ECHO_PANEL.y + 7
+        text.draw(surface, t(keys["title"]), x, y, color=accent)
+        y += GLYPH_HEIGHT + 4
+        pygame.draw.line(surface, palette.role("ui_border"),
+                         (x, y - 3), (ECHO_PANEL.right - 8, y - 3))
+
+        for key in keys["bullets"]:
+            text.draw(surface, "·", x + 2, y, color=accent)
+            text.draw(surface, t(key), x + 10, y,
+                      color=palette.role("ui_text"))
+            y += PANEL_STEP
+
+        y += 2
+        text.draw(surface, t(keys["cost"]), x, y,
+                  color=palette.color("stone_light"))
+        y += PANEL_STEP
+        text.draw(surface, t(keys["loss"]), x, y,
+                  color=palette.role("ui_text_dim"))
 
     def _draw_footer(self, surface: pygame.Surface) -> None:
-        if self.index == 0:
-            text.draw(surface, t("character.recommend"),
-                      INTERNAL_WIDTH // 2, INTERNAL_HEIGHT - 34,
-                      color=palette.color("stone_dark"), align="center")
         text.draw(surface, t("character.controls"),
-                  INTERNAL_WIDTH // 2, INTERNAL_HEIGHT - 18,
+                  INTERNAL_WIDTH // 2, INTERNAL_HEIGHT - 13,
                   color=palette.role("ui_text_dim"), align="center")
 
     def debug_lines(self) -> list[str]:

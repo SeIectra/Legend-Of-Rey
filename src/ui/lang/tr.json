@@ -14,9 +14,7 @@
   "common": {
     "on": "Açık",
     "off": "Kapalı",
-    "cancel": "İPTAL",
-    "yes": "VAR",
-    "no": "YOK"
+    "cancel": "İPTAL"
   },
 
   "menu": {
@@ -59,7 +57,6 @@
 
   "character": {
     "heading": "KİMİ OYNAYACAKSIN?",
-    "echo_label": "Yankı: {value}",
     "recommend": "İlk kez oynuyorsan Rey önerilir.",
     "controls": "[◂ ▸] seç    [Enter] onayla    [Esc] geri",
     "rey_quote": "\"Kafasının içinde sesler var.\"",
@@ -67,7 +64,25 @@
     "rey_trait_2": "Kırılgan",
     "ardo_quote": "\"Sessizlikte savaşır.\"",
     "ardo_trait_1": "Ağır",
-    "ardo_trait_2": "Dayanıklı"
+    "ardo_trait_2": "Dayanıklı",
+    "stat_health": "Can",
+    "stat_speed": "Hız",
+    "stat_chain": "Combo penceresi",
+    "stat_dodge": "Kaçınma",
+    "stat_note_rey": "Bilgiyle avantaj kurar",
+    "stat_note_ardo": "Zamanlamayla avantaj kurar",
+    "echo_title_rey": "YANKI  ·  Rey'in laneti",
+    "echo_rey_1": "Duvar ardındaki düşmanları gösterir",
+    "echo_rey_2": "Gizli geçitleri parlatır, ipucu verir",
+    "echo_rey_3": "Üç kademe: Berrak · Bulanık · Sessiz",
+    "echo_rey_cost": "Bedeli: ekran kararır, sesler boğuklaşır, savunman düşer.",
+    "echo_rey_loss": "Ölünce bir kademe zayıflar. Sessiz'den aşağı inmez.",
+    "echo_title_ardo": "YANKI YOK  ·  sessizlikte savaşır",
+    "echo_ardo_1": "Yardım almaz: ne düşman görür, ne ipucu",
+    "echo_ardo_2": "Daha çok can, daha ağır vuruş, daha sıkı combo",
+    "echo_ardo_3": "Rey'in en zor kademesi, Ardo'nun normali",
+    "echo_ardo_cost": "Karşılığında: Yankı'sız geçilen bölüm daha çok ödül verir.",
+    "echo_ardo_loss": "Ölmek Ardo'nun oynanışını değiştirmez."
   },
 
   "settings": {
