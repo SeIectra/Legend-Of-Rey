@@ -33,6 +33,23 @@ MAX_SCALE = 8
 SCALE_SCREEN_MARGIN = 80        # Pencere modunda ekran kenarina birakilan pay
 
 
+def viewport_for(width: int, height: int) -> tuple[int, pygame.Rect]:
+    """Verilen ekran icin (olcek, ortalanmis dikdortgen).
+
+    Olcek **daima tam sayi**: piksel art kesirli olcekte titrer ve bulanir.
+    Artan yer siyah bant olarak kalir - gerdirmek bozmaktan iyidir demiyoruz,
+    bant birakmak dogru olan.
+
+    Sahne disinda tutuldu ki tam ekran matematigi bir pencere acmadan
+    dogrulanabilsin (tests/test_window.py).
+    """
+    scale = max(MIN_SCALE,
+                min(width // INTERNAL_WIDTH, height // INTERNAL_HEIGHT))
+    view_w, view_h = INTERNAL_WIDTH * scale, INTERNAL_HEIGHT * scale
+    return scale, pygame.Rect((width - view_w) // 2, (height - view_h) // 2,
+                              view_w, view_h)
+
+
 class Game:
     def __init__(self, settings: Settings | None = None) -> None:
         pygame.init()
@@ -87,14 +104,28 @@ class Game:
         return max(MIN_SCALE, min(scale, MAX_SCALE))
 
     def _create_window(self) -> None:
-        fullscreen = bool(self.settings.get("fullscreen", False))
-        flags = pygame.SCALED | pygame.RESIZABLE
-        if fullscreen:
-            flags |= pygame.FULLSCREEN
+        """Pencereyi kurar.
 
-        configured = int(self.settings.get("scale") or 0)
-        scale = configured or self._best_scale()
-        size = (INTERNAL_WIDTH * scale, INTERNAL_HEIGHT * scale)
+        **`pygame.SCALED` KULLANILMAZ.** O bayrak pygame'in kendi olceklemesini
+        devreye sokar ve o olcek tam sayi olmak zorunda degildir: 1920x1080
+        ekranda mantiksal 1440x810 yuzey 1.333x gerilir, piksel art bozulur.
+        Ustelik `screen.get_size()` fiziksel degil **mantiksal** boyutu doner,
+        yani viewport hesabi gercek ekrani hic gormez.
+
+        Bunun yerine olcegi kendimiz hesapliyoruz (`_recompute_viewport`):
+        daima tam sayi kat, ortalanmis, artan yer siyah bant. 480x270 icin
+        1920x1080 tam 4x - bu makinede tam ekran hic bant birakmiyor.
+        """
+        fullscreen = bool(self.settings.get("fullscreen", False))
+        if fullscreen:
+            # (0, 0) = masaustu cozunurlugu; gercek pikselleri isteriz.
+            flags = pygame.FULLSCREEN
+            size = (0, 0)
+        else:
+            flags = pygame.RESIZABLE
+            configured = int(self.settings.get("scale") or 0)
+            scale = configured or self._best_scale()
+            size = (INTERNAL_WIDTH * scale, INTERNAL_HEIGHT * scale)
 
         vsync = 1 if self.settings.get("vsync", True) else 0
         try:
@@ -107,16 +138,9 @@ class Game:
         self._recompute_viewport()
 
     def _recompute_viewport(self) -> None:
-        """Canvas'i pencereye ortalayan, tam sayi katli dikdortgen."""
         if self.screen is None:
             return
-        width, height = self.screen.get_size()
-        scale = max(MIN_SCALE,
-                    min(width // INTERNAL_WIDTH, height // INTERNAL_HEIGHT))
-        self.scale = scale
-        view_w, view_h = INTERNAL_WIDTH * scale, INTERNAL_HEIGHT * scale
-        self.viewport = pygame.Rect(
-            (width - view_w) // 2, (height - view_h) // 2, view_w, view_h)
+        self.scale, self.viewport = viewport_for(*self.screen.get_size())
 
     def toggle_fullscreen(self) -> None:
         # `Settings.set` degisiklik olayini tetikler, o da pencereyi kurar.

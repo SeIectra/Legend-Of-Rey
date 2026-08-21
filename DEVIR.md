@@ -49,9 +49,19 @@ kılar. Kendiliğinden geri alma; Arda'ya sormadan değiştirme.
    karakter, para **Altın**, 18 bölüm. Rey'in göğsündeki **geyik dövmesi**
    kişisel simgesi olarak korunuyor (Arda'nın isteği, paketle çelişmiyor).
 
-5. **Rey'in görünümü Arda tarafından belirlendi:** esmer, uzun gür düz koyu
-   kahve saç, koyu kahve badem gözler, rahat feminen giyim, sağ köprücük
-   kemiği altında geyik dövmesi.
+5. **Karakter kanonu — Arda belirledi.** Çeviride zamir gerektiği için
+   cinsiyetler bağlayıcı:
+
+   | Karakter | Cinsiyet | Görünüm |
+   |---|---|---|
+   | **Rey** | kadın (she) | Esmer, uzun gür düz koyu kahve saç, koyu kahve badem gözler, pürüzsüz cilt, rahat feminen giyim, sağ köprücük kemiği altında **geyik dövmesi** |
+   | **Ardo** | erkek (he) | Geniş omuz, sivri kukulete, ağır duruş |
+   | **Cemo** | erkek — Rey'in **küçük kardeşi** | Esmer, **kıvırcık** saç, tatlı/yakışıklı bir çocuk |
+
+   Cemo'nun sprite'ı **henüz üretilmedi** — Bölüm 1 ve 13 içeriği, sırası
+   gelmedi (`CLAUDE.md` §3). Tarif burada duruyor ki sırası gelince
+   tahmine kalmasın. Kıvırcık saç Rey'in düz saçından ayrışıyor, siluet
+   testinde işe yarayacak.
 
 6. **`src/scenes/` eklendi** — `CLAUDE.md` §5'teki yapıda yok, mimari serbest
    olduğu için eklendi.
@@ -80,6 +90,7 @@ python tests/test_pipeline.py     # quantize → outline → shade → preview
 python tests/test_combat.py       # dövüş kare değerleri (BAĞLAYICI)
 python tests/test_menu.py         # menü UX + kayıt güvenliği
 python tests/test_lang.py         # dil tabloları + kod/tablo örtüşmesi
+python tests/test_window.py       # tam ekran / ölçekleme matematiği
 python -m pyflakes src tools tests main.py
 ```
 
@@ -145,6 +156,13 @@ Bunların hepsi gerçek hataydı, testle yakalandı. Tekrarlama.
 12. **Dile bağlı olduğu fark edilmeyen şeyler:** yüzde işaretinin yeri
     (TR `%100`, EN `100%`), süre birimi (`dk`/`m`), ve büyük harf kuralı —
     `tr_upper("Continue")` noktalı İ ile `CONTİNUE` verir.
+
+13. **`pygame.SCALED` KULLANMA.** O bayrak pygame'in kendi ölçeklemesini
+    devreye sokar ve ölçek tam sayı olmak zorunda değildir: 1920×1080
+    ekranda mantıksal 1440×810 yüzey 1.333× gerilir, piksel art bozulur.
+    Ayrıca `screen.get_size()` fiziksel değil **mantıksal** boyutu döner,
+    yani viewport hesabı gerçek ekranı hiç görmez. Ölçeği kendimiz
+    hesaplıyoruz (`viewport_for()`), `tests/test_window.py` bekçilik ediyor.
 
 ---
 
