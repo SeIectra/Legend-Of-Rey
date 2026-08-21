@@ -94,6 +94,24 @@ for chain_name in palette.SHADE_CHAINS:
           f"zincir basamaklari ayirt edilebilir: {chain_name}",
           f"en dar aralik {min(gaps):.3f}")
 
+# CharSpec'in renk alanlari **golge zinciri** adi tutar, renk adi degil.
+# Ikisi karisinca sprite uretimi PaletteError ile cokuyor ve bu ancak o
+# karakter ilk kez cizildiginde ortaya cikiyor - yani surume kadar
+# saklanabilir. Kadronun tamamini burada dogruluyoruz.
+from src.art.animation import CHARACTERS  # noqa: E402
+
+CHAIN_FIELDS = ("skin", "hair", "cloth", "cloth_dark", "armor", "accent",
+                "weapon_chain")
+for _name, _spec in CHARACTERS.items():
+    _bad = [f for f in CHAIN_FIELDS
+            if getattr(_spec, f) not in palette.SHADE_CHAINS]
+    check(not _bad, f"{_name}: renk alanlari gecerli zincir",
+          ", ".join(f"{f}={getattr(_spec, f)!r}" for f in _bad))
+
+# Kadronun her uyesi gercekten cizilebiliyor mu? Spec dogru gorunup cizimde
+# patlayabilir (orn. tanimli ama uygulanmamis bir ozellik bayragi).
+check(len(CHARACTERS) >= 5, "kadro dolu", f"{len(CHARACTERS)} karakter")
+
 # --- 2. Font ----------------------------------------------------------------
 print("\n--- font ---")
 pygame.init()

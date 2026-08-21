@@ -43,7 +43,7 @@ class Bloated(Enemy):
     move_speed = BLOATED_SPEED
     contact_range = BLOATED_TRIGGER_RANGE
 
-    sprite_name = "shambler"        # Gorev 9'da kendi sprite'i gelecek
+    sprite_name = "bloated"
     body_colour = "ember_dark"
 
     def __init__(self, scene, x: float, y: float) -> None:

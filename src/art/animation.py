@@ -258,16 +258,64 @@ ARDO_SPEC = replace(
     weapon="sword",
 )
 
-# Katman 1 dusmani - Suruklenen. Curuyen, yavas, tek saldiri.
+# --- Katman 1: Curuyenler (docs/gdd.md 7) -----------------------------------
+# Ucu de ayni iskeletten cikiyor ama **oranlari bilincli olarak zit**.
+# Bir donem ucu de ayni spec'i paylasiyordu ve yalnizca rengi degisiyordu;
+# uc dusman tipi degil, uc renkli tek dusman gibi okunuyordu. Siluet testi
+# (F4) bunun sinavi: tek renge indirildiginde hangisi oldugu anlasilmali.
+#
+#   Suruklenen  uzun sarkan kollar, one egik - "surukleniyor"
+#   Tirmanan    kucuk govde, upuzun ince uzuvlar, genis omuz - boceksi
+#   Sismek      kocaman yuvarlak govde, minik kafa, gudук uzuvlar - balon
+
+# Suruklenen - combo hedef tahtasi. Yavas, tek saldiri.
 SHAMBLER_SPEC = CharSpec(
     name="shambler",
     cell_width=40, cell_height=36, foot_y=31,
-    head_radius=3.6, torso_height=6.0, torso_width=6.4,
-    thigh=3.8, shin=3.8, upper_arm=3.6, fore_arm=3.6,
-    limb_width=2.6, shoulder_width=5.4,
-    skin="rot", hair="shadow", cloth="rot",
-    cloth_dark="shadow", armor="leather", accent="rot",
-    glow_eyes=170,
+    head_radius=3.4, torso_height=5.6, torso_width=6.0,
+    # Kollar bacaklardan uzun: yerde surunuyormus gibi sarkiyor.
+    # Bacaklar bir donem 3.4'tu ve siluet bacaksiz bir sutuna donuyordu -
+    # govdeyi kisaltip bacagi uzatmak ikisini de cozdu.
+    thigh=4.4, shin=4.4, upper_arm=5.0, fore_arm=5.2,
+    limb_width=2.5, shoulder_width=5.0,
+    # Deri ve giysi **ayri zincir**: bir donem ikisi de "rot" idi ve dusman
+    # tek duz kutle gibi okunuyordu. Curuyen et uzerinde kahverengi pacavra.
+    skin="rot", hair="shadow", cloth="leather",
+    cloth_dark="shadow", armor="rock", accent="rot",
+    glow_eyes=150,
+    weapon="none",
+)
+
+# Tirmanan - dikey farkindalik. Tavanda bekler, tepeden iner.
+CLIMBER_SPEC = CharSpec(
+    name="climber",
+    cell_width=40, cell_height=36, foot_y=30,
+    # Minik govde + upuzun ince uzuv + genis omuz = orumceksi siluet.
+    head_radius=2.7, torso_height=4.4, torso_width=4.2,
+    thigh=5.4, shin=5.6, upper_arm=5.2, fore_arm=5.4,
+    limb_width=1.7, shoulder_width=6.6,
+    # Koyu govde, solgun uzuvlar, mor goz: tavanda once gozleri gorunur.
+    skin="rot", hair="shadow", cloth="shadow",
+    cloth_dark="shadow", armor="rock", accent="arcane",
+    pointed_ears=True,
+    glow_eyes=215,               # Karanlikta once gozleri gorunur
+    weapon="none",
+)
+
+# Sismek - konumlandirma. Yaklasir, siser, patlar.
+BLOATED_SPEC = CharSpec(
+    name="bloated",
+    cell_width=40, cell_height=36, foot_y=31,
+    # Govde genis ve yuvarlak, uzuvlar gudук: balon gibi okunsun.
+    # 11 genislik denendi - yaratik degil kutu gibi gorunuyordu ve minik
+    # kafa tamamen kayboluyordu.
+    head_radius=3.0, torso_height=6.6, torso_width=9.0,
+    thigh=3.0, shin=3.0, upper_arm=2.6, fore_arm=2.6,
+    limb_width=2.8, shoulder_width=6.8,
+    # Sisen kese kirmizi: tehlike rengiyle akraba, "patlayacak" okunur.
+    skin="gore", hair="shadow", cloth="rot",
+    cloth_dark="shadow", armor="leather", accent="torchlight",
+    glow_eyes=120,
     weapon="none",
 )
 
@@ -275,4 +323,6 @@ CHARACTERS: dict[str, CharSpec] = {
     "rey": REY_SPEC,
     "ardo": ARDO_SPEC,
     "shambler": SHAMBLER_SPEC,
+    "climber": CLIMBER_SPEC,
+    "bloated": BLOATED_SPEC,
 }

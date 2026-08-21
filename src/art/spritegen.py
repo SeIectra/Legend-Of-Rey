@@ -229,6 +229,17 @@ def _draw_head(canvas: Canvas, cx: float, cy: float, spec: CharSpec) -> None:
 
     _draw_eyes(canvas, cx, cy, spec)
 
+    if spec.pointed_ears:
+        # Yanlara ve hafif yukari uzanan sivri kulaklar. Siluete katkisi
+        # kucuk ama belirleyici: yuvarlak kafayi kirar, boceksi/kurnaz
+        # okunur. `horns`'tan farki yon - boynuz yukari, kulak yana gider.
+        canvas.taper(cx - radius * 0.85, cy - radius * 0.15,
+                     cx - radius * 1.75, cy - radius * 0.95, 2.0, 0.8,
+                     spec.skin, 1)
+        canvas.taper(cx + radius * 0.85, cy - radius * 0.15,
+                     cx + radius * 1.75, cy - radius * 0.95, 2.0, 0.8,
+                     spec.skin, 2)
+
     if spec.horns:
         canvas.taper(cx - radius * 0.6, cy - radius * 0.7,
                      cx - radius * 1.4, cy - radius * 1.9, 2.2, 0.8,

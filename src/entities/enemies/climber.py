@@ -42,7 +42,7 @@ class Climber(Enemy):
     move_speed = CLIMBER_SPEED
     contact_range = 18.0
 
-    sprite_name = "shambler"        # Gorev 9'da kendi sprite'i gelecek
+    sprite_name = "climber"
     body_colour = "echo"
 
     def __init__(self, scene, x: float, y: float) -> None:
