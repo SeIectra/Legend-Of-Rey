@@ -28,7 +28,7 @@ from src.entities.actor import Actor
 from src.entities.character_stats import CharacterStats, REY
 from src.entities.player_anim import attack_progress, update_animation
 from src.entities.player_render import draw_player
-from src.systems import abilities
+from src.systems import abilities, charms
 
 ATTACK_REACH = 22
 ATTACK_HEIGHT = 18
@@ -60,6 +60,9 @@ class Player(Actor):
         # Yetenek kapisi **tek yerde**. Dagitilsaydi biri mutlaka bir yerde
         # unutulur ve oyuncu henuz almadigi bir seyi yapabilirdi.
         self.abilities: set[str] = abilities.starting_set(stats.name.lower())
+        # Takili tilsimlar. Yetenekten ayri tutuluyor: yetenek "yapabilir
+        # misin", tilsim "ne kadar iyi yapiyorsun" sorusunu cevapliyor.
+        self.charms: set[str] = set()
 
         self.chain = ChainState(window_frames=stats.chain_window)
         self.dodge = DodgeState(charges=stats.dodge_charges,
@@ -165,6 +168,13 @@ class Player(Actor):
 
     def has(self, ability: str) -> bool:
         return ability in self.abilities
+
+    def equip(self, charm: str) -> bool:
+        """Tilsim tak. Zaten takiliysa `False` doner."""
+        if charm in self.charms:
+            return False
+        self.charms.add(charm)
+        return True
 
     def grant(self, ability: str) -> bool:
         """Yetenek kazandirir. Zaten varsa False doner."""
@@ -298,6 +308,12 @@ class Player(Actor):
         is_counter = self.dodge.consume_counter()
         if is_counter:
             damage = counter_damage(damage, self.stats.counter_bonus)
+        # Tilsim carpani vurus **uretilirken** biniyor; sonradan duzeltmek
+        # olum esigini kaydirirdi (src/systems/charms.py).
+        if self.charms:
+            scale = charms.damage_scale(self.charms, self)
+            if scale != 1.0:
+                damage = max(1, round(damage * scale))
         self.last_hit_was_counter = is_counter
 
         box = Hitbox(

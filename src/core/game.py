@@ -76,6 +76,10 @@ class Game:
         # --- Zaman ----------------------------------------------------------
         self.clock = pygame.time.Clock()
         self.frame = 0                   # Oyun karesi (donmalarda ilerlemez)
+        # Muzik kisilma orani 0..1. Sahne doldurur, ses sistemi (Gorev 10)
+        # okuyacak. Simdiden burada durmasi, o gun sahneleri tekrar
+        # dolasmak gerekmemesi demek - dikis hazir, govde bos.
+        self.music_hush = 0.0
         self.real_frame = 0              # Gercek kare (asla durmaz)
         self.fps = 0.0
         self._accumulator = 0.0

@@ -100,6 +100,18 @@ class TileMap:
         row[tx] = EMPTY
         return True
 
+    def set_tile(self, tx: int, ty: int, value: int) -> bool:
+        """Tek bir tile'i degistirir. Harita disindaysa `False`.
+
+        Arena kapisi gibi **oynanis sirasinda** degisen zeminler icin.
+        Ayri bir "kapi varligi" yazmak yerine tile'i degistirmek, fizigin
+        zaten dogru calisiyor olmasi demek: yeni bir carpisma yolu yok.
+        """
+        if not (0 <= ty < self.height and 0 <= tx < self.width):
+            return False
+        self.tiles[ty][tx] = value
+        return True
+
     def breakable_rects(self) -> list[pygame.Rect]:
         """Kalan kirilabilir duvarlarin dikdortgenleri.
 

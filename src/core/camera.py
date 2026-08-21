@@ -20,6 +20,9 @@ from src.config import (
 # Havadayken dikey olu bolge bu kadar genisler - her ziplamada kamera ziplamaz.
 AIRBORNE_DEADZONE_SCALE = 2.2
 LOOKAHEAD_SMOOTHING = 0.06
+# Oyalanirken takip bu oranda yavaslar. 0.35 fark edilir ama "kamera
+# takildi" hissi vermez - 0.1 denendi, oyuncu kontrolu kaybetmis gibi oldu.
+LINGER_SMOOTHING_SCALE = 0.35
 
 
 class Camera:
@@ -33,9 +36,18 @@ class Camera:
         self.bounds: pygame.Rect | None = None
         self.shake_offset = (0, 0)
         self._lookahead = 0.0
+        # Oyalanma: kamera gecici olarak daha yavas takip eder. Duvardaki
+        # tirmik izi gibi **fark edilmesi gereken** seylerin uzerinde
+        # kullaniliyor. Oyunu durdurmadan bakisi geciktiriyor - kesme
+        # olmadan dikkat cekmenin en ucuz yolu (docs/bolum-02.md Oda 1).
+        self.linger_frames = 0
 
     def set_bounds(self, rect: pygame.Rect | None) -> None:
         self.bounds = rect
+
+    def linger(self, frames: int) -> None:
+        """`frames` kare boyunca takibi yavaslat. Ust uste binmez."""
+        self.linger_frames = max(self.linger_frames, frames)
 
     def snap_to(self, x: float, y: float) -> None:
         """Yumusatma olmadan aninda konumlan. Bolum baslangicinda kullanilir."""
@@ -70,8 +82,13 @@ class Camera:
         elif center_y - focus_y > half_h:
             target_y = focus_y + half_h
 
-        self.x += (target_x - self.width * 0.5 - self.x) * CAMERA_SMOOTHING
-        self.y += (target_y - self.height * 0.5 - self.y) * CAMERA_SMOOTHING
+        smoothing = CAMERA_SMOOTHING
+        if self.linger_frames > 0:
+            self.linger_frames -= 1
+            smoothing *= LINGER_SMOOTHING_SCALE
+
+        self.x += (target_x - self.width * 0.5 - self.x) * smoothing
+        self.y += (target_y - self.height * 0.5 - self.y) * smoothing
         self._clamp()
 
     def _clamp(self) -> None:

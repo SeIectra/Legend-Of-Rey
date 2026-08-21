@@ -139,7 +139,7 @@ class PlayScene(Scene):
                            grounded=self.player.body.grounded)
 
         if self.echo is not None:
-            self.echo.update(self.game.input.held(Action.ECHO))
+            self.echo.update(self.echo_held())
             if self.game.input.pressed(Action.ECHO_ASK):
                 self.on_echo_ask()
         self.compass.update(self.player)
@@ -153,6 +153,16 @@ class PlayScene(Scene):
         if self.toast_frames > 0:
             self.toast_frames -= 1
         self.update_scene()
+
+    def echo_held(self) -> bool:
+        """Yanki bu karede acik mi?
+
+        Normalde tusun kendisi. Bolum, anlatimin gerektirdigi anlarda
+        (Bolum 2'nin Yanki odasi: ses **kendiliginden** yukselir) bunu
+        ezebilsin diye ayri bir kanca. Ezme `EchoState`'in icine
+        yazilsaydi bedel muhasebesi iki yere dagilirdi.
+        """
+        return self.game.input.held(Action.ECHO)
 
     def update_scene(self) -> None:
         """Alt sinifa ait kare islemleri (tetikleyiciler, anlatim)."""
@@ -294,14 +304,14 @@ class PlayScene(Scene):
         Burada ayrica sorulmasi gerekiyor - yoksa oyuncu duvara vurur ve
         hicbir sey olmaz.
         """
-        broken = False
+        broken: list[pygame.Rect] = []
         for rect in self.tilemap.breakable_rects():
             if not box.rect.colliderect(rect):
                 continue
             tx = rect.x // TILE_SIZE
             ty = rect.y // TILE_SIZE
             if self.tilemap.break_at(tx, ty):
-                broken = True
+                broken.append(rect)
                 self.particles.burst(rect.centerx, rect.centery, 8,
                                      path="dust", speed=(0.5, 1.8))
                 self.decals.splatter(rect.centerx, rect.bottom, amount=4,
@@ -309,10 +319,15 @@ class PlayScene(Scene):
         if broken:
             self.juice.explosion(player.body.center_x, player.body.center_y,
                                  ImpactWeight.NORMAL)
-            self.on_wall_broken()
+            self.on_wall_broken(broken)
 
-    def on_wall_broken(self) -> None:
-        """Gizli gecit acildi. Alt sinif ozel tepki verebilir."""
+    def on_wall_broken(self, rects: list[pygame.Rect]) -> None:
+        """Gizli gecit acildi. `rects` yikilan tile'lar.
+
+        Hangi duvarin yikildigi bolume soyleniyor: bir bolumde birden fazla
+        kirilabilir duvar olabiliyor ve hepsi ayni sey anlamina gelmiyor
+        (Bolum 2: biri yolu aciyor, digeri gizli odayi).
+        """
         self.show_toast(t("echo.wall_broken"), frames=120)
 
     def on_player_jump(self, player) -> None:

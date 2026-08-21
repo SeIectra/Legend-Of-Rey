@@ -1,18 +1,15 @@
 {
   "_aciklama": "Turkce - kanonik dil. Dizeler once burada yazilir, sonra cevrilir. Eksik ceviri bu tabloya duser.",
   "_kural": "Metinler GOSTERILECEK halleriyle durur. Baslikar buyuk harfli yazilir; calisma zamaninda buyuk harfe cevrilmez (bkz. i18n.py).",
-
   "title": {
     "full": "REY EFSANESİ: YANKILAR",
     "acronym": "REY"
   },
-
   "common": {
     "on": "Açık",
     "off": "Kapalı",
     "cancel": "İPTAL"
   },
-
   "menu": {
     "continue": "DEVAM ET",
     "continue_hint": "Kaldığın yerden devam et",
@@ -27,7 +24,6 @@
     "overwrite_warning": "Mevcut kaydın silinecek.",
     "overwrite_confirm": "YİNE DE BAŞLA"
   },
-
   "save": {
     "chapter": "BÖLÜM {chapter}",
     "playtime": "Süre",
@@ -37,7 +33,6 @@
     "echo": "Yankı",
     "secrets": "Gizli"
   },
-
   "pause": {
     "heading": "DURAKLATILDI",
     "resume": "DEVAM",
@@ -50,7 +45,6 @@
     "quit_confirm": "DÖN",
     "status": "Bölüm {chapter} · Yankı {dots} · {gold} altın"
   },
-
   "character": {
     "heading": "KİMİ OYNAYACAKSIN?",
     "recommend": "İlk kez oynuyorsan Rey önerilir.",
@@ -80,7 +74,6 @@
     "echo_ardo_cost": "Karşılığında: Yankı'sız geçilen bölüm daha çok ödül verir.",
     "echo_ardo_loss": "Ölmek Ardo'nun oynanışını değiştirmez."
   },
-
   "settings": {
     "heading": "AYARLAR",
     "percent": "%{value}",
@@ -88,7 +81,6 @@
     "tab_display": "GÖRÜNTÜ",
     "tab_audio": "SES",
     "tab_gameplay": "OYNANIŞ",
-
     "fullscreen": "Tam ekran",
     "fullscreen_windowed": "Pencere",
     "fullscreen_on": "Tam ekran",
@@ -111,13 +103,11 @@
     "ui_scale_large": "Büyük",
     "brightness": "Parlaklık",
     "brightness_note": "Oyun karanlık - ekranına göre ayarla.",
-
     "volume_master": "Ana ses",
     "volume_music": "Müzik",
     "volume_sfx": "Efektler",
     "volume_echo": "Yankı fısıltıları",
     "volume_echo_note": "Ayrı kanal - rahatsız ediciyse kısabilirsin.",
-
     "language": "Dil",
     "lang_tr": "Türkçe",
     "lang_en": "English",
@@ -134,7 +124,6 @@
     "damage_numbers": "Hasar sayıları",
     "rumble": "Kol titreşimi"
   },
-
   "ability": {
     "sword": "KILIÇ  ·  J ile saldır",
     "dodge": "KAÇINMA  ·  Shift ile atıl",
@@ -144,20 +133,16 @@
     "wall_jump": "DUVAR ZIPLAMASI",
     "unknown": "?"
   },
-
   "chapter01": {
     "hint_move": "{left} {right} ile yürü",
-    "hint_attack": "{key} ile saldır",
-    "end_placeholder": "[ BÖLÜM 1 SONU — Bölüm 2 Görev 4'te ]"
+    "hint_attack": "{key} ile saldır"
   },
-
   "speaker": {
     "rey": "REY",
     "ardo": "ARDO",
     "cemo": "CEMO",
     "echo": "…"
   },
-
   "line": {
     "ch01_cemo_gift": "Boynuna tak. Ben yapayım dedim.",
     "ch01_rey_thanks": "Elin sağolsun, ufaklık.",
@@ -165,9 +150,13 @@
     "ch01_echo_rift": "aşağıda... aşağıda...",
     "ch01_echo_alone": "onu geri alabilirsin. ben yolu biliyorum.",
     "ch01_echo_sword": "al onu. lazım olacak.",
-    "ch01_echo_wall": "burası ince. duyuyor musun?"
+    "ch01_echo_wall": "burası ince. duyuyor musun?",
+    "ch02_echo_wall": "Duvar ince. Dinle.",
+    "ch02_echo_secret": "Senden önce biri gelmiş. Dönmemiş.",
+    "ch02_echo_boss": "Bu seni bekliyordu.",
+    "ch02_echo_exit": "Aşağıda. Daha aşağıda.",
+    "ch02_rey_claw2": "Hâlâ direniyormuş."
   },
-
   "combat": {
     "counter": "KARŞI VURUŞ",
     "combo": "{count} COMBO",
@@ -177,13 +166,11 @@
     "died": "ÖLDÜN · R ile sıfırla",
     "controls": "Yön · Boşluk zıpla · J saldır · Shift kaçın · Esc menü"
   },
-
   "echo": {
     "tier_up": "Yankı berraklaşıyor",
     "wall_broken": "Gizli geçit açıldı",
     "tier_down": "Yankı zayıflıyor"
   },
-
   "keys": {
     "shift": "Shift",
     "enter": "Enter",
@@ -197,8 +184,31 @@
     "gamepad_button": "Düğme {number}",
     "unbound": "?"
   },
-
   "chapter": {
-    "village": "Köy"
+    "village": "Köy",
+    "first_descent": "İlk İniş"
+  },
+  "chapter_end": {
+    "heading": "BÖLÜM TAMAMLANDI",
+    "time": "Süre",
+    "combo": "Combo rekoru",
+    "gold": "Altın",
+    "secrets": "Gizli alan",
+    "continue": "Devam etmek için onayla"
+  },
+  "chapter02": {
+    "gold_found": "{count} altın",
+    "secret_found": "Gizli oda açıldı",
+    "boss_gold": "{count} altın",
+    "ardo_tracks": "Duvarda bir çatlak — iz sürüldü"
+  },
+  "boss": {
+    "bloated_one": "ŞİŞMİŞ OLAN",
+    "unknown": "İSİMSİZ"
+  },
+  "charm": {
+    "bloody_whet": "KANLI BİLEME  ·  5+ combo'da hasar %15 artar",
+    "bloody_whet_desc": "Zincir uzadıkça kılıç keskinleşir.",
+    "unknown": "Bilinmeyen tılsım"
   }
 }

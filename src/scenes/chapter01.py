@@ -236,10 +236,12 @@ class Chapter01Scene(PlayScene):
     def on_chapter_end(self) -> None:
         """Bolum 1 bitti - Rey zindana iner.
 
-        Bolum 2 henuz yazilmadi (GOREVLER Gorev 4). Su an dovus odasina
-        donuyor ve bunun gecici oldugu ekranda **acikca** yaziyor.
+        Gecis **kesme degil**: yarik yukarida kaldi, Rey asagi iniyor.
+        Bolum 2 dogrudan aciliyor; ara sahne icin dogru an bu degil,
+        inisin kendisi zaten Bolum 2'nin ilk odasi (docs/bolum-02.md).
         """
-        self.show_toast(t("chapter01.end_placeholder"), frames=200)
+        from src.scenes.chapter02 import Chapter02Scene
+        self.scenes.replace(Chapter02Scene, character=self.character)
 
     def on_echo_tutorial(self) -> None:
         """Yanki Gorusu burada ogreniliyor.

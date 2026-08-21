@@ -227,6 +227,11 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
     spawn = chapter01.LEVEL.first("player")
     rooms.append(("bolum 1 - koy", chapter01.LEVEL.terrain_rows,
                   (spawn.tile_x, spawn.tile_y + 1)))
+
+    from src.world.rooms import chapter02
+    spawn2 = chapter02.LEVEL.first("player")
+    rooms.append(("bolum 2 - ilk inis", chapter02.LEVEL.terrain_rows,
+                  (spawn2.tile_x, spawn2.tile_y + 1)))
     return rooms
 
 

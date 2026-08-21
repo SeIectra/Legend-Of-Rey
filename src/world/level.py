@@ -35,6 +35,8 @@ MARKERS: dict[str, str] = {
     "d": "dummy",
     "K": "pickup_necklace",
     "W": "pickup_sword",
+    "$": "chest",
+    "M": "miniboss",
     "X": "exit",
     "!": "trigger",      # bolume ozel tetikleyici
 }
@@ -73,6 +75,27 @@ class Level:
     def first(self, kind: str) -> Placement | None:
         found = self.of(kind)
         return found[0] if found else None
+
+
+def join_rooms(*blocks: list[str]) -> list[str]:
+    """Odalari **yan yana** birlestirir.
+
+    Sekiz odalik bir bolum tek ASCII blogu olarak yazilsa 300+ sutun olur ve
+    okunamaz. Her oda kendi kucuk blogu olarak yaziliyor, burada
+    birlestiriliyor: harita hem gorulebiliyor hem uzun olabiliyor.
+
+    Butun bloklarin **satir sayisi ayni** olmali; degilse hangi odanin
+    kaydigini bulmak zor olur, o yuzden burada acikca hata veriyoruz.
+    """
+    if not blocks:
+        return []
+    height = len(blocks[0])
+    for index, block in enumerate(blocks):
+        if len(block) != height:
+            raise ValueError(
+                f"oda {index} {len(block)} satir, digerleri {height} - "
+                "butun odalar ayni yukseklikte olmali")
+    return ["".join(block[row] for block in blocks) for row in range(height)]
 
 
 def parse(name: str, rows: list[str]) -> Level:
