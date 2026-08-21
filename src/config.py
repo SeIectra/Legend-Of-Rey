@@ -214,6 +214,61 @@ TELL_FRAMES_BLOATED: Final[int] = 30     # Sismek uzun surer, patlama okunur
 
 ENEMY_STAGGER_FRAMES: Final[int] = 14    # Poise kirilinca sendeleme suresi
 
+# --- Saldiri hakki (token) ---------------------------------------------------
+# Hakki olmayan dusman **kusatma yorungesinde** bekler. Kalabalik dovusun
+# okunabilirligi buna dayaniyor: iki saldirgan izlenebilir, alti izlenemez.
+TOKEN_HOLD_MIN_FRAMES: Final[int] = 24   # Hak alan en az bu kadar tutar
+TOKEN_HOLD_MAX_FRAMES: Final[int] = 150  # Sonra birakir - sira kimsede kilitlenmesin
+TOKEN_COOLDOWN_FRAMES: Final[int] = 30   # Birakan bu kadar tekrar isteyemez
+
+# --- Kusatma yorungesi -------------------------------------------------------
+ORBIT_RADIUS_MIN: Final[float] = 34.0    # Bu mesafeden yakina sokulmaz
+ORBIT_RADIUS_MAX: Final[float] = 62.0
+ORBIT_SLOT_WIDTH: Final[float] = 18.0    # Bekleyenler ust uste binmesin
+ENEMY_APPROACH_SPEED: Final[float] = 0.55
+ENEMY_ORBIT_SPEED: Final[float] = 0.30
+
+# --- Algi --------------------------------------------------------------------
+ENEMY_SIGHT_RANGE: Final[float] = 170.0
+ENEMY_LOSE_RANGE: Final[float] = 240.0   # Histerezis: goz acip kapama olmasin
+
+# --- Tip degerleri -----------------------------------------------------------
+# Suruklenen - combo hedef tahtasi. Yavas 3'luk ritim: bekle-bekle-vur.
+SHAMBLER_HEALTH: Final[int] = 40
+SHAMBLER_POISE: Final[int] = 2
+SHAMBLER_SPEED: Final[float] = 0.45
+SHAMBLER_DAMAGE: Final[int] = 8
+SHAMBLER_REACH: Final[int] = 14
+SHAMBLER_ACTIVE_FRAMES: Final[int] = 4
+SHAMBLER_RECOVER_FRAMES: Final[int] = 22
+SHAMBLER_BEAT_FRAMES: Final[int] = 34    # Ritmin bir vurusu
+
+# Tirmanan - dikey farkindalik. Ani tek vurus, uzun bekleme.
+CLIMBER_HEALTH: Final[int] = 28
+CLIMBER_POISE: Final[int] = 1            # Kirilgan - tek vurusta sendeler
+CLIMBER_SPEED: Final[float] = 0.85
+CLIMBER_DAMAGE: Final[int] = 10
+CLIMBER_REACH: Final[int] = 12
+CLIMBER_ACTIVE_FRAMES: Final[int] = 5
+CLIMBER_RECOVER_FRAMES: Final[int] = 30  # Uzun bekleme - ritmin yarisi bu
+CLIMBER_DROP_SPEED: Final[float] = 2.6
+CLIMBER_TRIGGER_X: Final[float] = 20.0   # Oyuncu bu kadar altina girince birakir
+
+# Sismek - konumlandirma. Yaklas-sis-patla, sabit sure.
+BLOATED_HEALTH: Final[int] = 34
+BLOATED_POISE: Final[int] = 3
+BLOATED_SPEED: Final[float] = 0.38
+BLOATED_FUSE_FRAMES: Final[int] = 30     # TELL_FRAMES_BLOATED ile ayni ritim
+BLOATED_TRIGGER_RANGE: Final[float] = 26.0
+BLOATED_BLAST_RADIUS: Final[float] = 40.0
+BLOATED_BLAST_DAMAGE: Final[int] = 18
+BLOATED_SELF_DESTRUCT: Final[bool] = True
+
+# --- Kalicilik ---------------------------------------------------------------
+# Kan lekesi ve moloz bolum boyunca zeminde kalir (CLAUDE.md 7).
+# Ust sinir var: 400 leke birikirse cizim bedeli hissedilir.
+MAX_GROUND_DECALS: Final[int] = 220
+
 
 # =============================================================================
 # KARAKTER FARKLARI   (docs/dovus-sistemi.md 8 - BAGLAYICI)

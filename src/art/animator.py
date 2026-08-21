@@ -17,7 +17,7 @@ import pygame
 
 from src.art import palette
 from src.art.animation import ANIMATIONS, CHARACTERS, build_sprite_set
-from src.art.forge import flip_h, silhouette, squash_surface
+from src.art.forge import flip_h, silhouette, squash_surface, tint
 from src.art.spritegen import CharSpec
 
 # Bosta/kosu gibi donguselerde her sanat karesi kac oyun karesi durur.
@@ -32,6 +32,7 @@ HOLD_OVERRIDES: dict[str, int] = {
 _sprite_cache: dict[str, dict[str, list[pygame.Surface]]] = {}
 _flipped_cache: dict[int, pygame.Surface] = {}
 _silhouette_cache: dict[int, pygame.Surface] = {}
+_tint_cache: dict[tuple, pygame.Surface] = {}
 
 
 def sprite_set(name: str) -> dict[str, list[pygame.Surface]]:
@@ -49,6 +50,7 @@ def clear_cache() -> None:
     _sprite_cache.clear()
     _flipped_cache.clear()
     _silhouette_cache.clear()
+    _tint_cache.clear()
 
 
 def _flipped(surface: pygame.Surface) -> pygame.Surface:
@@ -69,6 +71,25 @@ def _silhouetted(surface: pygame.Surface,
         if len(_silhouette_cache) > 512:
             _silhouette_cache.clear()
         _silhouette_cache[key] = cached
+    return cached
+
+
+def _tinted(surface: pygame.Surface, colour: palette.RGB,
+            strength: float) -> pygame.Surface:
+    """Renge dogru **karistirir** - siluet korunur.
+
+    `_silhouetted` sprite'i tek renge duzlestirir; iki karelik vurus flasi
+    icin dogru, kalici bir durum icin degil. Az canli dusman o yolla
+    ciziliyordu ve omrunun geri kalaninda sekilsiz bir bloga donuyordu -
+    "durumu renkle anlat" kurali siluet okunurlugunu yemeyecek.
+    """
+    key = (id(surface), colour, round(strength, 2))
+    cached = _tint_cache.get(key)
+    if cached is None:
+        cached = tint(surface, colour, strength)
+        if len(_tint_cache) > 512:
+            _tint_cache.clear()
+        _tint_cache[key] = cached
     return cached
 
 
@@ -137,6 +158,7 @@ class Animator:
                squash: tuple[float, float] = (1.0, 1.0),
                silhouette_mode: bool = False,
                tint_colour: palette.RGB | None = None,
+               tint_strength: float = 1.0,
                alpha: int = 255) -> pygame.Surface | None:
         """Cizime hazir yuzey: yon, flas, deformasyon ve siluet uygulanmis."""
         image = self.image
@@ -150,7 +172,12 @@ class Animator:
         elif flash:
             image = _silhouetted(image, palette.role("hit_flash"))
         elif tint_colour is not None:
-            image = _silhouetted(image, tint_colour)
+            # strength 1.0 = tam duzlestirme (eski davranis), altinda
+            # karistirma: renk okunur ama siluet kaybolmaz.
+            if tint_strength >= 1.0:
+                image = _silhouetted(image, tint_colour)
+            else:
+                image = _tinted(image, tint_colour, tint_strength)
 
         image = squash_surface(image, squash)
 

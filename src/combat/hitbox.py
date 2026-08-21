@@ -112,6 +112,13 @@ class HitboxManager:
 
     def _resolve_against(self, box: Hitbox, entities: list) -> None:
         for entity in entities:
+            # Sahibi kendi hitbox'indan hasar almaz. Yakin dovuste kutu zaten
+            # onde acildigi icin bu hic sorun olmuyordu; **radyal patlamada**
+            # oluyor: kutu patlayanin uzerinde duruyor, ilk hedef kendisi
+            # cikiyor ve `pierce=False` ise kutu orada tukeniyor - patlama
+            # kimseye ulasmiyor.
+            if entity is box.owner:
+                continue
             if entity in box.already_hit or not _is_hittable(entity):
                 continue
             if not box.rect.colliderect(entity.hurtbox):

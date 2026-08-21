@@ -15,6 +15,7 @@ import pygame
 
 from src.art import palette
 from src.art.particles import ParticleField
+from src.combat.attack_token import AttackTokenManager
 from src.combat.hitbox import HitboxManager, Team
 from src.config import (
     COMBO_THRESHOLD_HIGH, COMBO_THRESHOLD_MID, INTERNAL_HEIGHT, INTERNAL_WIDTH,
@@ -25,19 +26,23 @@ from src.core.input import Action
 from src.core.juice import ImpactEvent, ImpactWeight, Juice
 from src.core.scene import Scene
 from src.entities.dummy import TrainingDummy
+from src.entities.enemies.bloated import Bloated
+from src.entities.enemies.climber import Climber
+from src.entities.enemies.shambler import Shambler
 from src.entities.character_stats import ARDO, REY
 from src.entities.player import Player
 from src.systems.save import read_save
 from src.ui import text
 from src.ui.i18n import t
 from src.ui.hud import HUD
+from src.world.decals import DecalField
 from src.world.tilemap import TileMap
 
 # Test odasi: duz zemin + birkac platform. Icerik degil, tezgah.
 ROOM_ROWS: list[str] = [
     "##############################################",
     "##..........................................##",
-    "##..........................................##",
+    "##........##########........................##",   # Tirmananin tutunacagi
     "##..........................................##",
     "##........====................====..........##",
     "##..........................................##",
@@ -53,7 +58,19 @@ ROOM_ROWS: list[str] = [
 ]
 
 SPAWN_TILE = (6, 12)
-DUMMY_TILES = ((16, 12), (26, 12), (36, 12))
+
+# Antrenman kuklalari saginda, gercek dusmanlar solunda: ikisi de ayni odada
+# denenebilsin. Kuklalar karsilik vermez, dusmanlar verir.
+DUMMY_TILES = ((40, 12),)
+
+# Alti dusman - "kalabalik okunabilir mi?" sinavi bu (GOREVLER Gorev 2).
+# Hepsi gorus menzili icinde (ENEMY_SIGHT_RANGE = 170px ~ 10 tile). Once
+# odaya yaymistim ve alti dusmanin ancak ikisi oyuncuyu goruyordu - yani
+# "kalabalik okunabilir mi?" sorusu hic sorulmamis oluyordu. Tezgahin isi
+# o soruyu sormak.
+SHAMBLER_TILES = ((12, 12), (15, 12), (18, 12))
+CLIMBER_TILES = ((11, 3), (14, 3), (17, 3))      # Tavan seridinin altinda
+BLOATED_TILES = ((13, 12), (16, 12))
 HUD_MARGIN = 6
 
 
@@ -69,6 +86,11 @@ class CombatRoomScene(Scene):
         shake = float(self.game.settings.get("screen_shake", 1.0))
         self.juice.configure(shake_enabled=shake > 0.0, shake_scale=shake)
         self.hitboxes = HitboxManager(on_hit=self.on_hit)
+        # Saldiri hakki: ayni anda en fazla 2 dusman saldirabilir.
+        # Kalabalik dovusun okunabilirligi buna dayaniyor.
+        self.tokens = AttackTokenManager()
+        # Kalici izler - bolum boyunca zeminde kalir.
+        self.decals = DecalField(*self.tilemap.bounds.size)
 
         self.save_data, _ = read_save()
         self.hud = HUD(self.game)
@@ -78,10 +100,15 @@ class CombatRoomScene(Scene):
         spawn_y = (SPAWN_TILE[1] + 1) * TILE_SIZE
         self.player = Player(self, spawn_x, spawn_y, stats)
 
-        self.enemies: list[TrainingDummy] = [
-            TrainingDummy(self, tx * TILE_SIZE + TILE_SIZE // 2,
-                          (ty + 1) * TILE_SIZE)
-            for tx, ty in DUMMY_TILES
+        def place(cls, tiles):
+            return [cls(self, tx * TILE_SIZE + TILE_SIZE // 2,
+                        (ty + 1) * TILE_SIZE) for tx, ty in tiles]
+
+        self.enemies: list = [
+            *place(Shambler, SHAMBLER_TILES),
+            *place(Climber, CLIMBER_TILES),
+            *place(Bloated, BLOATED_TILES),
+            *place(TrainingDummy, DUMMY_TILES),
         ]
 
         self.camera.snap_to(self.player.body.center_x, self.player.body.center_y)
@@ -101,8 +128,11 @@ class CombatRoomScene(Scene):
 
     def update(self) -> None:
         self.player.update()
+        self.tokens.update()
         for enemy in self.enemies:
             enemy.update()
+        # Sahneden cikanlari at - token yoneticisi de onlari birakir.
+        self.enemies = [e for e in self.enemies if not e.remove]
 
         self.hitboxes.update({
             Team.ENEMY: self.enemies,
@@ -129,6 +159,7 @@ class CombatRoomScene(Scene):
         offset = self.camera.offset
 
         self.tilemap.draw(surface, offset)
+        self.decals.draw(surface, offset)
         for enemy in self.enemies:
             enemy.draw(surface, offset)
         self.player.draw(surface, offset)
@@ -174,6 +205,26 @@ class CombatRoomScene(Scene):
                              ImpactWeight.FINISHER)
         self.particles.burst(enemy.body.center_x, enemy.body.center_y, 16,
                              path="blood", speed=(1.0, 3.0))
+        # Parcaciklar soner, leke kalir: koridora donunce dovusun izi durur.
+        self.decals.splatter(enemy.body.center_x, enemy.body.feet[1], amount=10)
+
+    def on_enemy_tell(self, enemy) -> None:
+        """Tell basladi. Ses Gorev 10'da; simdilik gorsel kanal yeter."""
+        self.game.play_ui_sound("tell")
+
+    def on_climber_drop(self, enemy) -> None:
+        """Tirmanan tavandan koptu - toz doksun, telegraf tamamlansin."""
+        self.particles.burst(enemy.body.center_x, enemy.body.bottom, 5,
+                             direction=(0.0, 1.0), path="dust",
+                             speed=(0.2, 0.7), life=(10, 20), gravity=0.03)
+
+    def on_bloated_explode(self, enemy) -> None:
+        """Patlama radyal - yonlu degil (docs/derinlestirme.md 1.2)."""
+        self.juice.explosion(enemy.body.center_x, enemy.body.center_y,
+                             ImpactWeight.KILL)
+        self.particles.burst(enemy.body.center_x, enemy.body.center_y, 22,
+                             path="spark", speed=(1.2, 3.6))
+        self.decals.scorch(enemy.body.center_x, enemy.body.feet[1])
 
     def on_combo_threshold(self, player, threshold: int) -> None:
         if threshold >= COMBO_THRESHOLD_HIGH:
