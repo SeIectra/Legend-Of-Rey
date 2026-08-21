@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""Legend of Rey (LORE) — Ardeko Studios
+
+Calistirmak icin:
+    python main.py
+
+Hata ayiklama tuslari:
+    F3   hata ayiklama katmani (FPS, sahne yigini, sahneye ozel bilgi)
+    F4   siluet modu - her sey duz kutuya doner, dovus hissi boyle test edilir
+    F11  tam ekran
+    F12  ekran goruntusu
+"""
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+# Depo kokunu import yoluna ekle: oyun her dizinden calistirilabilsin.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+
+SCENES = {
+    "menu": ("src.ui.menu", "MainMenuScene"),
+    "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
+    "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
+}
+DEFAULT_SCENE = "menu"
+
+
+def main() -> int:
+    import importlib
+
+    name = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_SCENE
+    if name not in SCENES:
+        print(f"bilinmeyen sahne: {name}")
+        print(f"secenekler: {', '.join(SCENES)}")
+        return 1
+
+    from src.core.game import Game
+
+    module_name, class_name = SCENES[name]
+    scene_cls = getattr(importlib.import_module(module_name), class_name)
+
+    game = Game()
+    game.run(scene_cls)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

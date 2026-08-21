@@ -1,0 +1,295 @@
+"""Ana dongu: sabit 60 kare, 480x270 ic yuzey, tam sayi olcekleme.
+
+**Sabit adim, kare birimi.** Fizik her zaman 1/60'lik esit adimlarla ilerler.
+Makine yavassa birden fazla adim yakalanir, hizliysa beklenir. `dt` tabanli
+fizik yapilmaz - degisken adim combo penceresini bozar (CLAUDE.md 4).
+
+**Olcekleme.** Her sey 480x270 yuzeye cizilir, sonra `pygame.transform.scale`
+ile tam sayi katinda buyutulur. `smoothscale` YASAK - piksel art bulaniklasir.
+
+**Hitstop burada yasar.** Vurus aninda birkac kare fizik ve animasyon durur,
+cizim surer. `game.hitstop(frames)` cagirmak yeterli; tum sahneler yararlanir.
+Bu, en yuksek getirili 15 satirlik kod (docs/dovus-sistemi.md 5).
+"""
+from __future__ import annotations
+
+import time
+from pathlib import Path
+
+import pygame
+
+from src.art import palette
+from src.config import (
+    FPS, INTERNAL_HEIGHT, INTERNAL_WIDTH, MAX_CATCHUP_FRAMES,
+)
+from src.core.input import Action, InputManager
+from src.core.scene import SceneManager
+from src.systems.settings import Settings
+
+WINDOW_TITLE = "Legend of Rey"
+MIN_SCALE = 1
+MAX_SCALE = 8
+SCALE_SCREEN_MARGIN = 80        # Pencere modunda ekran kenarina birakilan pay
+
+
+class Game:
+    def __init__(self, settings: Settings | None = None) -> None:
+        pygame.init()
+        self.settings = settings or Settings()
+        self.settings.on_change(self._on_setting_changed)
+
+        self.input = InputManager(self.settings.get("bindings"))
+        self.scenes = SceneManager(self)
+
+        self.running = False
+        self.debug_overlay = False
+        # F4 uc kip arasinda gezer:
+        #   sprite     - normal oyun
+        #   silhouette - siluet testi: sprite tek renge iner, okunurluk sinavi
+        #   box        - "kutularla oyna": sanat tamamen kalkar, dovusun kendisi
+        #                eglenceli mi diye bakilir (GOREVLER Gorev 1)
+        self.render_modes = ("sprite", "silhouette", "box")
+        self.render_mode = "sprite"
+        self.last_ui_sound = ""      # Gorev 10'da ses sistemine baglanacak
+
+        # --- Zaman ----------------------------------------------------------
+        self.clock = pygame.time.Clock()
+        self.frame = 0                   # Oyun karesi (donmalarda ilerlemez)
+        self.real_frame = 0              # Gercek kare (asla durmaz)
+        self.fps = 0.0
+        self._accumulator = 0.0
+        self._last_time = time.perf_counter()
+        self._hitstop_frames = 0
+
+        # --- Ekran ----------------------------------------------------------
+        # Pencere once acilir: convert()/convert_alpha() bir ekran bicimi
+        # olmadan calismaz ve pygame hata firlatir.
+        self.screen: pygame.Surface | None = None
+        self.scale = 1
+        self.viewport = pygame.Rect(0, 0, INTERNAL_WIDTH, INTERNAL_HEIGHT)
+        self._create_window()
+        self.canvas = pygame.Surface(
+            (INTERNAL_WIDTH, INTERNAL_HEIGHT)).convert_alpha()
+
+    # --- Pencere ------------------------------------------------------------
+    def _best_scale(self) -> int:
+        try:
+            info = pygame.display.Info()
+            available_w = info.current_w
+            available_h = info.current_h - SCALE_SCREEN_MARGIN
+        except pygame.error:
+            return 3
+        scale = min(available_w // INTERNAL_WIDTH, available_h // INTERNAL_HEIGHT)
+        return max(MIN_SCALE, min(scale, MAX_SCALE))
+
+    def _create_window(self) -> None:
+        fullscreen = bool(self.settings.get("fullscreen", False))
+        flags = pygame.SCALED | pygame.RESIZABLE
+        if fullscreen:
+            flags |= pygame.FULLSCREEN
+
+        configured = int(self.settings.get("scale") or 0)
+        scale = configured or self._best_scale()
+        size = (INTERNAL_WIDTH * scale, INTERNAL_HEIGHT * scale)
+
+        vsync = 1 if self.settings.get("vsync", True) else 0
+        try:
+            self.screen = pygame.display.set_mode(size, flags, vsync=vsync)
+        except pygame.error:
+            # vsync bazi surucularde reddedilir; onsuz tekrar dene.
+            self.screen = pygame.display.set_mode(size, flags)
+
+        pygame.display.set_caption(WINDOW_TITLE)
+        self._recompute_viewport()
+
+    def _recompute_viewport(self) -> None:
+        """Canvas'i pencereye ortalayan, tam sayi katli dikdortgen."""
+        if self.screen is None:
+            return
+        width, height = self.screen.get_size()
+        scale = max(MIN_SCALE,
+                    min(width // INTERNAL_WIDTH, height // INTERNAL_HEIGHT))
+        self.scale = scale
+        view_w, view_h = INTERNAL_WIDTH * scale, INTERNAL_HEIGHT * scale
+        self.viewport = pygame.Rect(
+            (width - view_w) // 2, (height - view_h) // 2, view_w, view_h)
+
+    def toggle_fullscreen(self) -> None:
+        # `Settings.set` degisiklik olayini tetikler, o da pencereyi kurar.
+        self.settings.set("fullscreen",
+                          not self.settings.get("fullscreen", False))
+
+    def _on_setting_changed(self, key: str, value: object) -> None:
+        """Ayar degisince aninda uygula - 'Kaydet' butonu yok."""
+        if key in ("fullscreen", "scale", "vsync"):
+            self._create_window()
+        elif key == "bindings" and isinstance(value, dict):
+            self.input.apply_bindings(value)
+        # Ses ve sarsinti ayarlarini sahneler kendi okur; burada zorlamiyoruz.
+
+    def screenshot(self, directory: Path | None = None) -> Path:
+        target = directory or Path.cwd() / "build" / "screenshots"
+        target.mkdir(parents=True, exist_ok=True)
+        path = target / f"lore_{int(time.time())}.png"
+        pygame.image.save(self.canvas, str(path))
+        print(f"[game] ekran goruntusu: {path}")
+        return path
+
+    # --- Ses (Gorev 10'da baglanacak) ---------------------------------------
+    def play_ui_sound(self, name: str) -> None:
+        """Arayuz sesi. Ses sistemi Gorev 10'da gelecek.
+
+        Dikis simdiden burada: menu "tik" ve "tak" seslerini cagiriyor, o gun
+        bu govdeyi doldurmak yetecek. Sirasi gelmemis sistemi simdi yazmiyoruz.
+        """
+        self.last_ui_sound = name
+
+    # --- Zaman kontrolu -----------------------------------------------------
+    def hitstop(self, frames: int) -> None:
+        """Vurus aninda oyunu dondurur. En uzun istek kazanir, birikmez."""
+        self._hitstop_frames = max(self._hitstop_frames, frames)
+
+    @property
+    def frozen(self) -> bool:
+        return self._hitstop_frames > 0
+
+    # --- Ana dongu ----------------------------------------------------------
+    def run(self, first_scene: type) -> None:
+        self.scenes.set_root(first_scene, transition=False)
+        self.running = True
+        self._last_time = time.perf_counter()
+        try:
+            while self.running:
+                self.tick()
+        except KeyboardInterrupt:
+            pass
+        finally:
+            self.shutdown()
+
+    def tick(self) -> None:
+        """Tek bir gercek kare: girdi, yakalanan tickler, cizim."""
+        now = time.perf_counter()
+        elapsed = min(now - self._last_time, MAX_CATCHUP_FRAMES / FPS)
+        self._last_time = now
+        self.real_frame += 1
+        self.fps = self.clock.get_fps()
+
+        self.input.begin_frame()
+        self._pump_events()
+
+        self._accumulator += elapsed * FPS
+        steps = 0
+        while self._accumulator >= 1.0 and steps < MAX_CATCHUP_FRAMES:
+            self._step()
+            self._accumulator -= 1.0
+            steps += 1
+        if steps == 0:
+            # Donma sirasinda bile girdi okunmali; yoksa tuslar yutulur.
+            self.input.end_frame()
+
+        self._render()
+        self.clock.tick(FPS)
+
+    def _step(self) -> None:
+        """Bir oyun karesi. Hitstop varsa fizik atlanir, cizim surer."""
+        self.input.end_frame()
+        if self._hitstop_frames > 0:
+            self._hitstop_frames -= 1
+            # Sahne guncellemesi atlanir ama sahne degisimi kuyrugu islenmeli,
+            # yoksa donma sirasinda istenen gecis kaybolur.
+            self.scenes.transition.update()
+            return
+        self.scenes.update()
+        self.frame += 1
+
+    def _pump_events(self) -> None:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.quit()
+                return
+            if event.type == pygame.VIDEORESIZE:
+                self._recompute_viewport()
+                continue
+            self.input.handle_event(event)
+
+            if event.type == pygame.KEYDOWN and self._handle_debug_key():
+                continue
+            self.scenes.handle_event(event)
+
+    def _handle_debug_key(self) -> bool:
+        """Hata ayiklama tuslarini yakalar. Yakalarsa True doner."""
+        if self.input.pressed(Action.FULLSCREEN):
+            self.toggle_fullscreen()
+            return True
+        if self.input.pressed(Action.SCREENSHOT):
+            self.screenshot()
+            return True
+        if self.input.pressed(Action.DEBUG_OVERLAY):
+            self.debug_overlay = not self.debug_overlay
+            return True
+        if self.input.pressed(Action.DEBUG_SILHOUETTE):
+            index = self.render_modes.index(self.render_mode)
+            self.render_mode = self.render_modes[(index + 1) % len(self.render_modes)]
+            print(f"[game] cizim kipi: {self.render_mode}")
+            return True
+        return False
+
+    @property
+    def silhouette_mode(self) -> bool:
+        return self.render_mode == "silhouette"
+
+    @property
+    def box_mode(self) -> bool:
+        return self.render_mode == "box"
+
+    def _render(self) -> None:
+        if self.screen is None:
+            return
+        self.canvas.fill(palette.color("void"))
+        self.scenes.draw(self.canvas)
+        if self.debug_overlay:
+            self._draw_debug()
+
+        self.screen.fill((0, 0, 0))
+        if self.viewport.size == self.canvas.get_size():
+            self.screen.blit(self.canvas, self.viewport.topleft)
+        else:
+            # Tam sayi olceklemede `scale` en hizli ve en keskin yol.
+            # smoothscale burada YASAK - piksel art bulaniklasir.
+            scaled = pygame.transform.scale(self.canvas, self.viewport.size)
+            self.screen.blit(scaled, self.viewport.topleft)
+        pygame.display.flip()
+
+    def _draw_debug(self) -> None:
+        from src.ui import text
+        scene = self.scenes.current
+        lines = [
+            f"FPS {self.fps:5.1f}   kare {self.frame}",
+            f"sahne {type(scene).__name__ if scene else '-'} "
+            f"x{len(self.scenes.stack)}",
+        ]
+        if self.render_mode != "sprite":
+            lines.append(f"cizim kipi: {self.render_mode.upper()} (F4)")
+        extra = getattr(scene, "debug_lines", None)
+        if callable(extra):
+            lines.extend(extra())
+
+        # Koyu zemin: hata ayiklama metni HUD'un ya da sahnenin uzerine binince
+        # ikisi de okunmaz hale geliyordu.
+        width = max((text.text_width(line) for line in lines), default=0) + 8
+        height = len(lines) * 13 + 6
+        backdrop = pygame.Surface((width, height), pygame.SRCALPHA)
+        backdrop.fill((*palette.color("void"), 205))
+        self.canvas.blit(backdrop, (2, 2))
+
+        for index, line in enumerate(lines):
+            text.draw(self.canvas, line, 6, 6 + index * 13,
+                      color=palette.color("echo_bright"))
+
+    # --- Kapanis ------------------------------------------------------------
+    def quit(self) -> None:
+        self.running = False
+
+    def shutdown(self) -> None:
+        self.scenes.shutdown()
+        pygame.quit()
