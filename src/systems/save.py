@@ -59,7 +59,9 @@ class SaveData:
 
     # Ilerleme
     chapter: int = 1
-    chapter_name: str = "Köy"
+    # Bolum adi dil anahtari tutar - kayit dosyasi dilden bagimsiz olmali.
+    # Turkce kaydi acan Ingilizce oyuncu "Village" gormeli, "Koy" degil.
+    chapter_name: str = "chapter.village"
     checkpoint: str = ""
     playtime_frames: int = 0
 
@@ -94,10 +96,13 @@ class SaveData:
     # --- Turetilmis ---------------------------------------------------------
     @property
     def playtime_text(self) -> str:
-        """Menu kartinda gosterilecek sure: '3sa 12dk'."""
+        """Menu kartinda gosterilecek sure: '3sa 12dk' / '3h 12m'."""
+        from src.ui.i18n import t          # gec import: dongusel bagimlilik yok
         total_minutes = self.playtime_frames // (60 * 60)
         hours, minutes = divmod(total_minutes, 60)
-        return f"{hours}sa {minutes}dk" if hours else f"{minutes}dk"
+        if hours:
+            return t("save.playtime_hm", hours=hours, minutes=minutes)
+        return t("save.playtime_m", minutes=minutes)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

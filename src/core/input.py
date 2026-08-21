@@ -79,12 +79,15 @@ DEFAULT_GAMEPAD: dict[Action, tuple[int, ...]] = {
 
 # Oyuncuya gosterilecek tus adlari. `pygame.key.name()` "left shift" gibi
 # seyler dondurur; arayuzde "Shift" daha okunur.
+# Hepsi dil anahtari tutar - istisnasiz. Shift/Enter/Esc/Tab su an her dilde
+# ayni yazilsa da tabloda duruyor: birini metin, digerini anahtar yapmak
+# cozumleyicide "bu anahtar mi, metin mi?" tahmini gerektirirdi.
 KEY_LABELS: dict[int, str] = {
-    pygame.K_LSHIFT: "Shift", pygame.K_RSHIFT: "Shift",
-    pygame.K_SPACE: "Boşluk", pygame.K_RETURN: "Enter",
-    pygame.K_ESCAPE: "Esc", pygame.K_TAB: "Tab",
-    pygame.K_LEFT: "Sol", pygame.K_RIGHT: "Sağ",
-    pygame.K_UP: "Yukarı", pygame.K_DOWN: "Aşağı",
+    pygame.K_LSHIFT: "keys.shift", pygame.K_RSHIFT: "keys.shift",
+    pygame.K_SPACE: "keys.space", pygame.K_RETURN: "keys.enter",
+    pygame.K_ESCAPE: "keys.esc", pygame.K_TAB: "keys.tab",
+    pygame.K_LEFT: "keys.left", pygame.K_RIGHT: "keys.right",
+    pygame.K_UP: "keys.up", pygame.K_DOWN: "keys.down",
 }
 
 GAMEPAD_LABELS: dict[int, str] = {
@@ -144,20 +147,23 @@ class InputManager:
         Bir yetenegi acip tusunu soylememek oyuncuyu menuye bakmaya zorlar;
         ad ile tus hep birlikte gider.
         """
+        from src.ui.i18n import t      # gec import: cekirdek katmani arayuze
+                                       # baglanmasin, yalnizca burada gerekli
         if self.last_device == "gamepad":
             buttons = self.gamepad.get(action)
             if buttons:
-                return GAMEPAD_LABELS.get(buttons[0], f"Düğme {buttons[0]}")
+                label = GAMEPAD_LABELS.get(buttons[0])
+                return label or t("keys.gamepad_button", number=buttons[0])
         keys = self.keyboard.get(action)
         if not keys:
-            return "?"
+            return t("keys.unbound")
         key = keys[0]
         if key in KEY_LABELS:
-            return KEY_LABELS[key]
+            return t(KEY_LABELS[key])
         try:
             return pygame.key.name(key).upper()
         except pygame.error:
-            return "?"
+            return t("keys.unbound")
 
     # --- Kare dongusu -------------------------------------------------------
     def begin_frame(self) -> None:

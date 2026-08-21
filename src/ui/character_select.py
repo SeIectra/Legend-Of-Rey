@@ -22,6 +22,7 @@ from src.core.input import Action
 from src.core.scene import Scene
 from src.systems.save import SaveData, write_save
 from src.ui import text
+from src.ui.i18n import t
 from src.ui.font_data import GLYPH_HEIGHT
 from src.ui.widgets import panel
 
@@ -33,21 +34,44 @@ RIGHT_X = INTERNAL_WIDTH // 2 + 92
 
 
 class CharacterInfo:
-    def __init__(self, key: str, name: str, tagline: str, traits: tuple[str, ...],
-                 echo: str, health: int) -> None:
+    """Karakter kartinin verisi.
+
+    `name` cevrilmiyor - ozel isim. Tanitim yazisi ve ozellikler dil anahtari
+    tutar. Yanki bir **boolean**: eskiden "VAR"/"YOK" dizesiydi ve rengi de o
+    dizeyle secilirdi; ceviri gelince o karsilastirma sessizce yanlis renk
+    verirdi. Gorunen metin artik durumdan turetiliyor, tersi degil.
+    """
+
+    def __init__(self, key: str, name: str, tagline_key: str,
+                 trait_keys: tuple[str, ...], has_echo: bool,
+                 health: int) -> None:
         self.key = key
         self.name = name
-        self.tagline = tagline
-        self.traits = traits
-        self.echo = echo
+        self.tagline_key = tagline_key
+        self.trait_keys = trait_keys
+        self.has_echo = has_echo
         self.health = health
+
+    @property
+    def tagline(self) -> str:
+        return t(self.tagline_key)
+
+    @property
+    def traits(self) -> tuple[str, ...]:
+        return tuple(t(k) for k in self.trait_keys)
+
+    @property
+    def echo_text(self) -> str:
+        return t("common.yes" if self.has_echo else "common.no")
 
 
 CHARACTERS = (
-    CharacterInfo("rey", "REY", "\"Kafasının içinde sesler var.\"",
-                  ("Hızlı", "Kırılgan"), "VAR", 80),
-    CharacterInfo("ardo", "ARDO", "\"Sessizlikte savaşır.\"",
-                  ("Ağır", "Dayanıklı"), "YOK", 120),
+    CharacterInfo("rey", "REY", "character.rey_quote",
+                  ("character.rey_trait_1", "character.rey_trait_2"),
+                  True, 80),
+    CharacterInfo("ardo", "ARDO", "character.ardo_quote",
+                  ("character.ardo_trait_1", "character.ardo_trait_2"),
+                  False, 120),
 )
 
 
@@ -113,7 +137,7 @@ class CharacterSelectScene(Scene):
     # --- Cizim --------------------------------------------------------------
     def draw(self, surface: pygame.Surface) -> None:
         surface.fill(palette.color("abyss_dark"))
-        text.draw(surface, text.tr_upper("Kimi oynayacaksın?"),
+        text.draw(surface, t("character.heading"),
                   INTERNAL_WIDTH // 2, 34,
                   color=palette.role("ui_text"), align="center", tracking=2)
 
@@ -168,17 +192,18 @@ class CharacterSelectScene(Scene):
                   color=palette.role("ui_text_dim"), align="center")
         y += GLYPH_HEIGHT + 2
 
-        echo_colour = (palette.color("echo_bright") if info.echo == "VAR"
+        echo_colour = (palette.color("echo_bright") if info.has_echo
                        else palette.color("stone_dark"))
-        text.draw(surface, f"Yankı: {info.echo}", INTERNAL_WIDTH // 2, y,
+        text.draw(surface, t("character.echo_label", value=info.echo_text),
+                  INTERNAL_WIDTH // 2, y,
                   color=echo_colour, align="center")
 
     def _draw_footer(self, surface: pygame.Surface) -> None:
         if self.index == 0:
-            text.draw(surface, "İlk kez oynuyorsan Rey önerilir.",
+            text.draw(surface, t("character.recommend"),
                       INTERNAL_WIDTH // 2, INTERNAL_HEIGHT - 34,
                       color=palette.color("stone_dark"), align="center")
-        text.draw(surface, "[◂ ▸] seç    [Enter] onayla    [Esc] geri",
+        text.draw(surface, t("character.controls"),
                   INTERNAL_WIDTH // 2, INTERNAL_HEIGHT - 18,
                   color=palette.role("ui_text_dim"), align="center")
 

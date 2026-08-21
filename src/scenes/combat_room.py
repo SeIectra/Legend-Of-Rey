@@ -29,6 +29,7 @@ from src.entities.character_stats import ARDO, REY
 from src.entities.player import Player
 from src.systems.save import read_save
 from src.ui import text
+from src.ui.i18n import t
 from src.ui.hud import HUD
 from src.world.tilemap import TileMap
 
@@ -163,7 +164,7 @@ class CombatRoomScene(Scene):
             self.total_hits += 1
             self.player.register_hit()
             if box.is_counter:
-                self.show_toast("KARŞI VURUŞ")
+                self.show_toast(t("combat.counter"))
             if result.killed:
                 # Kill cancel: recovery aninda kesilir, akis surer.
                 self.player.notify_kill()
@@ -176,11 +177,11 @@ class CombatRoomScene(Scene):
 
     def on_combo_threshold(self, player, threshold: int) -> None:
         if threshold >= COMBO_THRESHOLD_HIGH:
-            self.show_toast(f"{threshold} COMBO · Yankı iyileşir")
+            self.show_toast(t("combat.combo_echo", count=threshold))
         elif threshold >= COMBO_THRESHOLD_MID:
-            self.show_toast(f"{threshold} COMBO · can yenilenir")
+            self.show_toast(t("combat.combo_health", count=threshold))
         else:
-            self.show_toast(f"{threshold} COMBO")
+            self.show_toast(t("combat.combo", count=threshold))
 
     def on_combo_reset(self) -> None: ...
 
@@ -210,10 +211,10 @@ class CombatRoomScene(Scene):
                                  speed=(0.1, 0.4), life=(8, 14), gravity=0.0)
 
     def on_player_hurt(self, player, result) -> None:
-        self.show_toast("HASAR")
+        self.show_toast(t("combat.hurt"))
 
     def on_player_died(self, player) -> None:
-        self.show_toast("ÖLDÜN · R ile sıfırla")
+        self.show_toast(t("combat.died"))
 
     def _emit_particles(self, event: ImpactEvent) -> None:
         self.particles.burst(event.x, event.y, event.particle_count,
@@ -245,8 +246,7 @@ class CombatRoomScene(Scene):
                       color=palette.color("violet_bright"), align="center",
                       outline=True)
 
-        text.draw(surface,
-                  "Yön · Boşluk zıpla · J saldır · Shift kaçın · Esc menü",
+        text.draw(surface, t("combat.controls"),
                   INTERNAL_WIDTH // 2, INTERNAL_HEIGHT - 12,
                   color=palette.role("ui_text_dim"), align="center")
 

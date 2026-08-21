@@ -26,6 +26,7 @@ from src.config import MENU_TRANSITION_MAX_FRAMES
 from src.core.input import Action
 from src.ui import text
 from src.ui.font_data import GLYPH_HEIGHT
+from src.ui.i18n import t
 
 SELECT_ANIM_FRAMES = 4
 CONFIRM_FLASH_FRAMES = 6
@@ -83,13 +84,29 @@ def blur(surface: pygame.Surface, factor: int = 4) -> pygame.Surface:
 
 @dataclass
 class MenuItem:
-    label: str
+    """Menu ogesi.
+
+    `label` ve `hint` **dil anahtari** tutar, hazir metin degil. Metin cizim
+    aninda cozulur; boylece oyuncu ayarlardan dili degistirdiginde arkadaki
+    menu de aninda degisir. Menuler bir kez kuruluyor - metni burada
+    saklasaydik dil degisimi ekrana yansimazdi.
+    """
+
+    label: str                      # dil anahtari, orn. "menu.continue"
     action: Callable[[], None] | None = None
     enabled: bool = True
     visible: bool = True            # Gorunmez oge gezinmede atlanir
-    hint: str = ""
+    hint: str = ""                  # dil anahtari
     gap_before: bool = False        # CIKIS bir boslukla ayrilir
     danger: bool = False            # Yikici eylem - farkli renk
+
+    @property
+    def text(self) -> str:
+        return t(self.label)
+
+    @property
+    def hint_text(self) -> str:
+        return t(self.hint) if self.hint else ""
 
 
 class Menu:
@@ -254,7 +271,7 @@ class Menu:
         if self.confirm_flash > 0 and selected:
             colour = palette.role("hit_flash")
 
-        text.draw(surface, item.label, rect.x + offset, rect.y, color=colour,
+        text.draw(surface, item.text, rect.x + offset, rect.y, color=colour,
                   shadow=True)
 
     def _draw_glow(self, surface: pygame.Surface, rect: pygame.Rect) -> None:
@@ -269,7 +286,7 @@ class Menu:
     def draw_hint(self, surface: pygame.Surface, x: int, y: int) -> None:
         item = self.selected
         if item.hint:
-            text.draw(surface, item.hint, x, y,
+            text.draw(surface, item.hint_text, x, y,
                       color=palette.role("ui_text_dim"), align="center")
 
     def draw_cursor(self, surface: pygame.Surface, game) -> None:

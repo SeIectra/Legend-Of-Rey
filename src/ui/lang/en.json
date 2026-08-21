@@ -1,0 +1,150 @@
+{
+  "_note": "English. Keys must match tr.json exactly - tests/test_lang.py enforces this. A missing key falls back to Turkish and is reported, never silently blank.",
+  "_style": "Strings are stored AS DISPLAYED. Headings are written in capitals here rather than uppercased at runtime (see i18n.py).",
+
+  "title": {
+    "full": "LEGEND OF REY: ECHOES",
+    "acronym": "LORE"
+  },
+
+  "common": {
+    "on": "On",
+    "off": "Off",
+    "cancel": "CANCEL",
+    "yes": "YES",
+    "no": "NO"
+  },
+
+  "menu": {
+    "continue": "CONTINUE",
+    "continue_hint": "Pick up where you left off",
+    "new_game": "NEW GAME",
+    "new_game_hint": "Start Rey's story from the beginning",
+    "settings": "SETTINGS",
+    "settings_hint": "Display, audio and accessibility",
+    "extras": "EXTRAS",
+    "extras_hint": "Unlocks as you progress",
+    "quit": "QUIT",
+    "restored_from_backup": "Main save unreadable - restored from backup.",
+    "overwrite_warning": "Your save will be erased.",
+    "overwrite_confirm": "START ANYWAY"
+  },
+
+  "save": {
+    "chapter": "CHAPTER {chapter}",
+    "playtime": "Time",
+    "playtime_hm": "{hours}h {minutes}m",
+    "playtime_m": "{minutes}m",
+    "gold": "Gold",
+    "echo": "Echo",
+    "secrets": "Secrets"
+  },
+
+  "pause": {
+    "heading": "PAUSED",
+    "resume": "RESUME",
+    "equipment": "EQUIPMENT",
+    "equipment_hint": "Unlocks in Chapter 2",
+    "settings": "SETTINGS",
+    "main_menu": "MAIN MENU",
+    "quit_question": "Return to the main menu?",
+    "quit_saved": "Your progress is saved ✓",
+    "quit_confirm": "RETURN",
+    "status": "Chapter {chapter} · Echo {dots} · {gold} gold"
+  },
+
+  "character": {
+    "heading": "WHO WILL YOU PLAY?",
+    "echo_label": "Echo: {value}",
+    "recommend": "First time? Rey is recommended.",
+    "controls": "[◂ ▸] select    [Enter] confirm    [Esc] back",
+    "rey_quote": "\"There are voices inside her head.\"",
+    "rey_trait_1": "Fast",
+    "rey_trait_2": "Fragile",
+    "ardo_quote": "\"Fights in silence.\"",
+    "ardo_trait_1": "Heavy",
+    "ardo_trait_2": "Sturdy"
+  },
+
+  "settings": {
+    "heading": "SETTINGS",
+    "percent": "{value}%",
+    "controls": "[▴▾] move   [◂▸] change   [Esc] close",
+    "tab_display": "DISPLAY",
+    "tab_audio": "AUDIO",
+    "tab_gameplay": "GAMEPLAY",
+
+    "fullscreen": "Fullscreen",
+    "fullscreen_windowed": "Windowed",
+    "fullscreen_on": "Fullscreen",
+    "scale": "Scale",
+    "scale_auto": "Auto",
+    "scale_2x": "2×",
+    "scale_3x": "3×",
+    "scale_4x": "4×",
+    "screen_shake": "Screen shake",
+    "screen_shake_low": "Low",
+    "screen_shake_normal": "Normal",
+    "screen_shake_note": "Turn it off if you feel motion sick.",
+    "colorblind": "Colourblind mode",
+    "colorblind_none": "None",
+    "colorblind_prot": "Protanopia",
+    "colorblind_deut": "Deuteranopia",
+    "colorblind_trit": "Tritanopia",
+    "ui_scale": "Interface size",
+    "ui_scale_normal": "Normal",
+    "ui_scale_large": "Large",
+    "brightness": "Brightness",
+    "brightness_note": "The game is dark - tune it to your screen.",
+
+    "volume_master": "Master",
+    "volume_music": "Music",
+    "volume_sfx": "Effects",
+    "volume_echo": "Echo whispers",
+    "volume_echo_note": "Separate channel - turn it down if it unsettles you.",
+
+    "language": "Language",
+    "lang_tr": "Türkçe",
+    "lang_en": "English",
+    "pct_50": "50%",
+    "pct_75": "75%",
+    "pct_100": "100%",
+    "pct_150": "150%",
+    "damage_taken": "Damage taken",
+    "enemy_speed": "Enemy speed",
+    "echo_penalty": "Echo penalty",
+    "echo_penalty_note": "When off, dying does not lower your Echo tier.",
+    "auto_combo": "Auto combo",
+    "auto_combo_note": "When on, one button carries the chain.",
+    "damage_numbers": "Damage numbers",
+    "rumble": "Controller rumble"
+  },
+
+  "combat": {
+    "counter": "COUNTER",
+    "combo": "{count} COMBO",
+    "combo_health": "{count} COMBO · health restored",
+    "combo_echo": "{count} COMBO · Echo recovers",
+    "hurt": "HIT",
+    "died": "YOU DIED · press R to reset",
+    "controls": "Arrows · Space jump · J attack · Shift dodge · Esc menu"
+  },
+
+  "keys": {
+    "shift": "Shift",
+    "enter": "Enter",
+    "esc": "Esc",
+    "tab": "Tab",
+    "space": "Space",
+    "left": "Left",
+    "right": "Right",
+    "up": "Up",
+    "down": "Down",
+    "gamepad_button": "Button {number}",
+    "unbound": "?"
+  },
+
+  "chapter": {
+    "village": "Village"
+  }
+}

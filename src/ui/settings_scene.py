@@ -20,6 +20,7 @@ from src.core.scene import Scene
 from src.systems.settings import Option, TABS
 from src.ui import text
 from src.ui.font_data import GLYPH_HEIGHT
+from src.ui.i18n import t
 from src.ui.widgets import TabBar, panel, value_bar
 
 PANEL_X = 34
@@ -36,7 +37,7 @@ class SettingsScene(Scene):
 
     def on_enter(self, **kwargs: object) -> None:
         self.settings = self.game.settings
-        self.tabs = TabBar([label for label, _ in TABS],
+        self.tabs = TabBar([t(key) for key, _ in TABS],
                            PANEL_X + 8, PANEL_Y + 6, PANEL_WIDTH - 16)
         self.row = 0
 
@@ -103,15 +104,18 @@ class SettingsScene(Scene):
         rect = pygame.Rect(PANEL_X, PANEL_Y, PANEL_WIDTH,
                            INTERNAL_HEIGHT - PANEL_Y * 2)
         panel(surface, rect)
-        text.draw(surface, text.tr_upper("Ayarlar"), INTERNAL_WIDTH // 2,
+        text.draw(surface, t("settings.heading"), INTERNAL_WIDTH // 2,
                   PANEL_Y - 16, color=palette.role("ui_text"),
                   align="center", tracking=2)
 
+        # Dil bu ekrandan degistirilebiliyor; sekme adlari o anki dilde
+        # olsun diye her karede tazelenir.
+        self.tabs.labels = [t(key) for key, _ in TABS]
         self.tabs.draw(surface)
         self._draw_rows(surface, rect)
         self._draw_note(surface, rect)
 
-        text.draw(surface, "[▴▾] gez   [◂▸] değiştir   [Esc] kapat",
+        text.draw(surface, t("settings.controls"),
                   INTERNAL_WIDTH // 2, INTERNAL_HEIGHT - 16,
                   color=palette.role("ui_text_dim"), align="center")
 
@@ -140,7 +144,7 @@ class SettingsScene(Scene):
                 ratio = float(self.settings.get(entry.key, entry.default))
                 value_bar(surface, pygame.Rect(VALUE_X, y + 3, BAR_WIDTH, 5),
                           ratio)
-                text.draw(surface, f"{int(ratio * 100)}%",
+                text.draw(surface, t("settings.percent", value=int(ratio * 100)),
                           VALUE_X + BAR_WIDTH + 6, y, color=colour)
             y += ROW_HEIGHT
 
@@ -154,5 +158,5 @@ class SettingsScene(Scene):
                   color=palette.color("stone_light"), align="center")
 
     def debug_lines(self) -> list[str]:
-        return [f"sekme: {TABS[self.tabs.index][0]}  "
+        return [f"sekme: {t(TABS[self.tabs.index][0])}  "
                 f"satır: {self.current.label}"]

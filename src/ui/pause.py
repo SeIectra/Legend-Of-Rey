@@ -19,6 +19,7 @@ from src.core.input import Action
 from src.core.scene import Scene
 from src.systems.save import read_save, write_save
 from src.ui import text
+from src.ui.i18n import t
 from src.ui.widgets import Menu, MenuItem, blur, panel
 
 PANEL_WIDTH = 168
@@ -40,11 +41,11 @@ class PauseScene(Scene):
         self._blurred: pygame.Surface | None = None
 
         self.menu = Menu([
-            MenuItem("DEVAM", self._resume),
-            MenuItem("EKİPMAN", None, enabled=False,
-                     hint="Bölüm 2'de açılır"),
-            MenuItem("AYARLAR", self._open_settings),
-            MenuItem("ANA MENÜ", self._ask_quit, gap_before=True),
+            MenuItem("pause.resume", self._resume),
+            MenuItem("pause.equipment", None, enabled=False,
+                     hint="pause.equipment_hint"),
+            MenuItem("pause.settings", self._open_settings),
+            MenuItem("pause.main_menu", self._ask_quit, gap_before=True),
         ], INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2 - 30, width=120,
             centered=True, on_sound=self.game.play_ui_sound)
 
@@ -61,8 +62,8 @@ class PauseScene(Scene):
         # bu gercekten olmus olmali.
         self._save_progress()
         self.confirm_quit = Menu([
-            MenuItem("İPTAL", self._cancel_quit),
-            MenuItem("DÖN", self._to_main_menu, danger=True),
+            MenuItem("common.cancel", self._cancel_quit),
+            MenuItem("pause.quit_confirm", self._to_main_menu, danger=True),
         ], INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2 + 18, width=140,
             centered=True, on_sound=self.game.play_ui_sound)
 
@@ -103,7 +104,7 @@ class PauseScene(Scene):
                            INTERNAL_HEIGHT // 2 - PANEL_HEIGHT // 2 - 6,
                            PANEL_WIDTH, PANEL_HEIGHT)
         panel(surface, rect)
-        text.draw(surface, text.tr_upper("Duraklatıldı"), INTERNAL_WIDTH // 2,
+        text.draw(surface, t("pause.heading"), INTERNAL_WIDTH // 2,
                   rect.y + 8, color=palette.role("ui_text"), align="center",
                   tracking=2)
 
@@ -131,7 +132,7 @@ class PauseScene(Scene):
         if data is None:
             return
         dots = "●" * (data.echo_tier + 1) + "○" * (2 - data.echo_tier)
-        info = f"Bölüm {data.chapter} · Yankı {dots} · {data.gold} altın"
+        info = t("pause.status", chapter=data.chapter, dots=dots, gold=data.gold)
         text.draw(surface, info, INTERNAL_WIDTH // 2, INTERNAL_HEIGHT - 30,
                   color=palette.role("ui_text_dim"), align="center")
 
@@ -143,13 +144,13 @@ class PauseScene(Scene):
         rect = pygame.Rect(INTERNAL_WIDTH // 2 - 100,
                            INTERNAL_HEIGHT // 2 - 40, 200, 80)
         panel(surface, rect)
-        text.draw(surface, "Ana menüye dön?", INTERNAL_WIDTH // 2, rect.y + 10,
+        text.draw(surface, t("pause.quit_question"), INTERNAL_WIDTH // 2, rect.y + 10,
                   color=palette.role("ui_text"), align="center")
         # Belirsizlik birakmiyoruz - kaydedildigini acikca soyluyoruz.
-        text.draw(surface, "İlerlemen kaydedildi ✓", INTERNAL_WIDTH // 2,
+        text.draw(surface, t("pause.quit_saved"), INTERNAL_WIDTH // 2,
                   rect.y + 24, color=palette.color("echo_bright"),
                   align="center")
         self.confirm_quit.draw(surface)
 
     def debug_lines(self) -> list[str]:
-        return [f"duraklatma · seçili: {self.menu.selected.label}"]
+        return [f"duraklatma · seçili: {self.menu.selected.text}"]

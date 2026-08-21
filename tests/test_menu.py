@@ -37,6 +37,7 @@ from src.systems.save import (  # noqa: E402
     write_save,
 )
 from src.systems.settings import DISPLAY_OPTIONS, Settings, TABS  # noqa: E402
+from src.ui import i18n  # noqa: E402
 from src.ui.widgets import CONFIRM_FLASH_FRAMES, SELECT_ANIM_FRAMES  # noqa: E402
 
 failures: list[str] = []
@@ -66,6 +67,10 @@ def step(game, count: int = 1, keys: tuple[int, ...] = ()) -> None:
 
 
 def main() -> int:
+    # Test gorunen metni dogruluyor; dili acikca sabitle ki makinede kayitli
+    # ayar ne olursa olsun ayni sonucu versin.
+    i18n.set_language("tr")
+
     # --- 1. Kayit guvenligi -------------------------------------------------
     print("--- kayit guvenligi ---")
     delete_save()
@@ -138,22 +143,22 @@ def main() -> int:
     step(game, 2)
 
     devam = menu_scene.menu.items[0]
-    check(devam.label == "DEVAM ET", "DEVAM ET en ustte")
+    check(devam.text == "DEVAM ET", "DEVAM ET en ustte")
     check(not devam.visible, "kayit yokken DEVAM ET GORUNMEZ (gri degil)")
-    check(menu_scene.menu.selected.label == "YENİ OYUN",
-          "kayit yokken YENI OYUN secili", menu_scene.menu.selected.label)
+    check(menu_scene.menu.selected.text == "YENİ OYUN",
+          "kayit yokken YENI OYUN secili", menu_scene.menu.selected.text)
 
     cikis = menu_scene.menu.items[-1]
-    check(cikis.label == "ÇIKIŞ" and cikis.gap_before,
+    check(cikis.text == "ÇIKIŞ" and cikis.gap_before,
           "CIKIS en altta ve boslukla ayrilmis")
 
     # Kayit varken DEVAM ET gorunur ve onceden secili olmali.
     write_save(SaveData(chapter=3, chapter_name="Meşale Mahzeni", gold=120))
     menu_scene.on_resume()
     check(menu_scene.menu.items[0].visible, "kayit varken DEVAM ET gorunur")
-    check(menu_scene.menu.selected.label == "DEVAM ET",
+    check(menu_scene.menu.selected.text == "DEVAM ET",
           "kayit varken DEVAM ET onceden secili",
-          menu_scene.menu.selected.label)
+          menu_scene.menu.selected.text)
 
     # --- 4. Uzerine yazma uyarisi -------------------------------------------
     print("\n--- uzerine yazma ---")
@@ -161,9 +166,9 @@ def main() -> int:
     menu_scene.menu.activate()
     check(menu_scene.confirm_overwrite is not None,
           "kayit varken YENI OYUN onay soruyor")
-    check(menu_scene.confirm_overwrite.selected.label == "İPTAL",
+    check(menu_scene.confirm_overwrite.selected.text == "İPTAL",
           "yikici eylemde varsayilan secim IPTAL",
-          menu_scene.confirm_overwrite.selected.label)
+          menu_scene.confirm_overwrite.selected.text)
     check(menu_scene.confirm_overwrite.items[1].danger,
           "yikici secenek tehlike olarak isaretli")
     menu_scene.confirm_overwrite.activate()  # IPTAL
@@ -187,7 +192,7 @@ def main() -> int:
     menu_scene.on_resume()
     labels_seen = []
     for _ in range(5):
-        labels_seen.append(menu_scene.menu.selected.label)
+        labels_seen.append(menu_scene.menu.selected.text)
         menu_scene.menu.move(1)
     check("DEVAM ET" not in labels_seen,
           "gezinme gorunmez ogeyi atliyor", str(labels_seen))
@@ -203,9 +208,9 @@ def main() -> int:
     select = game.scenes.current
     step(game, 2)
     check(len(CHARACTERS) == 2, "iki karakter")
-    check(CHARACTERS[0].key == "rey" and CHARACTERS[0].echo == "VAR",
+    check(CHARACTERS[0].key == "rey" and CHARACTERS[0].has_echo,
           "Rey'in Yankisi var")
-    check(CHARACTERS[1].key == "ardo" and CHARACTERS[1].echo == "YOK",
+    check(CHARACTERS[1].key == "ardo" and not CHARACTERS[1].has_echo,
           "Ardo'nun Yankisi yok")
 
     select.index = 1
@@ -261,7 +266,7 @@ def main() -> int:
     pause._ask_quit()
     check(pause.saved_notice > 0,
           "ana menuye donmeden once kaydedildi ve bildiriliyor")
-    check(pause.confirm_quit.selected.label == "İPTAL",
+    check(pause.confirm_quit.selected.text == "İPTAL",
           "ana menu onayinda varsayilan IPTAL")
 
     game.shutdown()

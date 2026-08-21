@@ -15,18 +15,37 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 from src.systems.save import SETTINGS_NAME, user_data_dir
+from src.ui.i18n import t
 
 
 @dataclass
 class Option:
-    """Tek bir ayar: anahtar, etiket, degerler ve gosterilecek adlari."""
+    """Tek bir ayar: anahtar, etiket **anahtarlari**, degerler.
+
+    Etiketler dize degil dil anahtari tutar. Bu liste modul yuklenirken bir
+    kez kurulur; metni burada saklasaydik oyuncunun dil degistirmesi hicbir
+    sey yapmazdi - eski dil import aninda pismis olurdu. `label` ve `note`
+    birer ozellik: cizim aninda, o anki dilde cozulurler.
+    """
 
     key: str
-    label: str
+    label_key: str
     values: tuple[Any, ...]
-    labels: tuple[str, ...]
+    label_keys: tuple[str, ...]
     default_index: int = 0
-    note: str = ""                      # Ayarlar ekraninda alt aciklama
+    note_key: str = ""                  # Ayarlar ekraninda alt aciklama
+
+    @property
+    def label(self) -> str:
+        return t(self.label_key)
+
+    @property
+    def note(self) -> str:
+        return t(self.note_key) if self.note_key else ""
+
+    @property
+    def labels(self) -> tuple[str, ...]:
+        return tuple(t(k) for k in self.label_keys)
 
     def index_of(self, value: Any) -> int:
         try:
@@ -35,7 +54,7 @@ class Option:
             return self.default_index
 
     def label_for(self, value: Any) -> str:
-        return self.labels[self.index_of(value)]
+        return t(self.label_keys[self.index_of(value)])
 
 
 @dataclass
@@ -43,55 +62,77 @@ class Slider:
     """Surekli deger - ses seviyeleri ve parlaklik."""
 
     key: str
-    label: str
+    label_key: str
     default: float = 1.0
     step: float = 0.05
-    note: str = ""
+    note_key: str = ""
+
+    @property
+    def label(self) -> str:
+        return t(self.label_key)
+
+    @property
+    def note(self) -> str:
+        return t(self.note_key) if self.note_key else ""
 
 
 # --- Sekme tanimlari --------------------------------------------------------
 DISPLAY_OPTIONS: tuple[Option | Slider, ...] = (
-    Option("fullscreen", "Tam ekran", (False, True), ("Pencere", "Tam ekran")),
-    Option("scale", "Ölçek", (0, 2, 3, 4), ("Otomatik", "2×", "3×", "4×")),
-    Option("screen_shake", "Ekran sarsıntısı", (0.0, 0.5, 1.0),
-           ("Kapalı", "Az", "Normal"),
+    Option("fullscreen", "settings.fullscreen", (False, True),
+           ("settings.fullscreen_windowed", "settings.fullscreen_on")),
+    Option("scale", "settings.scale", (0, 2, 3, 4),
+           ("settings.scale_auto", "settings.scale_2x", "settings.scale_3x",
+            "settings.scale_4x")),
+    Option("screen_shake", "settings.screen_shake", (0.0, 0.5, 1.0),
+           ("common.off", "settings.screen_shake_low",
+            "settings.screen_shake_normal"),
            default_index=2,
-           note="Mide bulantısı yaşıyorsan kapatabilirsin."),
-    Option("colorblind", "Renk körü modu",
+           note_key="settings.screen_shake_note"),
+    Option("colorblind", "settings.colorblind",
            ("none", "protanopia", "deuteranopia", "tritanopia"),
-           ("Yok", "Protanopi", "Döteranopi", "Tritanopi")),
-    Option("ui_scale", "Arayüz boyutu", (1, 2), ("Normal", "Büyük")),
-    Slider("brightness", "Parlaklık", default=1.0,
-           note="Oyun karanlık - ekranına göre ayarla."),
+           ("settings.colorblind_none", "settings.colorblind_prot",
+            "settings.colorblind_deut", "settings.colorblind_trit")),
+    Option("ui_scale", "settings.ui_scale", (1, 2),
+           ("settings.ui_scale_normal", "settings.ui_scale_large")),
+    Slider("brightness", "settings.brightness", default=1.0,
+           note_key="settings.brightness_note"),
 )
 
 AUDIO_OPTIONS: tuple[Option | Slider, ...] = (
-    Slider("volume_master", "Ana ses", default=0.9),
-    Slider("volume_music", "Müzik", default=0.6),
-    Slider("volume_sfx", "Efektler", default=0.8),
-    Slider("volume_echo", "Yankı fısıltıları", default=0.7,
-           note="Ayrı kanal - rahatsız ediciyse kısabilirsin."),
+    Slider("volume_master", "settings.volume_master", default=0.9),
+    Slider("volume_music", "settings.volume_music", default=0.6),
+    Slider("volume_sfx", "settings.volume_sfx", default=0.8),
+    Slider("volume_echo", "settings.volume_echo", default=0.7,
+           note_key="settings.volume_echo_note"),
 )
 
 GAMEPLAY_OPTIONS: tuple[Option | Slider, ...] = (
-    Option("language", "Dil", ("tr", "en"), ("Türkçe", "English")),
-    Option("damage_taken", "Alınan hasar", (0.5, 0.75, 1.0, 1.5),
-           ("%50", "%75", "%100", "%150"), default_index=2),
-    Option("enemy_speed", "Düşman hızı", (0.75, 1.0), ("%75", "%100"),
-           default_index=1),
-    Option("echo_penalty", "Yankı cezası", (True, False), ("Açık", "Kapalı"),
-           note="Kapalıysa ölünce Yankı kademesi düşmez."),
-    Option("auto_combo", "Otomatik combo", (False, True), ("Kapalı", "Açık"),
-           note="Açıkken tek tuşla zincir devam eder."),
-    Option("damage_numbers", "Hasar sayıları", (False, True),
-           ("Kapalı", "Açık")),
-    Option("rumble", "Kol titreşimi", (True, False), ("Açık", "Kapalı")),
+    # Dil secenegi kendi adini hic cevirmez: "Türkçe" ve "English" her dilde
+    # ayni yazilir. Yanlis dile dusen oyuncu geri donebilmeli.
+    Option("language", "settings.language", ("tr", "en"),
+           ("settings.lang_tr", "settings.lang_en")),
+    Option("damage_taken", "settings.damage_taken", (0.5, 0.75, 1.0, 1.5),
+           ("settings.pct_50", "settings.pct_75",
+            "settings.pct_100", "settings.pct_150"),
+           default_index=2),
+    Option("enemy_speed", "settings.enemy_speed", (0.75, 1.0),
+           ("settings.pct_75", "settings.pct_100"), default_index=1),
+    Option("echo_penalty", "settings.echo_penalty", (True, False),
+           ("common.on", "common.off"),
+           note_key="settings.echo_penalty_note"),
+    Option("auto_combo", "settings.auto_combo", (False, True),
+           ("common.off", "common.on"),
+           note_key="settings.auto_combo_note"),
+    Option("damage_numbers", "settings.damage_numbers", (False, True),
+           ("common.off", "common.on")),
+    Option("rumble", "settings.rumble", (True, False),
+           ("common.on", "common.off")),
 )
 
 TABS: tuple[tuple[str, tuple], ...] = (
-    ("GÖRÜNTÜ", DISPLAY_OPTIONS),
-    ("SES", AUDIO_OPTIONS),
-    ("OYNANIŞ", GAMEPLAY_OPTIONS),
+    ("settings.tab_display", DISPLAY_OPTIONS),
+    ("settings.tab_audio", AUDIO_OPTIONS),
+    ("settings.tab_gameplay", GAMEPLAY_OPTIONS),
 )
 
 ALL_ENTRIES: tuple = DISPLAY_OPTIONS + AUDIO_OPTIONS + GAMEPLAY_OPTIONS

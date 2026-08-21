@@ -25,6 +25,7 @@ from src.config import (
 from src.core.input import Action, InputManager
 from src.core.scene import SceneManager
 from src.systems.settings import Settings
+from src.ui import i18n
 
 WINDOW_TITLE = "Legend of Rey"
 MIN_SCALE = 1
@@ -37,6 +38,9 @@ class Game:
         pygame.init()
         self.settings = settings or Settings()
         self.settings.on_change(self._on_setting_changed)
+        # Kayitli dili **arayuz kurulmadan once** uygula: menuler kurulurken
+        # metinleri o anki dilden cozuyor.
+        self._apply_language(self.settings.get("language", i18n.DEFAULT_LANGUAGE))
 
         self.input = InputManager(self.settings.get("bindings"))
         self.scenes = SceneManager(self)
@@ -125,7 +129,24 @@ class Game:
             self._create_window()
         elif key == "bindings" and isinstance(value, dict):
             self.input.apply_bindings(value)
+        elif key == "language" and isinstance(value, str):
+            self._apply_language(value)
         # Ses ve sarsinti ayarlarini sahneler kendi okur; burada zorlamiyoruz.
+
+    def _apply_language(self, code: object) -> None:
+        """Dili degistirir. Basarisiz olursa varsayilana doner.
+
+        Yeniden baslatma gerekmiyor: arayuz metinleri cizim aninda cozuluyor,
+        metin yuzeyleri de dizeyle anahtarlandigi icin onbellek kendiliginden
+        tazeleniyor.
+        """
+        try:
+            i18n.set_language(str(code))
+        except i18n.LanguageError as exc:
+            # Elle duzenlenmis ya da bozulmus bir ayar dosyasi oyunu
+            # baslatmamazlik etmesin.
+            print(f"[game] dil yuklenemedi ({code}): {exc}")
+            i18n.set_language(i18n.DEFAULT_LANGUAGE)
 
     def screenshot(self, directory: Path | None = None) -> Path:
         target = directory or Path.cwd() / "build" / "screenshots"
@@ -292,4 +313,7 @@ class Game:
 
     def shutdown(self) -> None:
         self.scenes.shutdown()
+        # Cozulemeyen dil anahtarlarini kapanista bildir: eksik ceviri
+        # sessizce gecmesin (font'un eksik glif davranisiyla ayni mantik).
+        i18n.report_missing()
         pygame.quit()

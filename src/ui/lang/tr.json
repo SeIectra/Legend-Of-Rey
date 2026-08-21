@@ -1,0 +1,150 @@
+{
+  "_aciklama": "Turkce - kanonik dil. Dizeler once burada yazilir, sonra cevrilir. Eksik ceviri bu tabloya duser.",
+  "_kural": "Metinler GOSTERILECEK halleriyle durur. Baslikar buyuk harfli yazilir; calisma zamaninda buyuk harfe cevrilmez (bkz. i18n.py).",
+
+  "title": {
+    "full": "REY EFSANESİ: YANKILAR",
+    "acronym": "REY"
+  },
+
+  "common": {
+    "on": "Açık",
+    "off": "Kapalı",
+    "cancel": "İPTAL",
+    "yes": "VAR",
+    "no": "YOK"
+  },
+
+  "menu": {
+    "continue": "DEVAM ET",
+    "continue_hint": "Kaldığın yerden devam et",
+    "new_game": "YENİ OYUN",
+    "new_game_hint": "Rey'in hikâyesini baştan başla",
+    "settings": "AYARLAR",
+    "settings_hint": "Görüntü, ses ve erişilebilirlik",
+    "extras": "EKSTRALAR",
+    "extras_hint": "Oyun ilerledikçe açılır",
+    "quit": "ÇIKIŞ",
+    "restored_from_backup": "Ana kayıt okunamadı, yedekten dönüldü.",
+    "overwrite_warning": "Mevcut kaydın silinecek.",
+    "overwrite_confirm": "YİNE DE BAŞLA"
+  },
+
+  "save": {
+    "chapter": "BÖLÜM {chapter}",
+    "playtime": "Süre",
+    "playtime_hm": "{hours}sa {minutes}dk",
+    "playtime_m": "{minutes}dk",
+    "gold": "Altın",
+    "echo": "Yankı",
+    "secrets": "Gizli"
+  },
+
+  "pause": {
+    "heading": "DURAKLATILDI",
+    "resume": "DEVAM",
+    "equipment": "EKİPMAN",
+    "equipment_hint": "Bölüm 2'de açılır",
+    "settings": "AYARLAR",
+    "main_menu": "ANA MENÜ",
+    "quit_question": "Ana menüye dön?",
+    "quit_saved": "İlerlemen kaydedildi ✓",
+    "quit_confirm": "DÖN",
+    "status": "Bölüm {chapter} · Yankı {dots} · {gold} altın"
+  },
+
+  "character": {
+    "heading": "KİMİ OYNAYACAKSIN?",
+    "echo_label": "Yankı: {value}",
+    "recommend": "İlk kez oynuyorsan Rey önerilir.",
+    "controls": "[◂ ▸] seç    [Enter] onayla    [Esc] geri",
+    "rey_quote": "\"Kafasının içinde sesler var.\"",
+    "rey_trait_1": "Hızlı",
+    "rey_trait_2": "Kırılgan",
+    "ardo_quote": "\"Sessizlikte savaşır.\"",
+    "ardo_trait_1": "Ağır",
+    "ardo_trait_2": "Dayanıklı"
+  },
+
+  "settings": {
+    "heading": "AYARLAR",
+    "percent": "%{value}",
+    "controls": "[▴▾] gez   [◂▸] değiştir   [Esc] kapat",
+    "tab_display": "GÖRÜNTÜ",
+    "tab_audio": "SES",
+    "tab_gameplay": "OYNANIŞ",
+
+    "fullscreen": "Tam ekran",
+    "fullscreen_windowed": "Pencere",
+    "fullscreen_on": "Tam ekran",
+    "scale": "Ölçek",
+    "scale_auto": "Otomatik",
+    "scale_2x": "2×",
+    "scale_3x": "3×",
+    "scale_4x": "4×",
+    "screen_shake": "Ekran sarsıntısı",
+    "screen_shake_low": "Az",
+    "screen_shake_normal": "Normal",
+    "screen_shake_note": "Mide bulantısı yaşıyorsan kapatabilirsin.",
+    "colorblind": "Renk körü modu",
+    "colorblind_none": "Yok",
+    "colorblind_prot": "Protanopi",
+    "colorblind_deut": "Döteranopi",
+    "colorblind_trit": "Tritanopi",
+    "ui_scale": "Arayüz boyutu",
+    "ui_scale_normal": "Normal",
+    "ui_scale_large": "Büyük",
+    "brightness": "Parlaklık",
+    "brightness_note": "Oyun karanlık - ekranına göre ayarla.",
+
+    "volume_master": "Ana ses",
+    "volume_music": "Müzik",
+    "volume_sfx": "Efektler",
+    "volume_echo": "Yankı fısıltıları",
+    "volume_echo_note": "Ayrı kanal - rahatsız ediciyse kısabilirsin.",
+
+    "language": "Dil",
+    "lang_tr": "Türkçe",
+    "lang_en": "English",
+    "pct_50": "%50",
+    "pct_75": "%75",
+    "pct_100": "%100",
+    "pct_150": "%150",
+    "damage_taken": "Alınan hasar",
+    "enemy_speed": "Düşman hızı",
+    "echo_penalty": "Yankı cezası",
+    "echo_penalty_note": "Kapalıysa ölünce Yankı kademesi düşmez.",
+    "auto_combo": "Otomatik combo",
+    "auto_combo_note": "Açıkken tek tuşla zincir devam eder.",
+    "damage_numbers": "Hasar sayıları",
+    "rumble": "Kol titreşimi"
+  },
+
+  "combat": {
+    "counter": "KARŞI VURUŞ",
+    "combo": "{count} COMBO",
+    "combo_health": "{count} COMBO · can yenilenir",
+    "combo_echo": "{count} COMBO · Yankı iyileşir",
+    "hurt": "HASAR",
+    "died": "ÖLDÜN · R ile sıfırla",
+    "controls": "Yön · Boşluk zıpla · J saldır · Shift kaçın · Esc menü"
+  },
+
+  "keys": {
+    "shift": "Shift",
+    "enter": "Enter",
+    "esc": "Esc",
+    "tab": "Tab",
+    "space": "Boşluk",
+    "left": "Sol",
+    "right": "Sağ",
+    "up": "Yukarı",
+    "down": "Aşağı",
+    "gamepad_button": "Düğme {number}",
+    "unbound": "?"
+  },
+
+  "chapter": {
+    "village": "Köy"
+  }
+}

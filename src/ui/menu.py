@@ -24,7 +24,8 @@ from src.core.input import Action
 from src.core.scene import Scene
 from src.systems.save import has_save, read_save
 from src.ui import text
-from src.ui.font_data import GLYPH_HEIGHT
+from src.ui.i18n import t, t_or_raw
+from src.ui.font_data import GLYPH_HEIGHT, GLYPH_WIDTH
 from src.ui.widgets import Menu, MenuItem, panel
 
 TITLE_Y = 46
@@ -47,7 +48,7 @@ class MainMenuScene(Scene):
         self.notice_frames = 0
 
         if self.save_status == "backup":
-            self.notice = "Ana kayıt okunamadı, yedekten dönüldü."
+            self.notice = "menu.restored_from_backup"
             self.notice_frames = 300
 
         self.menu = self._build_menu()
@@ -56,15 +57,15 @@ class MainMenuScene(Scene):
         save_exists = has_save()
         return Menu([
             # Kayit yoksa gorunmez - gri degil, YOK.
-            MenuItem("DEVAM ET", self._continue, visible=save_exists,
-                     hint="Kaldığın yerden devam et"),
-            MenuItem("YENİ OYUN", self._new_game,
-                     hint="Rey'in hikâyesini baştan başla"),
-            MenuItem("AYARLAR", self._open_settings,
-                     hint="Görüntü, ses ve erişilebilirlik"),
-            MenuItem("EKSTRALAR", None, enabled=False,
-                     hint="Oyun ilerledikçe açılır"),
-            MenuItem("ÇIKIŞ", self.game.quit, gap_before=True),
+            MenuItem("menu.continue", self._continue, visible=save_exists,
+                     hint="menu.continue_hint"),
+            MenuItem("menu.new_game", self._new_game,
+                     hint="menu.new_game_hint"),
+            MenuItem("menu.settings", self._open_settings,
+                     hint="menu.settings_hint"),
+            MenuItem("menu.extras", None, enabled=False,
+                     hint="menu.extras_hint"),
+            MenuItem("menu.quit", self.game.quit, gap_before=True),
         ], MENU_X, MENU_Y, width=140,
             on_sound=self.game.play_ui_sound)
 
@@ -85,8 +86,9 @@ class MainMenuScene(Scene):
     def _ask_overwrite(self) -> None:
         # Yikici eylem: varsayilan secim daima IPTAL.
         self.confirm_overwrite = Menu([
-            MenuItem("İPTAL", self._cancel_overwrite),
-            MenuItem("YİNE DE BAŞLA", self._go_character_select, danger=True),
+            MenuItem("common.cancel", self._cancel_overwrite),
+            MenuItem("menu.overwrite_confirm", self._go_character_select,
+                     danger=True),
         ], INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2 + 14, width=150,
             centered=True, on_sound=self.game.play_ui_sound)
 
@@ -159,13 +161,39 @@ class MainMenuScene(Scene):
                            (372, INTERNAL_HEIGHT - 58), max(2, radius // 3))
 
     def _draw_title(self, surface: pygame.Surface) -> None:
-        text.draw(surface, text.tr_upper("Legend of"), MENU_X, TITLE_Y,
-                  color=palette.role("ui_text_dim"), tracking=2)
-        text.draw(surface, text.tr_upper("Rey"), MENU_X, TITLE_Y + 16,
+        """Baslik + kisaltma.
+
+        Isim her iki dilde de kelimelerin bas harflerinden anlamli bir sozcuk
+        cikaracak sekilde secildi:
+            LEGEND OF REY: ECHOES  -> LORE
+            REY EFSANESI: YANKILAR -> REY
+        Bas harfleri vurgulayarak ciziyoruz ki bu tesadüf gibi degil, tasarim
+        gibi okunsun - kisaltma basligin kendi icinden cikiyor.
+        """
+        self._draw_initial_caps(surface, t("title.full"), MENU_X, TITLE_Y)
+        text.draw(surface, t("title.acronym"), MENU_X, TITLE_Y + 14,
                   color=palette.role("ui_text_bright"), outline=True,
                   tracking=6)
         pygame.draw.line(surface, palette.color("violet"),
-                         (MENU_X, TITLE_Y + 34), (MENU_X + 96, TITLE_Y + 34))
+                         (MENU_X, TITLE_Y + 32), (MENU_X + 96, TITLE_Y + 32))
+
+    def _draw_initial_caps(self, surface: pygame.Surface, value: str,
+                           x: int, y: int) -> None:
+        """Her kelimenin ilk harfini vurgulu, gerisini soluk cizer."""
+        bright = palette.role("ui_text")
+        dim = palette.role("ui_text_dim")
+        tracking = 1
+        advance = GLYPH_WIDTH + tracking
+        for word in value.split(" "):
+            if not word:
+                x += advance
+                continue
+            text.draw(surface, word[0], x, y, color=bright, tracking=tracking)
+            if len(word) > 1:
+                text.draw(surface, word[1:], x + advance, y, color=dim,
+                          tracking=tracking)
+            # Kelime + tek bosluk kadar ilerle.
+            x += (len(word) + 1) * advance
 
     def _draw_save_card(self, surface: pygame.Surface) -> None:
         """DEVAM ET kartı: uc hafta sonra donen oyuncu nerede kaldigini
@@ -175,10 +203,11 @@ class MainMenuScene(Scene):
         panel(surface, rect)
 
         line_y = rect.y + 6
-        text.draw(surface, f"BÖLÜM {data.chapter}", rect.x + 8, line_y,
+        text.draw(surface, t("save.chapter", chapter=data.chapter),
+                  rect.x + 8, line_y,
                   color=palette.role("ui_text_bright"))
         line_y += GLYPH_HEIGHT + 2
-        text.draw(surface, f"\"{data.chapter_name}\"", rect.x + 8, line_y,
+        text.draw(surface, f"\"{t_or_raw(data.chapter_name)}\"", rect.x + 8, line_y,
                   color=palette.role("ui_text"))
         line_y += GLYPH_HEIGHT + 4
         pygame.draw.line(surface, palette.color("stone_dark"),
@@ -186,10 +215,12 @@ class MainMenuScene(Scene):
         line_y += 4
 
         rows = (
-            ("Süre", data.playtime_text),
-            ("Altın", str(data.gold)),
-            ("Yankı", "●" * (data.echo_tier + 1) + "○" * (2 - data.echo_tier)),
-            ("Gizli", f"{data.secrets_found}/{max(1, data.secrets_total)}"),
+            (t("save.playtime"), data.playtime_text),
+            (t("save.gold"), str(data.gold)),
+            (t("save.echo"),
+             "●" * (data.echo_tier + 1) + "○" * (2 - data.echo_tier)),
+            (t("save.secrets"),
+             f"{data.secrets_found}/{max(1, data.secrets_total)}"),
         )
         for label, value in rows:
             text.draw(surface, label, rect.x + 8, line_y,
@@ -206,10 +237,10 @@ class MainMenuScene(Scene):
         rect = pygame.Rect(INTERNAL_WIDTH // 2 - 108,
                            INTERNAL_HEIGHT // 2 - 46, 216, 92)
         panel(surface, rect)
-        text.draw(surface, "Mevcut kaydın silinecek.", INTERNAL_WIDTH // 2,
+        text.draw(surface, t("menu.overwrite_warning"), INTERNAL_WIDTH // 2,
                   rect.y + 10, color=palette.role("ui_text"), align="center")
         if self.save_data:
-            detail = (f"BÖLÜM {self.save_data.chapter} · "
+            detail = (t("save.chapter", chapter=self.save_data.chapter) + " · "
                       f"{self.save_data.playtime_text}")
             text.draw(surface, detail, INTERNAL_WIDTH // 2, rect.y + 24,
                       color=palette.role("ui_text_dim"), align="center")
@@ -217,7 +248,7 @@ class MainMenuScene(Scene):
 
     def _draw_footer(self, surface: pygame.Surface) -> None:
         if self.notice_frames > 0:
-            text.draw(surface, self.notice, INTERNAL_WIDTH // 2,
+            text.draw(surface, t(self.notice), INTERNAL_WIDTH // 2,
                       INTERNAL_HEIGHT - 40, color=palette.color("danger_bright"),
                       align="center")
         text.draw(surface, "Ardeko Studios", 6, INTERNAL_HEIGHT - 12,
