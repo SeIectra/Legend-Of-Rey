@@ -20,11 +20,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 
 SCENES = {
+    # Varsayilan akis: intro -> menunun kurulmasi -> menu. Uculu tek bir
+    # kesintisiz kamera hareketi (docs/menu-ui.md 0).
+    "intro": ("src.scenes.intro", "IntroScene"),
     "menu": ("src.ui.menu", "MainMenuScene"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }
-DEFAULT_SCENE = "menu"
+DEFAULT_SCENE = "intro"
 
 
 def main() -> int:

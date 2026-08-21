@@ -7,6 +7,10 @@
     "acronym": "REY"
   },
 
+  "cinematic": {
+    "hold_to_speed": "Hızlandırmak için basılı tut"
+  },
+
   "common": {
     "on": "Açık",
     "off": "Kapalı",

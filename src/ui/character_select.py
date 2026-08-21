@@ -131,8 +131,11 @@ class CharacterSelectScene(Scene):
                         max_health=info.health, health=info.health)
         write_save(data)
 
-        from src.scenes.combat_room import CombatRoomScene
-        self.scenes.set_root(CombatRoomScene, character=info.key)
+        # Kamera mor alevden **yukari** cikip koye varir. Menu gidecegin
+        # yer, oyun geldigin yer (docs/menu-ui.md 0.3).
+        from src.scenes.vertical_journey import VerticalJourneyScene
+        self.scenes.set_root(VerticalJourneyScene, transition=False,
+                             direction="up", chapter=1, character=info.key)
 
     # --- Cizim --------------------------------------------------------------
     def draw(self, surface: pygame.Surface) -> None:

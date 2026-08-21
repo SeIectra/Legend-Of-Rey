@@ -40,7 +40,8 @@ CARD_HEIGHT = 96
 
 
 class MainMenuScene(Scene):
-    def on_enter(self, **kwargs: object) -> None:
+    def on_enter(self, reveal_buttons: bool = False,
+                 **kwargs: object) -> None:
         self.frame = 0
         self.save_data, self.save_status = read_save()
         self.confirm_overwrite: Menu | None = None
@@ -54,6 +55,9 @@ class MainMenuScene(Scene):
         self.menu = self._build_menu()
         # Sahne kayittaki ilerlemeye gore kurulur (5 asama).
         self.backdrop = MenuBackdrop(stage_for(self.save_data))
+        if reveal_buttons:
+            # Kamera menuye yeni vardi: butonlar tek tek belirsin.
+            self.menu.start_reveal()
 
     def _build_menu(self) -> Menu:
         save_exists = has_save()
@@ -75,8 +79,12 @@ class MainMenuScene(Scene):
     def _continue(self) -> None:
         if self.save_data is None:
             return
-        from src.scenes.combat_room import CombatRoomScene
-        self.scenes.replace(CombatRoomScene,
+        # Kamera alevden **asagi** iner, kaldigin bolume kadar. Ne kadar
+        # ilerlediysen o kadar uzun dusersin (docs/menu-ui.md 0.4).
+        from src.scenes.vertical_journey import VerticalJourneyScene
+        self.scenes.replace(VerticalJourneyScene, transition=False,
+                            direction="down",
+                            chapter=self.save_data.chapter,
                             character=self.save_data.character)
 
     def _new_game(self) -> None:

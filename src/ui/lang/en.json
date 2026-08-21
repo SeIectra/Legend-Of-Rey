@@ -7,6 +7,10 @@
     "acronym": "LORE"
   },
 
+  "cinematic": {
+    "hold_to_speed": "Hold to speed up"
+  },
+
   "common": {
     "on": "On",
     "off": "Off",

@@ -35,6 +35,10 @@ CONFIRM_FLASH_FRAMES = 6
 # "daha yumusak olsun" diye buyutmeye kalkarsa burada durur.
 assert SELECT_ANIM_FRAMES <= MENU_TRANSITION_MAX_FRAMES
 assert CONFIRM_FLASH_FRAMES <= MENU_TRANSITION_MAX_FRAMES
+# Butonlarin tek tek belirmesi - her biri 4 kare arayla.
+REVEAL_STAGGER = 4
+REVEAL_SLIDE_FRAMES = 6
+
 MARKER = "▸"
 MARKER_GAP = 8
 ROW_HEIGHT = 18
@@ -127,7 +131,14 @@ class Menu:
         self.select_anim = 0
         self.confirm_flash = 0
         self.mouse_visible = False
+        # Butonlarin tek tek belirmesi (docs/menu-ui.md 0.2). Kamera menuye
+        # varinca calisir; normal acilista 0 kalir ve hicbir sey beklemez.
+        self.reveal_frames = 0
         self._ensure_selectable(1)
+
+    def start_reveal(self) -> None:
+        """Butonlar alttan yukari, 4 kare arayla, 2px kayarak belirsin."""
+        self.reveal_frames = 1
 
     # --- Gezinme ------------------------------------------------------------
     def _selectable(self, index: int) -> bool:
@@ -168,6 +179,11 @@ class Menu:
     def update(self, game) -> None:
         self.select_anim = max(0, self.select_anim - 1)
         self.confirm_flash = max(0, self.confirm_flash - 1)
+        if self.reveal_frames:
+            self.reveal_frames += 1
+            done = len(self.items) * REVEAL_STAGGER + REVEAL_SLIDE_FRAMES
+            if self.reveal_frames > done:
+                self.reveal_frames = 0     # Belirme bitti
 
         inp = game.input
         if inp.pressed(Action.UP):
@@ -243,11 +259,25 @@ class Menu:
         for index, item in enumerate(self.items):
             if not item.visible:
                 continue          # Gri degil, YOK (docs/menu-ui.md 3)
+            if self.reveal_frames and not self._revealed(index):
+                continue
             self._draw_item(surface, index, item)
+
+    def _revealed(self, index: int) -> bool:
+        return self.reveal_frames >= (index + 1) * REVEAL_STAGGER
+
+    def _reveal_slide(self, index: int) -> int:
+        """Belirirken 2 piksel alttan gelir - yerine oturma hissi."""
+        if not self.reveal_frames:
+            return 0
+        age = self.reveal_frames - (index + 1) * REVEAL_STAGGER
+        if age >= REVEAL_SLIDE_FRAMES:
+            return 0
+        return int(round(2 * (1.0 - age / REVEAL_SLIDE_FRAMES)))
 
     def _draw_item(self, surface: pygame.Surface, index: int,
                    item: MenuItem) -> None:
-        rect = self.item_rect(index)
+        rect = self.item_rect(index).move(0, self._reveal_slide(index))
         selected = index == self.index
 
         if not item.enabled:
