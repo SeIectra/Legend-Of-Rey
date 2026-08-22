@@ -27,7 +27,7 @@ from src.config import (
 from src.core.input import Action, InputManager
 from src.core.scene import SceneManager
 from src.systems.settings import Settings
-from src.ui import i18n
+from src.ui import cursor, i18n
 
 WINDOW_TITLE = "Legend of Rey"
 MIN_SCALE = 1
@@ -109,6 +109,10 @@ class Game:
         self._create_window()
         self.canvas = pygame.Surface(
             (INTERNAL_WIDTH, INTERNAL_HEIGHT)).convert_alpha()
+        # Isletim sisteminin varsayilan oku bu oyunun piksel-art diline
+        # uymuyor - kendi imlecimizi ciziyoruz (src/ui/cursor.py), OS
+        # oku bir daha hic gorunmuyor.
+        pygame.mouse.set_visible(False)
 
     # --- Pencere ------------------------------------------------------------
     def _best_scale(self) -> int:
@@ -331,6 +335,7 @@ class Game:
         self.scenes.draw(self.canvas)
         if self.debug_overlay:
             self._draw_debug()
+        self._draw_cursor()
 
         self.screen.fill((0, 0, 0))
         if self.viewport.size == self.canvas.get_size():
@@ -341,6 +346,32 @@ class Game:
             scaled = pygame.transform.scale(self.canvas, self.viewport.size)
             self.screen.blit(scaled, self.viewport.topleft)
         pygame.display.flip()
+
+    def _draw_cursor(self) -> None:
+        """Ozel imlec - yalnizca fare **son kullanilan** girdiyse gorunur.
+
+        Ic cozunurlukte cizilir (dis cizimden once) ki geri kalan her sey
+        gibi tam sayida buyusun - ekran uzayinda cizilseydi piksel art
+        olceklemesiyle uyumsuz, bulanik bir imlec olurdu.
+        """
+        if self.input.last_device != "mouse":
+            return
+        position = self.virtual_mouse_pos()
+        if position is not None:
+            cursor.draw(self.canvas, position)
+
+    def virtual_mouse_pos(self) -> tuple[float, float] | None:
+        """Gercek fare konumunu ic (480x270) cozunurluge cevirir.
+
+        Menu/ayarlar/karakter secimi kendi kopyalarini tutuyordu; tek
+        kaynaga tasimak yerine (gerek yoksa dokunma) burada da var -
+        ozel imlec ayni donusumu kullanmak zorunda.
+        """
+        mx, my = pygame.mouse.get_pos()
+        if not self.viewport.collidepoint(mx, my) or self.scale <= 0:
+            return None
+        return ((mx - self.viewport.x) / self.scale,
+                (my - self.viewport.y) / self.scale)
 
     def _draw_debug(self) -> None:
         from src.ui import text

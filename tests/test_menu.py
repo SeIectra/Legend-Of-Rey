@@ -300,6 +300,30 @@ def main() -> int:
 
     game.shutdown()
 
+    # --- 10. Ozel imlec (C&C tarzi) ------------------------------------------
+    print("\n--- ozel imlec ---")
+    from src.ui import cursor
+
+    # `pygame.quit()` az once cagrildi (Game.shutdown) - Canvas.resolve()
+    # `.convert_alpha()` icin acik bir ekran modu istiyor, once yeni bir
+    # Game() ile pencereyi geri kur.
+    game = Game()
+    game.scenes.set_root(CombatRoomScene, transition=False)
+    game.scenes._flush()
+
+    sprite = cursor.sprite()
+    check(sprite.get_size()[0] > 0 and sprite.get_size()[1] > 0,
+          "imlec yuzeyi uretiliyor", str(sprite.get_size()))
+    check(cursor.sprite() is sprite, "imlec bir kez uretilip onbellekten okunuyor")
+
+    check(game.input.last_device == "keyboard",
+          "basta ozel imlec gizli (fare henuz kullanilmadi)")
+    game.input.last_device = "mouse"
+    step(game, 1)
+    game._render()          # cokmeden calismali - konum ekran disinda olsa bile
+    check(True, "fare 'son kullanilan' iken render cokmuyor")
+    game.shutdown()
+
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")
