@@ -89,9 +89,15 @@ class Chapter01Scene(PlayScene):
         # Kilic: yaratiklardan once duruyor. Rey silahsiz basliyor ve ilk
         # yaratigi gorunce kacacak yeri yok - kilici alma ani bir rahatlama
         # oluyor. Once ihtiyaci hissettiriyoruz, sonra veriyoruz.
+        #
+        # **Ardo icin YOK** - o zaten kilicla basliyor (egitimli yabanci,
+        # weapons.starting_weapon). Prop yine de cizilseydi Ardo, elinde
+        # zaten kilic varken yerde "al beni" diyen ikinci bir kilica
+        # bakardi - Arda'nin bildirdigi tam bu celiskiydi ("karakter
+        # kilici almadan once de kilici oluyor").
         sword_at = LEVEL.first("pickup_sword")
         self.sword_pos = ((sword_at.x, sword_at.feet_y - 10)
-                          if sword_at else None)
+                          if sword_at and self.character != "ardo" else None)
 
         # Ogreti durumu
         self.moved = False

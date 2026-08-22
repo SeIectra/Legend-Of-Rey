@@ -88,6 +88,28 @@ def main() -> int:
           "Rey ogretiyle Yanki Gorusu'nu kazaniyor")
     game2.shutdown()
 
+    # --- Ardo zaten kilicla basliyor - yerde ikinci bir kilic gormemeli -----
+    # Arda'nin bildirdigi celiski: "karakter kilici almadan once de kilici
+    # oluyor" - Ardo zaten silahli baslarken sahne yine de bir "al beni"
+    # kilic prop'u gosteriyordu.
+    print("\n--- Ardo zaten silahli - yerde ikinci kilic YOK ---")
+    game3 = Game()
+    ardo2 = make_scene(game3, "ardo")
+    check(ardo2.player.has(abilities.SWORD),
+          "Ardo basta zaten kilica sahip")
+    check(ardo2.sword_pos is None,
+          "Ardo icin yerde kilic prop'u YOK (celiskili gorunmesin)")
+    game3.shutdown()
+
+    print("\n--- Rey icin yerde kilic prop'u hala var ---")
+    game4 = Game()
+    rey2 = make_scene(game4, "rey")
+    check(not rey2.player.has(abilities.SWORD),
+          "Rey basta kilica sahip degil")
+    check(rey2.sword_pos is not None,
+          "Rey icin yerde kilic prop'u duruyor (bulunacak)")
+    game4.shutdown()
+
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")
