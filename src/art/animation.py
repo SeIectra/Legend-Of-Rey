@@ -257,6 +257,12 @@ ARDO_SPEC = replace(
     torso_height=8.0, torso_width=8.2, shoulder_width=7.6, limb_width=2.9,
     thigh=4.4, shin=4.4,          # Daha kisa bacak, daha agir duruş
     skin="skin_tan", hair="hair_dark", cloth="cloth_grey",
+    # Arka bacak/kol "cloth_dark" ile bir basamak koyu cizilir. Varsayilan
+    # "shadow" zinciri "abyss_dark" arka planla neredeyse ayni koyulukta -
+    # Ardo'nun etegi olmadigi icin (Rey'in aksine) bacaklar dogrudan
+    # gorunuyor ve arka bacak kayboluyordu ("tek bacakli" gibi okunuyordu).
+    # "steel" zaten zirhinin tonu - ayni aile, ama secilebilir.
+    cloth_dark="steel",
     armor="steel", accent="leather",
     long_hair=False, hair_length=0.0, hem=0.0, tattoo=False,
     hood=True, cape=True, shoulder_pads=True,

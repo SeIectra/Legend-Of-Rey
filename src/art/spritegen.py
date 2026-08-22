@@ -209,8 +209,12 @@ def _draw_head(canvas: Canvas, cx: float, cy: float, spec: CharSpec) -> None:
             canvas.taper(cx - radius * 1.1, cy + radius * 0.2,
                          cx - radius * 1.9, cy + radius * 1.5,
                          radius * 0.9, radius * 0.35, spec.cloth, 0)
-            # Kukuletenin agzi: yuzun ust yarisi karanlikta kalir.
-            canvas.disc(cx + radius * 0.25, cy + radius * 0.15, radius * 0.72,
+            # Kukuletenin golgesi: yuzun ust yarisi karanlikta kalir ama
+            # **hepsi degil** - cene/yanak hatti gorunur kalmali, yoksa
+            # kukulete bos bir kukuletiye degil govdeye baglanan sekilsiz
+            # bir yuma donusuyor (Arda'nin geri bildirimi: "insana
+            # benzemiyor"). Yaricap 0.72'den 0.5'e dusuruldu.
+            canvas.disc(cx + radius * 0.30, cy + radius * 0.05, radius * 0.50,
                         "shadow", 1)
         else:
             for y in range(int(cy - radius), int(cy)):
@@ -271,6 +275,16 @@ def _draw_eyes(canvas: Canvas, cx: float, cy: float, spec: CharSpec) -> None:
                   glow=spec.glow_eyes)
         return
     if spec.skull:
+        return
+    if spec.hood:
+        # Kukuletenin golgesi koyu; "hair_dark" gozler o golgeyle ayni
+        # tonda kalip kayboluyordu (Arda: "insana benzemiyor" - gozsuz bir
+        # kukulete govdeye baglanan sekilsiz bir yumdu). Parlamiyor - bu
+        # bir canavar degil, golgede kalan bir insan - ama golgeden
+        # **secilecek** kadar acik olmali: soluk bir "bone_pale" pareltisi.
+        near_x = int(cx + spec.head_radius * 0.25)
+        canvas.fill_rect(near_x, eye_y, 2, 1, "bone_pale", 3)
+        canvas.px(int(cx - spec.head_radius * 0.6), eye_y, "bone_pale", 3)
         return
     # Badem goz: 2 piksel genis, ustunde kirpik cizgisi.
     near_x = int(cx + spec.head_radius * 0.25)
