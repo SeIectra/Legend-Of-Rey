@@ -115,10 +115,17 @@ class Climber(Enemy):
             self._drop()
             return
 
-        # Sabir sayaci: oyuncu farkindayken ama hic tam altina girmiyorsa
-        # (oda duzeni bunu garanti etmez) esik asilinca yine de birakir -
-        # "yapisik dusman" hissi sonsuza kadar surmesin.
-        self.aware_frames = self.aware_frames + 1 if self.aware else 0
+        # Sabir sayaci: oyuncu hic tam altina girmiyorsa (oda duzeni bunu
+        # garanti etmez) esik asilinca yine de birakir - "yapisik dusman"
+        # hissi sonsuza kadar surmesin. **`self.aware`'e bagli degil**:
+        # ilk surumde yalniz farkindayken sayiliyordu, ama farkindalik
+        # `distance_to()` ile YATAY mesafeye bakiyor (dikey yok sayiliyor)
+        # - oyuncu tam altindan hic yatay olarak yaklasmadan gecerse
+        # (orn. baska bir platformdan) Tirmanan hic farkina varmadan
+        # ekranda gorunur sekilde asili kaliyordu. Kosulsuz sayim, oda
+        # yuklendikten sonra en gec CLIMBER_PATIENCE_FRAMES kare icinde
+        # her Tirmanan'in dusecegini garanti eder.
+        self.aware_frames += 1
         patient_drop = self.aware_frames >= CLIMBER_PATIENCE_FRAMES
 
         if ((self.overhead_player or patient_drop)
