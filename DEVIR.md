@@ -3,7 +3,7 @@
 Bu belge, projeyi devralan Claude Code oturumu içindir.
 **Önce `CLAUDE.md`'yi oku** (bağlayıcı anayasa), sonra burayı.
 
-Son güncelleme: 22.08.2026 (Görev 8 sonrası + silah altyapısı) · Ardeko Studios
+Son güncelleme: 22.08.2026 (canlı oynanış geri bildirim turu sonrası) · Ardeko Studios
 
 ---
 
@@ -443,11 +443,14 @@ Sıra gelmediği için değil, gözden kaçmasın diye burada:
 10. **Checkpoint yok.** Oyuncu ölünce sahne yeniden kurulmuyor; Bölüm 2'de
    arena kapısı ölümde açılıyor ki oyuncu kilitli kalmasın, ama gerçek
    çözüm bir yeniden doğma sistemi. Bölüm 3'te de aynı durum.
-11. **Marooned dusman kendiliginden asagi inmiyor.** `_vertically_reachable()`
-   (commit `c812bbb`) erişilemez bir hedefe saldırı denemesini durdurdu,
-   ama bir düşman yüksek/kopuk bir platformda kalırsa orada bekler -
-   savaşa dönmesi için ledge-detection/basit bir "kenara yürü" davranışı
-   gerekir. Şimdilik zararsız (sadece pasif duruyor), ama tam çözüm değil.
+11. ~~**Marooned dusman kendiliginden asagi inmiyor.**~~ ✅ (22.08.2026)
+   `_vertically_reachable()` (commit `c812bbb`) erişilemez bir hedefe
+   saldırı denemesini durdurmuştu ama düşman yüksek/kopuk bir platformda
+   sonsuza kadar bekleyebiliyordu - Arda ekran görüntüsüyle "hâlâ
+   yapışık" diye bildirdi. `ENEMY_UNREACHABLE_PATIENCE_FRAMES` sonrası
+   `_nearest_ledge_direction()` ile en yakın kenarı bulup düşüyor artık;
+   `Climber`'ın ayrı asılı-bekleme mekanizması da aynı düzeltmeyi aldı
+   (`CLIMBER_PATIENCE_FRAMES`). Detay §8 madde 5.
 12. **Bölüm 3'ün "5 yuva" ödülü basitleştirildi.** `docs/bolum-03.md`
    yuvaların hepsi yanınca "ısıyla açılan bir gizli kapı" tarif ediyor;
    kodda bulmaca çözümü sadece bir kutlama efekti/toast veriyor, Mum
@@ -555,6 +558,44 @@ Arda uzun süre bilgisayar başında olmayacağı için **tam yetki verdi**
    (§2 madde 12): kare dalga → sinüs, adım sesi sıklığı 5x azaltıldı,
    genel ses tepe seviyesi düşürüldü. Kalan: müzik (bölüm 9) ve öncelik
    2-3 setleri hâlâ yok.
+5. ~~**İkinci canlı oynanış turu (22.08.2026) — altı ayrı geri bildirim,
+   hepsi aynı oturumda çözüldü:**~~ ✅
+   - **Düşmanlar hâlâ yukarıda/tavanda "yapışık" kalıyordu** (ekran
+     görüntüsüyle bildirildi) - madde 2'nin "açık kalan yarımı" buydu.
+     `Enemy._approach()` artık `ENEMY_UNREACHABLE_PATIENCE_FRAMES` (90
+     kare) sonra en yakın kenarı arayıp (`_nearest_ledge_direction`)
+     düşüyor; `Climber`'ın kendi ayrı asılı-bekleme mekanizması da aynı
+     hataya sahipti, `CLIMBER_PATIENCE_FRAMES` (150 kare) ile o da
+     düzeltildi.
+   - **"Mini-boss duvarına sıkışıyoruz"** (ekran görüntüsü) - araştırma
+     sonucu: Bölüm 2'nin kapısı doğru çalışıyor (bot-yürüyüş testiyle
+     doğrulandı, boss görünür olduktan uzun süre sonra kapanıyor), oda
+     geometrisinde de engel yok. Kapı **kasıtlı/gerçek** bir mühür -
+     ama sessizce beliriyordu, oyuncu "az önce bir şey oldu" değil
+     "burada hep bir duvar varmış" hissediyordu. `rift_close` sesi
+     eklendi.
+   - **"Sesler çizirti gibi, kaldıralım"** - sentezlenmiş TÜM donguluk
+     (loop) sesler kaldırıldı (karakter seçim fısıltısı, Yankı açıkken
+     sürekli ses, üç bölümün ortam döngüleri, intro uğultusu, dikey
+     yolculuk rüzgâr/mahzen çaprazlaması). Kısa tek seferlik efektler
+     (vuruş/adım/UI) kaldı - ayrı, olumsuz geri bildirim almadılar.
+   - **"Kaçınma/sprint geldiğini söyleyen ipucu yok"** - `on_ability_gained()`
+     paylaşılan `PlayScene`'e taşındı, Bölüm 2 artık kaçınmayı
+     `if grant(): on_ability_gained()` ile açıkça bildiriyor (eskiden
+     sessizce veriliyordu).
+   - **"Ardo kafasındaki şey yüzünden yaratığa benziyor"** - kukulete
+     tamamen kaldırıldı, tam açık yüz + gümüş/gri kısa saç. Detay §2
+     madde 13.
+   - **"Ayarlar sekmesi kötü, Ses'e gitmek için en aşağı inmek gerekiyor"**
+     - `Action.NEXT_TAB` (Tab/RB) + fare tıklama ile sekmeler arası
+     doğrudan geçiş, tab şeridi + seçili satır + ok işaretleri görsel
+     olarak yenilendi.
+   - **Ek istek:** C&C tarzı özel altın imleç (`src/ui/cursor.py`) -
+     OS oku artık hiç görünmüyor.
+
+   Tüm değişiklikler ayrı commit'ler halinde, her biri kendi regresyon
+   testiyle. 13 test paketi + `tools/reachability.py` her adımda yeşil
+   kaldı.
 
 Arda geri döndüğünde sırayı değiştirebilir — daha önce iki kez değiştirdi.
 
