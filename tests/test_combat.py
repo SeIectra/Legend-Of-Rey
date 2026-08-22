@@ -26,6 +26,7 @@ from src.config import (  # noqa: E402
     HITSTOP_FINISHER, HITSTOP_KILL, HITSTOP_NORMAL, INPUT_BUFFER_FRAMES,
 )
 from src.core.game import Game  # noqa: E402
+from src.combat import weapons  # noqa: E402
 from src.systems import abilities  # noqa: E402
 from src.scenes.combat_room import CombatRoomScene  # noqa: E402
 
@@ -57,10 +58,10 @@ class Harness:
     def arm(self) -> None:
         """Dovus testleri kilici ve kacinmayi **varsayiyor**.
 
-        Rey artik silahsiz basliyor (`src/systems/abilities.py`); kilic
-        Bolum 1'de bulunuyor. Buradaki testler ilerlemeyi degil **kare
-        degerlerini** olcuyor, o yuzden ikisi pesinen veriliyor. Kapinin
-        kendisi asagida ayrica sinaniyor.
+        Rey artik yumrukla basliyor (`src/combat/weapons.py`); kilic
+        Bolum 1'de bulunuyor. Buradaki testler ilerlemeyi degil kilicin
+        baglayici **kare degerlerini** olcuyor, o yuzden ikisi pesinen
+        veriliyor. Kapinin kendisi asagida ayrica sinaniyor.
         """
         self.player.grant(abilities.SWORD)
         self.player.grant(abilities.DODGE)
@@ -325,21 +326,25 @@ def main() -> int:
 
     h.game.shutdown()
 
-    # --- Yetenek kapisi ----------------------------------------------------
-    # Prototipte iyi calisan bir seydi: kilici sonradan almak, atilmayi
-    # sonradan ogrenmek. Kapinin gercekten kapali oldugunu dogrula - yoksa
-    # "sonradan alma" hissi sessizce kaybolur ve kimse fark etmez.
+    # --- Yetenek kapisi ------------------------------------------------------
+    # Rey artik yumrukla basliyor (src/combat/weapons.py) - saldiri bastan
+    # acik, kilic sonradan gelen bir YUKSELTME, bir "kapanan kapi" degil.
+    # Kacinma ise hala gercek bir kapi: ogrenilmeden atilamaz.
     print("\n--- yetenek kapisi ---")
     gate = Harness()
-    gate.player.abilities.clear()          # koy kizi Rey: eli bos
+    gate.player.abilities.clear()          # koy kizi Rey: eli bos (yumruk)
+    # `Harness.arm()` diger testler icin onceden kilic kusturuyor; bu test
+    # ozellikle KUSANMADAN ONCEKI durumu olctugu icin geri aliyoruz.
+    gate.player.equip_weapon(weapons.FISTS)
+    check(gate.player.weapon == weapons.FISTS, "Rey yumrukla basliyor")
 
     # `tap` bas-birak yapar. `step(press=...)` yalnizca KEYDOWN gonderiyor
     # ve tus basili kaldigi icin ikinci basis **yeni bir kenar uretmiyor** -
     # bu tuzaga bir kez dusuldu, kod hatasi sanildi.
     gate.tap(KEY_ATTACK)
-    gate.settle(12)
-    check(not gate.player.chain.busy,
-          "kilic yokken saldirilamiyor", gate.player.chain.phase.name)
+    check(gate.player.chain.busy, "yumrukla da saldirilabiliyor",
+          gate.player.chain.phase.name)
+    gate.settle(30)
 
     gate.tap(KEY_DODGE)
     gate.settle(4)
@@ -348,9 +353,13 @@ def main() -> int:
     check(gate.player.grant(abilities.SWORD), "kilic kazanildi")
     check(not gate.player.grant(abilities.SWORD),
           "ayni yetenek iki kez kazanilmiyor")
+    check(gate.player.weapon == weapons.SWORD,
+          "kilic kazaninca silah degisiyor")
+    check(gate.player.chain.chain_table is CHAIN,
+          "kilicin zinciri baglayici CHAIN tablosu")
 
     gate.tap(KEY_ATTACK)
-    check(gate.player.chain.busy, "kilictan sonra saldirilabiliyor",
+    check(gate.player.chain.busy, "kilictan sonra da saldirilabiliyor",
           gate.player.chain.phase.name)
 
     gate.settle(45)

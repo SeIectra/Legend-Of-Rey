@@ -105,6 +105,39 @@ CHAIN_WINDOW_FRAMES: Final[int] = 12    # Aktif kare bitince zinciri surdurme su
 
 
 # =============================================================================
+# SILAHLAR - yumruktan kilica  (Arda karari, 22.08.2026)
+# =============================================================================
+# Rey artik tamamen silahsiz baslamiyor: **yumrukla** basliyor, kilici
+# Bolum 1'de buluyor. Bolum 2 mini-boss sonrasi Hancer/Balta secimi
+# (DEVIR.md acik madde 9) ayni altyapiyi (`src/combat/weapons.py`)
+# kullanacak; ileride yay/arbalet de eklenebilir (mimari bunu engellemiyor,
+# icerik olarak henuz yazilmadi - sirasi gelmedi).
+#
+# Kilicin tablosu (`CHAIN`, yukarida) BAGLAYICI (docs/dovus-sistemi.md).
+# Asagidakiler **yer tutucu** - Arda ile birlikte gercek degerlere
+# oturtulacak; CLAUDE.md'nin "sessizce degistirme" yasagi zaten
+# belirlenmis sayilar icin - bunlar henuz hic belirlenmedi.
+FIST_CHAIN: Final[tuple[ChainHit, ...]] = (
+    ChainHit(windup=5, active=3, recovery=12, damage=4, knockback=1.0,
+             cancelable=True, hitstop=2),
+)
+DAGGER_CHAIN: Final[tuple[ChainHit, ...]] = (
+    ChainHit(windup=3, active=2, recovery=6, damage=7, knockback=1.1,
+             cancelable=True, hitstop=2),
+    ChainHit(windup=3, active=2, recovery=7, damage=8, knockback=1.2,
+             cancelable=True, hitstop=3),
+    ChainHit(windup=4, active=3, recovery=10, damage=13, knockback=2.2,
+             cancelable=False, hitstop=5),
+)
+AXE_CHAIN: Final[tuple[ChainHit, ...]] = (
+    ChainHit(windup=7, active=4, recovery=15, damage=17, knockback=2.8,
+             cancelable=True, hitstop=4),
+    ChainHit(windup=9, active=5, recovery=20, damage=32, knockback=5.5,
+             cancelable=False, hitstop=9),
+)
+
+
+# =============================================================================
 # DOVUS - KACINMA   (docs/dovus-sistemi.md 3 - BAGLAYICI)
 # =============================================================================
 DODGE_IFRAMES: Final[int] = 6

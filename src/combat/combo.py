@@ -52,9 +52,13 @@ class ChainState:
     skip_recovery: bool = False      # Kill cancel aktif karede geldiyse
     # Meşale taşırken tek elle dövüşülür: zincir 3'lü değil 2'li, bitirici
     # yok (docs/bolum-03.md Oda 1). `None` = kısıtlama yok (üç vuruşun
-    # hepsi acık). CHAIN tablosunun kendisi değişmiyor, sadece ne kadarına
+    # hepsi acık). Silah tablosunun kendisi değişmiyor, sadece ne kadarına
     # erişilebildiği.
     max_index: int | None = None
+    # Hangi silahın zinciri okunuyor (src/combat/weapons.py). Varsayılan
+    # `CHAIN` (kılıç) - Player kuşandığı silaha göre bunu değiştirir,
+    # `ChainState`'in kendisi hangi silah olduğunu bilmez.
+    chain_table: tuple = CHAIN
 
     @property
     def busy(self) -> bool:
@@ -62,13 +66,13 @@ class ChainState:
 
     @property
     def spec(self):
-        if 0 <= self.index < len(CHAIN):
-            return CHAIN[self.index]
-        return CHAIN[0]
+        if 0 <= self.index < len(self.chain_table):
+            return self.chain_table[self.index]
+        return self.chain_table[0]
 
     @property
     def _effective_max(self) -> int:
-        cap = len(CHAIN) - 1
+        cap = len(self.chain_table) - 1
         if self.max_index is not None:
             cap = min(cap, self.max_index)
         return cap
@@ -87,7 +91,7 @@ class ChainState:
     def start(self, index: int) -> None:
         self.index = index
         self.phase = AttackPhase.WINDUP
-        self.phase_frames_left = CHAIN[index].windup
+        self.phase_frames_left = self.chain_table[index].windup
         self.hitbox_spawned = False
         self.queued = False
         self.window_frames_left = 0

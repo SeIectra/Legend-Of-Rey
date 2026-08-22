@@ -410,7 +410,8 @@ class Chapter01Scene(PlayScene):
                      left=self.game.input.binding_label(Action.LEFT),
                      right=self.game.input.binding_label(Action.RIGHT))
         elif (self.moved and not self.attacked and self.enemies
-                and self.player.has(abilities.SWORD)
+                # Yumrukla bile saldirilabiliyor artik - ipucu kilica
+                # bakmiyor, sadece dusman gorunur olunca tetikleniyor.
                 and self.game.frame > TUTORIAL_ATTACK_AFTER):
             hint = t("chapter01.hint_attack",
                      key=self.game.input.binding_label(Action.ATTACK))

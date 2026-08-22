@@ -26,6 +26,7 @@ from src.art.animator import Animator
 from src.core.input import Action
 from src.entities.actor import Actor
 from src.entities.character_stats import CharacterStats, REY
+from src.combat import weapons
 from src.entities.player_anim import attack_progress, update_animation
 from src.entities.player_render import draw_player
 from src.systems import abilities, charms
@@ -52,11 +53,6 @@ class Player(Actor):
         self.max_health = stats.max_health
         super().__init__(scene, x, y)
 
-        self.animator = Animator(stats.sprite_name)
-        # Sprite hucresi karakterden buyuk; ayak cizgisini govdenin altina
-        # hizalamak icin gerekli. Bilinmezse karakter havada durur.
-        self.sprite_foot_y = CHARACTERS[stats.sprite_name].foot_y
-
         # Yetenek kapisi **tek yerde**. Dagitilsaydi biri mutlaka bir yerde
         # unutulur ve oyuncu henuz almadigi bir seyi yapabilirdi.
         self.abilities: set[str] = abilities.starting_set(stats.name.lower())
@@ -64,7 +60,14 @@ class Player(Actor):
         # misin", tilsim "ne kadar iyi yapiyorsun" sorusunu cevapliyor.
         self.charms: set[str] = set()
 
-        self.chain = ChainState(window_frames=stats.chain_window)
+        # Silah: Rey yumrukla baslar (kilici Bolum 1'de bulur), Ardo
+        # egitimli bir yabanci - kilicla gelir (src/combat/weapons.py).
+        # `self.animator`/`self.chain` bu silaha gore kuruluyor; ayri ayri
+        # ilklendirilselerdi biri diger degisince unutulurdu.
+        self.weapon = weapons.starting_weapon(stats.name.lower())
+        self.chain = ChainState(window_frames=stats.chain_window,
+                                chain_table=weapons.get(self.weapon).chain)
+        self._apply_weapon_sprite()
         self.dodge = DodgeState(charges=stats.dodge_charges,
                                 max_charges=stats.dodge_charges)
         self.combo = ComboCounter()
@@ -182,19 +185,34 @@ class Player(Actor):
             return False
         self.abilities.add(ability)
         if ability == abilities.SWORD:
-            self._equip_sword()
+            self.equip_weapon(weapons.SWORD)
         return True
 
-    def _equip_sword(self) -> None:
-        """Kilic alininca sprite degisir - eli bos Rey artik silahli.
+    def equip_weapon(self, key: str) -> None:
+        """Silah degistir - yumruktan kilica, ileride hancer/baltaya.
 
-        Ayni iskeletten cikan iki spec oldugu icin degisim bedava; yalnizca
-        animator yeniden kuruluyor.
+        Zincir tablosu tamamen degisir (`src/combat/weapons.py`); yarim
+        kalmis bir vurusun ortasinda silah degismez cunku `grant()` bunu
+        yalnizca ability kazanildigi anda cagirir, o an zaten `chain.busy`
+        degildir (yetenek diyalog/sandik anlarinda verilir, dovus aninda
+        degil). Sprite, ayni iskeletten cikan "_armed" varyanti varsa
+        degisir - yumruk kendi "silahsiz" sprite'ini kullanmaya devam eder.
         """
-        armed = f"{self.stats.sprite_name}_armed"
-        if armed in CHARACTERS:
-            self.animator = Animator(armed)
-            self.sprite_foot_y = CHARACTERS[armed].foot_y
+        self.weapon = key
+        weapon = weapons.get(key)
+        self.chain = ChainState(window_frames=self.stats.chain_window,
+                                chain_table=weapon.chain)
+        self._apply_weapon_sprite()
+
+    def _apply_weapon_sprite(self) -> None:
+        suffix = weapons.get(self.weapon).sprite_suffix
+        sprite_name = f"{self.stats.sprite_name}{suffix}"
+        if sprite_name not in CHARACTERS:
+            sprite_name = self.stats.sprite_name
+        self.animator = Animator(sprite_name)
+        # Sprite hucresi karakterden buyuk; ayak cizgisini govdenin altina
+        # hizalamak icin gerekli. Bilinmezse karakter havada durur.
+        self.sprite_foot_y = CHARACTERS[sprite_name].foot_y
 
     def _handle_actions(self, inp) -> None:
         # Kacinma once bakilir: saldiriyi iptal edebilir, akiciligin kalbi bu.
@@ -212,7 +230,9 @@ class Player(Actor):
             self.body.vy *= JUMP_CUT_MULTIPLIER
             self.jump_held = False
 
-        if inp.buffered(Action.ATTACK) and self.has(abilities.SWORD):
+        # Yumruk bastan acik - silah yok sayisi degil, ilk silah. Kilic/hancer/
+        # balta zaten `equip_weapon()` ile zincir tablosunu degistiriyor.
+        if inp.buffered(Action.ATTACK):
             inp.consume(Action.ATTACK)
             self._request_attack()
 

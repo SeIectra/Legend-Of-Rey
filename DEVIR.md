@@ -3,7 +3,7 @@
 Bu belge, projeyi devralan Claude Code oturumu içindir.
 **Önce `CLAUDE.md`'yi oku** (bağlayıcı anayasa), sonra burayı.
 
-Son güncelleme: 22.08.2026 (Görev 8 sonrası) · Ardeko Studios
+Son güncelleme: 22.08.2026 (Görev 8 sonrası + silah altyapısı) · Ardeko Studios
 
 ---
 
@@ -26,7 +26,8 @@ görev sırası `GOREVLER.md`'de.
 | 9 — Sanat geçişi | 🟡 | Sprite + mağara arka planı hazır; **tileset hâlâ placeholder** |
 | 10 — Ses + son cila | ⬜ | Dikiş hazır, gövde boş |
 
-Toplam ~13.700 satır. **On iki test paketi de yeşil** (`test_chapter03.py` eklendi).
+Toplam ~13.900 satır. **On üç test paketi de yeşil** (`test_chapter01.py` +
+`test_chapter03.py` eklendi).
 
 **Oynanabilir akış:**
 intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)** →
@@ -103,6 +104,30 @@ kılar. Kendiliğinden geri alma; Arda'ya sormadan değiştirme.
    kısıtını (2'li zincir, bitirici yok) uygulamıyorum
    (`Chapter03Scene._update_combo_restriction`). Yanlışsa tek satırlık bir
    değişiklik.
+
+10. **Silah sistemi genelleştirildi (22.08.2026).** Arda: "sadece yumruk,
+    sonra kılıç iyi. ama sonrasında bölüm 2 mini boss sonrası hançer/balta
+    olayı devam etsin. hatta gelecekte ok/arbalet de koyabiliriz... önce
+    altyapıyı kur." Eski davranış (kılıç yokken saldırı **tamamen kilitli**)
+    değişti: Rey artık yumrukla başlıyor, saldırı bastan açık; kılıç
+    Bölüm 1'de bulununca `equip_weapon()` ile üstüne biniyor. Yapılan:
+    - `src/config.py`: `FIST_CHAIN`/`DAGGER_CHAIN`/`AXE_CHAIN` — **açıkça
+      placeholder**, sayıları henüz Arda belirlemedi. Bağlayıcı `CHAIN`
+      (kılıç) tablosuna dokunulmadı.
+    - `src/combat/weapons.py` (yeni): `Weapon` kaydı + `starting_weapon()`
+      (Rey→yumruk, Ardo→kılıç). Hançer/Balta **tanımlı ama hiçbir sahne
+      henüz vermiyor** — ödül akışı ayrı bir görev (madde 9 altta).
+    - `ChainState`'e `chain_table` alanı: artık hangi silahın zincirini
+      okuyacağını `Player` söylüyor, modül sabiti `CHAIN`'e kilitli değil.
+    - `Player.equip_weapon()` yeni, `_equip_sword()`'un yerini aldı;
+      `grant(SWORD)` artık bunu çağırıyor.
+    - `tests/test_combat.py` "yetenek kapisi" bölümü güncellendi: eski
+      iddia ("kılıç yokken saldırılamaz") artık **yanlış** — yeni iddia
+      yumrukla saldırının çalıştığını, kılıcın `chain_table`'ı bağlayıcı
+      `CHAIN`'e değiştirdiğini doğruluyor.
+    - Hançer/Balta'nın kendi sprite'ı yok, `sword`'la aynı `_armed`
+      varyantını **bilerek** paylaşıyorlar (CLAUDE.md: sessiz placeholder
+      yasak, bu yüzden `weapons.py` docstring'inde açıkça yazılı).
 
 ---
 
@@ -345,8 +370,10 @@ Sıra gelmediği için değil, gözden kaçmasın diye burada:
    karanlık) çalışıyor, müziği kısacak taraf Görev 10'da yazılacak.
 9. **Bölüm 2'nin ödülünde eksik var:** belge mini-boss sonrası **ilk silah
    seçimi** (Hançer / Balta) veriyor. Şu an sadece 55 altın veriliyor.
-   Silah sistemi (`SaveData.weapon` alanı duruyor) hiç yazılmadı — bilerek
-   bırakıldı, çünkü silah çeşitliliği tek başına bir görev.
+   Silah **altyapısı** artık var (`src/combat/weapons.py`, §2 madde 10) —
+   `DAGGER`/`AXE` tanımlı, ama hiçbir sahne henüz vermiyor. Eksik olan
+   tamamen **içerik/akış**: mini-boss sonrası seçim ekranı, `SaveData`'ya
+   hangi silahın seçildiğinin yazılması, Hançer/Balta'nın kendi sprite'ı.
 10. **Checkpoint yok.** Oyuncu ölünce sahne yeniden kurulmuyor; Bölüm 2'de
    arena kapısı ölümde açılıyor ki oyuncu kilitli kalmasın, ama gerçek
    çözüm bir yeniden doğma sistemi. Bölüm 3'te de aynı durum.
@@ -439,6 +466,9 @@ Arda uzun süre bilgisayar başında olmayacağı için **tam yetki verdi**
    hata doğurdu (kapı açılınca kendini hemen yeniden kilitliyordu),
    `boss_defeated` bayrağıyla çözüldü - `tests/test_chapter02.py`'ye
    regresyon kontrolü eklendi.
+2d. ~~**Silah sistemi altyapısı**~~ ✅ (bu commit). Arda'nın isteği:
+   yumrukla başla, kılıcı sonra bul; Hançer/Balta/gelecekte menzilli için
+   mimari hazır ama içerik yazılmadı. Detay §2 madde 10.
 3. **Görev 9 — Sanat geçişi.** `src/art/tileset.py` yazıldı (prosedürel
    tuğla dokusu, `forge.Canvas` ile - 4 duvar varyantı, üst kenar vurgusu)
    ama **henüz `world/tilemap.py`'ye bağlanmadı** - şu an dead code. En görünür eksik: tileset hâlâ düz renk.
