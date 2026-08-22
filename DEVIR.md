@@ -349,7 +349,19 @@ Sıra gelmediği için değil, gözden kaçmasın diye burada:
    bırakıldı, çünkü silah çeşitliliği tek başına bir görev.
 10. **Checkpoint yok.** Oyuncu ölünce sahne yeniden kurulmuyor; Bölüm 2'de
    arena kapısı ölümde açılıyor ki oyuncu kilitli kalmasın, ama gerçek
-   çözüm bir yeniden doğma sistemi.
+   çözüm bir yeniden doğma sistemi. Bölüm 3'te de aynı durum.
+11. **Marooned dusman kendiliginden asagi inmiyor.** `_vertically_reachable()`
+   (commit `c812bbb`) erişilemez bir hedefe saldırı denemesini durdurdu,
+   ama bir düşman yüksek/kopuk bir platformda kalırsa orada bekler -
+   savaşa dönmesi için ledge-detection/basit bir "kenara yürü" davranışı
+   gerekir. Şimdilik zararsız (sadece pasif duruyor), ama tam çözüm değil.
+12. **Bölüm 3'ün "5 yuva" ödülü basitleştirildi.** `docs/bolum-03.md`
+   yuvaların hepsi yanınca "ısıyla açılan bir gizli kapı" tarif ediyor;
+   kodda bulmaca çözümü sadece bir kutlama efekti/toast veriyor, Mum
+   Bekçisi'nin cebi ayrı, her zaman kılıçla kırılabilir bir duvarın
+   ardında (diğer gizli duvarlarla aynı dil). Bilinçli bir sadeleştirme -
+   DEVIR.md'de not düşüldü ki "neden farklı" sorusu sorulunca cevap hazır
+   olsun.
 
 ---
 
@@ -410,9 +422,14 @@ Arda uzun süre bilgisayar başında olmayacağı için **tam yetki verdi**
 
 1. ~~**Görev 5 — Ara Değerlendirme.**~~ Arda'nın kendi oturup oynaması
    gereken adım; o yokken atlanıyor, geri döndüğünde kendisi karar verir.
-2. **Düşmanların üst platform/çatılara sıkışması** (Arda'nın bildirdiği
-   hata, Görev 8 bitince). İnceleniyor/düzeltiliyor — bkz. bu bölümün
-   altındaki not, çözülünce buraya commit referansı eklenecek.
+2. ~~**Düşmanların üst platform/çatılara sıkışması**~~ ✅ (commit
+   `c812bbb`). Kök neden: `Enemy._approach()` saldırı kararını yalnızca
+   yatay mesafeye bakarak veriyordu; oyuncu tam altındaysa dikeyde
+   erişilemez bir hedefe sonsuza dek TELL/ATTACK deniyordu.
+   `_vertically_reachable()` eklendi. **Açık kalan yarım:** dusman hala
+   platformdan kendiliğinden inip savaşa dönmüyor (sadece artık boşuna
+   saldırmıyor) - ledge-detection gerektiren ayrı, daha büyük bir iş,
+   bilerek kapsam dışı bırakıldı.
 3. **Görev 9 — Sanat geçişi.** En görünür eksik: tileset hâlâ düz renk.
    `world/tilemap.py` 9-slice ve varyantlara genişleyecek.
 4. **Görev 10 — Ses.** `assets/audio/SES-LISTESI.md` içinde 72 ses / 84
