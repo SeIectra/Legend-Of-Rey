@@ -165,6 +165,19 @@ kılar. Kendiliğinden geri alma; Arda'ya sormadan değiştirme.
       `_update_arena()` eşik+tampon geçilince mühürlüyor - Bölüm 2'nin
       kalıbıyla birebir. `tests/test_chapter03.py` regresyon kontrolü var.
 
+13. **Ardo "insana benzemiyor" (22.08.2026).** Arda'nın devamındaki geri
+    bildirimi. Kök neden: `hood=True` karakterlerde yüzün çoğu "shadow"
+    zinciriyle karartılıyordu (yarıçap kafanın neredeyse tamamı) ve gözler
+    "hair_dark" ile çiziliyordu - ikisi de aynı derecede koyu, gözler
+    gölgede tamamen kayboluyordu. Kukulete govdeye bağlanan yüzsüz bir
+    yumdu. Düzeltme: gölge yarıçapı küçültüldü (çene hattı görünür kaldı),
+    gözler `hood=True` için soluk "bone_pale" ile çiziliyor (parlamıyor -
+    canavar değil, gölgede kalan bir insan), Ardo'nun `cloth_dark`'ı
+    "shadow" (arka planla aynı ton) yerine "steel" oldu (etegi olmadığı
+    için arka bacak dogrudan görünüyordu ve kayboluyordu). `tools/
+    sprite_sheet.py --karakter ardo` ile doğrulandı, siluet testi
+    Rey/Ardo ayrımını koruyor.
+
 ---
 
 ## 3. ÇALIŞTIRMA VE DOĞRULAMA
