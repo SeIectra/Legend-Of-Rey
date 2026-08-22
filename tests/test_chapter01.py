@@ -110,6 +110,38 @@ def main() -> int:
           "Rey icin yerde kilic prop'u duruyor (bulunacak)")
     game4.shutdown()
 
+    # --- Prolog: pasif oyuncu (hic onaylamiyor) hicbir repligi kaybetmez ----
+    # Arda'nin bildirdigi "bunlar cok anlamsiz cumleler" hatasi: cok-replikli
+    # bir beat'te ("gift": Cemo + Rey) ikinci satir onayla gecilmedigi surece
+    # bir sonraki beat baslayinca `self.say(...)` kuyrugu **sessizce**
+    # degistiriyordu - ilk oturumdaki bir oyuncunun "onayla" tusunu bilmesi
+    # beklenemez, o yuzden Rey'in tesekkuru hicbir zaman ekrana gelmiyordu.
+    # Bu test hic girdi vermeden butun prologu oynatir ve 5 repligin de
+    # (atlanmadan) en az bir kere gorundugunu dogrular.
+    print("\n--- prolog: pasif oyuncu replik kaybetmiyor ---")
+    game5 = Game()
+    game5.scenes.set_root(Chapter01Scene, transition=False, character="rey")
+    game5.scenes._flush()
+    prolog_scene = game5.scenes.current
+    seen_keys: list[str] = []
+    last_key = None
+    for _ in range(sum(frames for frames, _ in PROLOGUE) + 60):
+        game5.input.begin_frame()
+        game5.input.end_frame()
+        prolog_scene.update()
+        cur = prolog_scene.dialogue.current
+        key = cur.key if cur else None
+        if key is not None and key != last_key:
+            seen_keys.append(key)
+        last_key = key
+    for expected_key in ("line.ch01_echo_first", "line.ch01_cemo_gift",
+                         "line.ch01_rey_thanks", "line.ch01_echo_rift",
+                         "line.ch01_echo_alone"):
+        check(expected_key in seen_keys,
+              f"pasif oyuncu da '{expected_key}' repligini goruyor",
+              ", ".join(seen_keys))
+    game5.shutdown()
+
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")

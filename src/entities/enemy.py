@@ -36,11 +36,11 @@ from enum import Enum, auto
 from src.art import palette
 from src.combat.hitbox import Hitbox, Team, melee_rect
 from src.config import (
-    ENEMY_APPROACH_SPEED, ENEMY_LEDGE_PROBE_TILES, ENEMY_LOSE_RANGE,
-    ENEMY_MIN_TELL_FRAMES, ENEMY_ORBIT_SPEED, ENEMY_SIGHT_RANGE,
-    ENEMY_UNREACHABLE_PATIENCE_FRAMES, ENEMY_VERTICAL_ENGAGE_RANGE,
-    ORBIT_RADIUS_MAX, ORBIT_RADIUS_MIN, ORBIT_SLOT_WIDTH, TILE_SIZE,
+    ENEMY_APPROACH_SPEED, ENEMY_LOSE_RANGE, ENEMY_MIN_TELL_FRAMES,
+    ENEMY_ORBIT_SPEED, ENEMY_SIGHT_RANGE, ORBIT_RADIUS_MAX, ORBIT_RADIUS_MIN,
+    ORBIT_SLOT_WIDTH,
 )
+from src.entities import enemy_navigation
 from src.entities.actor import Actor
 
 
@@ -98,7 +98,8 @@ class Enemy(Actor):
         self.orbit_slot = 0.0            # Yorunge icindeki yeri
         self._attack_spawned = False
         # Oyuncu dikeyde erisilemezken gecen kare sayisi - bir esigi
-        # asinca dusman en yakin kenari arayip oradan iner (bkz. _approach).
+        # asinca dusman en yakin kenari arayip oradan iner (bkz.
+        # _update_reachability / _think).
         self._unreachable_frames = 0
         self.speed_scale = float(
             scene.game.settings.get("enemy_speed", 1.0)) if scene else 1.0
@@ -160,6 +161,7 @@ class Enemy(Actor):
 
         self.state_frames += 1
         self._update_awareness()
+        self._update_reachability()
         self._think()
 
         # Actor.update yercekimi ve hareketi yapar; durum makinesi vx'i
@@ -177,6 +179,10 @@ class Enemy(Actor):
             self.aware = True
         elif self.aware and distance > ENEMY_LOSE_RANGE:
             self.aware = False
+
+    def _update_reachability(self) -> None:
+        """Dikey erisilebilirlik takibi - bkz. `enemy_navigation.py`."""
+        enemy_navigation.update_reachability(self)
 
     def _think(self) -> None:
         """Durum makinesi. Alt sinif genelde bunu ezmez."""
@@ -208,6 +214,9 @@ class Enemy(Actor):
                 self._set_state(EnemyState.ORBIT)
             return
 
+        if self._try_escape_unreachable():
+            return
+
         if not self.aware:
             self._set_state(EnemyState.IDLE)
             self.body.approach_vx(0.0, 0.2)
@@ -221,6 +230,10 @@ class Enemy(Actor):
             self._set_state(EnemyState.ORBIT)
             self._orbit()
 
+    def _try_escape_unreachable(self) -> bool:
+        """Sikisma kacisi - bkz. `enemy_navigation.py`."""
+        return enemy_navigation.try_escape_unreachable(self)
+
     # --- Hareket ------------------------------------------------------------
     def _face_player(self) -> None:
         player = self.player
@@ -230,18 +243,8 @@ class Enemy(Actor):
             self.facing = 1 if player.body.center_x > self.body.center_x else -1
 
     def _vertically_reachable(self, player) -> bool:
-        """Oyuncu saldiri menzilinde erisilebilecek yukseklikte mi?
-
-        `distance_to()` yalnizca yatay olcuyor - bir dusman kopuk bir
-        platforma (guclu bir knockback_up ile, ya da bolum tasarimindaki
-        bir yukseltiye) cikinca, oyuncu tam altindaysa yatay mesafe hep
-        kucuk kaliyordu ve dusman hicbir zaman ulasamayacagi bir hedefe
-        sonsuza dek saldiri **denemesi** yapiyordu - "ust platformlara
-        sikisma" raporunun kaynagi buydu. Saldiriyi baslatmadan once bu
-        da soruluyor; goruş/kusatma davranisi bilerek degismiyor.
-        """
-        return abs(self.body.center_y - player.body.center_y) \
-            <= ENEMY_VERTICAL_ENGAGE_RANGE
+        """Oyuncu dikeyde erisilebilir mi - bkz. `enemy_navigation.py`."""
+        return enemy_navigation.vertically_reachable(self, player)
 
     def _approach(self) -> None:
         player = self.player
@@ -249,8 +252,10 @@ class Enemy(Actor):
             return
         self._face_player()
         distance = self.distance_to(player)
+        # Erisilebilirlik artik `_update_reachability()` ile her karede,
+        # bu fonksiyondan bagimsiz olarak izleniyor (bkz. `_think()`'in
+        # basindaki kenar-arama kontrolu) - burada yalnizca okunuyor.
         reachable = self._vertically_reachable(player)
-        self._unreachable_frames = 0 if reachable else self._unreachable_frames + 1
 
         if (distance <= self.contact_range and reachable
                 and self._can_attack()):
@@ -258,34 +263,7 @@ class Enemy(Actor):
             return
 
         speed = self.move_speed * self.speed_scale * ENEMY_APPROACH_SPEED / 0.5
-        direction = self.facing
-        if (not reachable
-                and self._unreachable_frames >= ENEMY_UNREACHABLE_PATIENCE_FRAMES):
-            # Oyuncuya sonsuza dek erisemiyor - o zaman en yakin kenari ara
-            # ve oradan in. "Yapisik dusman" hissi boyle kaliciliktan cikar.
-            edge = self._nearest_ledge_direction()
-            if edge is not None:
-                direction = edge
-        self.body.approach_vx(direction * speed, 0.25)
-
-    def _nearest_ledge_direction(self) -> int | None:
-        """Zemin `ENEMY_LEDGE_PROBE_TILES` ileride kesiliyorsa o yonu doner.
-
-        Once yuzun donuk oldugu yon denenir (oyuncuya daha yakin bir kenar
-        genelde o taraftadir), sonra tersi. Ikisi de kesilmiyorsa (genis,
-        duz bir platform) `None` doner - cagiran mevcut davranisi surdurur.
-        """
-        tilemap = getattr(self.scene, "tilemap", None)
-        if tilemap is None:
-            return None
-        foot_tx = int(self.body.center_x) // TILE_SIZE
-        foot_ty = int(self.body.feet[1]) // TILE_SIZE
-        for direction in (self.facing, -self.facing):
-            probe_tx = foot_tx + direction * ENEMY_LEDGE_PROBE_TILES
-            if not (tilemap.is_solid(probe_tx, foot_ty)
-                    or tilemap.is_platform(probe_tx, foot_ty)):
-                return direction
-        return None
+        self.body.approach_vx(self.facing * speed, 0.25)
 
     def _orbit(self) -> None:
         """Kusatma: yaklas ama girme, yerini koru.
@@ -371,14 +349,3 @@ class Enemy(Actor):
             grow = 0.18 * self.tell_progress
             return (1.0 - grow * 0.4, 1.0 + grow)
         return (1.0, 1.0)
-
-    def body_tint(self) -> palette.RGB | None:
-        """Durumu renkle anlatir - can bari yok (CLAUDE.md 7).
-
-        Sagligi dustukce koyulasir: bar okumadan "az kaldi" hissi.
-        """
-        if self.state is EnemyState.STAGGER:
-            return palette.color("stone_light")
-        if self.health_ratio < 0.35:
-            return palette.color("ink_soft")
-        return None

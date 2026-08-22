@@ -232,13 +232,6 @@ class ExtinguishedOne(Boss):
         self.on_attack_cancelled()
 
     # --- Dongu --------------------------------------------------------------
-    def _think(self) -> None:
-        if self.state is EnemyState.ATTACK and self.move == "drag":
-            # Surukleme boyunca hiz sabit tutulur - _think normalde vx'i
-            # yaklastirirdi, dash'in gucunu yerdi.
-            return
-        super()._think()
-
     def silhouette_scale(self) -> tuple[float, float]:
         if self.state is not EnemyState.TELL:
             return (1.0, 1.0)

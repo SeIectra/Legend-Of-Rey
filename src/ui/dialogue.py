@@ -48,6 +48,24 @@ from src.ui.widgets import panel
 TYPE_SPEED = 2.0
 ADVANCE_LOCK_FRAMES = 8          # Yanlislikla iki repligi birden gecme
 
+# Tamamlanmis bir replik onaylanmadan bu kadar kare beklerse **kendiliginden**
+# ilerler/kapanir - ama yalnizca `start(..., auto_advance=True)` ile
+# baslatilmis dizilerde (bkz. asagidaki `auto_advance` parametresi).
+# Sinematik beatler zamanlayiciyla ilerliyor ve oyuncu "onayla" tusunun
+# repligi ilerlettigini bilmeyebilir (ilk oturum, ilk dakika) - onaysiz
+# kalan bir cok-replikli dizinin ikinci satiri (`ch01_gift` beatindeki
+# Rey'in tesekkuru gibi) boylece hicbir zaman ekrana gelmeden bir sonraki
+# `say()` cagrisiyla sessizce kayboluyordu. Arda'nin "bunlar cok anlamsiz
+# cumleler" geri bildirimi bunun sonucuydu. Basili tutmak/onaylamak hala
+# daha hizli gecisi saglar - bu yalnizca bir alt sinir.
+#
+# Bilerek **varsayilan degil**: bir zamanlayicinin yarisamadigi normal
+# kesif/dovus repligi (orn. chapter02'nin boss karsilasma satiri) oyuncu
+# onaylamadan kendiliginden kapanirsa, meskul oyuncunun hic okumadigi
+# metin sessizce kaybolur - `AUTO_ADVANCE_HOLD_FRAMES` o senaryo icin
+# tasarlanmadi, yalnizca beat-zamanlayicisiyla yarisan diyaloglar icin.
+AUTO_ADVANCE_HOLD_FRAMES = 50
+
 BOX_X = 24
 BOX_WIDTH = INTERNAL_WIDTH - 48
 BOX_BOTTOM = INTERNAL_HEIGHT - 16
@@ -100,16 +118,25 @@ class Dialogue:
         self.index = 0
         self.revealed = 0.0
         self.lock = 0
+        self.hold = 0
+        self.auto_advance = False
         self.active = False
 
     # --- Denetim ------------------------------------------------------------
-    def start(self, lines: tuple[Line, ...]) -> None:
+    def start(self, lines: tuple[Line, ...], auto_advance: bool = False) -> None:
+        """`auto_advance=True` yalnizca bir sahne-zamanlayicisiyla yarisan
+        dizilerde kullanilir (bkz. `AUTO_ADVANCE_HOLD_FRAMES`). Normal
+        kesif/dovus repligi varsayilanla oynar: oyuncu onaylayana kadar
+        ekranda kalir, sessizce kaybolmaz.
+        """
         if not lines:
             return
         self.lines = lines
         self.index = 0
         self.revealed = 0.0
         self.lock = ADVANCE_LOCK_FRAMES
+        self.hold = 0
+        self.auto_advance = auto_advance
         self.active = True
 
     def stop(self) -> None:
@@ -154,13 +181,18 @@ class Dialogue:
             self.revealed += TYPE_SPEED * (4.0 if fast else 1.0)
             return
 
-        if pressed and self.lock <= 0:
+        # Tamamlandi - onayla hemen ilerler; `auto_advance` acikken bir
+        # sure sonra kendiliginden de ilerler (bkz. AUTO_ADVANCE_HOLD_FRAMES).
+        self.hold += 1
+        if (pressed and self.lock <= 0) or (
+                self.auto_advance and self.hold >= AUTO_ADVANCE_HOLD_FRAMES):
             self._advance()
 
     def _advance(self) -> None:
         self.index += 1
         self.revealed = 0.0
         self.lock = ADVANCE_LOCK_FRAMES
+        self.hold = 0
         if self.index >= len(self.lines):
             self.stop()
 

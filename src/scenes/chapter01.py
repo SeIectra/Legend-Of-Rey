@@ -50,6 +50,14 @@ CEMO_SINK_SPEED = 0.42
 HINT_Y = INTERNAL_HEIGHT - 26
 SHOCK_LOCK_FRAMES = 46   # Rey yerden kalkana kadar
 
+# Bir beat'in repligi suresi icinde bitmezse (oyuncu onaylamadi, diyalog
+# kendi otomatik-ilerleme suresini bekliyor) beat en fazla bu kadar uzar.
+# Yoksa bir sonraki beat'in `_on_beat_start()`'i kuyrugu **aninda** degistirir
+# ve okunmamis bir replik (orn. "gift" beatindeki Rey'in tesekkuru) sessizce
+# kaybolur - Arda'nin "bunlar cok anlamsiz cumleler" geri bildiriminin
+# kaynagi buydu. Azami: sonsuza dek beklemez, sahne kilitlenmez.
+DIALOGUE_GRACE_FRAMES = 100
+
 
 class Chapter01Scene(PlayScene):
     """Koy. Kolye verilir, Cemo kacirilir."""
@@ -141,23 +149,36 @@ class Chapter01Scene(PlayScene):
             return
         self.beat_frames += 1
         length = PROLOGUE[self.beat_index][0]
-        if self.beat_frames >= length:
-            self.beat_index += 1
-            self.beat_frames = 0
-            self._on_beat_start()
+        if self.beat_frames < length:
+            return
+        # Sure doldu ama repligi (varsa) henuz bitmediyse DIALOGUE_GRACE_
+        # FRAMES kadar daha bekle - `self.dialogue.done` cok-replikli bir
+        # beat'te ikinci satirin da (onaylanarak ya da kendiliginden)
+        # gosterilmis olmasini garanti eder.
+        if (not self.dialogue.done
+                and self.beat_frames < length + DIALOGUE_GRACE_FRAMES):
+            return
+        self.beat_index += 1
+        self.beat_frames = 0
+        self._on_beat_start()
 
     def _on_beat_start(self) -> None:
         # Replikler jestin **yerine** degil yanina geliyor. Cemo'nun yariga
         # cekildigi an ("chase") hala kelimesiz - orada bir replik ani
         # ucuzlatirdi.
+        # `auto_advance=True`: bu repliklerin hepsi `_advance_prologue()`'un
+        # beat-zamanlayicisiyla yarisiyor (bkz. DIALOGUE_GRACE_FRAMES) -
+        # oyuncu onaylamasa bile dizinin tamami gosterilmeli. Asagidaki
+        # `sword`/`wall` replikleri (etkilesimle tetiklenir, zamanlayici
+        # yok) bilerek varsayilanda kaliyor.
         if self.beat == "wake":
             # Sesin ilk kelimesi. Tek kelime - Rey uyanirken.
-            self.say(Line("echo", "line.ch01_echo_first"))
+            self.say(Line("echo", "line.ch01_echo_first"), auto_advance=True)
         elif self.beat == "gift":
             self.say(Line("cemo", "line.ch01_cemo_gift"),
-                     Line("rey", "line.ch01_rey_thanks"))
+                     Line("rey", "line.ch01_rey_thanks"), auto_advance=True)
         elif self.beat == "alone":
-            self.say(Line("echo", "line.ch01_echo_alone"))
+            self.say(Line("echo", "line.ch01_echo_alone"), auto_advance=True)
 
         if self.beat == "taken":
             # Yer sarsilir. Radyal - yarilmanin yonu yok.
@@ -174,7 +195,7 @@ class Chapter01Scene(PlayScene):
             self.player.body.vx = -1.8
             self.player.body.vy = -1.2
             # Ses ilk kez burada duyuluyor: yarik acilirken. Iki kelime.
-            self.say(Line("echo", "line.ch01_echo_rift"))
+            self.say(Line("echo", "line.ch01_echo_rift"), auto_advance=True)
         elif self.beat == "alone":
             self.necklace = True
             self.cemo_gone = True

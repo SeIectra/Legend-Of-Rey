@@ -95,13 +95,30 @@ class Climber(Enemy):
         self.body.vx = 0.0
         self.body.y = self.anchor_y
 
-        if self._fleeing_light:
-            # Devrilme planini birakir, tavan boyunca isiktan uzaklasir.
-            player = self.player
-            if player is not None:
-                away = -1.0 if player.body.center_x >= self.body.center_x else 1.0
-                self.anchor_x += away * CLIMBER_FLEE_SPEED
-                self.body.x = self.anchor_x - self.body.width * 0.5
+        # Sabir sayaci EN BASTA, kosulsuz artiyor - asagidaki her dalin
+        # (isiktan kacma dahil) ustunde. Oyuncu hic tam altina girmiyorsa
+        # (oda duzeni bunu garanti etmez) esik asilinca yine de birakir -
+        # "yapisik dusman" hissi sonsuza kadar surmesin. **`self.aware`'e
+        # bagli degil**: ilk surumde yalniz farkindayken sayiliyordu, ama
+        # farkindalik `distance_to()` ile YATAY mesafeye bakiyor (dikey yok
+        # sayiliyor) - oyuncu tam altindan hic yatay olarak yaklasmadan
+        # gecerse (orn. baska bir platformdan) Tirmanan hic farkina
+        # varmadan ekranda gorunur sekilde asili kaliyordu. Kosulsuz sayim,
+        # oda yuklendikten sonra en gec CLIMBER_PATIENCE_FRAMES kare icinde
+        # her Tirmanan'in dusecegini garanti eder.
+        self.aware_frames += 1
+        patient_drop = self.aware_frames >= CLIMBER_PATIENCE_FRAMES
+
+        # STAGGER ve TELL, isiktan kacmadan **once** kontrol edilir. Vurulup
+        # sendelemek ya da zaten saldiri dizisinde olmak, kacis davranisindan
+        # her zaman onceliklidir - eskiden `_fleeing_light` en basta
+        # kontrol edildigi icin (return ile) bu iki durum hic okunmuyordu:
+        # isik alaninda vurulan bir Tirmanan "yukarida kalip sikismasin"
+        # diye tasarlanan STAGGER-de-aninda-dusme garantisini kacirip sabir
+        # esigine kadar (150 kare) asili kalabiliyordu.
+        if self.state is EnemyState.STAGGER:
+            # Asiliyken vurulursa duser - yukarida kalip sikismasin.
+            self._drop()
             return
 
         if self.state is EnemyState.TELL:
@@ -110,27 +127,44 @@ class Climber(Enemy):
                 self._drop()
             return
 
-        if self.state is EnemyState.STAGGER:
-            # Asiliyken vurulursa duser - yukarida kalip sikismasin.
-            self._drop()
+        if self._fleeing_light:
+            # Kacis yonu oyuncunun konumundan turetiliyor, isik kaynaginin
+            # konumundan degil - statik yakilmis bir mesalenin (Bolum 3
+            # Oda 3 bulmacasi) yaricapindan bu yuzden HICBIR ZAMAN
+            # cikamayabilir (oyuncu pek hareket etmezse kacis yonu hep ayni
+            # kalir). Sayac yine de yukarida kosulsuz isledigi icin sabir
+            # burada da devreye girer - sonsuza dek kacmaz, esik dolunca
+            # duser.
+            if patient_drop:
+                self._drop()
+                return
+            player = self.player
+            if player is not None:
+                away = -1.0 if player.body.center_x >= self.body.center_x else 1.0
+                self.anchor_x += away * CLIMBER_FLEE_SPEED
+                self.body.x = self.anchor_x - self.body.width * 0.5
             return
 
-        # Sabir sayaci: oyuncu hic tam altina girmiyorsa (oda duzeni bunu
-        # garanti etmez) esik asilinca yine de birakir - "yapisik dusman"
-        # hissi sonsuza kadar surmesin. **`self.aware`'e bagli degil**:
-        # ilk surumde yalniz farkindayken sayiliyordu, ama farkindalik
-        # `distance_to()` ile YATAY mesafeye bakiyor (dikey yok sayiliyor)
-        # - oyuncu tam altindan hic yatay olarak yaklasmadan gecerse
-        # (orn. baska bir platformdan) Tirmanan hic farkina varmadan
-        # ekranda gorunur sekilde asili kaliyordu. Kosulsuz sayim, oda
-        # yuklendikten sonra en gec CLIMBER_PATIENCE_FRAMES kare icinde
-        # her Tirmanan'in dusecegini garanti eder.
-        self.aware_frames += 1
-        patient_drop = self.aware_frames >= CLIMBER_PATIENCE_FRAMES
-
-        if ((self.overhead_player or patient_drop)
-                and self.scene.tokens.request(self)):
-            self._begin_tell()
+        # Pusu (oyuncu tam altinda) gercek bir saldiri - saldiri hakki
+        # gerektirir, cunku okunabilir bir tell'e giriyor (docs/dovus-
+        # sistemi.md 6, "ayni anda en fazla 2 dusman saldirabilir").
+        # Sabir dususu (`patient_drop`) saldiri **degil** - sikismayi
+        # onleme. Hakka bagli olsaydi (eski kod: `(overhead or patient)
+        # and tokens.request(...)`) 2'den fazla dusman ayni oda ayni anda
+        # bekliyorsa hak hep baskalarinda kalir ve sabir hicbir sey garanti
+        # etmezdi - Arda'nin "hala yukarida" hatasinin gercek kaynagi buydu.
+        #
+        # `elif` bilerek `overhead_player` ile PAYLASIMSIZ: pusu VE sabir
+        # ayni anda dogruyken hak reddedilirse (oda dolu), tell'siz dogrudan
+        # dusmek "Telegraf sart" kuralini (yukaridaki docstring) kirar -
+        # oyuncu tam altindayken habersiz dusen bir dusman ilk seferinde
+        # adaletsizce olur. O yuzden pusu varken sabir devreye girmiyor,
+        # hak acilana kadar tell denemeye devam ediyor.
+        if self.overhead_player:
+            if self.scene.tokens.request(self):
+                self._begin_tell()
+        elif patient_drop:
+            self._drop()
 
     def _drop(self) -> None:
         self.hanging = False

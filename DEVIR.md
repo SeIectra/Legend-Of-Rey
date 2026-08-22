@@ -3,7 +3,7 @@
 Bu belge, projeyi devralan Claude Code oturumu içindir.
 **Önce `CLAUDE.md`'yi oku** (bağlayıcı anayasa), sonra burayı.
 
-Son güncelleme: 22.08.2026 (canlı oynanış geri bildirim turu sonrası) · Ardeko Studios
+Son güncelleme: 23.08.2026 (üçüncü canlı oynanış geri bildirim turu sonrası) · Ardeko Studios
 
 ---
 
@@ -182,6 +182,26 @@ kılar. Kendiliğinden geri alma; Arda'ya sormadan değiştirme.
     planla aynı ton) yerine "steel" oldu (eteği olmadığı için arka bacak
     doğrudan görünüyordu ve kayboluyordu).
 
+    **Üçüncü tur (22-23.08.2026), referans karakter görselleri geldikten
+    sonra:** Arda iki AI üretimi karakter referans sayfası + "havalı ve
+    yakışıklı" tarifini gönderdi. Üç ayrı ince ayar:
+    - `shoulder_chain: str = ""` alanı `CharSpec`'e eklendi (boşsa
+      `armor`'a düşer) - Ardo'ya zırhla aynı tona karışmayan, ayrı
+      açık/kürk tonlu (`"bone_pale"`) omuz yastığı verildi.
+    - **Saç rengi `"steel"` → `"hair_dark"`** (Rey'le AYNI zincir).
+      Referans görseldeki saç koyuydu; gri sadece Rey'den ayrışsın diye
+      seçilmişti. Siluet testi yalnızca **şekle** bakıyor (tek renge
+      düzleşir) - rengi koyulaştırmak Rey/Ardo ayrımını bozmuyor, ayrım
+      zaten geniş omuz + kısa saç siluet şekli + kürk yaka + eteksizlikle
+      taşınıyor. `tools/sprite_sheet.py --siluet` ile yeniden doğrulandı.
+    - Referans görsellerdeki boyalı/yüksek-çözünürlüklü stil (ve "Muhafız"
+      karakteri, Rey için "büyü" animasyonları) **birebir kopyalanmadı** -
+      `CLAUDE.md`'nin bağlayıcı boru hattı el çizimi/dışarıdan görsel almayı
+      yasaklıyor, yalnızca prosedürel + 32 renk palet + kod-üretimi sprite
+      kabul ediyor. Arda'ya bu kısıt açıkça söylendi; tarif edilen
+      özellikler (silah/kimlik okunabilirliği, "havalı" duruş) motor
+      sınırları içinde karşılandı.
+
 ---
 
 ## 3. ÇALIŞTIRMA VE DOĞRULAMA
@@ -349,6 +369,28 @@ Bunların hepsi gerçek hataydı, testle yakalandı. Tekrarlama.
     Bir modülün import edilebilir olması çalıştığı anlamına gelmez -
     `tools/shot.py` ile gerçek bir sahne çizdirmek şart.
 
+24. **`elif` iki koşulu "ya biri ya öbürü" sanmak, ikisi aynı anda doğru
+    olduğunda sessizce yanlış dalı seçtirebilir.** `Climber._think_hanging()`
+    ilk halinde `if overhead and tokens.request(): tell` / `elif
+    patient_drop: drop()` idi - pusu VE sabır aynı anda doğruyken (oda dolu,
+    hak reddedildi) `elif` doğrudan tell'siz düşüşe düşüyordu; "Telegraf
+    şart" kuralı (dosyanın kendi docstring'i) sessizce çiğneniyordu. Kural
+    şuydu: iki koşul birbirini SAF DIŞI bırakmıyorsa (`overhead` VE
+    `patient` aynı anda true olabiliyorsa), `elif` yerine iç içe `if` kur ki
+    hangi dalın önceliği olduğu açıkça yazılsın.
+
+25. **Bir sahnenin ihtiyacı için eklenen davranış, paylaşılan bir sınıfa
+    global olarak eklenirse başka her çağıranı sessizce değiştirir.**
+    Bölüm 1'in beat-zamanlayıcısı için `Dialogue`'a eklenen
+    `AUTO_ADVANCE_HOLD_FRAMES` (tamamlanan replik 50 kare sonra
+    kendiliğinden ilerler) ilk halde koşulsuzdu - Bölüm 2/3'ün etkileşimle
+    tetiklenen repliklerini de (boss karşılaşması gibi) sessizce
+    etkiliyordu, oysa onlar hiçbir zamanlayıcıyla yarışmıyor. Düzeltme:
+    `start(..., auto_advance=False)` - varsayılan eski davranış, yalnızca
+    ihtiyacı olan çağıran `True` geçiyor. Paylaşılan bir sınıfa "bir yer
+    için" davranış eklerken varsayılanın eski davranışı koruyup korumadığı
+    kontrol edilmeli.
+
 ---
 
 ## 5. MİMARİ — HIZLI HARİTA
@@ -443,21 +485,130 @@ Sıra gelmediği için değil, gözden kaçmasın diye burada:
 10. **Checkpoint yok.** Oyuncu ölünce sahne yeniden kurulmuyor; Bölüm 2'de
    arena kapısı ölümde açılıyor ki oyuncu kilitli kalmasın, ama gerçek
    çözüm bir yeniden doğma sistemi. Bölüm 3'te de aynı durum.
-11. ~~**Marooned dusman kendiliginden asagi inmiyor.**~~ ✅ (22.08.2026)
-   `_vertically_reachable()` (commit `c812bbb`) erişilemez bir hedefe
-   saldırı denemesini durdurmuştu ama düşman yüksek/kopuk bir platformda
-   sonsuza kadar bekleyebiliyordu - Arda ekran görüntüsüyle "hâlâ
-   yapışık" diye bildirdi. `ENEMY_UNREACHABLE_PATIENCE_FRAMES` sonrası
-   `_nearest_ledge_direction()` ile en yakın kenarı bulup düşüyor artık;
-   `Climber`'ın ayrı asılı-bekleme mekanizması da aynı düzeltmeyi aldı
-   (`CLIMBER_PATIENCE_FRAMES`). Detay §8 madde 5.
-12. **Bölüm 3'ün "5 yuva" ödülü basitleştirildi.** `docs/bolum-03.md`
+11. ~~**Marooned dusman kendiliginden asagi inmiyor.**~~ ✅ (22-23.08.2026,
+   DÖRT AYRI TUR — dördüncüsü 23.08.2026, henüz commit'lenmedi, bkz. §4
+   madde 24) `_vertically_reachable()` (commit `c812bbb`) erişilemez bir
+   hedefe saldırı denemesini durdurmuştu ama düşman yüksek/kopuk bir
+   platformda sonsuza kadar bekleyebiliyordu - Arda ekran görüntüsüyle
+   "hâlâ yapışık" diye bildirdi (iki kere, iki farklı ekran görüntüsüyle).
+   Üç kademede tam düzeltildi:
+   1) `ENEMY_UNREACHABLE_PATIENCE_FRAMES` sonrası `_nearest_ledge_direction()`
+      ile en yakın kenarı bulup düşme eklendi; `Climber`'ın ayrı
+      asılı-bekleme mekanizması `CLIMBER_PATIENCE_FRAMES` ile aynı fikri
+      aldı.
+   2) `Climber.aware_frames` sayacı `self.aware`'e bağlıydı - `aware`
+      yalnızca YATAY mesafeye bakıyor, oyuncu hiç yatay olarak
+      yaklaşmazsa (örn. başka bir platformdan geçerse) sayaç hiç
+      başlamıyordu. Koşulsuz sayıma çevrildi.
+   3) **Asıl kalan hata (Arda'nın "hâlâ yukarıda" bildirdiği üçüncü tur):**
+      hem genel `Enemy._approach()` hem `Climber`'ın sabır-düşüşü,
+      düşmenin kendisini saldırı hakkı (`AttackTokenManager`, aynı anda
+      en fazla 2) alabilmeye bağlıyordu. Bir odada 2'den fazla düşman
+      varsa (ekran görüntüsündeki 4 düşman gibi) hak sürekli
+      başkalarında kalabiliyor ve "sabır" hiçbir şey garanti etmiyordu.
+      Ayrıca genel sayaç yalnızca düşman zaten `APPROACH` durumundaysa
+      (yani hem farkında HEM hakkı varsa) işliyordu - hiç farkına
+      varmayan bir düşman sayacı hiç başlatamıyordu. Düzeltme: (a)
+      erişilebilirlik artık farkındalıktan bağımsız her karede ölçülüyor
+      (`Enemy._update_reachability()`), sabır dolunca IDLE/ORBIT
+      durumunda bile kenar aranıyor; (b) `Climber`'ın sabır-düşüşü artık
+      saldırı hakkı GEREKTİRMİYOR - yalnızca gerçek pusu (oyuncu tam
+      altında) hak istiyor, sabır düşüşü doğrudan `_drop()`. İki yeni
+      regresyon testi (`tests/test_enemy.py`: sahte "hak hiç verilmiyor"
+      yöneticisi + "hiç farkına varmadan" senaryosu) bunu kanıtlıyor.
+   4) **Dördüncü tur (23.08.2026) - başka bir Claude oturumu 3'ü uygulamış
+      ama commit'lememişti; bu oturum kod incelemesinden iki gerçek hata
+      daha buldu ve düzeltti:**
+      - `Climber._think_hanging()`'te pusu (`overhead_player`) VE sabır
+        (`patient_drop`) aynı anda doğruyken hak reddedilirse (oda dolu),
+        `elif patient_drop: self._drop()` dalı tell'siz doğrudan
+        düşürüyordu - tam da bu dosyanın kendi "Telegraf şart" kuralını
+        kırıyordu. Düzeltme: `patient_drop` artık yalnızca `overhead_player`
+        YANLIŞKEN devreye giriyor; pusu varken hak açılana kadar tell
+        denemeye devam ediyor, asla habersiz düşmüyor.
+      - `Enemy._try_escape_unreachable()` (genelleştirilmiş kaçış, madde 3'ün
+        (a) şıkkı) `_face_player()` çağrılmadan önce çalışıyordu - hiç
+        farkına varmamış bir düşman için `self.facing` o karede hiç
+        güncellenmemiş/bayat olabiliyordu, `_nearest_ledge_direction()` de
+        önce `facing` yönünü denediği için yanlış kenara yönelebiliyordu.
+        Düzeltme: kenar aramadan önce `_face_player()` eklendi.
+      İki yeni regresyon testi hâlâ yeşil, `tools/reachability.py` da öyle.
+      Ayrıca bu turda `enemy.py` 384 satırdan 400 sınırının üstüne çıkmıştı
+      (yeni `_update_reachability`/`_try_escape_unreachable`) - dikey
+      erişim/kenar-arama mantığı `src/entities/enemy_navigation.py`'ye
+      taşındı (serbest fonksiyonlar, `enemy_render.py`'deki
+      `draw_enemy(enemy, ...)` deseniyle aynı - circular import açmıyor).
+      Kullanılmayan `Enemy.body_tint()` da bu geçişte silindi (hiçbir yerden
+      çağrılmıyordu, `enemy_render.py::_tint()` aynı mantığı zaten
+      bağımsız tekrarlıyordu - CLAUDE.md 4/23'teki "çalıştırılmayan kod"
+      dersine tam örnek). Bölünme sırasında bir tane daha aynı türde hata
+      eklendi ve otomatik bir inceleme turu tarafından hemen yakalandı:
+      `_try_escape_unreachable()`, `enemy_navigation.py`'deki serbest
+      `nearest_ledge_direction(enemy)` fonksiyonunu **doğrudan** çağırıyor -
+      `Enemy._nearest_ledge_direction()` sarmalayıcı metodu hiçbir yerden
+      çağrılmıyordu, silindi.
+      Ayrı bir hata daha bu turda bulundu: prolog diyalog düzeltmesi
+      (`AUTO_ADVANCE_HOLD_FRAMES`, aşağıdaki madde 13) `Dialogue` sınıfının
+      TAMAMINA uygulanmıştı - Bölüm 2/3'ün etkileşimle tetiklenen (boss
+      karşılaşması, gizli duvar vb.) replikleri de oyuncu onaylamasa 50
+      kare sonra kendiliğinden kapanır hâle gelmişti. `Dialogue.start()`'a
+      `auto_advance: bool = False` parametresi eklendi; yalnızca Bölüm 1'in
+      beat-zamanlayıcısıyla yarışan repliklerde `True` geçiliyor, diğer
+      tüm `say()` çağrıları eski (onaylanana kadar ekranda kalan) davranışta.
+13. **Bölüm 1 prologunda pasif oyuncu repliği kaybediyordu (23.08.2026,
+   commit'lenmemiş bir oturumdan devralındı, bu oturumda tamamlandı).**
+   Çok-replikli bir beat'te ("gift": Cemo + Rey) ikinci satır onayla
+   geçilmediği sürece beat süresi dolunca `_on_beat_start()` kuyruğu
+   **sessizce** değiştiriyordu - Arda'nın "bunlar çok anlamsız cümleler"
+   geri bildirimi bunun sonucuydu. İki parçalı çözüm: `chapter01.py`'de
+   `DIALOGUE_GRACE_FRAMES=100` - beat, diyalog bitene kadar (üst sınırla)
+   bekler; `dialogue.py`'de `auto_advance=True` ile başlatılan diziler
+   tamamlandıktan `AUTO_ADVANCE_HOLD_FRAMES=50` kare sonra kendiliğinden
+   ilerler (pasif oyuncu için). `tests/test_chapter01.py`'e hiç girdi
+   vermeden tüm prologu oynatıp 5 repliğin de göründüğünü doğrulayan bir
+   regresyon testi eklendi. **Kapsam bilerek dar tutuldu** - bkz. madde
+   12'nin son paragrafı: yalnızca beat'e bağlı replikler `auto_advance`
+   alıyor, kesif/dövüş repliği eski davranışta kalıyor.
+14. **Bölüm 3'ün "5 yuva" ödülü basitleştirildi.** `docs/bolum-03.md`
    yuvaların hepsi yanınca "ısıyla açılan bir gizli kapı" tarif ediyor;
    kodda bulmaca çözümü sadece bir kutlama efekti/toast veriyor, Mum
    Bekçisi'nin cebi ayrı, her zaman kılıçla kırılabilir bir duvarın
    ardında (diğer gizli duvarlarla aynı dil). Bilinçli bir sadeleştirme -
    DEVIR.md'de not düşüldü ki "neden farklı" sorusu sorulunca cevap hazır
    olsun.
+15. **İki gerçek, ÖNCEDEN COMMIT'LENMİŞ hata daha bulundu ve düzeltildi
+   (23.08.2026) - bu oturumun asıl görevi değildi (Bölüm 1/enemy fix'ini
+   bitirmekti) ama otomatik bir kod inceleme turu bunları Bölüm 3'ün
+   kendi kapsamında yakaladı, ikisi de "dikey dilim" değerlendirmesini
+   etkileyecek kadar ciddiydi:**
+   - **`Climber._think_hanging()`'te `_fleeing_light` STAGGER/TELL
+     kontrolünden ÖNCE `return` ediyordu** (Bölüm 3 Oda 3'ün "ışıktan
+     kaçar" mekaniği - madde 11'in üçüncü şıkkı ile aynı fonksiyon, farklı
+     dal). Işık alanı içinde vurulan bir Tirmanan, "yukarıda kalıp
+     sıkışmasın" diye var olan STAGGER-de-anında-düşme garantisini
+     kaçırıp sabır eşiğine kadar (150 kare) asılı kalabiliyordu. Düzeltme:
+     STAGGER ve TELL kontrolleri artık `_fleeing_light`'tan ÖNCE - vurulmuş
+     ya da saldırı dizisinde olmak kaçıştan her zaman öncelikli.
+   - **`ExtinguishedOne._think()`, "sürükleme" hamlesinin ATTACK durumunda
+     `super()._think()`'i HİÇ çağırmadan dönüyordu** (`if state is ATTACK
+     and move=="drag": return`). Tabanın ATTACK dalının yaptığı iki şey -
+     hitbox'ı açan `_spawn_attack()` ve `active_frames` sonrası RECOVER'a
+     geçiş - hiçbir zaman çalışmıyordu. `MOVES` dizisinde "sürükleme" iki
+     kez var (4 hamlenin 2'si) - boss'un ilk birkaç saldırısından biri
+     kaçınılmaz olarak bu hamleye denk gelip ATTACK'ta **sonsuza dek**
+     kilitleniyordu (hiçbir hasar vermeden, hiçbir yere geçmeden) - mini-boss
+     dövüşü tamamen oynanmaz hale geliyordu. Kontrol edildi: dövüşün kendi
+     override'ının gerekçesi ("_think normalde vx'i yaklaştırırdı") artık
+     yanlıştı - tabanın ATTACK dalı vx'e hiç dokunmuyor (yalnızca RECOVER
+     dokunuyor) - override muhtemelen taban değiştikten sonra bayatlamıştı.
+     Düzeltme: gereksiz/zararlı override tamamen silindi.
+   `tests/test_enemy.py`'e her ikisi için de regresyon testi eklendi
+   (ışıktan kaçarken vurulma → anında düşme; sürükleme hamlesi → hitbox
+   gerçekten açılıyor VE ATTACK'ta kilitlenmiyor). `test_chapter03.py`'nin
+   40 kontrolü bu iki senaryoyu hiç kapsamıyordu (boss'un "sürükleme"
+   hamlesini hiç tetiklemiyordu) - otomatik inceleme olmasa muhtemelen
+   Arda'nın kendi oynanış turunda bulunacaktı. On üç test paketi + 
+   `tools/reachability.py` hâlâ yeşil.
 
 ---
 
@@ -596,6 +747,41 @@ Arda uzun süre bilgisayar başında olmayacağı için **tam yetki verdi**
    Tüm değişiklikler ayrı commit'ler halinde, her biri kendi regresyon
    testiyle. 13 test paketi + `tools/reachability.py` her adımda yeşil
    kaldı.
+
+6. ~~**Üçüncü canlı oynanış turu (22-23.08.2026) — ekran görüntüleriyle
+   bildirilen iki hata + referans karakter görselleri:**~~ ✅
+   - **KRİTİK — mini-boss kapısı kapanırken oyuncuyu gövdesinin içinde
+     bırakabiliyordu** (commit `feeab53`). Bölüm 2/3'ün arena-kapısı
+     mühürleme eşiği `player.body.center_x` (gövde MERKEZİ) kullanıyordu;
+     gövdenin genişliği yüzünden merkez eşiği geçtiği ama sol yarısının
+     hâlâ mühürlenecek sütunla çakıştığı gerçek bir kare penceresi vardı -
+     tam o karede mühürleme tetiklenirse oyuncu katı geometrinin içinde,
+     hiçbir kaçış yönü olmadan sıkışıp kalıyordu. Doğrudan benzetimle
+     doğrulandı (eski formülün mühürleyeceği karede `overlap=True`).
+     Düzeltme: eşik `player.body.x` (SOL kenar) oldu - gövdenin TAMAMI
+     sütunu geçmeden mühürlenmiyor. Hem Bölüm 2 hem Bölüm 3 aynı deseni
+     kullanıyordu, ikisi de düzeltildi. Yeni bir "kapıya yürüyerek gömülme"
+     regresyon testi eklendi - ilk testler `teleport()` tabanlıydı ve bu
+     hatayı hiç yakalamamıştı (o kare penceresini atlıyordu) - ders:
+     gerçekten yürünen senaryoyu test et, yalnızca ışınlanmayı değil.
+   - **Ardo'nun oyun başında zaten silahlıyken yerde ikinci bir kılıç
+     prop'u görünmesi** (commit `07da0bb`) - `Chapter01Scene.setup()`
+     `sword_pos`'u karaktere bakmadan dolduruyordu. Artık Ardo için
+     baştan `None`.
+   - **Ardo'nun görünümü** (referans karakter görselleri + "havalı ve
+     yakışıklı" tarifi üzerine) - ayrı kürk tonlu omuz zırhı + saç rengi
+     Rey'le aynı koyu tona çekildi. Detay §2 madde 13 (üçüncü tur).
+   - **Düşmanlar hâlâ tavanda/yukarıda yapışık kalıyordu** (madde 5'in
+     "düzeltildi" dediği hata **tam çözülmemiş** çıktı - saldırı hakkı
+     kıtlığı sabrı da etkiliyordu) + **Bölüm 1 prologunda replik
+     kayboluyordu** ("bunlar çok anlamsız cümleler") + **Sönmüş Olan
+     boss'unun "sürükleme" hamlesi ATTACK'ta sonsuza kilitlenebiliyordu**
+     (üçü de birden fazla Claude oturumunun art arda incelemesiyle
+     bulundu/düzeltildi). Tam detay §6 madde 11 (4 tur), madde 13, madde 15.
+
+   Sırasıyla 22.08 ve 23.08 tarihli commit'ler halinde, hepsi kendi
+   regresyon testiyle. On üç test paketi + `tools/reachability.py` bu
+   turun sonunda da yeşil.
 
 Arda geri döndüğünde sırayı değiştirebilir — daha önce iki kez değiştirdi.
 

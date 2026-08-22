@@ -351,7 +351,11 @@ def main() -> int:
             check(not climber.overhead_player,
                   "test kurulumu: oyuncu hic tam altina girmiyor")
         if not climber.hanging:
-            patient_dropped_at = frame
+            # `frame` 0-indeksli - bu noktada gerceklesmis GUNCELLEME
+            # sayisi `frame + 1`. Artik sabir dususu token beklemeden
+            # ANINDA gerceklesiyor (eskiden araya bir TELL suresi
+            # giriyordu ve bu +1 fark hicbir zaman fark edilmiyordu).
+            patient_dropped_at = frame + 1
             break
     check(patient_dropped_at is not None,
           "oyuncu hic tam altina girmese de sabir esiginde birakiyor",
@@ -360,6 +364,132 @@ def main() -> int:
         check(patient_dropped_at >= CLIMBER_PATIENCE_FRAMES,
               "sabir esiginden ONCE birakmiyor (erken tetiklenmiyor)",
               f"{patient_dropped_at} >= {CLIMBER_PATIENCE_FRAMES}")
+    game.shutdown()
+
+    # --- 8c. Tirmanan - saldiri hakki HICBIR ZAMAN yok, yine de birakir -----
+    # 8b, `tokens.clear()` ile bos bir yonetici kullaniyor ve odada TEK
+    # Tirmanan var - hakki hep bedavadan aliyordu. Gercek oyunda ayni oda
+    # ayni anda birden fazla dusman barindirinca (Arda'nin ekran goruntusu:
+    # dorduncu dusman ayni ekranda) hak MAX_SIMULTANEOUS_ATTACKERS(2) ile
+    # sinirli. Sabir dususu hakka bagli olsaydi (eski kod: `(overhead or
+    # patient) and tokens.request(...)`) hak surekli baskalarinda kalabilir
+    # ve sabir hicbir sey garanti etmezdi - "hala yukarida" hatasinin asil
+    # kaynagi buydu. Bu sahte yonetici hakki **hicbir zaman** vermeyerek o
+    # senaryoyu belirsizliksiz kurar (gercek yoneticinin kendi zaman-asimi
+    # TOKEN_HOLD_MAX_FRAMES=150, CLIMBER_PATIENCE_FRAMES=150 ile ayni kareye
+    # denk geldigi icin gercek yoneticiyle bu ayrimi net kurmak zor olurdu).
+    class _NeverAvailable:
+        def request(self, enemy: object) -> bool:
+            return False
+
+        def release(self, enemy: object, cooldown: int = 0) -> None:
+            pass
+
+        def force_release(self, enemy: object, cooldown: int = 0) -> None:
+            pass
+
+        def update(self) -> None:
+            pass
+
+        def clear(self) -> None:
+            pass
+
+        @property
+        def active_count(self) -> int:
+            return 0
+
+    print("\n--- tirmanan (saldiri hakki hic verilmese de sabirla birakir) ---")
+    game, scene = make_scene()
+    climber = place(scene, Climber, 20, tile_y=3)
+    scene.enemies = [climber]
+    scene.tokens = _NeverAvailable()
+    scene.player.body.x = climber.body.center_x + 60   # aware ama tam altinda degil
+    scene.player.body.y = climber.body.y
+    never_dropped_at = None
+    for frame in range(CLIMBER_PATIENCE_FRAMES + 30):
+        step(game, scene)
+        if not climber.hanging:
+            never_dropped_at = frame
+            break
+    check(never_dropped_at is not None,
+          "saldiri hakki hicbir zaman yokken de sabir esiginde birakiyor",
+          f"{never_dropped_at}")
+    if never_dropped_at is not None:
+        check(climber.state is not EnemyState.TELL,
+              "bu birakma bir saldiri TELL'i degil - hakka bagli olmayan dogrudan dusme",
+              f"state={climber.state}")
+    game.shutdown()
+
+    # --- 8d. Tirmanan - surekli isiktan kacsa da sabir esiginde birakir -----
+    # `_fleeing_light` sabir sayacindan ONCE `return` ediyordu (Bolum 3 Oda
+    # 3 bulmacasinda statik yakilan mesaleler icin eklendi). Kacis yonu
+    # oyuncunun konumundan turetiliyor, isik kaynaginin konumundan degil -
+    # oyuncu pek hareket etmezse Tirmanan isik yaricapindan hic cikamayabilir
+    # ve sayac hic baslamadigi icin sonsuza dek kacar - 8b/8c'nin kanitladigi
+    # garantiyi bu tek dal delip geciyordu. Bu test statik, hareket etmeyen
+    # bir isik kaynagiyla (Tirmanan'in tam ustunde, genis yaricap - kacis asla
+    # disina cikmaz) sabir sayacinin yine de isleyip esik dolunca dustugunu
+    # dogruluyor.
+    from src.systems.light import LightState  # noqa: E402 (yalnizca bu testte)
+
+    print("\n--- tirmanan (surekli isiktan kacsa da sabirla birakir) ---")
+    game, scene = make_scene()
+    climber = place(scene, Climber, 20, tile_y=3)
+    scene.enemies = [climber]
+    scene.tokens.clear()
+    scene.light = LightState()
+    scene.light.set_static("test_mesale", climber.body.center_x,
+                            climber.body.center_y, 200.0)
+    scene.player.body.x = climber.body.center_x   # oyuncu hic hareket etmiyor
+    scene.player.body.y = climber.body.y
+    check(climber._fleeing_light,
+          "test kurulumu: Tirmanan isiktan kaciyor")
+    fled_dropped_at = None
+    for frame in range(CLIMBER_PATIENCE_FRAMES + 30):
+        step(game, scene)
+        if not climber.hanging:
+            fled_dropped_at = frame
+            break
+    check(fled_dropped_at is not None,
+          "surekli isiktan kacsa bile sabir esiginde birakiyor",
+          f"{fled_dropped_at}")
+    if fled_dropped_at is not None:
+        check(fled_dropped_at + 1 >= CLIMBER_PATIENCE_FRAMES,
+              "sabir esiginden ONCE birakmiyor (erken tetiklenmiyor)",
+              f"{fled_dropped_at + 1} >= {CLIMBER_PATIENCE_FRAMES}")
+    game.shutdown()
+
+    # --- 8e. Tirmanan - isiktan kacarken vurulursa yine de ANINDA duser -----
+    # `_fleeing_light` STAGGER/TELL kontrolunden ONCE `return` ediyordu -
+    # isik alaninda vurulan bir Tirmanan "yukarida kalip sikismasin" diye
+    # var olan STAGGER-de-aninda-dusme garantisini (docstring: "Asiliyken
+    # vurulursa duser") kacirip sabir esigine kadar (150 kare) asili
+    # kalabiliyordu. Bu test isik alani icindeyken poise'ini kirip ayni
+    # karede/hemen sonraki karede dustugunu dogruluyor - 150 kare
+    # beklenmiyor.
+    print("\n--- tirmanan (isiktan kacarken vurulursa aninda duser) ---")
+    game, scene = make_scene()
+    climber = place(scene, Climber, 20, tile_y=3)
+    scene.enemies = [climber]
+    scene.tokens.clear()
+    scene.light = LightState()
+    scene.light.set_static("test_mesale", climber.body.center_x,
+                            climber.body.center_y, 200.0)
+    scene.player.body.x = climber.body.center_x
+    scene.player.body.y = climber.body.y
+    check(climber._fleeing_light,
+          "test kurulumu: Tirmanan isiktan kaciyor")
+    for _ in range(climber.poise):
+        climber.take_damage(
+            Hitbox(rect=climber.body.rect.copy(), damage=1, owner=scene.player,
+                   targets=Team.ENEMY, poise_damage=1),
+            (1.0, 0.0))
+    check(climber.state is EnemyState.STAGGER,
+          "test kurulumu: poise kirildi, STAGGER'da")
+    step(game, scene)
+    check(not climber.hanging,
+          "isiktan kacarken vurulan Tirmanan sabir beklemeden aninda duser",
+          f"hanging={climber.hanging}")
     game.shutdown()
 
     # --- 9. Can bari yok ----------------------------------------------------
@@ -433,6 +563,83 @@ def main() -> int:
             attacked = True
             break
     check(attacked, "ayni seviyedeyken saldiri hala calisiyor (fix asiri kisitlamiyor)")
+    game.shutdown()
+
+    # --- 10c. Dikey erisim - oyuncuyu HIC gormeden kopuk platformdan iner ---
+    # 10b'nin ayni-sinif ikizi: onceki sayac yalnizca `_approach()` icinde,
+    # yani dusman zaten APPROACH durumundaysa (`aware` VE saldiri hakki
+    # varken) isliyordu. Bolum duzeni oyuncuyu bir dusmanin gorus menzili
+    # icine hic sokmayabilir (orn. baska bir koridordan gecer) - o zaman
+    # sayac hic baslamiyor ve dusman kopuk bir platformda gorunur sekilde
+    # sonsuza dek kaliyordu. Simdi erisilebilirlik farkindaliktan BAGIMSIZ
+    # olculuyor (bkz. enemy.py::_update_reachability).
+    print("\n--- dikey erisim (hic farkinda olmadan kopuk platformdan iner) ---")
+    game, scene = make_scene()
+    # Orta kat sol parcasi: satir 10, sutun 14-17 - iki yani da bosluk.
+    stray = place(scene, Shambler, 15, tile_y=9)
+    scene.enemies = [stray]
+    scene.tokens.clear()
+    scene.player.body.x = 40 * TILE_SIZE      # Cok uzakta - gorus menzili disi
+    scene.player.body.y = 12 * TILE_SIZE
+    check(not stray._vertically_reachable(scene.player),
+          "test kurulumu: oyuncu dikeyde erisilemez")
+    start_y = stray.body.y
+    left_at = None
+    was_ever_aware = False
+    for frame in range(ENEMY_UNREACHABLE_PATIENCE_FRAMES + 90):
+        step(game, scene)
+        was_ever_aware = was_ever_aware or stray.aware
+        if stray.body.y > start_y + 4.0:
+            left_at = frame
+            break
+    check(left_at is not None,
+          "oyuncuyu hic gormeden de kopuk platformdan inmeye basliyor",
+          f"{left_at} kare")
+    check(not was_ever_aware,
+          "test kurulumu: dusman hic 'farkinda' olmadi - yalnizca sabirla indi",
+          f"aware={was_ever_aware}")
+    game.shutdown()
+
+    # --- 11. Sonmus Olan - "surukleme" hamlesi ATTACK'ta kilitlenmiyor ------
+    # `ExtinguishedOne._think()`'in eski hali `state is ATTACK and
+    # move=="drag"` oldugunda `super()._think()`'i HIC cagirmadan
+    # donuyordu. Tabanin ATTACK dalinin yaptigi iki sey - hitbox'i acan
+    # `_spawn_attack()` ve `active_frames` sonrasi RECOVER'a gecis -
+    # hicbir zaman calismiyordu. `MOVES` dizisinde "surukleme" iki kez var
+    # (4 hamlenin 2'si) - boss'un ilk birkac saldirisindan biri kacinilmaz
+    # olarak bu hamleye denk gelip ATTACK'ta sonsuza dek kilitleniyordu
+    # (hicbir hasar vermeden, hicbir yere gecmeden) - mini-boss dovusu
+    # tamamen oynanmaz hale geliyordu.
+    from src.entities.enemies.extinguished_one import (  # noqa: E402
+        DRAG_ACTIVE, DRAG_RECOVER, ExtinguishedOne,
+    )
+
+    print("\n--- sonmus olan (surukleme ATTACK'ta kilitlenmiyor) ---")
+    game, scene = make_scene()
+    boss = ExtinguishedOne(scene, 20 * TILE_SIZE, 13 * TILE_SIZE)
+    scene.enemies = [boss]
+    scene.tokens.clear()
+    boss.move_index = 1              # _next_move() -> "drag" ilk hamle olsun
+    boss._begin_tell()
+    check(boss.move == "drag", "test kurulumu: ilk hamle 'surukleme'")
+    for _ in range(boss.tell_frames):
+        step(game, scene)
+    check(boss.state is EnemyState.ATTACK,
+          "tell bitince ATTACK'a geciyor", f"state={boss.state}")
+    boxes_before = len(scene.hitboxes.boxes)
+    step(game, scene)                # spawn karesi - attack_spawned burada True olur
+    check(len(scene.hitboxes.boxes) > boxes_before,
+          "surukleme hitbox'i gercekten aciliyor (_spawn_attack calisti)",
+          f"{boxes_before} -> {len(scene.hitboxes.boxes)}")
+    stuck = True
+    for _ in range(DRAG_ACTIVE + DRAG_RECOVER + 5):
+        step(game, scene)
+        if boss.state is not EnemyState.ATTACK:
+            stuck = False
+            break
+    check(not stuck,
+          "surukleme ATTACK'ta sonsuza dek kilitlenmiyor - RECOVER/ORBIT'e geciyor",
+          f"state={boss.state}")
     game.shutdown()
 
     # --- 10. Kalicilik ------------------------------------------------------

@@ -178,9 +178,14 @@ class PlayScene(Scene):
     def update_scene(self) -> None:
         """Alt sinifa ait kare islemleri (tetikleyiciler, anlatim)."""
 
-    def say(self, *lines) -> None:
-        """Replik dizisi baslatir. `lines` `Line` nesneleri."""
-        self.dialogue.start(tuple(lines))
+    def say(self, *lines, auto_advance: bool = False) -> None:
+        """Replik dizisi baslatir. `lines` `Line` nesneleri.
+
+        `auto_advance=True` yalnizca bir sahne-zamanlayicisiyla yarisan
+        (orn. Bolum 1'in prolog beat'leri) dizilerde kullanilir - normal
+        kesif/dovus repligi oyuncu onaylayana kadar ekranda kalir.
+        """
+        self.dialogue.start(tuple(lines), auto_advance=auto_advance)
 
     # --- Yanki --------------------------------------------------------------
     def on_echo_ask(self) -> None:
