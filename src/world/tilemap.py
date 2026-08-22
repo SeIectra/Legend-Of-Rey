@@ -9,14 +9,17 @@ dikdortgenin dokundugu tile araligi hesaplanip yalnizca o araliga bakilir.
 Tek yonlu platformlar (`=`) yalnizca **asagi dogru hareket ederken** ve ayak
 platformun ustundeyken katidir. Kural fizik katmaninda uygulanir.
 
-Gorev 4'te 9-slice ve oda gecisleriyle genisleyecek; su an dovus testinin
-ihtiyaci kadar.
+Cizim `src/art/tileset.py`'den geliyor (Gorev 9): prosedurel tugla/kiris
+dokusu, karakter sprite'lari gibi kod ile uretilip onbelleklenir. Duz renk
+dolgu yok artik - kirilabilir duvarin normal duvardan **ayirt edilemez**
+kalmasi (docs/gdd.md 4) ayni (tx, ty) icin ayni varyantin uretilmesiyle
+korunuyor.
 """
 from __future__ import annotations
 
 import pygame
 
-from src.art import palette
+from src.art import palette, tileset
 from src.config import TILE_DRAW_MARGIN, TILE_SIZE
 
 EMPTY = 0
@@ -37,21 +40,6 @@ LEGEND: dict[str, int] = {
     "=": PLATFORM,
     "^": SPIKE,
     "B": BREAKABLE,
-}
-
-# Placeholder cizim renkleri. Gorev 9'da gercek tileset gelince degisecek.
-TILE_COLORS: dict[int, str] = {
-    # Kirilabilir duvar normal duvarla **ayni renkte** cizilir. Farkli
-    # cizilseydi Yanki'nin isi kalmazdi: oyuncu gizli gecidi zaten gorurdu.
-    BREAKABLE: "stone_dark",
-    SOLID: "stone_dark",
-    PLATFORM: "earth",
-    SPIKE: "danger",
-}
-TILE_TOP_COLORS: dict[int, str] = {
-    BREAKABLE: "stone",
-    SOLID: "stone",
-    PLATFORM: "earth",
 }
 
 
@@ -195,23 +183,19 @@ class TileMap:
 
     def _draw_tile(self, surface: pygame.Surface, value: int, tx: int, ty: int,
                    x: int, y: int) -> None:
+        ts = tileset.shared()
         if value == SPIKE:
-            surface.fill(palette.color("stone_dark"),
-                         (x, y + TILE_SIZE - 4, TILE_SIZE, 4))
-            for i in range(0, TILE_SIZE, 4):
-                pygame.draw.polygon(surface, palette.color(TILE_COLORS[SPIKE]), [
-                    (x + i, y + TILE_SIZE - 4),
-                    (x + i + 2, y + 4),
-                    (x + i + 4, y + TILE_SIZE - 4)])
+            surface.blit(ts.spike(), (x, y))
             return
-
-        height = TILE_SIZE if value == SOLID else 5
-        surface.fill(palette.color(TILE_COLORS[value]), (x, y, TILE_SIZE, height))
-        # Ust kenar seridi: platform okunurlugu icin kritik (asset-plani.md 4).
-        if not self.is_solid(tx, ty - 1):
-            surface.fill(palette.color(TILE_TOP_COLORS[value]),
-                         (x, y, TILE_SIZE, 2))
-            surface.fill(palette.color("stone_light"), (x, y, TILE_SIZE, 1))
+        if value == PLATFORM:
+            surface.blit(ts.platform(tx, ty), (x, y))
+            return
+        # SOLID ve BREAKABLE **ayni** ureticiyi kullanir - Yanki olmadan
+        # gizli gecidin normal duvardan ayirt edilememesi bundan geliyor
+        # (docs/gdd.md 4). Ust kenar seridi yalnizca ustunde kati yoksa
+        # cizilir (asset-plani.md 4: "platform kenar seridini guclendir").
+        lit_top = not self.is_solid(tx, ty - 1)
+        surface.blit(ts.wall(tx, ty, lit_top), (x, y))
 
     def draw_debug(self, surface: pygame.Surface,
                    offset: tuple[int, int]) -> None:

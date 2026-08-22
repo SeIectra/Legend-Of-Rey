@@ -36,14 +36,21 @@ _ROW_HEIGHT = 4            # Tugla sirasi yuksekligi
 
 
 def _brick_wall(variant: int, lit_top: bool) -> pygame.Surface:
-    """Kosma (running-bond) tugla dokusu - harc cizgileri sira sira kayar."""
+    """Kosma (running-bond) tugla dokusu - harc cizgileri sira sira kayar.
+
+    `"stone"` diye bir golge zinciri **yok** - `tools/palette.json`'da
+    "stone" yalnizca bir renk ismi ve bir tonlama rampasi (ramp), zincir
+    degil. Zincirlerden "steel" tam olarak ayni dort tonu tasiyor
+    (stone_darkest→stone_dark→stone→stone_light, ramps.stone ile birebir) -
+    ismi zirhtan geliyor ama tonlari saf tas.
+    """
     c = Canvas(TILE_SIZE, TILE_SIZE)
-    c.fill_rect(0, 0, TILE_SIZE, TILE_SIZE, "stone", 1)
+    c.fill_rect(0, 0, TILE_SIZE, TILE_SIZE, "steel", 1)
 
     rows = TILE_SIZE // _ROW_HEIGHT
     for row in range(rows):
         y = row * _ROW_HEIGHT
-        c.fill_rect(0, y, TILE_SIZE, 1, "stone", 0)          # yatay harc
+        c.fill_rect(0, y, TILE_SIZE, 1, "steel", 0)          # yatay harc
         # Her varyant + her ikinci sira farkli bir kaymayla basliyor -
         # ayni blok yan yana durunca goz "kopyala-yapistir" fark etmesin.
         shift = (variant * 5 + (0 if row % 2 == 0 else _ROW_HEIGHT + 3)) \
@@ -51,16 +58,16 @@ def _brick_wall(variant: int, lit_top: bool) -> pygame.Surface:
         x = shift - TILE_SIZE
         step_x = 6 + ((variant + row) % 3)
         while x < TILE_SIZE:
-            c.fill_rect(x, y, 1, _ROW_HEIGHT, "stone", 0)    # dikey harc
+            c.fill_rect(x, y, 1, _ROW_HEIGHT, "steel", 0)    # dikey harc
             x += step_x
 
-    c.noise(seed=4200 + variant, amount=0.30, chain="stone")
+    c.noise(seed=4200 + variant, amount=0.30, chain="steel")
 
     if lit_top:
         # Basilabilir yuzey: gucclu bir vurgu seridi (asset-plani.md 4 -
         # "platform kenar seridini guclendir").
-        c.fill_rect(0, 0, TILE_SIZE, 1, "stone", 3)
-        c.fill_rect(0, 1, TILE_SIZE, 1, "stone", 2)
+        c.fill_rect(0, 0, TILE_SIZE, 1, "steel", 3)
+        c.fill_rect(0, 1, TILE_SIZE, 1, "steel", 2)
 
     c.shade()
     c.resolve_alpha = None  # (dokumantasyon amacli; kullanilmiyor)
@@ -68,27 +75,38 @@ def _brick_wall(variant: int, lit_top: bool) -> pygame.Surface:
 
 
 def _platform(variant: int) -> pygame.Surface:
-    """Ahsap kiris - tek yonlu platform, ince (yalnizca ust seride cizilir)."""
+    """Ahsap kiris - tek yonlu platform, ince (yalnizca ust seride cizilir).
+
+    Palette'te 4 basamaklı saf bir "toprak/ahsap" zinciri yok (yalnizca
+    `earth_dark`/`earth` iki renk var). "leather" zinciri
+    (ink→earth_dark→earth→flesh) ayni aile icinde 4 basamak veriyor ve
+    zaten kilic kabzasi/kemer gibi ahsap-deri nesnelerde kullaniliyor.
+    """
     c = Canvas(TILE_SIZE, 6)
-    c.fill_rect(0, 0, TILE_SIZE, 6, "earth", 1)
-    c.fill_rect(0, 0, TILE_SIZE, 1, "earth", 3)              # ust vurgu
+    c.fill_rect(0, 0, TILE_SIZE, 6, "leather", 2)
+    c.fill_rect(0, 0, TILE_SIZE, 1, "leather", 3)             # ust vurgu
     # Tahta damari: birkac yatay cizik.
     for i, x in enumerate(range(1, TILE_SIZE, 5)):
-        step = 0 if (i + variant) % 2 == 0 else 2
-        c.fill_rect(x, 2 + (i % 2), 3, 1, "earth", step)
-    c.noise(seed=5100 + variant, amount=0.25, chain="earth")
+        step = 1 if (i + variant) % 2 == 0 else 3
+        c.fill_rect(x, 2 + (i % 2), 3, 1, "leather", step)
+    c.noise(seed=5100 + variant, amount=0.25, chain="leather")
     c.shade()
     return c.resolve()
 
 
 def _spike() -> pygame.Surface:
-    """Diken siresi - ucgen dislere shade() ile hacim."""
+    """Diken siresi - ucgen dislere shade() ile hacim.
+
+    "danger" da bir zincir degil (yalnizca 2 basamakli bir ramp). "gore"
+    zinciri (blood_dark→blood→blood_bright→danger_bright) tehlike rengine
+    zaten ulasiyor ve bir diken tuzagina gore tam kanli/tehlikeli aile.
+    """
     c = Canvas(TILE_SIZE, TILE_SIZE)
-    c.fill_rect(0, TILE_SIZE - 4, TILE_SIZE, 4, "stone", 0)
+    c.fill_rect(0, TILE_SIZE - 4, TILE_SIZE, 4, "steel", 0)
     for i in range(0, TILE_SIZE, 4):
         c.polygon([
             (i, TILE_SIZE - 4), (i + 2, 3), (i + 4, TILE_SIZE - 4),
-        ], "danger", 2)
+        ], "gore", 2)
     c.shade()
     return c.resolve()
 

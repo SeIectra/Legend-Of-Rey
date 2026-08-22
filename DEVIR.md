@@ -23,7 +23,7 @@ görev sırası `GOREVLER.md`'de.
 | 6 — Menü ve UI | ✅ | Sıra dışı yapıldı (Arda istedi) |
 | 7 — Menü sahnesi cilası | ✅ | Mor alev, Ardeko intro, dikey yolculuk |
 | 8 — Bölüm 3 | ✅ | Meşale Mahzeni: ışık sistemi, 7 oda + gizli Mum Bekçisi cebi, mini-boss |
-| 9 — Sanat geçişi | 🟡 | Sprite + mağara arka planı hazır; **tileset hâlâ placeholder** |
+| 9 — Sanat geçişi | 🟡 | Sprite + mağara arka planı + **tileset artık bağlı**; ses hâlâ eksik |
 | 10 — Ses + son cila | ⬜ | Dikiş hazır, gövde boş |
 
 Toplam ~13.900 satır. **On üç test paketi de yeşil** (`test_chapter01.py` +
@@ -128,6 +128,20 @@ kılar. Kendiliğinden geri alma; Arda'ya sormadan değiştirme.
     - Hançer/Balta'nın kendi sprite'ı yok, `sword`'la aynı `_armed`
       varyantını **bilerek** paylaşıyorlar (CLAUDE.md: sessiz placeholder
       yasak, bu yüzden `weapons.py` docstring'inde açıkça yazılı).
+
+11. **Tileset nihayet bağlandı (22.08.2026, Görev 9).** `src/art/tileset.py`
+    daha önce yazılmış ama hiç çalıştırılmamış "ölü kod"du - bağlanınca
+    hemen üç `PaletteError` verdi: `_brick_wall`/`_spike` var olmayan
+    `"stone"`/`"danger"` **zincirlerini** çağırıyordu (ikisi de sadece renk
+    adı/ramp, `tools/palette.json`'un `shade_chains` bölümünde yok).
+    Düzeltme: duvar → `"steel"` zinciri (ramps.stone ile birebir aynı 4
+    ton, sadece adı zırhtan geliyor), diken → `"gore"` (danger_bright'a
+    ulaşan tek zincir), platform (ahşap kiriş) → `"leather"` (earth_dark/
+    earth içeren tek 4 basamaklı zincir). Palete **yeni renk eklenmedi** -
+    sadece var olan zincirlerden doğru olanı seçildi. `world/tilemap.py`
+    artık düz renk doldurmuyor, `TileSet.wall/platform/spike()`'tan blit
+    ediyor; kırılabilir duvar hâlâ normal duvarla **aynı üretici**yle
+    çiziliyor (aynı (tx,ty) → aynı varyant), ayırt edilemezlik korundu.
 
 ---
 
@@ -289,6 +303,13 @@ Bunların hepsi gerçek hataydı, testle yakalandı. Tekrarlama.
     dizileri). Uzun metin dosyalarını Write aracıyla yaz, kısa yamaları
     Python betiğiyle uygula.
 
+23. **Yazılıp hiç çalıştırılmayan kod hatasız görünür, hatasız değildir.**
+    `tileset.py` iki görev boyunca "yazıldı ama bağlanmadı" diye durdu;
+    bağlanır bağlanmaz üç yerde var olmayan zincir adına başvurduğu
+    ortaya çıktı (`"stone"`/`"danger"` zincir değil, ramp/renk adı).
+    Bir modülün import edilebilir olması çalıştığı anlamına gelmez -
+    `tools/shot.py` ile gerçek bir sahne çizdirmek şart.
+
 ---
 
 ## 5. MİMARİ — HIZLI HARİTA
@@ -308,9 +329,11 @@ src/
 │   ├── spritegen.py   draw_humanoid — tek iskelet, çok karakter
 │   ├── animation.py   Poz üreticileri + karakter kütüphanesi
 │   ├── animator.py    Oynatıcı + sprite önbelleği
-│   └── particles.py   Sütun tabanlı, üst sınır 200
+│   ├── particles.py   Sütun tabanlı, üst sınır 200
+│   └── tileset.py     ★ Görev 9 — prosedürel tuğla/kiriş, TileMap.draw() bağlı
 ├── combat/
-│   ├── combo.py       3'lü zincir, kaçınma, combo sayacı
+│   ├── combo.py       3'lü zincir (chain_table silaha göre değişir), kaçınma, combo sayacı
+│   ├── weapons.py     ★ yumruk/kılıç/hançer/balta kaydı — Player.equip_weapon()
 │   ├── attack_token.py ★ aynı anda en fazla 2 saldırgan
 │   └── hitbox.py      Kare bazlı hitbox — kimse doğrudan hasar vermez
 ├── entities/          actor · player · player_render · character_stats · dummy
@@ -358,8 +381,12 @@ Sıra gelmediği için değil, gözden kaçmasın diye burada:
    (Dil ayarı artık **çalışıyor** — TR/EN, anında geçiş.)
 3. **Ardo'nun oynanışı Rey'in aynısı** — sayılar farklı, İz Sürme mekaniği
    (`docs/derinlestirme.md` 2.4) yok.
-4. **Tileset placeholder.** `world/tilemap.py` düz renk çiziyor; 9-slice ve
-   varyantlar Görev 9.
+4. ~~**Tileset placeholder.**~~ ✅ (22.08.2026) `world/tilemap.py` artık
+   `src/art/tileset.py`'den prosedürel tuğla/kiriş dokusu blit ediyor (duvar
+   4 varyant, platform 2 varyant, diken). Gerçek 9-slice (köşe/kenar ayrı
+   parça) hâlâ yok - şu an "üstü açık mı" tek ekseninde iki hal var, bu
+   odaların dikdörtgen blok tasarımı için yeterli görünüyor; köşe
+   karmaşası gerekirse ayrı bir iş.
 5. **EKSTRALAR ve EKİPMAN menüde kapalı** — içerikleri sonraki görevlerde.
 6. **`docs/asset-plani.md` güncel değil:** "Türkçe karakter eksik" ve
    "prototipteki sprite kalitesi" maddeleri artık geçersiz.
@@ -466,18 +493,26 @@ Arda uzun süre bilgisayar başında olmayacağı için **tam yetki verdi**
    hata doğurdu (kapı açılınca kendini hemen yeniden kilitliyordu),
    `boss_defeated` bayrağıyla çözüldü - `tests/test_chapter02.py`'ye
    regresyon kontrolü eklendi.
-2d. ~~**Silah sistemi altyapısı**~~ ✅ (bu commit). Arda'nın isteği:
+2d. ~~**Silah sistemi altyapısı**~~ ✅ (commit sonrası). Arda'nın isteği:
    yumrukla başla, kılıcı sonra bul; Hançer/Balta/gelecekte menzilli için
    mimari hazır ama içerik yazılmadı. Detay §2 madde 10.
-3. **Görev 9 — Sanat geçişi.** `src/art/tileset.py` yazıldı (prosedürel
-   tuğla dokusu, `forge.Canvas` ile - 4 duvar varyantı, üst kenar vurgusu)
-   ama **henüz `world/tilemap.py`'ye bağlanmadı** - şu an dead code. En görünür eksik: tileset hâlâ düz renk.
-   `world/tilemap.py` 9-slice ve varyantlara genişleyecek.
+3. ~~**Görev 9 — Tileset bağlama.**~~ ✅ `src/art/tileset.py` artık
+   `world/tilemap.py::_draw_tile`'a bağlı - duvar/platform/diken düz renk
+   değil, prosedürel doku (`tools/shot.py` ile 3 sahnede görsel doğrulandı,
+   Bölüm 3'ün karartma maskesi altında da doğru görünüyor). Bağlanırken
+   çıkan gerçek hata ve düzeltmesi: §2 madde 11, §4 madde 23. Kalan:
+   gerçek 9-slice köşe/kenar ayrımı yok (şimdilik gerek görülmedi) ve
+   asıl "Görev 9" başlığının geri kalanı - **ses** hâlâ yazılmadı.
 4. **Görev 10 — Ses.** `assets/audio/SES-LISTESI.md` içinde 72 ses / 84
    dosya listelendi. Dikişler hazır: `game.play_ui_sound()`,
    `game.music_hush`, `juice.pitch_variation()`.
 
 Arda geri döndüğünde sırayı değiştirebilir — daha önce iki kez değiştirdi.
+
+**Not: `git push` bu ortamda çalışmıyor** (kimlik doğrulama yok -
+`fatal: could not read Username for 'https://github.com'`). Commit'ler
+yerelde birikiyor; başka bir makineden ya da kimlik bilgisi girilen bir
+oturumdan `git push` çalıştırılması gerekiyor.
 
 ---
 
