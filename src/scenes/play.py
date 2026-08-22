@@ -207,6 +207,12 @@ class PlayScene(Scene):
     def _update_echo_audio(self) -> None:
         """Yanki acilirken/kapanirken kenar tespiti - `EchoState` kendisi
         sesle ilgilenmiyor (systems/ katmani salt mantik), kenar burada.
+
+        Surekli `echo_loop` dongusu **kaldirildi** (Arda'nin canli oynanis
+        geri bildirimi, 22.08.2026: "cizirti gibi, rahatsiz edici").
+        Sentezlenmis surekli/donguluk sesler bu oturumda genel olarak
+        guvenilir bulunmadi; kisa, nedeni belli tek seferlik sesler
+        (echo_open/close gibi) kaliyor.
         """
         active = self.echo.active
         if active and not self._echo_was_active:
@@ -214,12 +220,6 @@ class PlayScene(Scene):
         elif not active and self._echo_was_active:
             self.game.play_sound("echo_close", bus="volume_echo")
         self._echo_was_active = active
-
-        if active:
-            self.game.play_loop("echo_loop", "echo_loop", bus="volume_echo",
-                                volume=self.echo.strength)
-        else:
-            self.game.stop_loop("echo_loop")
 
     def _update_necklace_audio(self) -> None:
         """Kalp atisi periyodu her devri tamamladiginda tek `tak` sesi.

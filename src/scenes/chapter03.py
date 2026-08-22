@@ -90,7 +90,8 @@ class Chapter03Scene(PlayScene):
         # Bolum 2'den geliyoruz: kilic ve kacinma elde.
         self.player.grant(abilities.SWORD)
         self.player.grant(abilities.DODGE)
-        self.game.play_loop("amb", "amb_torch", volume=0.5)
+        # `amb_torch` donguluk sesi kaldirildi - bkz. chapter01.py ayni
+        # tarihli not (Arda: sentezlenmis surekli sesler rahatsiz edici).
 
         self.light = LightState()
         self.sconces = [list(entry) for entry in TORCHES]      # kendi kopyasi
@@ -133,9 +134,6 @@ class Chapter03Scene(PlayScene):
         self.finished = False
 
         self._enter_room(self._room_at(self.player.body.center_x))
-
-    def on_exit(self) -> None:
-        self.game.stop_loop("amb")
 
     def _is_secret(self, tile_x: int) -> bool:
         lo, hi = SECRET_POCKET_ABS_COLUMNS

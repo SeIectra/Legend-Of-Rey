@@ -58,7 +58,9 @@ class Chapter01Scene(PlayScene):
 
     def setup(self) -> None:
         self.tilemap = TileMap(LEVEL.terrain_rows)
-        self.game.play_loop("amb", "amb_village_night", volume=0.6)
+        # `amb_village_night` donguluk sesi kaldirildi (Arda'nin canli
+        # oynanis geri bildirimi: sentezlenmis surekli sesler "cizirti
+        # gibi, rahatsiz edici"). Kisa/tek seferlik efektler kaliyor.
 
         spawn = LEVEL.first("player")
         self.player = self.make_player(spawn.x, spawn.feet_y)
@@ -100,9 +102,6 @@ class Chapter01Scene(PlayScene):
         # adim **degisince** cagriliyor; ilk adim ("wake") icin hic
         # calismiyordu ve o repligi kimse duymuyordu.
         self._on_beat_start()
-
-    def on_exit(self) -> None:
-        self.game.stop_loop("amb")
 
     @property
     def beat(self) -> str:

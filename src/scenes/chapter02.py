@@ -81,7 +81,8 @@ class Chapter02Scene(PlayScene):
         # acikca veriliyor - kayittan gelmesini beklemiyoruz.
         self.player.grant(abilities.SWORD)
         self.player.grant(abilities.DODGE)
-        self.game.play_loop("amb", "amb_cellar", volume=0.7)
+        # `amb_cellar` donguluk sesi kaldirildi - bkz. chapter01.py ayni
+        # tarihli not (Arda: sentezlenmis surekli sesler rahatsiz edici).
 
         self.chests = [
             Chest(spot.x, spot.feet_y,
@@ -116,9 +117,6 @@ class Chapter02Scene(PlayScene):
         self.finished = False
 
         self._enter_room(self._room_at(self.player.body.center_x))
-
-    def on_exit(self) -> None:
-        self.game.stop_loop("amb")
 
     def _is_secret(self, tile_x: int) -> bool:
         """Gizli oda sutun araligi. Ana yoldaki sandiktan boyle ayriliyor."""
@@ -319,6 +317,9 @@ class Chapter02Scene(PlayScene):
             self.tilemap.set_tile(ARENA_DOOR_COLUMN, row, SOLID)
         self.juice.explosion(ARENA_DOOR_COLUMN * TILE_SIZE,
                              self.player.body.center_y, ImpactWeight.FINISHER)
+        # Ses olmadan kapi sessizce beliriyordu - oyuncu "az once bir sey
+        # oldu" yerine "burada hep bir duvar varmis" hissine kapiliyordu.
+        self.game.play_sound("rift_close")
 
     def _open_arena(self) -> None:
         """Boss oldu: kapi kalkar, odul verilir.

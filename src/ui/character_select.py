@@ -4,12 +4,14 @@ Gorsel dil (docs/menu-ui.md 4): secili karakter **buyuk, aydinlik,
 animasyonlu**; digeri kucuk, karanlik, hareketsiz. Bu, "secmedigin kisi
 hikayede olacak" fikrini gorsel olarak kurar.
 
-Detay: Rey seciliyken arkada fisilti duyulur (Yanki'nin dongulu sesi
-dusuk hacimde, `echo_loop`), Ardo seciliyken **tam sessizlik** - oynanis
-farkini duyarak anlarsin (`_update_whisper()`).
-
 Ilk oynayista kucuk bir not: "Ilk kez oynuyorsan Rey onerilir." Zorlamaz,
 yonlendirir.
+
+Not: bir ara Rey seciliyken arkada dongulu bir fisilti sesi vardi
+(`echo_loop`) - Arda'nin canli oynanis geri bildirimi "cizirti gibi,
+rahatsiz edici, kaldiralim" oldu (22.08.2026). Kaldirildi; sentezlenmis
+donguler (`echo_loop` dahil) genel olarak guvenilir bulunmadi, bkz.
+`src/scenes/play.py` ayni tarihli not.
 """
 from __future__ import annotations
 
@@ -172,23 +174,10 @@ class CharacterSelectScene(Scene):
 
         # Yalnizca secili karakter animasyonlu - digeri durgun.
         self.animators[CHARACTERS[self.index].key].update()
-        self._update_whisper()
-
-    def _update_whisper(self) -> None:
-        """Rey seciliyken arkada fisilti, Ardo seciliyken tam sessizlik."""
-        if CHARACTERS[self.index].key == "rey":
-            self.game.play_loop("char_select_whisper", "echo_loop",
-                                bus="volume_echo", volume=0.3)
-        else:
-            self.game.stop_loop("char_select_whisper")
-
-    def on_exit(self) -> None:
-        self.game.stop_loop("char_select_whisper")
 
     def _confirm(self) -> None:
         info = CHARACTERS[self.index]
         self.game.play_sound("ui_confirm")
-        self.game.stop_loop("char_select_whisper")
 
         data = SaveData(character=info.key,
                         max_health=info.health, health=info.health)

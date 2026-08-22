@@ -84,12 +84,13 @@ class IntroScene(CinematicScene):
         self._spark_played = False
 
     def update_cinematic(self) -> None:
-        # Kivilcim + uguldama tam SPARK_FRAME'de - `draw_cinematic`'in
-        # tek kare beyaz flas ciziyle **ayni an**.
+        # Kivilcim tam SPARK_FRAME'de - `draw_cinematic`'in tek kare beyaz
+        # flas ciziyle **ayni an**. `intro_hum` donguluk sesi kaldirildi
+        # (Arda'nin canli oynanis geri bildirimi: sentezlenmis surekli
+        # sesler rahatsiz edici).
         if not self._spark_played and self.elapsed >= SPARK_FRAME:
             self._spark_played = True
             self.game.play_sound("intro_spark")
-            self.game.play_loop("intro", "intro_hum", volume=0.8)
 
     def _load_logo(self) -> pygame.Surface | None:
         """Marka varligi diskten gelir. Yoksa placeholder cizilir.
@@ -203,6 +204,5 @@ class IntroScene(CinematicScene):
     def on_finished(self) -> None:
         # Intro karardiktan sonra ekran **dogrudan menuye kesmez**:
         # menunun kurulmasi introyu devraliyor (docs/menu-ui.md 0.2).
-        self.game.stop_loop("intro")
         from src.scenes.menu_reveal import MenuRevealScene
         self.scenes.replace(MenuRevealScene, transition=False)
