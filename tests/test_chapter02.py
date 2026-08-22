@@ -37,13 +37,14 @@ pygame.display.set_mode((64, 64))
 
 from src.config import INTERNAL_HEIGHT, INTERNAL_WIDTH, TILE_SIZE  # noqa: E402
 from src.core.game import Game  # noqa: E402
+from src.core.input import Action  # noqa: E402
 from src.scenes.chapter02 import Chapter02Scene  # noqa: E402
 from src.systems import abilities, charms  # noqa: E402
 from src.ui import i18n  # noqa: E402
 from src.ui.chapter_end import ChapterResult, format_time  # noqa: E402
 from src.world.rooms.chapter02 import (  # noqa: E402
-    ARENA_DOOR_COLUMN, CHEST_GOLD_MAIN, CHEST_GOLD_SECRET, ECHO_RISE_DELAY,
-    LEVEL, ROOM_STARTS, SECRET_WALL_MIN_COLUMN,
+    ARENA_DOOR_COLUMN, ARENA_DOOR_ROWS, CHEST_GOLD_MAIN, CHEST_GOLD_SECRET,
+    ECHO_RISE_DELAY, LEVEL, ROOM_STARTS, SECRET_WALL_MIN_COLUMN,
 )
 
 failures: list[str] = []
@@ -233,6 +234,45 @@ def main() -> int:
     check(abs(hot_scale - 1.15) < 1e-9, "5+ combo'da %15",
           f"{hot_scale:.3f}")
     player.combo.count = 0
+
+    # --- 7b. Kapi kapanirken oyuncu govdesi icinde kalmiyor -----------------
+    # Arda'nin ekran goruntusuyle bildirdigi hata: gercekten YURUYEREK
+    # girince (teleport degil) kapi bazen govdenin sol yarisi hala
+    # sutunu kaplarken kapaniyordu - oyuncu yeni kati tile'in icinde
+    # kalip cikamiyordu. `center_x` esigi govde genisligi kadar bir
+    # pencere birakiyordu; `body.x` (sol kenar) o pencereyi kapatir.
+    print("\n--- kapiya yururken gomulme ---")
+    scene_walk = make_scene(game)
+    boss_start_walk = dict(ROOM_STARTS)["miniboss"]
+    teleport(scene_walk, boss_start_walk - 6)
+    scene_walk.player.body.vx = 0.0
+    game.input._activate(Action.RIGHT)
+    embedded = False
+    sealed_frame = None
+    # Sadece kapinin GERCEKTEN katilastirdigi satirlar (ARENA_DOOR_ROWS) -
+    # tavan/zemin (0-3, 14-15) her sutunda zaten kati, oyuncu normalde
+    # yururken zeminde onlara da deger; bu **gomulme degil**, sadece
+    # yer cekimi. Yalniz kapinin kendi araligini kontrol etmek gerekiyor.
+    door_row_top = min(ARENA_DOOR_ROWS) * TILE_SIZE
+    door_row_height = (max(ARENA_DOOR_ROWS) + 1 - min(ARENA_DOOR_ROWS)) * TILE_SIZE
+    for frame in range(400):
+        game.input.begin_frame()
+        game.input.end_frame()
+        scene_walk.update()
+        door_solid = any(scene_walk.tilemap.is_solid(ARENA_DOOR_COLUMN, r)
+                         for r in ARENA_DOOR_ROWS)
+        if door_solid and scene_walk.player.body.rect.colliderect(
+                pygame.Rect(ARENA_DOOR_COLUMN * TILE_SIZE, door_row_top,
+                           TILE_SIZE, door_row_height)):
+            embedded = True
+        if scene_walk.arena_sealed and sealed_frame is None:
+            sealed_frame = frame
+        if sealed_frame is not None and frame > sealed_frame + 20:
+            break
+    game.input._deactivate(Action.RIGHT)
+    check(sealed_frame is not None, "yururken de kapi sonunda kapaniyor")
+    check(not embedded,
+          "kapi kapanirken oyuncunun govdesi kati tile ile CAKISMIYOR")
 
     # --- 8. Arena muhurlenip aciliyor ---------------------------------------
     print("\n--- mini-boss arenasi ---")

@@ -305,7 +305,16 @@ class Chapter02Scene(PlayScene):
             # sinirina girer girmez degil (bkz. _narrate_room). `boss_defeated`
             # kontrolu sart: yoksa kapi acildiktan sonra oyuncu hala sutunun
             # otesindeyse bir sonraki karede kendini hemen yeniden kilitliyordu.
-            if self.player.body.center_x > (ARENA_DOOR_COLUMN + 1) * TILE_SIZE:
+            #
+            # `body.x` (SOL kenar) kullaniliyor, `center_x` DEGIL: merkez
+            # esigi gecince govdenin sol yarisi hala kapi sutununu
+            # kapliyor olabiliyordu (govde genisligi kadar bir pencere).
+            # O anda muhurlenirse oyuncu **yeni kati tile'in icinde**
+            # kaliyordu - cikamiyordu, cunku iki yonde de hareket ayni
+            # kati tile'a carpiyordu (Arda'nin bildirdigi "duvara
+            # yapisiyoruz" hatasi). Sol kenar gecince govdenin TAMAMI
+            # sutunun disinda demektir.
+            if self.player.body.x > (ARENA_DOOR_COLUMN + 1) * TILE_SIZE:
                 self._seal_arena()
             return
         if not self.arena_sealed or self.boss_defeated:

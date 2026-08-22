@@ -433,7 +433,11 @@ class Chapter03Scene(PlayScene):
         self.brazier.update()
         if (self.room == "sonmus_olan" and not self.arena_sealed
                 and not self.boss_defeated and self.boss is not None):
-            if self.player.body.center_x > (ARENA_DOOR_COLUMN + 1) * TILE_SIZE:
+            # `body.x` (SOL kenar), `center_x` DEGIL - bkz. chapter02.py
+            # ayni kontrol: merkez esigi gecince govdenin sol yarisi hala
+            # esigi kapliyor olabiliyordu, o an muhurlenirse oyuncu yeni
+            # kati tile'in icinde kalip cikamiyordu.
+            if self.player.body.x > (ARENA_DOOR_COLUMN + 1) * TILE_SIZE:
                 self._seal_arena()
             return
         if not self.arena_sealed or self.boss_defeated:
