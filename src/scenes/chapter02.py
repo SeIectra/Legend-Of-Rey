@@ -76,11 +76,17 @@ class Chapter02Scene(PlayScene):
 
         spawn = LEVEL.first("player")
         self.player = self.make_player(spawn.x, spawn.feet_y)
-        # Bolum 1'den sonra geliyoruz: kilic ve kacinma elde. Bolum tek
-        # basina da oynanabilmeli (test, bolum secimi), o yuzden burada
-        # acikca veriliyor - kayittan gelmesini beklemiyoruz.
-        self.player.grant(abilities.SWORD)
-        self.player.grant(abilities.DODGE)
+        # Bolum 1'den sonra geliyoruz: kilic elde (Bolum 1'de zaten
+        # gosterildi). Kacinma ise **ilk kez burada** kazaniliyor - Arda'nin
+        # geri bildirimi: "kaçınma/sprint yeteneği geldiğini bahseden bir
+        # ipucu yok" - `grant()` daha once hicbir yerde cagrilmiyordu,
+        # oyuncu tusu tesadufen kesfetmek zorundaydi. `if` sarmali: zaten
+        # sahipse (bolum secimiyle tekrar giriliyorsa) ikinci kez
+        # bildirim gostermez.
+        if self.player.grant(abilities.SWORD):
+            self.on_ability_gained(abilities.SWORD)
+        if self.player.grant(abilities.DODGE):
+            self.on_ability_gained(abilities.DODGE)
         # `amb_cellar` donguluk sesi kaldirildi - bkz. chapter01.py ayni
         # tarihli not (Arda: sentezlenmis surekli sesler rahatsiz edici).
 

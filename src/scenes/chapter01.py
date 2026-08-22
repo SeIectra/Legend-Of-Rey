@@ -233,16 +233,6 @@ class Chapter01Scene(PlayScene):
             self.echo_taught = True
             self.on_echo_tutorial()
 
-    def on_ability_gained(self, ability: str) -> None:
-        """Yetenek kazanildi. Bir sey **kazanmis** olmali - sessiz gecmesin."""
-        self.show_toast(t(abilities.label_key(ability)), frames=180)
-        self.juice.explosion(self.player.body.center_x,
-                             self.player.body.center_y, ImpactWeight.NORMAL)
-        self.particles.burst(self.player.body.center_x,
-                             self.player.body.center_y, 14,
-                             path="spark", speed=(0.6, 2.2))
-        self.game.play_sound("item_pickup")
-
     def on_chapter_end(self) -> None:
         """Bolum 1 bitti - Rey zindana iner.
 

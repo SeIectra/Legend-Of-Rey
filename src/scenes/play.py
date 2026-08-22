@@ -29,6 +29,7 @@ from src.core.juice import ImpactEvent, ImpactWeight, Juice
 from src.core.scene import Scene
 from src.entities.character_stats import ARDO, REY
 from src.entities.player import Player
+from src.systems import abilities
 from src.systems.compass import Compass
 from src.systems.echo import Answer, EchoState
 from src.systems.save import read_save
@@ -459,6 +460,21 @@ class PlayScene(Scene):
             self.on_echo_tier_changed(self.echo.tier, gained=False)
         self.show_toast(t("combat.died"))
         self.game.play_sound("player_death")
+
+    def on_ability_gained(self, ability: str) -> None:
+        """Yetenek kazanildi. Bir sey **kazanmis** olmali - sessiz gecmesin.
+
+        Paylasilan (chapter01.py'den tasindi): her bolum kendi yetenek
+        anini yasiyor, ama "kazanmak" hep ayni goruntu/ses/yaziya sahip
+        olmali - dagitilsaydi biri farkli hissettirirdi.
+        """
+        self.show_toast(t(abilities.label_key(ability)), frames=180)
+        self.juice.explosion(self.player.body.center_x,
+                             self.player.body.center_y, ImpactWeight.NORMAL)
+        self.particles.burst(self.player.body.center_x,
+                             self.player.body.center_y, 14,
+                             path="spark", speed=(0.6, 2.2))
+        self.game.play_sound("item_pickup")
 
     def _emit_particles(self, event: ImpactEvent) -> None:
         self.particles.burst(event.x, event.y, event.particle_count,
