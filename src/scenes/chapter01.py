@@ -249,7 +249,16 @@ class Chapter01Scene(PlayScene):
         Ogretinin hemen **saginda** kirilabilir bir duvar var: oyuncu
         yetenegi ogrenir ogrenmez kullanacagi bir sey buluyor. Once
         ogretip sonra kullandirmak, ogretiyi hatirlanabilir yapan sey.
+
+        **Ardo'da bu tetiklenmemeli.** Ardo'nun Yanki'si yok (`self.echo`
+        `None` - play.py::on_enter); eskiden bu kontrol hic yoktu ve Ardo
+        da "Yanki Gorusu kazandin" bildirimini goruyordu - kazanmadigi,
+        hicbir mekanik karsiligi olmayan bir gucu acmasi isteniyordu. Ardo
+        duvari sezgiyle degil, sozun kendisiyle: kilici zaten elinde,
+        vurup kirar.
         """
+        if self.echo is None:
+            return
         if self.player.grant(abilities.ECHO_SIGHT):
             self.on_ability_gained(abilities.ECHO_SIGHT)
             self.say(Line("echo", "line.ch01_echo_wall"))

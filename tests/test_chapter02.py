@@ -250,6 +250,13 @@ def main() -> int:
     check(not scene.arena_sealed, "boss olunce kapi kalkti")
     check(not scene.tilemap.is_solid(ARENA_DOOR_COLUMN, 10),
           "kapi sutunu tekrar bos")
+    # Oyuncu hala kapi sutununun otesinde duruyor (yurumedi) - kapi
+    # **yeniden kilitlenmemeli**. Ilk fix denemesi tam bunu yapiyordu:
+    # acildiktan hemen sonraki karede "hala esik otesindeyim" mantigi
+    # onu tekrar kapatiyordu.
+    idle(game, scene, 10)
+    check(not scene.arena_sealed,
+          "kapi acildiktan sonra kendini yeniden kilitlemiyor")
 
     # Oyuncu olurse de kilitli kalmamali.
     scene2 = make_scene(game)

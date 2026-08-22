@@ -1,0 +1,101 @@
+"""Bolum 1 dogrulamasi - Ardo'nun Rey'e ozel ogretileri almadigi.
+
+`docs/gdd.md`: Ardo egitimli bir yabanci, Rey'in ogrenme yayini tekrar
+oynamiyor. Ama Bolum 1'in Yanki Gorusu ogretisi (`on_echo_tutorial`)
+karakter kontrolu olmadan yazilmisti: Ardo da (Yanki'si olmadigi halde)
+"Yanki Gorusu kazandin" bildirimini goruyordu - hicbir mekanik karsiligi
+olmayan bir gucu acmasi isteniyordu (Arda'nin bildirdigi hata).
+
+Calistir:
+    python tests/test_chapter01.py
+"""
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+
+os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
+os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+import pygame  # noqa: E402
+
+pygame.init()
+pygame.display.set_mode((64, 64))
+
+from src.core.game import Game  # noqa: E402
+from src.scenes.chapter01 import Chapter01Scene  # noqa: E402
+from src.systems import abilities  # noqa: E402
+from src.world.rooms.chapter01 import ECHO_TUTORIAL_TILE, PROLOGUE  # noqa: E402
+
+failures: list[str] = []
+
+
+def check(condition: bool, label: str, detail: str = "") -> None:
+    print(("OK " if condition else "!! ") + label
+          + (f"  ({detail})" if detail else ""))
+    if not condition:
+        failures.append(label)
+
+
+def make_scene(game: Game, character: str) -> Chapter01Scene:
+    game.scenes.set_root(Chapter01Scene, transition=False, character=character)
+    game.scenes._flush()
+    scene = game.scenes.current
+    scene.beat_index = len(PROLOGUE)          # prologu atla, dogrudan oyna
+    return scene
+
+
+def idle(game: Game, scene, frames: int) -> None:
+    for _ in range(frames):
+        game.input.begin_frame()
+        game.input.end_frame()
+        scene.update()
+
+
+def main() -> int:
+    game = Game()
+
+    # --- Ardo: Yanki yok, ogreti tetiklenmemeli ------------------------------
+    print("--- Ardo: Yanki Gorusu ogretisi ---")
+    ardo = make_scene(game, "ardo")
+    check(ardo.echo is None, "Ardo'nun Yanki'si yok")
+    check(not ardo.player.has(abilities.ECHO_SIGHT),
+          "Ardo basta Yanki Gorusu'ne sahip degil (zaten olmamali)")
+
+    ardo.player.body.set_feet(ECHO_TUTORIAL_TILE.x, ECHO_TUTORIAL_TILE.feet_y)
+    ardo.player.body.vx = ardo.player.body.vy = 0.0
+    idle(game, ardo, 5)
+    check(not ardo.player.has(abilities.ECHO_SIGHT),
+          "ogreti tetiklenince de Ardo Yanki Gorusu KAZANMIYOR")
+    check(ardo.toast == "", "hicbir bildirim gosterilmedi", repr(ardo.toast))
+    check(ardo.echo_taught,
+          "tetikleyici yine de 'ogretildi' isaretleniyor - tekrar denenmiyor")
+    game.shutdown()
+
+    # --- Rey: ayni ogreti hala calismali (fix asiri kisitlamiyor) -----------
+    print("\n--- Rey: Yanki Gorusu ogretisi hala calisiyor ---")
+    game2 = Game()
+    rey = make_scene(game2, "rey")
+    check(rey.echo is not None, "Rey'in Yankisi var")
+    rey.player.body.set_feet(ECHO_TUTORIAL_TILE.x, ECHO_TUTORIAL_TILE.feet_y)
+    rey.player.body.vx = rey.player.body.vy = 0.0
+    idle(game2, rey, 5)
+    check(rey.player.has(abilities.ECHO_SIGHT),
+          "Rey ogretiyle Yanki Gorusu'nu kazaniyor")
+    game2.shutdown()
+
+    print("\n=== SONUC ===")
+    if failures:
+        print(f"{len(failures)} BASARISIZ:")
+        for item in failures:
+            print(f"  - {item}")
+        return 1
+    print("Bolum 1 karakter-ozel ogreti kurallarina uyuyor.")
+    return 0
+
+
+raise SystemExit(main())

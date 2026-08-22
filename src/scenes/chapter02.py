@@ -161,9 +161,14 @@ class Chapter02Scene(PlayScene):
                     self.boss = enemy
 
     def _narrate_room(self, name: str) -> None:
-        """Odaya ilk girisin repligi. Cogu oda **sessiz** - jest yeter."""
+        """Odaya ilk girisin repligi. Cogu oda **sessiz** - jest yeter.
+
+        Kapi **burada** kapatilmiyor - `_update_arena()` oyuncu gercekten
+        kapi sutununu gecince kapatiyor (Arda'nin bildirdigi hata: oda
+        sinirina girer girmez kapatilinca, sinir kapi sutununa cok yakin
+        oldugu icin kapi neredeyse oyuncunun yuzune kapaniyordu).
+        """
         if name == "miniboss":
-            self._seal_arena()
             self.say(Line("echo", "line.ch02_echo_boss"))
         elif name == "cikis":
             self.say(Line("rey", "line.ch02_rey_claw2"),
@@ -286,6 +291,15 @@ class Chapter02Scene(PlayScene):
         return self.player.body.bottom <= floor
 
     def _update_arena(self) -> None:
+        if (self.room == "miniboss" and not self.arena_sealed
+                and not self.boss_defeated):
+            # Oyuncu kapi sutununu **gercekten gecince** kapanir - oda
+            # sinirina girer girmez degil (bkz. _narrate_room). `boss_defeated`
+            # kontrolu sart: yoksa kapi acildiktan sonra oyuncu hala sutunun
+            # otesindeyse bir sonraki karede kendini hemen yeniden kilitliyordu.
+            if self.player.body.center_x > (ARENA_DOOR_COLUMN + 1) * TILE_SIZE:
+                self._seal_arena()
+            return
         if not self.arena_sealed or self.boss_defeated:
             return
         if self.boss is not None and not self.boss.dead:
