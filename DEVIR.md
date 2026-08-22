@@ -430,7 +430,18 @@ Arda uzun süre bilgisayar başında olmayacağı için **tam yetki verdi**
    platformdan kendiliğinden inip savaşa dönmüyor (sadece artık boşuna
    saldırmıyor) - ledge-detection gerektiren ayrı, daha büyük bir iş,
    bilerek kapsam dışı bırakıldı.
-3. **Görev 9 — Sanat geçişi.** En görünür eksik: tileset hâlâ düz renk.
+2b. ~~**Ardo, Bölüm 1'de anlamsız bir "Yankı Görüşü kazandın" bildirimi
+   görüyordu**~~ ✅ (commit `03d34ac`). `on_echo_tutorial()` artık
+   `self.echo is None` iken (Ardo) hemen dönüyor.
+2c. ~~**Mini-boss arenasının kapısı oyuncunun yüzüne kapanıyordu**~~ ✅
+   (commit `03d34ac`). Kapı artık oda sınırına girer girmez değil,
+   oyuncu kapı sütununu gerçekten geçince kapanıyor. İlk deneme yeni bir
+   hata doğurdu (kapı açılınca kendini hemen yeniden kilitliyordu),
+   `boss_defeated` bayrağıyla çözüldü - `tests/test_chapter02.py`'ye
+   regresyon kontrolü eklendi.
+3. **Görev 9 — Sanat geçişi.** `src/art/tileset.py` yazıldı (prosedürel
+   tuğla dokusu, `forge.Canvas` ile - 4 duvar varyantı, üst kenar vurgusu)
+   ama **henüz `world/tilemap.py`'ye bağlanmadı** - şu an dead code. En görünür eksik: tileset hâlâ düz renk.
    `world/tilemap.py` 9-slice ve varyantlara genişleyecek.
 4. **Görev 10 — Ses.** `assets/audio/SES-LISTESI.md` içinde 72 ses / 84
    dosya listelendi. Dikişler hazır: `game.play_ui_sound()`,
