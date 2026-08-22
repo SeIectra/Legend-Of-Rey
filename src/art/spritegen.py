@@ -68,6 +68,11 @@ class CharSpec:
     horns: bool = False
     pointed_ears: bool = False
     shoulder_pads: bool = False
+    # Omuzluklarin rengi - bos ise `armor` kullanilir. Ayri tutulmasinin
+    # sebebi: Ardo'nun omuzlugu KURK (acik/soluk gri), zirhi (armor)
+    # koyu celik - ayni zincir olsaydi omuzluk siluette armor'la
+    # birlesip "kurklu" hissi kaybolurdu.
+    shoulder_chain: str = ""
     hem: float = 0.0                 # Belden asagi acilan tunik etegi
     hem_length: float = 5.0
     tattoo: bool = False
@@ -337,10 +342,11 @@ def draw_humanoid(spec: CharSpec, pose: Pose) -> Canvas:
     ], spec.cloth, 2)
 
     if spec.shoulder_pads:
+        shoulder_tone = spec.shoulder_chain or spec.armor
         canvas.disc(shoulder_x - spec.shoulder_width * 0.55, shoulder_y + 0.5,
-                    2.4, spec.armor, 3)
+                    2.6, shoulder_tone, 3)
         canvas.disc(shoulder_x + spec.shoulder_width * 0.55, shoulder_y + 0.5,
-                    2.4, spec.armor, 2)
+                    2.6, shoulder_tone, 2)
 
     if spec.tattoo:
         # Sag kopruck kemiginin altinda kucuk isaret. Bu olcekte bir geyik

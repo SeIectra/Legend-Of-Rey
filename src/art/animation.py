@@ -277,6 +277,10 @@ ARDO_SPEC = replace(
     armor="steel", accent="leather",
     long_hair=False, hair_length=0.0, hem=0.0, tattoo=False,
     hood=False, cape=True, shoulder_pads=True,
+    # Kurklu omuzluk (Arda'nin istegi): "bone_pale" - acik/soluk gri,
+    # koyu "steel" zirhtan siluette hemen ayrisir. Ayni tonda olsaydi
+    # omuzluk zirhla birlesip kurk hissi kayboluyordu.
+    shoulder_chain="bone_pale",
     weapon="sword",
 )
 
