@@ -151,3 +151,10 @@ _SHARED = TileSet()
 
 def shared() -> TileSet:
     return _SHARED
+
+
+def clear_cache() -> None:
+    """Renk korlugu modu degisince cagrilir - `animator.clear_cache()`
+    ile ayni sebep: dokular `palette.color()`'i **uretim aninda** okuyor,
+    onbellekte tutulan zaten-cizilmis yuzeyler eski renklerle kalir."""
+    _SHARED._cache.clear()

@@ -68,6 +68,10 @@ class Game:
         # Kayitli dili **arayuz kurulmadan once** uygula: menuler kurulurken
         # metinleri o anki dilden cozuyor.
         self._apply_language(self.settings.get("language", i18n.DEFAULT_LANGUAGE))
+        # Renk korlugu modu da **sprite/tileset hic uretilmeden once**
+        # uygulanir - sonradan degisirse _on_setting_changed onbellekleri
+        # temizler ve bir sonraki cizimde yeniden uretilirler.
+        palette.set_mode(self.settings.get("colorblind", "none"))
 
         self.input = InputManager(self.settings.get("bindings"))
         self.scenes = SceneManager(self)
@@ -169,6 +173,13 @@ class Game:
             self.input.apply_bindings(value)
         elif key == "language" and isinstance(value, str):
             self._apply_language(value)
+        elif key == "colorblind" and isinstance(value, str):
+            palette.set_mode(value)
+            # Onbellekteki her sprite/karo eski renklerle cizilmis - temizle,
+            # bir sonraki cizimde yeni palete gore yeniden uretilirler.
+            from src.art import animator, tileset
+            animator.clear_cache()
+            tileset.clear_cache()
         # Ses ve sarsinti ayarlarini sahneler kendi okur; burada zorlamiyoruz.
 
     def _apply_language(self, code: object) -> None:

@@ -50,9 +50,22 @@ def _load_raw() -> dict:
 
 _RAW = _load_raw()
 
-COLORS: dict[str, RGB] = {
+# Renk korlugu varyantlari - tools/colorblind.py tarafindan onceden
+# uretilip bu dosyaya yazilir (daltonize/duzeltme, simulasyon degil).
+# `_BASE_COLORS` degismez; `COLORS` ayarlar menusundeki secime gore
+# **icerigi** degisen (rebind edilmeyen) tek sozluk - boylece
+# `palette.COLORS` referansini tutan hicbir yer bayatlamiyor.
+_BASE_COLORS: dict[str, RGB] = {
     name: (int(v[0]), int(v[1]), int(v[2])) for name, v in _RAW["colors"].items()
 }
+_VARIANTS: dict[str, dict[str, RGB]] = {
+    mode: {name: (int(v[0]), int(v[1]), int(v[2])) for name, v in table.items()}
+    for mode, table in _RAW.get("colorblind_variants", {}).items()
+}
+COLORBLIND_MODES: tuple[str, ...] = ("none", "protanopia", "deuteranopia",
+                                    "tritanopia")
+
+COLORS: dict[str, RGB] = dict(_BASE_COLORS)
 RAMPS: dict[str, tuple[str, ...]] = {
     name: tuple(steps) for name, steps in _RAW.get("ramps", {}).items()
 }
@@ -71,6 +84,36 @@ OUTLINE_NAME: str = _RAW.get("outline", "ink")
 # Sirali liste - quantize.py en yakin rengi bunun uzerinde arar.
 ORDERED_NAMES: tuple[str, ...] = tuple(COLORS.keys())
 ORDERED_COLORS: tuple[RGB, ...] = tuple(COLORS[n] for n in ORDERED_NAMES)
+
+_active_mode = "none"
+
+
+# --- Renk korlugu modu --------------------------------------------------
+def set_mode(mode: str) -> None:
+    """Aktif renk korlugu modunu degistirir - `COLORS` ICERIGI degisir,
+    sozluk **rebind edilmez** (bkz. `COLORS` yorumu).
+
+    Sprite/tileset onbellekleri bu cagriyi gormez - onlari temizlemek
+    cagiranin isi (`Game._on_setting_changed`, `animator.clear_cache()`
+    + `tileset.clear_cache()`). Burasi yalnizca "hangi renkler" sorusuna
+    cevap veriyor, "kim yeniden cizecek" sorusuna degil.
+    """
+    global _active_mode, ORDERED_COLORS
+    if mode not in COLORBLIND_MODES:
+        mode = "none"
+    _active_mode = mode
+    source = _BASE_COLORS if mode == "none" else _VARIANTS.get(mode)
+    if not source:
+        source = _BASE_COLORS
+        _active_mode = "none"
+    COLORS.clear()
+    COLORS.update(source)
+    ORDERED_COLORS = tuple(COLORS[n] for n in ORDERED_NAMES)
+    nearest_name.cache_clear()
+
+
+def active_mode() -> str:
+    return _active_mode
 
 
 # --- Erisim -----------------------------------------------------------------

@@ -1,63 +1,273 @@
 {
-  "_aciklama": ["LORE ana paleti - 32 renk. TEK GERCEK KAYNAK.", "src/art/palette.py bu dosyayi okur, kendi renk tanimlamaz.", "Kaynagi ne olursa olsun her gorsel tools/quantize.py ile bu palete indirgenir.", "Bu dosya erken sabitlendi; degistirmek tum oyunu degistirir.", "Kontur rengi 'ink' - paletin en koyu 2. rengi (siyah degil, CLAUDE.md 6)."],
+  "_aciklama": [
+    "LORE ana paleti - 32 renk. TEK GERCEK KAYNAK.",
+    "src/art/palette.py bu dosyayi okur, kendi renk tanimlamaz.",
+    "Kaynagi ne olursa olsun her gorsel tools/quantize.py ile bu palete indirgenir.",
+    "Bu dosya erken sabitlendi; degistirmek tum oyunu degistirir.",
+    "Kontur rengi 'ink' - paletin en koyu 2. rengi (siyah degil, CLAUDE.md 6)."
+  ],
   "_versiyon": 1,
   "outline": "ink",
   "colors": {
-    "void":            [6, 5, 11],
-    "ink":             [16, 14, 26],
-    "ink_soft":        [30, 27, 44],
-    "stone_darkest":   [40, 44, 60],
-    "stone_dark":      [58, 64, 84],
-    "stone":           [86, 94, 116],
-    "stone_light":     [126, 134, 158],
-    "abyss_dark":      [14, 26, 48],
-    "abyss":           [24, 50, 86],
-    "abyss_light":     [40, 88, 136],
-    "earth_dark":      [58, 38, 28],
-    "earth":           [104, 70, 44],
-    "ember_dark":      [92, 32, 20],
-    "ember":           [176, 70, 28],
-    "ember_light":     [236, 130, 48],
-    "gold":            [255, 198, 96],
-    "blood_dark":      [62, 14, 20],
-    "blood":           [138, 26, 34],
-    "blood_bright":    [212, 56, 54],
-    "flesh_dark":      [98, 60, 44],
-    "flesh":           [154, 102, 74],
-    "flesh_light":     [202, 152, 118],
-    "echo_dark":       [22, 62, 74],
-    "echo":            [54, 142, 154],
-    "echo_bright":     [130, 222, 228],
-    "violet_dark":     [46, 20, 74],
-    "violet":          [106, 52, 160],
-    "violet_bright":   [180, 126, 234],
-    "danger":          [216, 76, 34],
-    "danger_bright":   [255, 134, 60],
-    "bone":            [228, 222, 204],
-    "white_flash":     [252, 250, 246]
+    "void": [
+      6,
+      5,
+      11
+    ],
+    "ink": [
+      16,
+      14,
+      26
+    ],
+    "ink_soft": [
+      30,
+      27,
+      44
+    ],
+    "stone_darkest": [
+      40,
+      44,
+      60
+    ],
+    "stone_dark": [
+      58,
+      64,
+      84
+    ],
+    "stone": [
+      86,
+      94,
+      116
+    ],
+    "stone_light": [
+      126,
+      134,
+      158
+    ],
+    "abyss_dark": [
+      14,
+      26,
+      48
+    ],
+    "abyss": [
+      24,
+      50,
+      86
+    ],
+    "abyss_light": [
+      40,
+      88,
+      136
+    ],
+    "earth_dark": [
+      58,
+      38,
+      28
+    ],
+    "earth": [
+      104,
+      70,
+      44
+    ],
+    "ember_dark": [
+      92,
+      32,
+      20
+    ],
+    "ember": [
+      176,
+      70,
+      28
+    ],
+    "ember_light": [
+      236,
+      130,
+      48
+    ],
+    "gold": [
+      255,
+      198,
+      96
+    ],
+    "blood_dark": [
+      62,
+      14,
+      20
+    ],
+    "blood": [
+      138,
+      26,
+      34
+    ],
+    "blood_bright": [
+      212,
+      56,
+      54
+    ],
+    "flesh_dark": [
+      98,
+      60,
+      44
+    ],
+    "flesh": [
+      154,
+      102,
+      74
+    ],
+    "flesh_light": [
+      202,
+      152,
+      118
+    ],
+    "echo_dark": [
+      22,
+      62,
+      74
+    ],
+    "echo": [
+      54,
+      142,
+      154
+    ],
+    "echo_bright": [
+      130,
+      222,
+      228
+    ],
+    "violet_dark": [
+      46,
+      20,
+      74
+    ],
+    "violet": [
+      106,
+      52,
+      160
+    ],
+    "violet_bright": [
+      180,
+      126,
+      234
+    ],
+    "danger": [
+      216,
+      76,
+      34
+    ],
+    "danger_bright": [
+      255,
+      134,
+      60
+    ],
+    "bone": [
+      228,
+      222,
+      204
+    ],
+    "white_flash": [
+      252,
+      250,
+      246
+    ]
   },
   "_rampalar": "Tonlama icin koyudan aciga siralar. shade.py ve spritegen bunlari kullanir.",
   "ramps": {
-    "stone": ["stone_darkest", "stone_dark", "stone", "stone_light"],
-    "abyss": ["abyss_dark", "abyss", "abyss_light"],
-    "earth": ["earth_dark", "earth"],
-    "ember": ["ember_dark", "ember", "ember_light", "gold"],
-    "blood": ["blood_dark", "blood", "blood_bright"],
-    "flesh": ["flesh_dark", "flesh", "flesh_light"],
-    "echo": ["echo_dark", "echo", "echo_bright"],
-    "violet": ["violet_dark", "violet", "violet_bright"],
-    "danger": ["danger", "danger_bright"],
-    "ink": ["void", "ink", "ink_soft"],
-    "bone": ["bone", "white_flash"]
+    "stone": [
+      "stone_darkest",
+      "stone_dark",
+      "stone",
+      "stone_light"
+    ],
+    "abyss": [
+      "abyss_dark",
+      "abyss",
+      "abyss_light"
+    ],
+    "earth": [
+      "earth_dark",
+      "earth"
+    ],
+    "ember": [
+      "ember_dark",
+      "ember",
+      "ember_light",
+      "gold"
+    ],
+    "blood": [
+      "blood_dark",
+      "blood",
+      "blood_bright"
+    ],
+    "flesh": [
+      "flesh_dark",
+      "flesh",
+      "flesh_light"
+    ],
+    "echo": [
+      "echo_dark",
+      "echo",
+      "echo_bright"
+    ],
+    "violet": [
+      "violet_dark",
+      "violet",
+      "violet_bright"
+    ],
+    "danger": [
+      "danger",
+      "danger_bright"
+    ],
+    "ink": [
+      "void",
+      "ink",
+      "ink_soft"
+    ],
+    "bone": [
+      "bone",
+      "white_flash"
+    ]
   },
   "_yollar": "Parcacik renk yollari - derinlestirme.md 1.3. Parcacik omru boyunca bu diziyi izler.",
   "particle_paths": {
-    "blood": ["white_flash", "blood_bright", "blood", "blood_dark", "ink_soft"],
-    "spark": ["white_flash", "gold", "ember_light", "ember", "ink_soft"],
-    "dust": ["stone_light", "stone", "stone_dark", "ink_soft"],
-    "echo": ["white_flash", "echo_bright", "echo", "echo_dark", "ink_soft"],
-    "violet": ["white_flash", "violet_bright", "violet", "violet_dark", "ink_soft"],
-    "soot": ["stone_dark", "ink_soft", "ink"]
+    "blood": [
+      "white_flash",
+      "blood_bright",
+      "blood",
+      "blood_dark",
+      "ink_soft"
+    ],
+    "spark": [
+      "white_flash",
+      "gold",
+      "ember_light",
+      "ember",
+      "ink_soft"
+    ],
+    "dust": [
+      "stone_light",
+      "stone",
+      "stone_dark",
+      "ink_soft"
+    ],
+    "echo": [
+      "white_flash",
+      "echo_bright",
+      "echo",
+      "echo_dark",
+      "ink_soft"
+    ],
+    "violet": [
+      "white_flash",
+      "violet_bright",
+      "violet",
+      "violet_dark",
+      "ink_soft"
+    ],
+    "soot": [
+      "stone_dark",
+      "ink_soft",
+      "ink"
+    ]
   },
   "_anlamsal": "Oyun kodunun renk yerine anlam ile konusmasi icin. Rol degisirse tek yerden degisir.",
   "roles": {
@@ -79,19 +289,578 @@
   },
   "_zincirler": "Golge zincirleri - rampa asabilir. Karakter ve nesne tonlamasi bunlari kullanir; 32 renk siniri bozulmadan her parca 4 basamak tonlanir.",
   "shade_chains": {
-    "hair_dark": ["void", "ink", "earth_dark", "earth"],
-    "skin_tan": ["earth_dark", "flesh_dark", "flesh", "flesh_light"],
-    "cloth_blue": ["abyss_dark", "abyss", "abyss_light", "stone_light"],
-    "cloth_grey": ["ink_soft", "stone_darkest", "stone_dark", "stone"],
-    "leather": ["ink", "earth_dark", "earth", "flesh"],
-    "steel": ["stone_darkest", "stone_dark", "stone", "stone_light"],
-    "brass": ["ember_dark", "ember", "ember_light", "gold"],
-    "bone_pale": ["stone_dark", "stone_light", "bone", "white_flash"],
-    "rot": ["ink_soft", "echo_dark", "echo", "echo_bright"],
-    "gore": ["blood_dark", "blood", "blood_bright", "danger_bright"],
-    "arcane": ["violet_dark", "violet", "violet_bright", "white_flash"],
-    "shadow": ["void", "ink", "ink_soft", "stone_darkest"],
-    "rock": ["ink_soft", "stone_darkest", "stone_dark", "stone"],
-    "torchlight": ["ember_dark", "ember", "ember_light", "gold"]
+    "hair_dark": [
+      "void",
+      "ink",
+      "earth_dark",
+      "earth"
+    ],
+    "skin_tan": [
+      "earth_dark",
+      "flesh_dark",
+      "flesh",
+      "flesh_light"
+    ],
+    "cloth_blue": [
+      "abyss_dark",
+      "abyss",
+      "abyss_light",
+      "stone_light"
+    ],
+    "cloth_grey": [
+      "ink_soft",
+      "stone_darkest",
+      "stone_dark",
+      "stone"
+    ],
+    "leather": [
+      "ink",
+      "earth_dark",
+      "earth",
+      "flesh"
+    ],
+    "steel": [
+      "stone_darkest",
+      "stone_dark",
+      "stone",
+      "stone_light"
+    ],
+    "brass": [
+      "ember_dark",
+      "ember",
+      "ember_light",
+      "gold"
+    ],
+    "bone_pale": [
+      "stone_dark",
+      "stone_light",
+      "bone",
+      "white_flash"
+    ],
+    "rot": [
+      "ink_soft",
+      "echo_dark",
+      "echo",
+      "echo_bright"
+    ],
+    "gore": [
+      "blood_dark",
+      "blood",
+      "blood_bright",
+      "danger_bright"
+    ],
+    "arcane": [
+      "violet_dark",
+      "violet",
+      "violet_bright",
+      "white_flash"
+    ],
+    "shadow": [
+      "void",
+      "ink",
+      "ink_soft",
+      "stone_darkest"
+    ],
+    "rock": [
+      "ink_soft",
+      "stone_darkest",
+      "stone_dark",
+      "stone"
+    ],
+    "torchlight": [
+      "ember_dark",
+      "ember",
+      "ember_light",
+      "gold"
+    ]
+  },
+  "_renk_korlugu_aciklama": "Otomatik uretildi: tools/colorblind.py. Elle duzenleme - bir sonraki calistirmada uzerine yazilir. Daltonize (duzeltme), simulasyon degil - oyuncunun GERCEKTEN gorecegi renkler.",
+  "colorblind_variants": {
+    "protanopia": {
+      "void": [
+        6,
+        6,
+        12
+      ],
+      "ink": [
+        16,
+        16,
+        28
+      ],
+      "ink_soft": [
+        30,
+        29,
+        46
+      ],
+      "stone_darkest": [
+        40,
+        43,
+        60
+      ],
+      "stone_dark": [
+        58,
+        62,
+        83
+      ],
+      "stone": [
+        86,
+        91,
+        114
+      ],
+      "stone_light": [
+        126,
+        131,
+        156
+      ],
+      "abyss_dark": [
+        14,
+        23,
+        46
+      ],
+      "abyss": [
+        24,
+        43,
+        82
+      ],
+      "abyss_light": [
+        40,
+        74,
+        128
+      ],
+      "earth_dark": [
+        58,
+        48,
+        43
+      ],
+      "earth": [
+        104,
+        88,
+        74
+      ],
+      "ember_dark": [
+        92,
+        68,
+        70
+      ],
+      "ember": [
+        176,
+        134,
+        132
+      ],
+      "ember_light": [
+        236,
+        189,
+        166
+      ],
+      "gold": [
+        255,
+        225,
+        157
+      ],
+      "blood_dark": [
+        62,
+        44,
+        51
+      ],
+      "blood": [
+        138,
+        100,
+        112
+      ],
+      "blood_bright": [
+        212,
+        157,
+        171
+      ],
+      "flesh_dark": [
+        98,
+        80,
+        74
+      ],
+      "flesh": [
+        154,
+        129,
+        116
+      ],
+      "flesh_light": [
+        202,
+        177,
+        156
+      ],
+      "echo_dark": [
+        22,
+        48,
+        61
+      ],
+      "echo": [
+        54,
+        112,
+        120
+      ],
+      "echo_bright": [
+        130,
+        186,
+        184
+      ],
+      "violet_dark": [
+        46,
+        38,
+        83
+      ],
+      "violet": [
+        106,
+        89,
+        178
+      ],
+      "violet_bright": [
+        180,
+        161,
+        255
+      ],
+      "danger": [
+        216,
+        163,
+        165
+      ],
+      "danger_bright": [
+        255,
+        203,
+        185
+      ],
+      "bone": [
+        228,
+        224,
+        206
+      ],
+      "white_flash": [
+        252,
+        251,
+        247
+      ]
+    },
+    "deuteranopia": {
+      "void": [
+        6,
+        6,
+        12
+      ],
+      "ink": [
+        16,
+        16,
+        28
+      ],
+      "ink_soft": [
+        30,
+        30,
+        47
+      ],
+      "stone_darkest": [
+        40,
+        46,
+        61
+      ],
+      "stone_dark": [
+        58,
+        66,
+        85
+      ],
+      "stone": [
+        86,
+        96,
+        117
+      ],
+      "stone_light": [
+        126,
+        136,
+        159
+      ],
+      "abyss_dark": [
+        14,
+        28,
+        49
+      ],
+      "abyss": [
+        24,
+        53,
+        87
+      ],
+      "abyss_light": [
+        40,
+        90,
+        134
+      ],
+      "earth_dark": [
+        58,
+        41,
+        39
+      ],
+      "earth": [
+        104,
+        75,
+        65
+      ],
+      "ember_dark": [
+        92,
+        47,
+        62
+      ],
+      "ember": [
+        176,
+        96,
+        115
+      ],
+      "ember_light": [
+        236,
+        149,
+        142
+      ],
+      "gold": [
+        255,
+        201,
+        132
+      ],
+      "blood_dark": [
+        62,
+        28,
+        46
+      ],
+      "blood": [
+        138,
+        64,
+        100
+      ],
+      "blood_bright": [
+        212,
+        105,
+        153
+      ],
+      "flesh_dark": [
+        98,
+        67,
+        67
+      ],
+      "flesh": [
+        154,
+        110,
+        106
+      ],
+      "flesh_light": [
+        202,
+        158,
+        145
+      ],
+      "echo_dark": [
+        22,
+        59,
+        66
+      ],
+      "echo": [
+        54,
+        134,
+        131
+      ],
+      "echo_bright": [
+        130,
+        211,
+        196
+      ],
+      "violet_dark": [
+        46,
+        35,
+        84
+      ],
+      "violet": [
+        106,
+        84,
+        181
+      ],
+      "violet_bright": [
+        180,
+        153,
+        255
+      ],
+      "danger": [
+        216,
+        113,
+        145
+      ],
+      "danger_bright": [
+        255,
+        158,
+        161
+      ],
+      "bone": [
+        228,
+        221,
+        203
+      ],
+      "white_flash": [
+        252,
+        250,
+        246
+      ]
+    },
+    "tritanopia": {
+      "void": [
+        6,
+        5,
+        15
+      ],
+      "ink": [
+        16,
+        13,
+        33
+      ],
+      "ink_soft": [
+        30,
+        26,
+        54
+      ],
+      "stone_darkest": [
+        40,
+        44,
+        71
+      ],
+      "stone_dark": [
+        58,
+        64,
+        98
+      ],
+      "stone": [
+        86,
+        94,
+        132
+      ],
+      "stone_light": [
+        126,
+        134,
+        176
+      ],
+      "abyss_dark": [
+        14,
+        26,
+        61
+      ],
+      "abyss": [
+        24,
+        51,
+        107
+      ],
+      "abyss_light": [
+        40,
+        90,
+        166
+      ],
+      "earth_dark": [
+        58,
+        36,
+        3
+      ],
+      "earth": [
+        104,
+        66,
+        0
+      ],
+      "ember_dark": [
+        92,
+        16,
+        0
+      ],
+      "ember": [
+        176,
+        44,
+        0
+      ],
+      "ember_light": [
+        236,
+        113,
+        0
+      ],
+      "gold": [
+        255,
+        193,
+        0
+      ],
+      "blood_dark": [
+        62,
+        0,
+        4
+      ],
+      "blood": [
+        138,
+        0,
+        0
+      ],
+      "blood_bright": [
+        212,
+        0,
+        0
+      ],
+      "flesh_dark": [
+        98,
+        55,
+        0
+      ],
+      "flesh": [
+        154,
+        95,
+        0
+      ],
+      "flesh_light": [
+        202,
+        146,
+        40
+      ],
+      "echo_dark": [
+        22,
+        64,
+        86
+      ],
+      "echo": [
+        54,
+        147,
+        171
+      ],
+      "echo_bright": [
+        130,
+        229,
+        244
+      ],
+      "violet_dark": [
+        46,
+        12,
+        95
+      ],
+      "violet": [
+        106,
+        34,
+        202
+      ],
+      "violet_bright": [
+        180,
+        115,
+        255
+      ],
+      "danger": [
+        216,
+        28,
+        0
+      ],
+      "danger_bright": [
+        255,
+        113,
+        0
+      ],
+      "bone": [
+        228,
+        222,
+        186
+      ],
+      "white_flash": [
+        252,
+        250,
+        242
+      ]
+    }
   }
 }
