@@ -246,17 +246,28 @@ REY_SPEC = CharSpec(
 # degisim bedava - tek fark silah.
 REY_ARMED_SPEC = replace(REY_SPEC, name="rey_armed", weapon="sword")
 
-# Ardo - yabanci. Daha agir, kapusonlu, Yanki'si yok.
+# Ardo - yabanci. Daha agir, genis omuzlu, Yanki'si yok.
 #
-# Siluet ayrimi bilincli: Rey ince, uzun sacli, etegi acilan; Ardo genis
-# omuzlu, sivri kukuleteli, etegi olmayan. Tek renge indirildiginde bile
-# hangisinin kim oldugu anlasilmali (docs/asset-plani.md 4).
+# **Kukulete kaldirildi (22.08.2026).** Onceki tasarim kapusonluydu; Arda
+# iki kez geri bildirdi ("insana benzemiyor", sonra acikca "kafasindaki o
+# sey yuzunden yaratiga benziyor - havali ve yakisikli bir karakter ciz
+# demistim"). Kukulete + golge + kucuk piksel tuvalinde bir kapusonu hem
+# "insan" hem "havali" okutmak bu boyutta guvenilir olmadi - yuz acikca
+# gorunmeyince yakisiklilik da okunamiyor. Cozum: yuzu Rey'inki gibi
+# tamamen acik birak, gri/gumus kisa sac ile ("deneyimli savasci" - Rey'in
+# koyu uzun sacindan hem renk hem siluet olarak ayri).
+#
+# Siluet ayrimi hala bilincli, baska eksenlerden: Rey ince/uzun sacli/
+# etegi acik; Ardo genis omuzlu/kisa sacli/etegi yok/omuz zirhli. Tek
+# renge indirildiginde bile hangisinin kim oldugu anlasilmali
+# (docs/asset-plani.md 4) - degisiklikten sonra siluet testiyle
+# (tools/sprite_sheet.py --siluet) dogrulandi.
 ARDO_SPEC = replace(
     REY_SPEC,
     name="ardo",
     torso_height=8.0, torso_width=8.2, shoulder_width=7.6, limb_width=2.9,
     thigh=4.4, shin=4.4,          # Daha kisa bacak, daha agir duruş
-    skin="skin_tan", hair="hair_dark", cloth="cloth_grey",
+    skin="skin_tan", hair="steel", cloth="cloth_grey",
     # Arka bacak/kol "cloth_dark" ile bir basamak koyu cizilir. Varsayilan
     # "shadow" zinciri "abyss_dark" arka planla neredeyse ayni koyulukta -
     # Ardo'nun etegi olmadigi icin (Rey'in aksine) bacaklar dogrudan
@@ -265,7 +276,7 @@ ARDO_SPEC = replace(
     cloth_dark="steel",
     armor="steel", accent="leather",
     long_hair=False, hair_length=0.0, hem=0.0, tattoo=False,
-    hood=True, cape=True, shoulder_pads=True,
+    hood=False, cape=True, shoulder_pads=True,
     weapon="sword",
 )
 

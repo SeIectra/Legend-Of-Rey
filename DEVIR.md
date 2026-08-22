@@ -74,7 +74,7 @@ kılar. Kendiliğinden geri alma; Arda'ya sormadan değiştirme.
    | Karakter | Cinsiyet | Görünüm |
    |---|---|---|
    | **Rey** | kadın (she) | Esmer, uzun gür düz koyu kahve saç, koyu kahve badem gözler, pürüzsüz cilt, rahat feminen giyim, sağ köprücük kemiği altında **geyik dövmesi** |
-   | **Ardo** | erkek (he) | Geniş omuz, sivri kukulete, ağır duruş |
+   | **Ardo** | erkek (he) | Geniş omuz, gümüş/gri kısa saç, ağır duruş, pelerin (kukulete kaldırıldı - §2 madde 13) |
    | **Cemo** | erkek — Rey'in **küçük kardeşi** | Esmer, **kıvırcık** saç, tatlı/yakışıklı bir çocuk |
 
    Cemo'nun sprite'ı **henüz üretilmedi** — Bölüm 1 ve 13 içeriği, sırası
@@ -165,18 +165,22 @@ kılar. Kendiliğinden geri alma; Arda'ya sormadan değiştirme.
       `_update_arena()` eşik+tampon geçilince mühürlüyor - Bölüm 2'nin
       kalıbıyla birebir. `tests/test_chapter03.py` regresyon kontrolü var.
 
-13. **Ardo "insana benzemiyor" (22.08.2026).** Arda'nın devamındaki geri
-    bildirimi. Kök neden: `hood=True` karakterlerde yüzün çoğu "shadow"
-    zinciriyle karartılıyordu (yarıçap kafanın neredeyse tamamı) ve gözler
-    "hair_dark" ile çiziliyordu - ikisi de aynı derecede koyu, gözler
-    gölgede tamamen kayboluyordu. Kukulete govdeye bağlanan yüzsüz bir
-    yumdu. Düzeltme: gölge yarıçapı küçültüldü (çene hattı görünür kaldı),
-    gözler `hood=True` için soluk "bone_pale" ile çiziliyor (parlamıyor -
-    canavar değil, gölgede kalan bir insan), Ardo'nun `cloth_dark`'ı
-    "shadow" (arka planla aynı ton) yerine "steel" oldu (etegi olmadığı
-    için arka bacak dogrudan görünüyordu ve kayboluyordu). `tools/
-    sprite_sheet.py --karakter ardo` ile doğrulandı, siluet testi
-    Rey/Ardo ayrımını koruyor.
+13. **Ardo "insana benzemiyor" → kukulete tamamen kaldırıldı (22.08.2026).**
+    İki turlu geri bildirim. İlk tur: `hood=True` karakterlerde yüzün çoğu
+    "shadow" zinciriyle karartılıyordu ve gözler "hair_dark" ile
+    çiziliyordu - ikisi de aynı derecede koyu, gözler gölgede tamamen
+    kayboluyordu. Gölge yarıçapını küçültüp gözleri soluk "bone_pale"
+    yaptım - **yetmedi**. İkinci tur, daha net: "kafasındaki o şey yüzünden
+    yaratığa benziyor, havalı ve yakışıklı bir karakter çiz demiştim."
+    Kukuletenin **şekli** kendisi (sivri, asimetrik) küçük tuvalde
+    "insan" değil "yaratık" okunuyordu - yüz kısmen görünür olsa bile.
+    Karar: kukulete tamamen kaldırıldı (`hood=False`), Rey'inki gibi
+    tam açık yüz + gümüş/gri kısa saç (`hair="steel"` - Rey'in koyu uzun
+    saçından hem renk hem siluet olarak ayrı). Geniş omuz/omuz zırhı/
+    pelerin duruyor - siluet ayrımı hâlâ korunuyor (`tools/sprite_sheet.py
+    --siluet` ile doğrulandı). Ardo'nun `cloth_dark`'ı da "shadow" (arka
+    planla aynı ton) yerine "steel" oldu (eteği olmadığı için arka bacak
+    doğrudan görünüyordu ve kayboluyordu).
 
 ---
 
