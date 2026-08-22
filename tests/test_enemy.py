@@ -340,6 +340,52 @@ def main() -> int:
           (ROOT / "src" / "entities" / "enemy.py").read_text(encoding="utf-8"),
           "durum siluetle de anlatiliyor - renk korlugu icin sart")
 
+    # --- 10b. Dikey erisim - "ust platformlara sikisma" hatasi --------------
+    # Arda'nin bildirdigi hata: bir dusman kopuk bir platforma cikinca
+    # (guclu knockback_up, ya da bolum tasariminda bir yukselti), oyuncu
+    # TAM ALTINDAYSA yatay mesafe hep kucuk kaliyor ve dusman erisemeyecegi
+    # bir hedefe sonsuza dek TELL/ATTACK denemesi yapiyordu.
+    print("\n--- dikey erisim (ust platforma sikisma) ---")
+    game, scene = make_scene()
+    # `combat_room.py`'nin gercek "ust kat" platformu: satir 7, sutun 18-21.
+    # Basilabilir satir 6 - `place()` "tile_y+1" satirina ayak koyar.
+    stuck = place(scene, Shambler, 19, tile_y=6)
+    scene.enemies = [stuck]
+    scene.tokens.clear()
+    scene.player.body.x = stuck.body.center_x - stuck.body.width * 0.5
+    scene.player.body.y = 12 * TILE_SIZE             # Zeminde - 6 tile asagida
+    start_y = stuck.body.y
+    bad_states = 0
+    for _ in range(600):
+        step(game, scene)
+        if stuck.state in (EnemyState.TELL, EnemyState.ATTACK):
+            bad_states += 1
+    check(stuck.aware, "dusman oyuncunun farkina variyor (goruş bozulmadi)")
+    check(bad_states == 0,
+          "erisilemez hedefe TELL/ATTACK denemesi YAPMIYOR",
+          f"{bad_states} kare TELL/ATTACK durumunda")
+    check(abs(stuck.body.y - start_y) < 2.0,
+          "dusman platformdan dusmuyor - saglam zeminde kaliyor",
+          f"y={stuck.body.y:.1f} (baslangic {start_y:.1f})")
+    game.shutdown()
+
+    # Ayni oyuncu SEVIYEDEYSE saldiri hala calismali - fix'in asiri
+    # kisitlayici olmadigini dogrular.
+    game, scene = make_scene()
+    reachable = place(scene, Shambler, 20, tile_y=12)
+    scene.enemies = [reachable]
+    scene.tokens.clear()
+    scene.player.body.x = reachable.body.center_x - reachable.body.width * 0.5
+    scene.player.body.y = 12 * TILE_SIZE
+    attacked = False
+    for _ in range(400):
+        step(game, scene)
+        if reachable.state is EnemyState.ATTACK:
+            attacked = True
+            break
+    check(attacked, "ayni seviyedeyken saldiri hala calisiyor (fix asiri kisitlamiyor)")
+    game.shutdown()
+
     # --- 10. Kalicilik ------------------------------------------------------
     print("\n--- kalici izler ---")
     game, scene = make_scene()

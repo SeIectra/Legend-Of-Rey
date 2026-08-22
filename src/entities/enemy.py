@@ -37,8 +37,8 @@ from src.art import palette
 from src.combat.hitbox import Hitbox, Team, melee_rect
 from src.config import (
     ENEMY_APPROACH_SPEED, ENEMY_LOSE_RANGE, ENEMY_MIN_TELL_FRAMES,
-    ENEMY_ORBIT_SPEED, ENEMY_SIGHT_RANGE, ORBIT_RADIUS_MAX, ORBIT_RADIUS_MIN,
-    ORBIT_SLOT_WIDTH,
+    ENEMY_ORBIT_SPEED, ENEMY_SIGHT_RANGE, ENEMY_VERTICAL_ENGAGE_RANGE,
+    ORBIT_RADIUS_MAX, ORBIT_RADIUS_MIN, ORBIT_SLOT_WIDTH,
 )
 from src.entities.actor import Actor
 
@@ -221,13 +221,28 @@ class Enemy(Actor):
         if abs(player.body.center_x - self.body.center_x) > 2.0:
             self.facing = 1 if player.body.center_x > self.body.center_x else -1
 
+    def _vertically_reachable(self, player) -> bool:
+        """Oyuncu saldiri menzilinde erisilebilecek yukseklikte mi?
+
+        `distance_to()` yalnizca yatay olcuyor - bir dusman kopuk bir
+        platforma (guclu bir knockback_up ile, ya da bolum tasarimindaki
+        bir yukseltiye) cikinca, oyuncu tam altindaysa yatay mesafe hep
+        kucuk kaliyordu ve dusman hicbir zaman ulasamayacagi bir hedefe
+        sonsuza dek saldiri **denemesi** yapiyordu - "ust platformlara
+        sikisma" raporunun kaynagi buydu. Saldiriyi baslatmadan once bu
+        da soruluyor; goruş/kusatma davranisi bilerek degismiyor.
+        """
+        return abs(self.body.center_y - player.body.center_y) \
+            <= ENEMY_VERTICAL_ENGAGE_RANGE
+
     def _approach(self) -> None:
         player = self.player
         if player is None:
             return
         self._face_player()
         distance = self.distance_to(player)
-        if distance <= self.contact_range and self._can_attack():
+        if (distance <= self.contact_range and self._vertically_reachable(player)
+                and self._can_attack()):
             self._begin_tell()
             return
         speed = self.move_speed * self.speed_scale * ENEMY_APPROACH_SPEED / 0.5

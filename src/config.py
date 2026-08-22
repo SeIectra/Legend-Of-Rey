@@ -232,6 +232,17 @@ ENEMY_ORBIT_SPEED: Final[float] = 0.30
 ENEMY_SIGHT_RANGE: Final[float] = 170.0
 ENEMY_LOSE_RANGE: Final[float] = 240.0   # Histerezis: goz acip kapama olmasin
 
+# Dikey erisim payi.  # ayarlanabilir - belgede yok, hata raporundan geldi
+# `distance_to()` yalnizca yatay olcuyor (docs/dovus-sistemi.md 6'nin
+# tasarladigi gibi - dusman gorusu ekran genisligine gore dusunulmus).
+# Ama bu yuzden bir dusman havadaki kopuk bir platforma (ornegin guclu bir
+# knockback_up ile) inince, oyuncu tam altindaysa yatay mesafe hep kucuk
+# kaliyor ve dusman ulasamayacagi bir hedefe sonsuza dek saldiri denemesi
+# yapiyordu - "ust platformlara sikisma" raporunun kaynagi buydu. Saldiri
+# **baslatma** karari bu payla dikeyde de sinirlaniyor; gorus/kusatma
+# davranisi (ekran capinda "farkinda olma" hissi) bilerek degismiyor.
+ENEMY_VERTICAL_ENGAGE_RANGE: Final[float] = 28.0
+
 # --- Tip degerleri -----------------------------------------------------------
 # Suruklenen - combo hedef tahtasi. Yavas 3'luk ritim: bekle-bekle-vur.
 SHAMBLER_HEALTH: Final[int] = 40
