@@ -186,7 +186,8 @@
   },
   "chapter": {
     "village": "Köy",
-    "first_descent": "İlk İniş"
+    "first_descent": "İlk İniş",
+    "torch_crypt": "Meşale Mahzeni"
   },
   "chapter_end": {
     "heading": "BÖLÜM TAMAMLANDI",
@@ -194,6 +195,9 @@
     "combo": "Combo rekoru",
     "gold": "Altın",
     "secrets": "Gizli alan",
+    "purple_flame": "Mor Alev",
+    "taken": "alındı",
+    "left": "bırakıldı",
     "continue": "Devam etmek için onayla"
   },
   "chapter02": {
@@ -202,13 +206,34 @@
     "boss_gold": "{count} altın",
     "ardo_tracks": "Duvarda bir çatlak — iz sürüldü"
   },
+  "chapter03": {
+    "gold_found": "{count} altın",
+    "secret_found": "Mum Bekçisi'nin odası açıldı",
+    "puzzle_solved": "Beş yuva da yanıyor",
+    "boss_gold": "{count} altın · Fener tılsımı",
+    "already_bought": "Zaten aldın",
+    "not_enough_gold": "Yetersiz altın",
+    "brazier_snuffed": "Mangal söndü",
+    "purple_taken": "Alev ellerinde.",
+    "pocket_open": "Gizli bir geçit açıldı",
+    "trade_title": "MUM BEKÇİSİ",
+    "trade_owned": "alındı"
+  },
+  "trade": {
+    "torch": "Meşale",
+    "wick": "Sönmez Fitil",
+    "candle": "Koruyucu Mum"
+  },
   "boss": {
     "bloated_one": "ŞİŞMİŞ OLAN",
+    "extinguished_one": "SÖNMÜŞ OLAN",
     "unknown": "İSİMSİZ"
   },
   "charm": {
     "bloody_whet": "KANLI BİLEME  ·  5+ combo'da hasar %15 artar",
     "bloody_whet_desc": "Zincir uzadıkça kılıç keskinleşir.",
+    "fener": "FENER  ·  ışık yarıçapı %40 artar, karanlıkta hasar %10 artar",
+    "fener_desc": "Karanlığın derinliğinde bile yanan bir ışık.",
     "unknown": "Bilinmeyen tılsım"
   }
 }

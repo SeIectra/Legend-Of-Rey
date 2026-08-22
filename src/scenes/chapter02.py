@@ -345,7 +345,17 @@ class Chapter02Scene(PlayScene):
             data.secrets_total += SECRETS_TOTAL
             if "chapter.first_descent" not in data.chapters_cleared:
                 data.chapters_cleared.append("chapter.first_descent")
-        self.scenes.push(ChapterEndScene, result=result)
+
+        # Bolum 3 artik var - ozet ekrani kapaninca dogrudan ona gecilir.
+        # (Onceden buraya `on_continue=None` verilip ana menuye donuluyordu;
+        # DEVIR.md'nin "Bolum 3 henuz yok" notu bu satirla kapaniyor.)
+        character = self.character
+
+        def _continue() -> None:
+            from src.scenes.chapter03_cinematics import DescentCinematic
+            self.scenes.set_root(DescentCinematic, character=character)
+
+        self.scenes.push(ChapterEndScene, result=result, on_continue=_continue)
 
     # --- Kancalar -----------------------------------------------------------
     def on_player_died(self, player) -> None:

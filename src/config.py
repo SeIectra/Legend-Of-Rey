@@ -253,6 +253,8 @@ CLIMBER_ACTIVE_FRAMES: Final[int] = 5
 CLIMBER_RECOVER_FRAMES: Final[int] = 30  # Uzun bekleme - ritmin yarisi bu
 CLIMBER_DROP_SPEED: Final[float] = 2.6
 CLIMBER_TRIGGER_X: Final[float] = 20.0   # Oyuncu bu kadar altina girince birakir
+# Isiktan kacma (docs/bolum-03.md Oda 3) - tavanda kayarak uzaklasir.
+CLIMBER_FLEE_SPEED: Final[float] = 0.5
 
 # Sismek - konumlandirma. Yaklas-sis-patla, sabit sure.
 BLOATED_HEALTH: Final[int] = 34
@@ -319,3 +321,51 @@ DEATH_GOLD_LOSS_RATIO: Final[float] = 0.30   # Olunce dusen, yerde kalir
 MENU_TRANSITION_MAX_FRAMES: Final[int] = 12   # Hicbir menu gecisi bunu asmaz
 HUD_HEALTH_VISIBLE_FRAMES: Final[int] = 180   # Hasardan sonra 3 saniye
 FAST_FORWARD_MULTIPLIER: Final[float] = 3.0   # Basili tutunca gecis hizlanir
+
+
+# =============================================================================
+# ISIK   (docs/bolum-03.md - "Meşale Mahzeni")
+# =============================================================================
+# Karanlik ≠ siyah: en koyu palet rengi + hafif mavi ton kullanilir, ve
+# karanlikta bile siluetler bu kadar alfa ile hafifce secilir (docs 03,
+# "Uygulama Notlari").
+DARKNESS_SILHOUETTE_ALPHA: Final[float] = 0.08
+
+TORCH_LIGHT_RADIUS: Final[float] = TILE_SIZE * 3.0     # "3 tile'lik bir daire"
+PURPLE_FLAME_LIGHT_RADIUS: Final[float] = TORCH_LIGHT_RADIUS * 2.0
+
+TORCH_THROW_SPEED: Final[float] = 3.2        # piksel / kare, yatay
+TORCH_THROW_LIFT: Final[float] = -3.6        # piksel / kare, yukari - yay cizer
+
+# Ses haritasi (sonar). `ask()` ile ayni desen: cooldown + gosterim suresi,
+# ama tek seferlik genisleyen bir halka - surekli acilma/kapanma egrisi
+# degil (docs/bolum-03.md Oda 2).
+SONAR_COOLDOWN_FRAMES: Final[int] = 90
+SONAR_PULSE_FRAMES: Final[int] = 60          # 1 saniye - genisleyip soner
+SONAR_MAX_RADIUS: Final[float] = 140.0
+
+# Mum Bekcisi ticareti - sabit uc teklif (docs/bolum-03.md Oda 3-A).
+CANDLE_KEEPER_PRICE_TORCH: Final[int] = 40
+CANDLE_KEEPER_PRICE_ETERNAL_WICK: Final[int] = 120     # "Sonmez Fitil"
+CANDLE_KEEPER_PRICE_DEATH_CANDLE: Final[int] = 200     # Olum korumasi
+
+# Sonmus Olan - Bolum 3 mini-boss. Uc hamle: Karanlik Dalgasi/Surukleme/
+# Mum Cagrisi. Mangal yanarken sersemler - combo penceresi.
+EXTINGUISHED_ONE_HEALTH: Final[int] = 200
+EXTINGUISHED_ONE_POISE: Final[int] = 5
+DARK_WAVE_TELL_FRAMES: Final[int] = 20       # "kollarini acar" - 20 kare tell
+DARK_WAVE_BLACKOUT_FRAMES: Final[int] = 120  # 2 saniye tam karanlik
+DRAG_TELL_FRAMES: Final[int] = 16
+CANDLE_CALL_TELL_FRAMES: Final[int] = 26
+BRAZIER_STAGGER_FRAMES: Final[int] = 90      # Yanma anindaki sersemleme suresi
+BRAZIER_BURN_FRAMES: Final[int] = 300        # Kendiliginden sonene kadar (5 sn)
+BRAZIER_LIGHT_RADIUS: Final[float] = TILE_SIZE * 2.5
+DRAG_SNUFF_RANGE: Final[float] = TILE_SIZE * 1.5   # Surukleme mangala buraya kadar yakinsa sonduruyor
+
+CHAPTER3_CHEST_GOLD_ROOM2: Final[int] = 35
+CHAPTER3_CHEST_GOLD_SECRET: Final[int] = 70
+CHAPTER3_BOSS_GOLD: Final[int] = 70
+
+# Fener tilsimi - mini-boss odulu.
+FENER_LIGHT_RADIUS_BONUS: Final[float] = 0.40
+FENER_DARK_DAMAGE_BONUS: Final[float] = 0.10

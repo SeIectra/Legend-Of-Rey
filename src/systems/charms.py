@@ -23,9 +23,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Iterable
 
+from src.config import FENER_DARK_DAMAGE_BONUS, FENER_LIGHT_RADIUS_BONUS
+
 # Tilsim kimlikleri. Kayit dosyasina **bu dizeler** yaziliyor, o yuzden
 # degistirilemezler - eski kayitlar tilsimlarini kaybeder.
 BLOODY_WHET = "bloody_whet"
+FENER = "fener"                  # Bolum 3 mini-boss odulu
 
 # "Kanli Bileme" bu combo sayisindan itibaren calisir.
 WHET_COMBO = 5
@@ -46,6 +49,10 @@ class Charm:
     # Oyuncunun **o andaki** durumuna bakar. Kosullu olmasinin karsiligi bu:
     # tilsim her karede yeniden karar veriyor.
     damage_scale: Callable[[object], float] = lambda player: 1.0
+    # Fener'in isik yaricapi bonusu icin ayri kanal - hasarla ayni
+    # carpan olsaydi "karanlikta hasar" ile "isik yaricapi" birbirine
+    # karisirdi (iki farkli soruya iki farkli sayi).
+    light_scale: Callable[[object], float] = lambda player: 1.0
 
     def active_for(self, player: object) -> bool:
         return self.damage_scale(player) != 1.0
@@ -57,6 +64,23 @@ def _bloody_whet(player: object) -> float:
     return 1.0 + WHET_BONUS if count >= WHET_COMBO else 1.0
 
 
+def _fener_dark_damage(player: object) -> float:
+    """Karanlikta hasar +%10. Isikta hicbir sey yapmaz."""
+    light = getattr(getattr(player, "scene", None), "light", None)
+    if light is None:
+        return 1.0
+    body = getattr(player, "body", None)
+    if body is None:
+        return 1.0
+    if light.in_light(body.center_x, body.center_y):
+        return 1.0
+    return 1.0 + FENER_DARK_DAMAGE_BONUS
+
+
+def _fener_light_radius(player: object) -> float:
+    return 1.0 + FENER_LIGHT_RADIUS_BONUS
+
+
 # Anahtarlar **acikca** yazili: f-string ile kurulan dil anahtarini
 # tests/test_lang.py kaynak taramasinda goremiyor ve "olu anahtar" sayiyor.
 CHARMS: dict[str, Charm] = {
@@ -65,6 +89,13 @@ CHARMS: dict[str, Charm] = {
         label_key="charm.bloody_whet",
         desc_key="charm.bloody_whet_desc",
         damage_scale=_bloody_whet,
+    ),
+    FENER: Charm(
+        key=FENER,
+        label_key="charm.fener",
+        desc_key="charm.fener_desc",
+        damage_scale=_fener_dark_damage,
+        light_scale=_fener_light_radius,
     ),
 }
 
@@ -95,4 +126,14 @@ def damage_scale(keys: Iterable[str], player: object) -> float:
         charm = CHARMS.get(key)
         if charm is not None:
             total *= charm.damage_scale(player)
+    return total
+
+
+def light_scale(keys: Iterable[str], player: object) -> float:
+    """Takili tilsimlarin isik yaricapi carpanlarini birlestirir (Fener)."""
+    total = 1.0
+    for key in keys:
+        charm = CHARMS.get(key)
+        if charm is not None:
+            total *= charm.light_scale(player)
     return total

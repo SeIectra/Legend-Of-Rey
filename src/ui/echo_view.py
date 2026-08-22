@@ -29,7 +29,7 @@ from src.art import palette
 from src.art.glow import radial_glow
 from src.config import (
     ECHO_TIER_CLEAR, ECHO_TIER_MURKY, ECHO_TIER_SILENT, INTERNAL_HEIGHT,
-    INTERNAL_WIDTH,
+    INTERNAL_WIDTH, SONAR_MAX_RADIUS,
 )
 from src.systems.echo import Answer
 
@@ -97,6 +97,43 @@ def _draw_crack(surface, wall, ox: int, oy: int, echo) -> None:
                         rect.centery - glow.get_height() // 2),
                  special_flags=pygame.BLEND_RGB_ADD)
     pygame.draw.rect(surface, palette.color("echo_bright"), rect, 1)
+
+
+def draw_sonar(surface: pygame.Surface, offset: tuple[int, int], echo,
+               player, enemies, walls=()) -> None:
+    """Ses haritasi: genisleyen bir halka, gordugu her seyi bir an
+    beyaz kontura bogar (docs/bolum-03.md Oda 2, "sonar gibi").
+
+    `draw_reveal`'dan ayri bir mekanik - o surekli, karanlik-menzilli bir
+    goruntu; bu tek seferlik bir darbe. Ikisi ayni karede de aktif olabilir
+    (biri Yanki kademesinden, digeri sonar tetiklenmesinden).
+    """
+    if not echo.sonar_active:
+        return
+    ox, oy = offset
+    progress = echo.sonar_progress
+    radius = max(1, int(SONAR_MAX_RADIUS * progress))
+    fade = 1.0 - progress
+    px = int(player.body.center_x) - ox
+    py = int(player.body.center_y) - oy
+
+    ring = pygame.Surface((radius * 2 + 4, radius * 2 + 4), pygame.SRCALPHA)
+    pygame.draw.circle(ring, (*palette.color("bone"), int(210 * fade)),
+                       (radius + 2, radius + 2), radius, 2)
+    surface.blit(ring, (px - radius - 2, py - radius - 2))
+
+    reach = radius + 8.0
+    colour = palette.color("bone")
+    for enemy in enemies:
+        distance = math.hypot(enemy.body.center_x - player.body.center_x,
+                              enemy.body.center_y - player.body.center_y)
+        if distance <= reach:
+            pygame.draw.rect(surface, colour, enemy.body.rect.move(-ox, -oy), 1)
+    for wall in walls:
+        distance = math.hypot(wall.rect.centerx - player.body.center_x,
+                              wall.rect.centery - player.body.center_y)
+        if distance <= reach:
+            pygame.draw.rect(surface, colour, wall.rect.move(-ox, -oy), 1)
 
 
 def draw_dim(surface: pygame.Surface, echo) -> None:

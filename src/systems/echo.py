@@ -39,7 +39,8 @@ from enum import IntEnum
 
 from src.config import (
     ECHO_DAMAGE_TAKEN_MULTIPLIER, ECHO_TIER_CLEAR, ECHO_TIER_MURKY,
-    ECHO_TIER_SILENT, ECHO_VIGNETTE_STRENGTH,
+    ECHO_TIER_SILENT, ECHO_VIGNETTE_STRENGTH, SONAR_COOLDOWN_FRAMES,
+    SONAR_PULSE_FRAMES,
 )
 
 # Acilma/kapanma egrisi - kare cinsinden.
@@ -91,6 +92,14 @@ class EchoState:
         # Yalan **karar** anindan bagimsiz olmali: ayni soru ayni karede
         # iki kez sorulursa ayni cevabi vermeli. Sahne basina sabit tohum.
         self._rng = random.Random(seed)
+
+        # Ses haritasi (sonar) - Bolum 3 Oda 2. `ask()`in ayni cooldown
+        # deseni ama surekli acilma/kapanma egrisi degil: tek seferlik
+        # genisleyen bir halka. `holding`dan bagimsiz - karanlik bir odada
+        # Yanki'yi **aktive etmek** bu darbeyi tetikliyor.
+        self.sonar_cooldown = 0
+        self.sonar_frames = 0
+        self._sonar_total = 0
 
     # --- Sorgular -----------------------------------------------------------
     @property
@@ -155,6 +164,11 @@ class EchoState:
             if self.answer_frames == 0:
                 self.last_answer = Answer.NONE
 
+        if self.sonar_cooldown > 0:
+            self.sonar_cooldown -= 1
+        if self.sonar_frames > 0:
+            self.sonar_frames -= 1
+
     # --- Soru sorma ---------------------------------------------------------
     def ask(self, cooldown: int = 90, display: int = 150) -> Answer:
         """Yanki'ya soru sorar. Cevabin **dogru olacagi garanti degil.**
@@ -176,3 +190,31 @@ class EchoState:
         else:
             self.last_answer = Answer.PARTIAL
         return self.last_answer
+
+    # --- Ses haritasi (sonar) -------------------------------------------------
+    def pulse(self, cooldown: int = SONAR_COOLDOWN_FRAMES,
+              duration: int = SONAR_PULSE_FRAMES) -> bool:
+        """Tek seferlik genisleyen ses dalgasi baslatir.
+
+        `ask()` ile ayni fikir (cooldown + gosterim suresi) ama tamamen
+        ayri bir gorsel: surekli acilma/kapanma egrisi degil, bir kere
+        genisleyip sonen bir halka (docs/bolum-03.md Oda 2). Cooldown
+        bitmemisse `False` doner - oyuncu ardarda spam edemez.
+        """
+        if self.sonar_cooldown > 0:
+            return False
+        self.sonar_cooldown = cooldown
+        self.sonar_frames = duration
+        self._sonar_total = duration
+        return True
+
+    @property
+    def sonar_active(self) -> bool:
+        return self.sonar_frames > 0
+
+    @property
+    def sonar_progress(self) -> float:
+        """0..1 - halka ne kadar genisledi. 0 = yeni dogdu, 1 = sonuyor."""
+        if self._sonar_total <= 0 or self.sonar_frames <= 0:
+            return 0.0
+        return 1.0 - (self.sonar_frames / self._sonar_total)

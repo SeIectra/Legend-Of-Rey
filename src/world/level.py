@@ -39,6 +39,8 @@ MARKERS: dict[str, str] = {
     "M": "miniboss",
     "X": "exit",
     "!": "trigger",      # bolume ozel tetikleyici
+    "g": "shadow_shambler",   # Golge Suruklenen - yalniz Bolum 3
+    "N": "candle_keeper",     # Mum Bekcisi - yalniz Bolum 3
 }
 
 

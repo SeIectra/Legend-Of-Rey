@@ -50,6 +50,11 @@ class ChainState:
     hitbox_spawned: bool = False
     window_frames: int = CHAIN_WINDOW_FRAMES
     skip_recovery: bool = False      # Kill cancel aktif karede geldiyse
+    # Meşale taşırken tek elle dövüşülür: zincir 3'lü değil 2'li, bitirici
+    # yok (docs/bolum-03.md Oda 1). `None` = kısıtlama yok (üç vuruşun
+    # hepsi acık). CHAIN tablosunun kendisi değişmiyor, sadece ne kadarına
+    # erişilebildiği.
+    max_index: int | None = None
 
     @property
     def busy(self) -> bool:
@@ -62,8 +67,15 @@ class ChainState:
         return CHAIN[0]
 
     @property
+    def _effective_max(self) -> int:
+        cap = len(CHAIN) - 1
+        if self.max_index is not None:
+            cap = min(cap, self.max_index)
+        return cap
+
+    @property
     def is_finisher(self) -> bool:
-        return self.index == len(CHAIN) - 1
+        return self.index == self._effective_max
 
     @property
     def cancelable(self) -> bool:
@@ -142,7 +154,7 @@ class ChainState:
                 # Aktif karede dusman oldu: recovery hic baslamaz.
                 self.skip_recovery = False
                 self._finish_with_window()
-                if self.queued and self.index + 1 < len(CHAIN):
+                if self.queued and self.index < self._effective_max:
                     self.start(self.index + 1)
                     return "chain"
                 self.queued = False
@@ -154,7 +166,7 @@ class ChainState:
 
         if self.phase is AttackPhase.RECOVERY and self.phase_frames_left <= 0:
             self.phase = AttackPhase.IDLE
-            if self.queued and self.index + 1 < len(CHAIN):
+            if self.queued and self.index < self._effective_max:
                 self.start(self.index + 1)
                 return "chain"
             self.queued = False
@@ -165,7 +177,7 @@ class ChainState:
 
     def next_index(self) -> int:
         """Yeni saldiri hangi vurusla baslamali?"""
-        if self.window_frames_left > 0 and 0 <= self.index < len(CHAIN) - 1:
+        if self.window_frames_left > 0 and 0 <= self.index < self._effective_max:
             return self.index + 1
         return 0
 

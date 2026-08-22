@@ -186,7 +186,8 @@
   },
   "chapter": {
     "village": "Village",
-    "first_descent": "First Descent"
+    "first_descent": "First Descent",
+    "torch_crypt": "The Torch Crypt"
   },
   "chapter_end": {
     "heading": "CHAPTER COMPLETE",
@@ -194,6 +195,9 @@
     "combo": "Best combo",
     "gold": "Gold",
     "secrets": "Secrets",
+    "purple_flame": "Purple Flame",
+    "taken": "taken",
+    "left": "left behind",
     "continue": "Confirm to continue"
   },
   "chapter02": {
@@ -202,13 +206,34 @@
     "boss_gold": "{count} gold",
     "ardo_tracks": "A crack in the wall - tracked"
   },
+  "chapter03": {
+    "gold_found": "{count} gold",
+    "secret_found": "The Candle Keeper's chamber opened",
+    "puzzle_solved": "All five sconces are lit",
+    "boss_gold": "{count} gold · Lantern charm",
+    "already_bought": "Already bought",
+    "not_enough_gold": "Not enough gold",
+    "brazier_snuffed": "The brazier went out",
+    "purple_taken": "The flame is in your hands.",
+    "pocket_open": "A hidden passage opened",
+    "trade_title": "THE CANDLE KEEPER",
+    "trade_owned": "owned"
+  },
+  "trade": {
+    "torch": "Torch",
+    "wick": "Eternal Wick",
+    "candle": "Guardian Candle"
+  },
   "boss": {
     "bloated_one": "THE BLOATED ONE",
+    "extinguished_one": "THE EXTINGUISHED ONE",
     "unknown": "NAMELESS"
   },
   "charm": {
     "bloody_whet": "BLOODY WHET  -  +15% damage at 5+ combo",
     "bloody_whet_desc": "The longer the chain, the sharper the blade.",
+    "fener": "LANTERN  -  +40% light radius, +10% damage in darkness",
+    "fener_desc": "A light that burns even in the deepest dark.",
     "unknown": "Unknown charm"
   }
 }

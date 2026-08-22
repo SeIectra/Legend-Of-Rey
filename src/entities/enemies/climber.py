@@ -19,9 +19,10 @@ from __future__ import annotations
 from src.art.animation import CHARACTERS
 from src.art.animator import Animator
 from src.config import (
-    CLIMBER_ACTIVE_FRAMES, CLIMBER_DAMAGE, CLIMBER_DROP_SPEED, CLIMBER_HEALTH,
-    CLIMBER_POISE, CLIMBER_REACH, CLIMBER_RECOVER_FRAMES, CLIMBER_SPEED,
-    CLIMBER_TRIGGER_X, TELL_FRAMES_CLIMBER,
+    CLIMBER_ACTIVE_FRAMES, CLIMBER_DAMAGE, CLIMBER_DROP_SPEED,
+    CLIMBER_FLEE_SPEED, CLIMBER_HEALTH, CLIMBER_POISE, CLIMBER_REACH,
+    CLIMBER_RECOVER_FRAMES, CLIMBER_SPEED, CLIMBER_TRIGGER_X,
+    TELL_FRAMES_CLIMBER,
 )
 from src.entities.enemy import Enemy, EnemyState
 
@@ -69,11 +70,33 @@ class Climber(Enemy):
             return
         super()._think()
 
+    @property
+    def _fleeing_light(self) -> bool:
+        """Isik yaklasinca kacar (docs/bolum-03.md Oda 3 - "isik silahtir").
+
+        `scene.light` yalnizca Bolum 3'te var; baska bolumlerde `None` ve
+        bu davranis hicbir zaman tetiklenmez - Climber'a dokunmak diger
+        bolumleri bozmuyor.
+        """
+        light = getattr(self.scene, "light", None)
+        if light is None:
+            return False
+        return light.in_light(self.body.center_x, self.body.center_y)
+
     def _think_hanging(self) -> None:
         # Asiliyken yercekimi yok; tavana tutunuyor.
         self.body.vy = 0.0
         self.body.vx = 0.0
         self.body.y = self.anchor_y
+
+        if self._fleeing_light:
+            # Devrilme planini birakir, tavan boyunca isiktan uzaklasir.
+            player = self.player
+            if player is not None:
+                away = -1.0 if player.body.center_x >= self.body.center_x else 1.0
+                self.anchor_x += away * CLIMBER_FLEE_SPEED
+                self.body.x = self.anchor_x - self.body.width * 0.5
+            return
 
         if self.state is EnemyState.TELL:
             self._face_player()

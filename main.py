@@ -26,6 +26,7 @@ SCENES = {
     "menu": ("src.ui.menu", "MainMenuScene"),
     "bolum1": ("src.scenes.chapter01", "Chapter01Scene"),
     "bolum2": ("src.scenes.chapter02", "Chapter02Scene"),
+    "bolum3": ("src.scenes.chapter03", "Chapter03Scene"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }

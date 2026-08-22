@@ -35,6 +35,7 @@ from src.ui.widgets import blur, panel
 
 PANEL_WIDTH = 196
 PANEL_HEIGHT = 112
+ROW_STEP = 13                    # Satirlar arasi dikey mesafe
 BLUR_FACTOR = 4
 
 FADE_FRAMES = 26                 # Karartma
@@ -55,6 +56,9 @@ class ChapterResult:
     gold: int
     secrets_found: int
     secrets_total: int
+    # Bolum 3'un karari. `None` = bu bolumde hic sorulmadi (Bolum 1/2),
+    # satir hic gorunmez - onceki bolumlerin ozet ekranini degistirmez.
+    purple_flame_taken: bool | None = None
 
     @property
     def missed_secret(self) -> bool:
@@ -109,13 +113,18 @@ class ChapterEndScene(Scene):
         if data is None:
             return []
         secrets = f"{data.secrets_found}/{data.secrets_total}"
-        return [
+        rows = [
             ("chapter_end.time", format_time(data.frames), "ui_text"),
             ("chapter_end.combo", str(data.best_combo), "ui_text"),
             ("chapter_end.gold", str(data.gold), "ui_text"),
             ("chapter_end.secrets", secrets,
              "danger" if data.missed_secret else "ui_text"),
         ]
+        if data.purple_flame_taken is not None:
+            value_key = ("chapter_end.taken" if data.purple_flame_taken
+                        else "chapter_end.left")
+            rows.append(("chapter_end.purple_flame", t(value_key), "ui_text"))
+        return rows
 
     def visible_rows(self) -> int:
         """Kac satir acildi. Test bunu okuyor."""
@@ -129,9 +138,13 @@ class ChapterEndScene(Scene):
         if self.result is None:
             return
 
+        # Satir sayisi bolume gore degisir (Bolum 3'un Mor Alev satiri gibi)
+        # - panel yuksekligi buna gore buyur, aksi halde son satir cerceveyi
+        # keser (DEVIR.md 9 - bu hata iki panelde daha once yasandi).
+        panel_height = max(PANEL_HEIGHT, 43 + len(self._rows()) * ROW_STEP + 20)
         rect = pygame.Rect(INTERNAL_WIDTH // 2 - PANEL_WIDTH // 2,
-                           INTERNAL_HEIGHT // 2 - PANEL_HEIGHT // 2,
-                           PANEL_WIDTH, PANEL_HEIGHT)
+                           INTERNAL_HEIGHT // 2 - panel_height // 2,
+                           PANEL_WIDTH, panel_height)
         panel(surface, rect)
 
         text.draw(surface, t("chapter_end.heading"), INTERNAL_WIDTH // 2,
@@ -154,7 +167,7 @@ class ChapterEndScene(Scene):
                       color=palette.role("ui_text_dim"))
             text.draw(surface, value, rect.right - 18, y,
                       color=colour, align="right")
-            y += 13
+            y += ROW_STEP
 
         if shown >= len(self._rows()) and self.frames >= INPUT_LOCK_FRAMES:
             self._draw_prompt(surface, rect)
