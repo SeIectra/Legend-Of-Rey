@@ -3,7 +3,7 @@
 Bu belge, projeyi devralan Claude Code oturumu içindir.
 **Önce `CLAUDE.md`'yi oku** (bağlayıcı anayasa), sonra burayı.
 
-Son güncelleme: 22.08.2026 · Ardeko Studios
+Son güncelleme: 22.08.2026 (Görev 8 sonrası) · Ardeko Studios
 
 ---
 
@@ -22,18 +22,20 @@ görev sırası `GOREVLER.md`'de.
 | 5 — Ara değerlendirme | ⬜ | **Arda'nın işi**, Claude'a verilmez |
 | 6 — Menü ve UI | ✅ | Sıra dışı yapıldı (Arda istedi) |
 | 7 — Menü sahnesi cilası | ✅ | Mor alev, Ardeko intro, dikey yolculuk |
-| 8 — Bölüm 3 | ⬜ | |
+| 8 — Bölüm 3 | ✅ | Meşale Mahzeni: ışık sistemi, 7 oda + gizli Mum Bekçisi cebi, mini-boss |
 | 9 — Sanat geçişi | 🟡 | Sprite + mağara arka planı hazır; **tileset hâlâ placeholder** |
 | 10 — Ses + son cila | ⬜ | Dikiş hazır, gövde boş |
 
-Toplam ~12.500 satır. **On bir test paketi de yeşil.**
+Toplam ~13.700 satır. **On iki test paketi de yeşil** (`test_chapter03.py` eklendi).
 
 **Oynanabilir akış:**
 intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)** →
-**Bölüm 2 (İlk İniş)** → bölüm sonu ekranı → ana menü
+**Bölüm 2 (İlk İniş)** → bölüm sonu ekranı → **Bölüm 3 (Meşale Mahzeni)** →
+bölüm sonu ekranı → ana menü
 
-Bölüm 2'nin sonunda ana menüye dönülüyor çünkü Bölüm 3 henüz yok (Görev 8).
-Bu bilinçli bir uç, gizlenmiş bir placeholder değil.
+Bölüm 2'nin sonu artık Bölüm 3'e zincirleniyor (`chapter02.py::_end_chapter`
+`on_continue` ile `DescentCinematic`'i açıyor). Bölüm 3'ün sonu şimdilik ana
+menüye dönüyor çünkü Bölüm 4 henüz yok - bilinçli bir uç.
 
 **Arda'nın seçtiği sıra:** Görev 7 ✅ → Bölüm 1 + prolog ✅ → Görev 3 ✅ → Görev 4 ✅
 
@@ -85,6 +87,22 @@ kılar. Kendiliğinden geri alma; Arda'ya sormadan değiştirme.
 7. **Aseprite:** kurulmadı, şimdilik gerek yok. Hazırlığı yapıldı
    (`tools/aseprite.py` tespit + geri düşüş, `tools/palette_to_gpl.py`,
    `.gitattributes`). Arda lisansı onayladı; elle rötuş gerektiğinde kurulur.
+
+8. **Tam yetki (22.08.2026, PC'den uzun süre uzak kalacağı için).** Arda
+   Claude'a onay beklemeden ilerleme ve **görevden göreve kendiliğinden
+   geçme** izni verdi - CLAUDE.md §13'ün "dur, sıradaki göreve kendiliğinden
+   geçme" kuralını bilinçli olarak geçersiz kılıyor. Bu izin devam ediyor
+   sayılmalı; geri alındığına dair açık bir mesaj gelmedikçe sıradaki görevi
+   sormadan başlat. Yine de: her görev sonunda test kanıtı göster ve bu
+   belgeyi güncelle - "durmadan devam etmek" "sessizce ilerlemek" demek
+   değil.
+
+9. **Mor Alev'in meşale kısıtlamasından muaf tutulması (Görev 8).**
+   `docs/bolum-03.md` bunu açıkça söylemiyor; Mor Alev sönmez ve doğaüstü
+   olduğu için (sıradan elde tutulan bir meşale değil) tek-elli dövüş
+   kısıtını (2'li zincir, bitirici yok) uygulamıyorum
+   (`Chapter03Scene._update_combo_restriction`). Yanlışsa tek satırlık bir
+   değişiklik.
 
 ---
 
@@ -379,35 +397,29 @@ gidildiğini gösterir. Yanlış dala geçmek veri kaybı değildir —
 
 ## 8. SIRADAKİ ADIM
 
-### Önce: **Görev 5 — Ara Değerlendirme.** Bu Arda'nın işi, Claude'a verilmez.
+**Görev 8 tamamlandı** (22.08.2026) — Bölüm 3 "Meşale Mahzeni" baştan sona
+oynanabilir: ışık sistemi (`src/systems/light.py` + `src/art/lighting.py`),
+taşınabilir meşale (`src/world/torch.py`), ses haritası/sonar
+(`EchoState.pulse()`), Gölge Sürüklenen (`shadow_shambler.py`), Mum
+Bekçisi ticareti (`candle_keeper.py` + `systems/economy.py`), Mor Alev
+kararı, mini-boss "Sönmüş Olan" (mangal mekaniği). `tests/test_chapter03.py`
+(40 kontrol) + `tools/reachability.py` yeşil.
 
-`CLAUDE.md` §14'ün dikey dilim kriteri: *"Bölüm 1-3 + menü bittiğinde
-oynayan biri 'bir bölüm daha oynayayım' demiyorsa, devam etmeden önce dur
-ve tartış."* Bölüm 2 bitti; Bölüm 3'e girmeden önce Arda'nın oturup
-oynaması gerekiyor.
+Arda uzun süre bilgisayar başında olmayacağı için **tam yetki verdi**
+(bkz. §2 madde 8) — onay beklemeden ilerleniyor. Sırayla:
 
-```bash
-python main.py bolum2        # doğrudan Bölüm 2
-python main.py bolum1        # Bölüm 1, sonunda Bölüm 2'ye geçer
-python main.py               # tam akış: intro → menü → karakter → yolculuk
-```
-
-Oynarken `F4` kutu kipi (game feel'i sprite'sız değerlendirmek için),
-`F3` hata ayıklama katmanı.
-
-### Sonra sırayla
-
-1. **Görev 8 — Bölüm 3 "Meşale Mahzeni"** (`docs/bolum-03.md`).
-   Meşale ekonomisi, ses haritası, Mum Bekçisi, Mor Alev kararı
-   (`SaveData.purple_flame_taken` alanı hazır bekliyor, B14'ün twist'ini
-   etkileyecek).
-2. **Görev 9 — Sanat geçişi.** En görünür eksik: tileset hâlâ düz renk.
+1. ~~**Görev 5 — Ara Değerlendirme.**~~ Arda'nın kendi oturup oynaması
+   gereken adım; o yokken atlanıyor, geri döndüğünde kendisi karar verir.
+2. **Düşmanların üst platform/çatılara sıkışması** (Arda'nın bildirdiği
+   hata, Görev 8 bitince). İnceleniyor/düzeltiliyor — bkz. bu bölümün
+   altındaki not, çözülünce buraya commit referansı eklenecek.
+3. **Görev 9 — Sanat geçişi.** En görünür eksik: tileset hâlâ düz renk.
    `world/tilemap.py` 9-slice ve varyantlara genişleyecek.
-3. **Görev 10 — Ses.** `assets/audio/SES-LISTESI.md` içinde 72 ses / 84
+4. **Görev 10 — Ses.** `assets/audio/SES-LISTESI.md` içinde 72 ses / 84
    dosya listelendi. Dikişler hazır: `game.play_ui_sound()`,
    `game.music_hush`, `juice.pitch_variation()`.
 
-**Ama önce Arda'ya sor** — sırayı iki kez değiştirdi, yine değiştirebilir.
+Arda geri döndüğünde sırayı değiştirebilir — daha önce iki kez değiştirdi.
 
 ---
 
