@@ -267,7 +267,12 @@ ARDO_SPEC = replace(
     name="ardo",
     torso_height=8.0, torso_width=8.2, shoulder_width=7.6, limb_width=2.9,
     thigh=4.4, shin=4.4,          # Daha kisa bacak, daha agir duruş
-    skin="skin_tan", hair="steel", cloth="cloth_grey",
+    # Arda'nin referans gorseli koyu/siyaha yakin sac gosteriyordu - "steel"
+    # (gri/gumus) o gorsele uymuyordu, sadece Rey'den ayrisin diye
+    # secilmisti. Siluet testi zaten renge degil SEKLE bakiyor (duz siyaha
+    # indiriliyor) - saci koyulastirmak siluet ayrimini bozmuyor, genis
+    # omuz/kisa sac/kurk yaka zaten yeterli.
+    skin="skin_tan", hair="hair_dark", cloth="cloth_grey",
     # Arka bacak/kol "cloth_dark" ile bir basamak koyu cizilir. Varsayilan
     # "shadow" zinciri "abyss_dark" arka planla neredeyse ayni koyulukta -
     # Ardo'nun etegi olmadigi icin (Rey'in aksine) bacaklar dogrudan
