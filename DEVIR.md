@@ -24,7 +24,7 @@ görev sırası `GOREVLER.md`'de.
 | 7 — Menü sahnesi cilası | ✅ | Mor alev, Ardeko intro, dikey yolculuk |
 | 8 — Bölüm 3 | ✅ | Meşale Mahzeni: ışık sistemi, 7 oda + gizli Mum Bekçisi cebi, mini-boss |
 | 9 — Sanat geçişi | 🟡 | Sprite + mağara arka planı + **tileset artık bağlı**; ses hâlâ eksik |
-| 10 — Ses + son cila | ⬜ | Dikiş hazır, gövde boş |
+| 10 — Ses + son cila | 🟡 | Öncelik 1 seti sentezle bağlandı; müzik/öncelik 2-3 yok |
 
 Toplam ~13.900 satır. **On üç test paketi de yeşil** (`test_chapter01.py` +
 `test_chapter03.py` eklendi).
@@ -142,6 +142,28 @@ kılar. Kendiliğinden geri alma; Arda'ya sormadan değiştirme.
     artık düz renk doldurmuyor, `TileSet.wall/platform/spike()`'tan blit
     ediyor; kırılabilir duvar hâlâ normal duvarla **aynı üretici**yle
     çiziliyor (aynı (tx,ty) → aynı varyant), ayırt edilemezlik korundu.
+
+12. **Ses sistemi + canlı geri bildirim (22.08.2026, Görev 10).** Ses
+    tasarımcısı/kayıt bu ortamda yok; `src/audio/` altında numpy ile
+    sentezlendi (CLAUDE.md 6: "kod ile üret" ilkesinin sese uygulanışı).
+    Arda oynarken hemen iki şey bildirdi, ikisi de **aynı oturumda**
+    düzeltildi:
+    - **"sesler çok rahatsız edici ve uyumsuz."** Üç neden bulundu: (a)
+      `ui_tick`/`ui_deny`/`ui_slider` kare dalga (square wave) kullanıyordu
+      - sert/8-bit bip, oyunun karanlık tonuyla çelişiyor - sinüse
+        çevrildi; (b) adım sesi 11px'te bir tetikleniyordu (koşarken ~11
+        ses/sn) - `STEP_DISTANCE_PX` 42'ye çıkarıldı (~2.5 adım/sn); (c)
+        genel `normalize()` tepe genliği 0.92 - sentez için çok agresif,
+        0.55'e düşürüldü. **Kesin çözüldüğü doğrulanmadı** - Arda'nın
+        kendi kulağıyla onaylaması gerekiyor, dönünce sorulmalı.
+    - **"ilk bölümde duvara sıkıştım yine boss'tan önce."** Araştırma:
+      Bölüm 2'nin arena kapısı (daha önce düzeltilmişti) bot-yürüyüş
+      testiyle doğru çalıştığı görüldü; asıl suçlu Bölüm 3'ün mini-boss
+      arenasıydı ("Sönmüş Olan") - **aynı hatanın Bölüm 3'e hiç
+      taşınmamış hâli**: oda sınırına girer girmez mühürleniyordu.
+      `world/rooms/chapter03.py`'ye `ARENA_DOOR_COLUMN` eklendi,
+      `_update_arena()` eşik+tampon geçilince mühürlüyor - Bölüm 2'nin
+      kalıbıyla birebir. `tests/test_chapter03.py` regresyon kontrolü var.
 
 ---
 
@@ -503,9 +525,19 @@ Arda uzun süre bilgisayar başında olmayacağı için **tam yetki verdi**
    çıkan gerçek hata ve düzeltmesi: §2 madde 11, §4 madde 23. Kalan:
    gerçek 9-slice köşe/kenar ayrımı yok (şimdilik gerek görülmedi) ve
    asıl "Görev 9" başlığının geri kalanı - **ses** hâlâ yazılmadı.
-4. **Görev 10 — Ses.** `assets/audio/SES-LISTESI.md` içinde 72 ses / 84
-   dosya listelendi. Dikişler hazır: `game.play_ui_sound()`,
-   `game.music_hush`, `juice.pitch_variation()`.
+4. ~~**Görev 10 — Ses (öncelik 1 seti).**~~ 🟡 (22.08.2026) Gerçek kayıt
+   yok - `src/audio/` altında numpy ile **sentezlendi** (CLAUDE.md 6'nın
+   sprite ilkesiyle aynı gerekçe: kod ile üret). `synth.py` (osilatör/
+   zarf/filtre), `sfx_combat/world/enemies/ui.py` (~50 ses üretici),
+   `mixer.py` (oynatma, hacim, ★ bogulma seti, perde varyasyonu, dongu
+   yönetimi). `game.play_sound()`/`play_loop()`/`stop_loop()` ile TÜM
+   sahnelere bağlandı - vuruş, adım, zıplama/iniş, kaçınma, Yankı ac/kapa/
+   soru-cevap, kolye kalp atışı, düşman tell/ölüm, sandık, meşale, menü,
+   intro, dikey yolculuk (rüzgar/mahzen çaprazlaması). Arda canlı
+   oynanışta hemen geri bildirim verdi ve **aynı oturumda düzeltildi**
+   (§2 madde 12): kare dalga → sinüs, adım sesi sıklığı 5x azaltıldı,
+   genel ses tepe seviyesi düşürüldü. Kalan: müzik (bölüm 9) ve öncelik
+   2-3 setleri hâlâ yok.
 
 Arda geri döndüğünde sırayı değiştirebilir — daha önce iki kez değiştirdi.
 

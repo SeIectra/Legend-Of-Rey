@@ -142,6 +142,7 @@ kulaktan da anlaşılsın (`docs/dovus-sistemi.md` 6).
 | `bloated_explode` | Patlama | Islak patlama + basınç | 1 |
 | `enemy_stagger` | Poise kırıldı, sendeler | Kısa, şaşkın | 2 |
 | `enemy_blocked` | Kalkanlı engelledi (Katman 2) | Metalik tok | 2 |
+| `enemy_tell` | Tip-özel tell'i olmayan düşman | Genel/yedek - `Enemy.tell_sound` varsayılanı (kod-kaynaklı) | 1 |
 
 ---
 
@@ -160,6 +161,8 @@ kulaktan da anlaşılsın (`docs/dovus-sistemi.md` 6).
 | `save_written` | Oyun kaydedildi | Alçak, güven veren | 2 |
 | `gold_pickup` | Altın toplandı | Metalik, perde miktara göre | 2 |
 | `item_pickup` | Eşya toplandı | Farklı, daha "önemli" | 2 |
+| `chest_open` | Sandık açılır (B2/B3) | Gıcırtı - kod-kaynaklı, kodun kendisi çağırıyordu | 1 |
+| `torch_light` | Meşale yakılır/söndürülür (B3) | Çıtırtı - kod-kaynaklı | 1 |
 
 ---
 
@@ -243,3 +246,17 @@ Sayılar belgeden makineyle sayıldı, tahmin değil.
 Bunlar elimde olunca ses sistemini (Görev 10) bağlayıp geri kalanı
 sırayla ekleyebilirim. Kod tarafındaki dikiş (`game.play_ui_sound`) zaten
 hazır ve bekliyor.
+
+---
+
+## GÖREV 10 SONRASI NOT (22.08.2026)
+
+Gerçek kayıt/ses tasarımcısı bu ortamda yok; öncelik 1 seti (yukarıdaki
+tüm `Ö=1` satırları, ~48 anahtar) `src/audio/` altında **numpy ile
+sentezlenerek** üretildi ve tüm sahnelere bağlandı (CLAUDE.md 6'nın
+sprite ilkesiyle aynı gerekçe). Ayrıca kodun gerçekten çağırdığı üç
+anahtar bu listeye yoktu, eklendi: `chest_open`, `torch_light`,
+`enemy_tell`. Müzik (bölüm 9) ve öncelik 2/3 hâlâ yazılmadı - gerçek
+kayıt/profesyonel ses gelirse `assets/audio/*.ogg` eklenip yalnızca
+`src/audio/sfx.py`'nin okuma şekli değişir, geri kalan (mixer, bogulma,
+perde varyasyonu) aynen kalır.
