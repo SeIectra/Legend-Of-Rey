@@ -35,6 +35,7 @@ class Action(Enum):
     PAUSE = auto()
     CONFIRM = auto()
     CANCEL = auto()
+    NEXT_TAB = auto()       # Ayarlar ekrani - sekmeler arasi DOGRUDAN gecis
     # Hata ayiklama
     DEBUG_OVERLAY = auto()
     DEBUG_SILHOUETTE = auto()
@@ -59,6 +60,7 @@ DEFAULT_KEYBOARD: dict[Action, tuple[int, ...]] = {
     Action.PAUSE: (pygame.K_ESCAPE,),
     Action.CONFIRM: (pygame.K_RETURN, pygame.K_SPACE, pygame.K_e),
     Action.CANCEL: (pygame.K_ESCAPE, pygame.K_BACKSPACE),
+    Action.NEXT_TAB: (pygame.K_TAB,),
     Action.DEBUG_OVERLAY: (pygame.K_F3,),
     Action.DEBUG_SILHOUETTE: (pygame.K_F4,),
     Action.FULLSCREEN: (pygame.K_F11,),
@@ -75,6 +77,7 @@ DEFAULT_GAMEPAD: dict[Action, tuple[int, ...]] = {
     Action.PAUSE: (7,),         # Start
     Action.CONFIRM: (0,),
     Action.CANCEL: (1,),
+    Action.NEXT_TAB: (5,),      # RB - ayarlar ekraninda sekme degistirir
 }
 
 # Oyuncuya gosterilecek tus adlari. `pygame.key.name()` "left shift" gibi

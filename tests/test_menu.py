@@ -246,6 +246,35 @@ def main() -> int:
           "ses seviyesi kisilabiliyor",
           f"{volume_before} -> {game.settings.get('volume_master')}")
 
+    # Arda'nin geri bildirimi: "Ses'e gitmek icin en asagiya inmek
+    # gerekiyor sacma" - artik listenin ucundan tasmadan DOGRUDAN
+    # sekme degistirilebiliyor (Tab tusu + fare tikla).
+    settings_scene.tabs.index = 0
+    settings_scene.row = 0
+    step(game, 2, keys=(pygame.K_TAB,))
+    check(settings_scene.tabs.index == 1,
+          "Tab tusu satirdan bagimsiz dogrudan sonraki sekmeye atliyor",
+          f"sekme={settings_scene.tabs.index}")
+
+    # Fare ile sekme basligina tiklama: `pygame.mouse.get_pos()` "dummy"
+    # video suruculusunde gercek bir imlec konumu vermiyor - test icin
+    # gecici olarak sabit bir konum donecek sekilde degistiriliyor.
+    settings_scene.tabs.index = 0
+    settings_scene.row = 2                   # Listenin ortasinda - uctan degil
+    target_tab = 2                           # OYNANIS
+    target_rect = settings_scene.tabs.tab_rect(target_tab)
+    screen_x = int(target_rect.centerx * game.scale + game.viewport.x)
+    screen_y = int(target_rect.centery * game.scale + game.viewport.y)
+    original_get_pos = pygame.mouse.get_pos
+    pygame.mouse.get_pos = lambda: (screen_x, screen_y)
+    try:
+        settings_scene._click()
+    finally:
+        pygame.mouse.get_pos = original_get_pos
+    check(settings_scene.tabs.index == target_tab,
+          "fare ile sekme basligina tiklayinca dogrudan o sekmeye geciliyor",
+          f"sekme={settings_scene.tabs.index}")
+
     # --- 9. Duraklatma ------------------------------------------------------
     print("\n--- duraklatma ---")
     from src.scenes.combat_room import CombatRoomScene
