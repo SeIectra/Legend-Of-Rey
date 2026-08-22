@@ -159,15 +159,15 @@ class Menu:
                 break
         if self.index != start:
             self.select_anim = SELECT_ANIM_FRAMES
-            self._play("tick")
+            self._play("ui_tick")
 
     def activate(self) -> None:
         item = self.items[self.index]
         if not (item.visible and item.enabled):
-            self._play("deny")
+            self._play("ui_deny")
             return
         self.confirm_flash = CONFIRM_FLASH_FRAMES
-        self._play("confirm")
+        self._play("ui_confirm")
         if item.action:
             item.action()
 
@@ -221,7 +221,7 @@ class Menu:
                 if index != self.index:
                     self.index = index
                     self.select_anim = SELECT_ANIM_FRAMES
-                    self._play("tick")
+                    self._play("ui_tick")
                 return
 
     def click(self, game) -> bool:

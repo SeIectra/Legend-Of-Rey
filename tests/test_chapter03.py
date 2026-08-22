@@ -32,7 +32,7 @@ from src.systems import charms, economy  # noqa: E402
 from src.ui import i18n  # noqa: E402
 from src.ui.chapter_end import ChapterResult  # noqa: E402
 from src.world.rooms.chapter03 import (  # noqa: E402
-    LEVEL, ROOM3_SOCKET_INDICES, ROOM_STARTS, WIND_ZONES,
+    ARENA_DOOR_COLUMN, LEVEL, ROOM3_SOCKET_INDICES, ROOM_STARTS, WIND_ZONES,
 )
 from src.world.torch import HELD, LANDED  # noqa: E402
 
@@ -248,10 +248,18 @@ def main() -> int:
     print("\n--- mangal ve mini-boss ---")
     scene9 = make_scene(game)
     boss_start = room_start("sonmus_olan")
-    teleport(scene9, boss_start + 6)
+    # Arda'nin bildirdigi hata (Bolum 2'de zaten bir kez cikmisti): kapi
+    # oda sinirina girer girmez kapanirsa oyuncunun yuzune kapaniyor gibi
+    # hissettiriyor. Once esigin GERISINE teleport edip kapinin henuz
+    # kapanmadigini, sonra esigi gecince kapandigini ayri ayri dogrula.
+    teleport(scene9, boss_start + 1)
     idle(game, scene9, 2)
-    check(scene9.arena_sealed, "arenaya girince mangal/boss hazir")
-    check(scene9.boss is not None, "mini-boss dogdu")
+    check(scene9.boss is not None, "oda sinirinda mini-boss zaten dogdu")
+    check(not scene9.arena_sealed,
+          "kapi oda sinirinda HENUZ kapanmiyor (esige kadar tampon var)")
+    teleport(scene9, ARENA_DOOR_COLUMN + 2)
+    idle(game, scene9, 2)
+    check(scene9.arena_sealed, "esigi gecince kapi kapaniyor")
     check(not scene9.brazier.lit, "mangal basta sonuk")
 
     scene9.has_purple_flame = True       # Test icin - yakma kosulunu saglar

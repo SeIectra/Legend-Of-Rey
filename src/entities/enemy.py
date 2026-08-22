@@ -72,6 +72,10 @@ class Enemy(Actor):
     contact_range: float = 18.0     # Bu mesafede saldiriya baslar
     sprite_name: str = "shambler"
     body_colour: str = "echo_dark"  # Kutu kipinde govde rengi (RENK adi, zincir degil)
+    # Ses (Gorev 10) - alt sinif kendi tipine gore ezer. Bos dize = ek ses
+    # calinmasin (orn. Sismek zaten patlama sesiyle olur, ustune binmesin).
+    tell_sound: str = "enemy_tell"
+    death_sound: str = "shambler_death"
 
     def __init_subclass__(cls, **kwargs: object) -> None:
         super().__init_subclass__(**kwargs)

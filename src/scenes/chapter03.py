@@ -49,9 +49,9 @@ from src.ui.widgets import panel
 from src.world import cave_backdrop
 from src.world.pickups import Chest
 from src.world.rooms.chapter03 import (
-    BRAZIER_TILE, LEVEL, PURPLE_FLAME_TILE, ROOM3_SOCKET_INDICES,
-    ROOM_STARTS, SECRET_POCKET_ABS_COLUMNS, SECRET_WALL_MIN_COLUMN, TORCHES,
-    WIND_ZONES,
+    ARENA_DOOR_COLUMN, BRAZIER_TILE, LEVEL, PURPLE_FLAME_TILE,
+    ROOM3_SOCKET_INDICES, ROOM_STARTS, SECRET_POCKET_ABS_COLUMNS,
+    SECRET_WALL_MIN_COLUMN, TORCHES, WIND_ZONES,
 )
 from src.world.tilemap import TileMap
 from src.world.torch import HELD, LANDED, SOCKETED, THROWN, Torch
@@ -90,6 +90,7 @@ class Chapter03Scene(PlayScene):
         # Bolum 2'den geliyoruz: kilic ve kacinma elde.
         self.player.grant(abilities.SWORD)
         self.player.grant(abilities.DODGE)
+        self.game.play_loop("amb", "amb_torch", volume=0.5)
 
         self.light = LightState()
         self.sconces = [list(entry) for entry in TORCHES]      # kendi kopyasi
@@ -132,6 +133,9 @@ class Chapter03Scene(PlayScene):
         self.finished = False
 
         self._enter_room(self._room_at(self.player.body.center_x))
+
+    def on_exit(self) -> None:
+        self.game.stop_loop("amb")
 
     def _is_secret(self, tile_x: int) -> bool:
         lo, hi = SECRET_POCKET_ABS_COLUMNS
@@ -179,9 +183,11 @@ class Chapter03Scene(PlayScene):
                 self.enemies.append(self.boss)
 
     def _narrate_room(self, name: str) -> None:
-        if name == "sonmus_olan" and self.boss is not None:
-            self._seal_arena()
-        elif name == "mor_alev":
+        # Kapi **burada** kapatilmiyor - `_update_arena()` oyuncu gercekten
+        # kapi sutununu gecince kapatiyor (Bolum 2'de yasanan ayni hata:
+        # oda sinirina girer girmez kapatilinca kapi neredeyse oyuncunun
+        # yuzune kapaniyordu - bkz. ARENA_DOOR_COLUMN).
+        if name == "mor_alev":
             from src.scenes.chapter03_cinematics import PurpleCinematic
             self.scenes.push(PurpleCinematic)
 
@@ -274,7 +280,7 @@ class Chapter03Scene(PlayScene):
             if socket is not None:
                 self.torch = Torch(self.player.body.center_x,
                                    self.player.body.feet[1])
-                self.game.play_ui_sound("torch_light")
+                self.game.play_sound("torch_light")
 
     def _nearest_dark_socket(self, range_px: float = TILE_SIZE * 2.5):
         best, best_d = None, range_px
@@ -301,7 +307,7 @@ class Chapter03Scene(PlayScene):
     def _socket_torch(self, entry: list) -> None:
         entry[2] = True
         self.torch = None
-        self.game.play_ui_sound("torch_light")
+        self.game.play_sound("torch_light")
 
     def _update_torch_physics(self) -> None:
         if self.torch is None:
@@ -379,7 +385,7 @@ class Chapter03Scene(PlayScene):
         self.particles.burst(chest.x, chest.feet_y - 8, 14, path="spark",
                              speed=(0.5, 2.0), life=(18, 34))
         self.juice.explosion(chest.x, chest.feet_y - 6, ImpactWeight.NORMAL)
-        self.game.play_ui_sound("chest_open")
+        self.game.play_sound("chest_open")
         if chest.secret and not self.secret_found:
             self.secret_found = True
             self.show_toast(t("chapter03.secret_found"), frames=200)
@@ -421,12 +427,17 @@ class Chapter03Scene(PlayScene):
         if offer.key == "candle_keeper_torch" and self.torch is None:
             self.torch = Torch(self.player.body.center_x, self.player.body.feet[1])
         self.show_toast(t(offer.label_key), frames=160)
-        self.game.play_ui_sound("chest_open")
+        self.game.play_sound("chest_open")
         self.trading = False
 
     # --- Arena / mangal ---------------------------------------------------------------
     def _update_arena(self) -> None:
         self.brazier.update()
+        if (self.room == "sonmus_olan" and not self.arena_sealed
+                and not self.boss_defeated and self.boss is not None):
+            if self.player.body.center_x > (ARENA_DOOR_COLUMN + 1) * TILE_SIZE:
+                self._seal_arena()
+            return
         if not self.arena_sealed or self.boss_defeated:
             return
         if self.boss is not None and not self.boss.dead:
@@ -494,6 +505,7 @@ class Chapter03Scene(PlayScene):
         self._end_chapter()
 
     def _end_chapter(self) -> None:
+        self.game.play_sound("chapter_end")
         if self.save_data is not None:
             self.save_data.purple_flame_taken = self.has_purple_flame
         result = ChapterResult(

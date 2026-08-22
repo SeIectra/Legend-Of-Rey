@@ -160,6 +160,22 @@ class VerticalJourneyScene(CinematicScene):
             strip.fill(palette.color("earth_dark"), (hx, hy, hw, hh))
             strip.fill(palette.color("ember"), (hx + hw // 2, hy + hh // 2, 2, 2))
 
+    # --- Ses -----------------------------------------------------------------
+    def update_cinematic(self) -> None:
+        """Ruzgar (yuzey) ve mahzen uguldamasi **caprazlar**
+        (assets/audio/SES-LISTESI.md 7: "ikisi capraz gecer"). Gece
+        bocekleri yalnizca koye varista belirir - sabit degil, tam surec
+        boyunca calan bir dongu olsaydi "varis" hissi kaybolurdu."""
+        top = self.progress if self.direction == "up" else 1.0 - self.progress
+        self.game.play_loop("journey_top", "journey_wind", volume=0.5 * top)
+        self.game.play_loop("journey_bottom", "journey_cellar",
+                            volume=0.5 * (1.0 - top))
+        if top > 0.85:
+            self.game.play_loop("journey_night", "journey_night",
+                                volume=0.4 * (top - 0.85) / 0.15)
+        else:
+            self.game.stop_loop("journey_night")
+
     # --- Cizim -------------------------------------------------------------
     def draw_cinematic(self, surface: pygame.Surface, progress: float) -> None:
         height = self._strip.get_height()
@@ -207,6 +223,9 @@ class VerticalJourneyScene(CinematicScene):
 
     # --- Gecis -------------------------------------------------------------
     def on_finished(self) -> None:
+        self.game.stop_loop("journey_top")
+        self.game.stop_loop("journey_bottom")
+        self.game.stop_loop("journey_night")
         # Yukari cikis koye varir - Bolum 1. Asagi inis kaldigin bolume;
         # su an yalnizca Bolum 1 var, ileri bolumler geldikce burasi
         # bolum numarasina bakacak.

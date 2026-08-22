@@ -45,6 +45,10 @@ class Bloated(Enemy):
 
     sprite_name = "bloated"
     body_colour = "ember_dark"
+    tell_sound = "bloated_fuse"
+    # Bos: `die()` zaten `_explode()` uzerinden "bloated_explode" caliyor -
+    # genel olum sesi ustune binerse ikilenir.
+    death_sound = ""
 
     def __init__(self, scene, x: float, y: float) -> None:
         super().__init__(scene, x, y)

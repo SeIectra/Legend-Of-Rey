@@ -43,6 +43,8 @@ class Shambler(Enemy):
 
     sprite_name = "shambler"
     body_colour = "echo_dark"
+    tell_sound = "shambler_tell"
+    death_sound = "shambler_death"
 
     def __init__(self, scene, x: float, y: float) -> None:
         super().__init__(scene, x, y)

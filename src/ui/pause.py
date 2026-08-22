@@ -47,7 +47,7 @@ class PauseScene(Scene):
             MenuItem("pause.settings", self._open_settings),
             MenuItem("pause.main_menu", self._ask_quit, gap_before=True),
         ], INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2 - 30, width=120,
-            centered=True, on_sound=self.game.play_ui_sound)
+            centered=True, on_sound=self.game.play_sound)
 
     # --- Eylemler -----------------------------------------------------------
     def _resume(self) -> None:
@@ -65,7 +65,7 @@ class PauseScene(Scene):
             MenuItem("common.cancel", self._cancel_quit),
             MenuItem("pause.quit_confirm", self._to_main_menu, danger=True),
         ], INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2 + 18, width=140,
-            centered=True, on_sound=self.game.play_ui_sound)
+            centered=True, on_sound=self.game.play_sound)
 
     def _cancel_quit(self) -> None:
         self.confirm_quit = None
@@ -77,6 +77,7 @@ class PauseScene(Scene):
         if data is not None:
             write_save(data)
             self.saved_notice = 180
+            self.game.play_sound("save_written")
 
     def _to_main_menu(self) -> None:
         from src.ui.menu import MainMenuScene

@@ -19,7 +19,7 @@ from src.config import (
     APEX_GRAVITY_SCALE, APEX_SPEED_THRESHOLD, COYOTE_FRAMES, DODGE_SPEED,
      JUMP_CUT_MULTIPLIER, PLAYER_AIR_ACCEL,
     PLAYER_AIR_FRICTION, PLAYER_GROUND_ACCEL, PLAYER_GROUND_FRICTION,
-    PLAYER_JUMP_SPEED, PLAYER_RUN_SPEED,
+    PLAYER_JUMP_SPEED, PLAYER_RUN_SPEED, STEP_DISTANCE_PX,
 )
 from src.art.animation import CHARACTERS
 from src.art.animator import Animator
@@ -81,6 +81,10 @@ class Player(Actor):
         # surer - oyuncu dusup yuvarlanir, ekran donmaz.
         self.control_locked = 0
         self.last_hit_was_counter = False
+        # Adim sesi - kare sayisi degil, alinan **mesafeye** gore tetiklenir
+        # (STEP_DISTANCE_PX): yavas yuruyus de hizli kosu da dogal sikilikta
+        # ses uretir.
+        self._step_distance = 0.0
 
     # --- Durum sorgulari ----------------------------------------------------
     @property
@@ -137,7 +141,24 @@ class Player(Actor):
 
         self._apply_physics()
         self._update_ground_state()
+        self._update_footsteps()
         self._update_animation()
+
+    def _update_footsteps(self) -> None:
+        """Yerde ve saldirmiyorken alinan mesafeyi biriktirir.
+
+        Esik asilinca `scene.on_player_step()` cagrilir - hangi ses
+        calinacagina (yer tipine gore) sahne karar verir.
+        """
+        if not self.body.grounded or self.chain.busy:
+            self._step_distance = 0.0
+            return
+        self._step_distance += abs(self.body.vx)
+        if self._step_distance >= STEP_DISTANCE_PX:
+            self._step_distance -= STEP_DISTANCE_PX
+            on_step = getattr(self.scene, "on_player_step", None)
+            if on_step:
+                on_step(self)
 
     def _update_animation(self) -> None:
         update_animation(self)

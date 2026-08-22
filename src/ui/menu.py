@@ -73,7 +73,7 @@ class MainMenuScene(Scene):
                      hint="menu.extras_hint"),
             MenuItem("menu.quit", self.game.quit, gap_before=True),
         ], MENU_X, MENU_Y, width=140,
-            on_sound=self.game.play_ui_sound)
+            on_sound=self.game.play_sound)
 
     # --- Eylemler -----------------------------------------------------------
     def _continue(self) -> None:
@@ -100,7 +100,7 @@ class MainMenuScene(Scene):
             MenuItem("menu.overwrite_confirm", self._go_character_select,
                      danger=True),
         ], INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2 + 14, width=150,
-            centered=True, on_sound=self.game.play_ui_sound)
+            centered=True, on_sound=self.game.play_sound)
 
     def _cancel_overwrite(self) -> None:
         self.confirm_overwrite = None

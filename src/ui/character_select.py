@@ -4,9 +4,9 @@ Gorsel dil (docs/menu-ui.md 4): secili karakter **buyuk, aydinlik,
 animasyonlu**; digeri kucuk, karanlik, hareketsiz. Bu, "secmedigin kisi
 hikayede olacak" fikrini gorsel olarak kurar.
 
-Detay: Rey seciliyken arkada fisilti duyulur, Ardo seciliyken **tam
-sessizlik** - oynanis farkini duyarak anlarsin. (Ses Gorev 10'da; dikis
-`game.play_ui_sound` uzerinden hazir.)
+Detay: Rey seciliyken arkada fisilti duyulur (Yanki'nin dongulu sesi
+dusuk hacimde, `echo_loop`), Ardo seciliyken **tam sessizlik** - oynanis
+farkini duyarak anlarsin (`_update_whisper()`).
 
 Ilk oynayista kucuk bir not: "Ilk kez oynuyorsan Rey onerilir." Zorlamaz,
 yonlendirir.
@@ -154,7 +154,7 @@ class CharacterSelectScene(Scene):
         if index == self.index:
             return
         self.index = index
-        self.game.play_ui_sound("tick")
+        self.game.play_sound("ui_tick")
 
     def update(self) -> None:
         self.frame += 1
@@ -167,15 +167,28 @@ class CharacterSelectScene(Scene):
         if inp.pressed(Action.CONFIRM):
             self._confirm()
         elif inp.pressed(Action.CANCEL):
-            self.game.play_ui_sound("back")
+            self.game.play_sound("ui_back")
             self.scenes.pop()
 
         # Yalnizca secili karakter animasyonlu - digeri durgun.
         self.animators[CHARACTERS[self.index].key].update()
+        self._update_whisper()
+
+    def _update_whisper(self) -> None:
+        """Rey seciliyken arkada fisilti, Ardo seciliyken tam sessizlik."""
+        if CHARACTERS[self.index].key == "rey":
+            self.game.play_loop("char_select_whisper", "echo_loop",
+                                bus="volume_echo", volume=0.3)
+        else:
+            self.game.stop_loop("char_select_whisper")
+
+    def on_exit(self) -> None:
+        self.game.stop_loop("char_select_whisper")
 
     def _confirm(self) -> None:
         info = CHARACTERS[self.index]
-        self.game.play_ui_sound("confirm")
+        self.game.play_sound("ui_confirm")
+        self.game.stop_loop("char_select_whisper")
 
         data = SaveData(character=info.key,
                         max_health=info.health, health=info.health)

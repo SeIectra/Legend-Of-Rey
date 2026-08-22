@@ -81,6 +81,7 @@ class BloatedOne(Boss):
     sprite_name = "shambler"
     body_colour = "blood"
     boss_name_key = "boss.bloated_one"
+    tell_sound = "shambler_tell"  # Ayni iskelet/sprite - ayni tell sesi
 
     def __init__(self, scene, x: float, y: float) -> None:
         super().__init__(scene, x, y)

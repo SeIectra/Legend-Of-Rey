@@ -45,6 +45,8 @@ class Climber(Enemy):
 
     sprite_name = "climber"
     body_colour = "echo"
+    tell_sound = "climber_tell"
+    death_sound = "climber_death"
 
     def __init__(self, scene, x: float, y: float) -> None:
         super().__init__(scene, x, y)

@@ -17,7 +17,7 @@ from src.art import palette
 from src.config import INTERNAL_HEIGHT, INTERNAL_WIDTH
 from src.core.input import Action
 from src.core.scene import Scene
-from src.systems.settings import Option, TABS
+from src.systems.settings import Option, Slider, TABS
 from src.ui import text
 from src.ui.font_data import GLYPH_HEIGHT
 from src.ui.i18n import t
@@ -79,9 +79,10 @@ class SettingsScene(Scene):
             # Listenin ucundan cikinca sekme degistir - dogal his.
             self.tabs.move(direction)
             self.row = 0 if direction > 0 else len(self.entries) - 1
+            self.game.play_sound("ui_tab")
         else:
             self.row = new_row
-        self.game.play_ui_sound("tick")
+            self.game.play_sound("ui_tick")
 
     def _adjust(self, direction: int) -> None:
         entry = self.current
@@ -89,10 +90,11 @@ class SettingsScene(Scene):
             self.settings.cycle(entry, direction)
         else:
             self.settings.adjust(entry, direction)
-        self.game.play_ui_sound("tick")
+        self.game.play_sound("ui_slider" if isinstance(entry, Slider)
+                             else "ui_tick")
 
     def _close(self) -> None:
-        self.game.play_ui_sound("back")
+        self.game.play_sound("ui_back")
         self.scenes.pop()
 
     # --- Cizim --------------------------------------------------------------

@@ -54,8 +54,11 @@ SHOCK_LOCK_FRAMES = 46   # Rey yerden kalkana kadar
 class Chapter01Scene(PlayScene):
     """Koy. Kolye verilir, Cemo kacirilir."""
 
+    footstep_sound = "step_earth"    # Koy toprak zemini - zindan tasi degil
+
     def setup(self) -> None:
         self.tilemap = TileMap(LEVEL.terrain_rows)
+        self.game.play_loop("amb", "amb_village_night", volume=0.6)
 
         spawn = LEVEL.first("player")
         self.player = self.make_player(spawn.x, spawn.feet_y)
@@ -98,6 +101,9 @@ class Chapter01Scene(PlayScene):
         # calismiyordu ve o repligi kimse duymuyordu.
         self._on_beat_start()
 
+    def on_exit(self) -> None:
+        self.game.stop_loop("amb")
+
     @property
     def beat(self) -> str:
         if self.beat_index >= len(PROLOGUE):
@@ -117,10 +123,13 @@ class Chapter01Scene(PlayScene):
         Bir donem `_update_cemo` icindeydi; Cemo cekilince o fonksiyon erken
         donuyor ve yarik sonsuza kadar acik kaliyordu.
         """
+        was_open = self.rift > 0.0
         if self.beat in ("taken", "chase"):
             self.rift = min(1.0, self.rift + 0.02)
         else:
             self.rift = max(0.0, self.rift - 0.03)
+        if was_open and self.rift <= 0.0:
+            self.game.play_sound("rift_close")
 
     def _advance_prologue(self) -> None:
         if self.beat_index >= len(PROLOGUE):
@@ -152,6 +161,7 @@ class Chapter01Scene(PlayScene):
             self.rift_y = self.cemo_y
             self.juice.explosion(self.rift_x, self.rift_y,
                                  ImpactWeight.FINISHER)
+            self.game.play_sound("rift_open")
             # Sarsinti Rey'i yere serer. **Yetisememesinin sebebi bu.**
             # Yoksa Rey 2.0 piksel/kare kosuyor ve Cemo'dan once yariga
             # varirdi; "kurtaramadin" ani hic olusmazdi.
@@ -232,6 +242,7 @@ class Chapter01Scene(PlayScene):
         self.particles.burst(self.player.body.center_x,
                              self.player.body.center_y, 14,
                              path="spark", speed=(0.6, 2.2))
+        self.game.play_sound("item_pickup")
 
     def on_chapter_end(self) -> None:
         """Bolum 1 bitti - Rey zindana iner.

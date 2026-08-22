@@ -19,7 +19,8 @@ from src.art.particles import ParticleField
 from src.combat.attack_token import AttackTokenManager
 from src.combat.hitbox import HitboxManager, Team
 from src.config import (
-    COMBO_THRESHOLD_HIGH, COMBO_THRESHOLD_MID, INTERNAL_WIDTH, TILE_SIZE,
+    COMBO_THRESHOLD_HIGH, COMBO_THRESHOLD_MID, HARD_LAND_AIR_FRAMES,
+    INTERNAL_WIDTH, NECKLACE_BEAT_MIN_WARMTH, TILE_SIZE,
 )
 from src.systems.echo import COMBO_TO_RESTORE
 from src.core.camera import Camera
@@ -29,7 +30,7 @@ from src.core.scene import Scene
 from src.entities.character_stats import ARDO, REY
 from src.entities.player import Player
 from src.systems.compass import Compass
-from src.systems.echo import EchoState
+from src.systems.echo import Answer, EchoState
 from src.systems.save import read_save
 from src.ui import echo_view
 from src.ui.dialogue import Dialogue
@@ -52,6 +53,11 @@ class _WallTarget:
 
 class PlayScene(Scene):
     """Oynanabilir bir alan: tilemap, oyuncu, dusmanlar, game feel."""
+
+    # Adim sesi zemine gore degil **sahneye** gore degisir (SES-LISTESI 2:
+    # "Taş zeminde"/"Toprak/koy zemininde") - zindan varsayilan, Bolum 1
+    # (koy) kendi degerini ezer.
+    footstep_sound = "step_stone"
 
     def setup(self) -> None:
         """Alt sinif sahneyi burada kurar.
@@ -84,7 +90,9 @@ class PlayScene(Scene):
         # "Yanki var mi?" diye dallanmaz - `has_echo` tek yerde sorulur.
         self.echo = (EchoState(tier=self.echo_tier)
                      if self.character != "ardo" else None)
+        self._echo_was_active = False   # echo_open/close kenar tespiti icin
         self.compass = Compass()
+        self._beat_index = -1            # necklace_beat kenar tespiti icin
         self.breakables: list = []
         # Diyalog oynanisi **durdurmuyor**: oyuncu konusma surerken
         # yuruyebilir. Durdursaydik her replik bir kesinti olurdu ve oyuncu
@@ -140,9 +148,11 @@ class PlayScene(Scene):
 
         if self.echo is not None:
             self.echo.update(self.echo_held())
+            self._update_echo_audio()
             if self.game.input.pressed(Action.ECHO_ASK):
                 self.on_echo_ask()
         self.compass.update(self.player)
+        self._update_necklace_audio()
         self.dialogue.update(self.game)
         # Kirilabilir duvarlar Yanki ile parliyor. Liste kucuk (oda basina
         # birkac tane), her karede uretmek sorun degil.
@@ -181,8 +191,49 @@ class PlayScene(Scene):
         """
         if self.echo is None:
             return
-        self.echo.ask()
-        self.game.play_ui_sound("echo_ask")
+        answer = self.echo.ask()
+        self.game.play_sound("echo_ask", bus="volume_echo")
+        # `echo_answer_lie` **bilerek** `echo_answer_truth` ile ayni dalga
+        # formu (sfx_world.py) - kulaktan ayirt edilebilir olsaydi mekanik
+        # olurdu (docs/dovus-sistemi.md 5).
+        answer_sound = {
+            Answer.TRUTH: "echo_answer_truth",
+            Answer.PARTIAL: "echo_answer_partial",
+            Answer.LIE: "echo_answer_lie",
+        }.get(answer)
+        if answer_sound:
+            self.game.play_sound(answer_sound, bus="volume_echo")
+
+    def _update_echo_audio(self) -> None:
+        """Yanki acilirken/kapanirken kenar tespiti - `EchoState` kendisi
+        sesle ilgilenmiyor (systems/ katmani salt mantik), kenar burada.
+        """
+        active = self.echo.active
+        if active and not self._echo_was_active:
+            self.game.play_sound("echo_open", bus="volume_echo")
+        elif not active and self._echo_was_active:
+            self.game.play_sound("echo_close", bus="volume_echo")
+        self._echo_was_active = active
+
+        if active:
+            self.game.play_loop("echo_loop", "echo_loop", bus="volume_echo",
+                                volume=self.echo.strength)
+        else:
+            self.game.stop_loop("echo_loop")
+
+    def _update_necklace_audio(self) -> None:
+        """Kalp atisi periyodu her devri tamamladiginda tek `tak` sesi.
+
+        `Compass.pulse` surekli bir 0..1 egri veriyor (cizim icin); ses
+        icin **kenar** gerekiyor - donguyu kendisi saymiyor, burada sayilir.
+        """
+        if self.compass.warmth <= NECKLACE_BEAT_MIN_WARMTH:
+            self._beat_index = -1
+            return
+        index = self.compass.frame // max(1, self.compass.beat_period)
+        if index != self._beat_index:
+            self._beat_index = index
+            self.game.play_sound("necklace_beat", volume=self.compass.warmth)
 
     def draw(self, surface: pygame.Surface) -> None:
         surface.fill(palette.color("abyss_dark"))
@@ -248,11 +299,25 @@ class PlayScene(Scene):
         if box.owner is self.player:
             self.total_hits += 1
             self.player.register_hit()
+            self.game.play_sound(self._hit_sound(box, result),
+                                 muffled=self._echo_active())
             if box.is_counter:
                 self.show_toast(t("combat.counter"))
             if result.killed:
                 # Kill cancel: recovery aninda kesilir, akis surer.
                 self.player.notify_kill()
+
+    def _hit_sound(self, box, result) -> str:
+        if result.killed:
+            return "hit_kill"
+        if box.is_counter:
+            return "hit_counter"
+        if box.is_finisher:
+            return "hit_heavy"
+        return "hit_light"
+
+    def _echo_active(self) -> bool:
+        return self.echo is not None and self.echo.active
 
     def on_enemy_died(self, enemy) -> None:
         self.juice.explosion(enemy.body.center_x, enemy.body.center_y,
@@ -261,16 +326,22 @@ class PlayScene(Scene):
                              path="blood", speed=(1.0, 3.0))
         # Parcaciklar soner, leke kalir: koridora donunce dovusun izi durur.
         self.decals.splatter(enemy.body.center_x, enemy.body.feet[1], amount=10)
+        # Bos dize = sessiz kal (orn. Sismek zaten patlama sesiyle oldu,
+        # ustune binmesin - src/entities/enemies/bloated.py).
+        if enemy.death_sound:
+            self.game.play_sound(enemy.death_sound)
 
     def on_enemy_tell(self, enemy) -> None:
-        """Tell basladi. Ses Gorev 10'da; simdilik gorsel kanal yeter."""
-        self.game.play_ui_sound("tell")
+        """Tell basladi - hangi ses calinacagini dusmanin kendi tipi
+        soyluyor (`Enemy.tell_sound`, varsayilan genel "enemy_tell")."""
+        self.game.play_sound(enemy.tell_sound, muffled=self._echo_active())
 
     def on_climber_drop(self, enemy) -> None:
         """Tirmanan tavandan koptu - toz doksun, telegraf tamamlansin."""
         self.particles.burst(enemy.body.center_x, enemy.body.bottom, 5,
                              direction=(0.0, 1.0), path="dust",
                              speed=(0.2, 0.7), life=(10, 20), gravity=0.03)
+        self.game.play_sound("climber_drop")
 
     def on_bloated_explode(self, enemy) -> None:
         """Patlama radyal - yonlu degil (docs/derinlestirme.md 1.2)."""
@@ -279,6 +350,7 @@ class PlayScene(Scene):
         self.particles.burst(enemy.body.center_x, enemy.body.center_y, 22,
                              path="spark", speed=(1.2, 3.6))
         self.decals.scorch(enemy.body.center_x, enemy.body.feet[1])
+        self.game.play_sound("bloated_explode")
 
     def on_combo_threshold(self, player, threshold: int) -> None:
         # Saldirgan oynayan kademesini geri kazanir (GOREVLER Gorev 3.1).
@@ -295,7 +367,12 @@ class PlayScene(Scene):
 
     def on_combo_reset(self) -> None: ...
 
-    def on_player_attack(self, player, index: int) -> None: ...
+    def on_player_attack(self, player, index: int) -> None:
+        """Zincir bir sonraki vurusa gecti - degip degmemesinden bagimsiz,
+        kilic her savrulduğunda calar (SES-LISTESI 1: "vurus degmese de
+        calar")."""
+        self.game.play_sound(
+            "swing_heavy" if player.chain.is_finisher else "swing_light")
 
     def on_attack_swing(self, player, box) -> None:
         """Vurus kirilabilir duvara degdi mi?
@@ -334,16 +411,20 @@ class PlayScene(Scene):
         self.particles.burst(player.body.feet[0], player.body.feet[1], 4,
                              direction=(0.0, -1.0), path="dust",
                              speed=(0.3, 0.9), life=(8, 16), gravity=0.04)
+        self.game.play_sound("jump")
 
     def on_player_land(self, player, air_frames: int) -> None:
         self.particles.burst(player.body.feet[0], player.body.feet[1], 6,
                              direction=(0.0, -1.0), path="dust",
                              speed=(0.4, 1.2), life=(10, 20), gravity=0.05)
+        hard = air_frames >= HARD_LAND_AIR_FRAMES
+        self.game.play_sound("land_hard" if hard else "land_soft")
 
     def on_player_dodge(self, player) -> None:
         self.particles.burst(player.body.center_x, player.body.feet[1], 8,
                              direction=(-player.facing, 0.0), path="dust",
                              speed=(0.5, 1.6), life=(10, 22), gravity=0.03)
+        self.game.play_sound("dodge")
 
     def on_dodge_trail(self, player) -> None:
         if player.dodge.frames_left % 3 == 0:
@@ -351,8 +432,14 @@ class PlayScene(Scene):
                                  direction=(-player.facing, 0.0), path="echo",
                                  speed=(0.1, 0.4), life=(8, 14), gravity=0.0)
 
+    def on_player_step(self, player) -> None:
+        """Adim - hangi ses calinacagi sahnenin `footstep_sound`'undan gelir
+        (zemine gore degil **sahneye** gore, bkz. sinif tanimi)."""
+        self.game.play_sound(self.footstep_sound, muffled=self._echo_active())
+
     def on_player_hurt(self, player, result) -> None:
         self.show_toast(t("combat.hurt"))
+        self.game.play_sound("player_hurt", muffled=self._echo_active())
 
     def on_echo_tier_changed(self, tier: int, gained: bool) -> None:
         """Kademe degisti. Asamali aciga cikarma: yalnizca **degisince**
@@ -362,6 +449,8 @@ class PlayScene(Scene):
         # sayiyor. Bu tuzaga ikinci kez dusuldu.
         self.show_toast(t("echo.tier_up" if gained else "echo.tier_down"),
                         frames=120)
+        self.game.play_sound("echo_tier_up" if gained else "echo_tier_down",
+                             bus="volume_echo")
 
     def on_player_died(self, player) -> None:
         # Olunce Yanki bir kademe zayiflar. Dip SESSIZ - daha asagi inmez,
@@ -369,6 +458,7 @@ class PlayScene(Scene):
         if self.echo is not None and self.echo.weaken():
             self.on_echo_tier_changed(self.echo.tier, gained=False)
         self.show_toast(t("combat.died"))
+        self.game.play_sound("player_death")
 
     def _emit_particles(self, event: ImpactEvent) -> None:
         self.particles.burst(event.x, event.y, event.particle_count,

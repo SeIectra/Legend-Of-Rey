@@ -206,3 +206,10 @@ PURPLE_FLAME_TILE = (ROOM_STARTS[4][1] + 13, 13)
 
 # Mangal (Oda 7).
 BRAZIER_TILE = (_room7_start + 18, 13)
+
+# Mini-boss arenasinin kapisi - oda sinirindan birkac tile ICERDE.
+# Bolum 2'de yasanan hatanin ayni surumu: kapi oda sinirina girer girmez
+# kapanirsa oyuncunun yuzune kapaniyor gibi hissettiriyor. Sinirin kendisi
+# (`_room7_start`) degil, buradan birkac tile sonrasi kapaniyor - oyuncu
+# odaya gercekten girdiginden ve mangali/boss'u gordugunden emin olunca.
+ARENA_DOOR_COLUMN = _room7_start + 3

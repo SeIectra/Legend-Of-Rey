@@ -222,6 +222,20 @@ SQUASH_HIT: Final[tuple[float, float]] = (1.30, 0.70)
 SQUASH_HIT_FRAMES: Final[int] = 2
 
 SOUND_PITCH_VARIANCE: Final[float] = 0.08   # Her tekrarli efekt +-%8
+# Bu kadar havada kalinca inis "land_hard" calar, azi "land_soft"
+# (assets/audio/SES-LISTESI.md 2). `Player._update_ground_state()` zaten
+# `air_frames > 10` olmadan hic cagirmiyor - bu esik onun USTUNDE.
+HARD_LAND_AIR_FRAMES: Final[int] = 30
+# Kac piksel yol alinca bir adim sesi caliyor (Player._update_footsteps).
+# Yuruyus hizinin dogal bir sonucu olsun diye kare sayisi degil mesafe.
+# Ilk deger (11px) kosarken saniyede ~11 adim sesi veriyordu - rahatsiz
+# edici derecede sik (Arda'nin canli oynanis geri bildirimi, 22.08.2026).
+# 42px ~2.5 adim/sn - gercekci bir kosu ritmine yakin.
+STEP_DISTANCE_PX: Final[float] = 42.0
+# Kolye pusulasi hedefe kilitliyken bu isinma esiginin ustunde kalp atisi
+# duyulur (assets/audio/SES-LISTESI.md 4). Sifir = her zaman duyulur;
+# cok dusuk tutuluyor ki uzaktaki hafif bir titresim de fark edilsin.
+NECKLACE_BEAT_MIN_WARMTH: Final[float] = 0.02
 
 
 # =============================================================================

@@ -81,6 +81,7 @@ class Chapter02Scene(PlayScene):
         # acikca veriliyor - kayittan gelmesini beklemiyoruz.
         self.player.grant(abilities.SWORD)
         self.player.grant(abilities.DODGE)
+        self.game.play_loop("amb", "amb_cellar", volume=0.7)
 
         self.chests = [
             Chest(spot.x, spot.feet_y,
@@ -115,6 +116,9 @@ class Chapter02Scene(PlayScene):
         self.finished = False
 
         self._enter_room(self._room_at(self.player.body.center_x))
+
+    def on_exit(self) -> None:
+        self.game.stop_loop("amb")
 
     def _is_secret(self, tile_x: int) -> bool:
         """Gizli oda sutun araligi. Ana yoldaki sandiktan boyle ayriliyor."""
@@ -254,7 +258,7 @@ class Chapter02Scene(PlayScene):
         self.particles.burst(chest.x, chest.feet_y - 8, 14, path="spark",
                              speed=(0.5, 2.0), life=(18, 34))
         self.juice.explosion(chest.x, chest.feet_y - 6, ImpactWeight.NORMAL)
-        self.game.play_ui_sound("chest_open")
+        self.game.play_sound("chest_open")
 
         if chest.charm and self.player.equip(chest.charm):
             if (self.save_data is not None
@@ -341,6 +345,7 @@ class Chapter02Scene(PlayScene):
         self._end_chapter()
 
     def _end_chapter(self) -> None:
+        self.game.play_sound("chapter_end")
         result = ChapterResult(
             chapter_key="chapter.first_descent",
             frames=self.frames,

@@ -19,6 +19,8 @@ from pathlib import Path
 import pygame
 
 from src.art import palette
+from src.audio import synth
+from src.audio.mixer import AudioMixer
 from src.config import (
     FPS, INTERNAL_HEIGHT, INTERNAL_WIDTH, MAX_CATCHUP_FRAMES,
 )
@@ -52,9 +54,17 @@ def viewport_for(width: int, height: int) -> tuple[int, pygame.Rect]:
 
 class Game:
     def __init__(self, settings: Settings | None = None) -> None:
+        # Mixer formati `pygame.init()`'ten ONCE kilitlenir (44.1kHz mono) -
+        # sonradan cagrilirsa platforma gore degisen bir varsayimla kalirdik.
+        synth.init_mixer()
         pygame.init()
         self.settings = settings or Settings()
         self.settings.on_change(self._on_setting_changed)
+        # Gorev 10: gercek kaydedilmis ses yok, dalga formlari koddan
+        # sentezleniyor (`src/audio/`) - CLAUDE.md 6'nin sprite ilkesiyle
+        # ayni. `AudioMixer` kendi paylasilan onbellegini kullanir, burada
+        # yalnizca ayarlara (hacim) erisim icin bir ornek tutuluyor.
+        self.audio = AudioMixer(self.settings)
         # Kayitli dili **arayuz kurulmadan once** uygula: menuler kurulurken
         # metinleri o anki dilden cozuyor.
         self._apply_language(self.settings.get("language", i18n.DEFAULT_LANGUAGE))
@@ -184,14 +194,26 @@ class Game:
         print(f"[game] ekran goruntusu: {path}")
         return path
 
-    # --- Ses (Gorev 10'da baglanacak) ---------------------------------------
-    def play_ui_sound(self, name: str) -> None:
-        """Arayuz sesi. Ses sistemi Gorev 10'da gelecek.
-
-        Dikis simdiden burada: menu "tik" ve "tak" seslerini cagiriyor, o gun
-        bu govdeyi doldurmak yetecek. Sirasi gelmemis sistemi simdi yazmiyoruz.
-        """
+    # --- Ses (Gorev 10) -------------------------------------------------------
+    def play_sound(self, name: str, muffled: bool = False,
+                  bus: str = "volume_sfx", volume: float = 1.0) -> None:
+        """Tek seferlik efekt calar. `muffled=True` -> Yanki'nin bogulmus
+        kopyasi (yalnizca `sfx.MUFFLED_KEYS` icindekiler icin gecerli)."""
         self.last_ui_sound = name
+        self.audio.play(name, muffled=muffled, bus=bus, volume=volume)
+
+    def play_loop(self, channel_key: str, name: str,
+                 bus: str = "volume_music", volume: float = 1.0) -> None:
+        """Mantiksal bir kanalda surekli ses baslatir (ruzgar, Yanki
+        fisiltisi, ...). Ayni ses zaten caliyorsa yalnizca hacmi guncellenir."""
+        self.audio.play_loop(channel_key, name, bus=bus, volume=volume)
+
+    def set_loop_volume(self, channel_key: str, volume: float,
+                        bus: str = "volume_music") -> None:
+        self.audio.set_loop_volume(channel_key, volume, bus=bus)
+
+    def stop_loop(self, channel_key: str) -> None:
+        self.audio.stop_loop(channel_key)
 
     # --- Zaman kontrolu -----------------------------------------------------
     def hitstop(self, frames: int) -> None:

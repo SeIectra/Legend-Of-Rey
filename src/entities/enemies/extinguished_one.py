@@ -127,6 +127,7 @@ class ExtinguishedOne(Boss):
     sprite_name = "climber"
     body_colour = "violet_dark"
     boss_name_key = "boss.extinguished_one"
+    tell_sound = "climber_tell"  # Ayni iskelet/sprite - ayni tell sesi
 
     def __init__(self, scene, x: float, y: float) -> None:
         super().__init__(scene, x, y)
