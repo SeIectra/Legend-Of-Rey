@@ -36,9 +36,10 @@ from enum import Enum, auto
 from src.art import palette
 from src.combat.hitbox import Hitbox, Team, melee_rect
 from src.config import (
-    ENEMY_APPROACH_SPEED, ENEMY_LOSE_RANGE, ENEMY_MIN_TELL_FRAMES,
-    ENEMY_ORBIT_SPEED, ENEMY_SIGHT_RANGE, ENEMY_VERTICAL_ENGAGE_RANGE,
-    ORBIT_RADIUS_MAX, ORBIT_RADIUS_MIN, ORBIT_SLOT_WIDTH,
+    ENEMY_APPROACH_SPEED, ENEMY_LEDGE_PROBE_TILES, ENEMY_LOSE_RANGE,
+    ENEMY_MIN_TELL_FRAMES, ENEMY_ORBIT_SPEED, ENEMY_SIGHT_RANGE,
+    ENEMY_UNREACHABLE_PATIENCE_FRAMES, ENEMY_VERTICAL_ENGAGE_RANGE,
+    ORBIT_RADIUS_MAX, ORBIT_RADIUS_MIN, ORBIT_SLOT_WIDTH, TILE_SIZE,
 )
 from src.entities.actor import Actor
 
@@ -96,6 +97,9 @@ class Enemy(Actor):
         self.orbit_side = 1              # Oyuncunun hangi yaninda bekliyor
         self.orbit_slot = 0.0            # Yorunge icindeki yeri
         self._attack_spawned = False
+        # Oyuncu dikeyde erisilemezken gecen kare sayisi - bir esigi
+        # asinca dusman en yakin kenari arayip oradan iner (bkz. _approach).
+        self._unreachable_frames = 0
         self.speed_scale = float(
             scene.game.settings.get("enemy_speed", 1.0)) if scene else 1.0
 
@@ -245,12 +249,43 @@ class Enemy(Actor):
             return
         self._face_player()
         distance = self.distance_to(player)
-        if (distance <= self.contact_range and self._vertically_reachable(player)
+        reachable = self._vertically_reachable(player)
+        self._unreachable_frames = 0 if reachable else self._unreachable_frames + 1
+
+        if (distance <= self.contact_range and reachable
                 and self._can_attack()):
             self._begin_tell()
             return
+
         speed = self.move_speed * self.speed_scale * ENEMY_APPROACH_SPEED / 0.5
-        self.body.approach_vx(self.facing * speed, 0.25)
+        direction = self.facing
+        if (not reachable
+                and self._unreachable_frames >= ENEMY_UNREACHABLE_PATIENCE_FRAMES):
+            # Oyuncuya sonsuza dek erisemiyor - o zaman en yakin kenari ara
+            # ve oradan in. "Yapisik dusman" hissi boyle kaliciliktan cikar.
+            edge = self._nearest_ledge_direction()
+            if edge is not None:
+                direction = edge
+        self.body.approach_vx(direction * speed, 0.25)
+
+    def _nearest_ledge_direction(self) -> int | None:
+        """Zemin `ENEMY_LEDGE_PROBE_TILES` ileride kesiliyorsa o yonu doner.
+
+        Once yuzun donuk oldugu yon denenir (oyuncuya daha yakin bir kenar
+        genelde o taraftadir), sonra tersi. Ikisi de kesilmiyorsa (genis,
+        duz bir platform) `None` doner - cagiran mevcut davranisi surdurur.
+        """
+        tilemap = getattr(self.scene, "tilemap", None)
+        if tilemap is None:
+            return None
+        foot_tx = int(self.body.center_x) // TILE_SIZE
+        foot_ty = int(self.body.feet[1]) // TILE_SIZE
+        for direction in (self.facing, -self.facing):
+            probe_tx = foot_tx + direction * ENEMY_LEDGE_PROBE_TILES
+            if not (tilemap.is_solid(probe_tx, foot_ty)
+                    or tilemap.is_platform(probe_tx, foot_ty)):
+                return direction
+        return None
 
     def _orbit(self) -> None:
         """Kusatma: yaklas ama girme, yerini koru.

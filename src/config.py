@@ -290,6 +290,16 @@ ENEMY_LOSE_RANGE: Final[float] = 240.0   # Histerezis: goz acip kapama olmasin
 # davranisi (ekran capinda "farkinda olma" hissi) bilerek degismiyor.
 ENEMY_VERTICAL_ENGAGE_RANGE: Final[float] = 28.0
 
+# O onceki fix'in **acikca birakilan** yarim tarafi: dusman artik bosuna
+# saldirmiyor ama erisilemez bir platformda sonsuza kadar bekleyebiliyordu -
+# "yapisik dusman" olarak geri bildirildi (Arda, 22.08.2026). Bu kadar kare
+# erisilemez kaldiktan sonra dusman en yakin kenari arayip oradan duser.
+ENEMY_UNREACHABLE_PATIENCE_FRAMES: Final[int] = 90
+# Kenar arama menzili (tile) - bu kadar ileride zemin kesiliyorsa "kenar"
+# sayilir. Cok kucuk olursa dusman kenari gecmeden fark edemez (duz zeminde
+# sonsuza dek arar), cok buyuk olursa uzak bir bosluga yanlislikla yonelir.
+ENEMY_LEDGE_PROBE_TILES: Final[int] = 2
+
 # --- Tip degerleri -----------------------------------------------------------
 # Suruklenen - combo hedef tahtasi. Yavas 3'luk ritim: bekle-bekle-vur.
 SHAMBLER_HEALTH: Final[int] = 40
@@ -311,6 +321,11 @@ CLIMBER_ACTIVE_FRAMES: Final[int] = 5
 CLIMBER_RECOVER_FRAMES: Final[int] = 30  # Uzun bekleme - ritmin yarisi bu
 CLIMBER_DROP_SPEED: Final[float] = 2.6
 CLIMBER_TRIGGER_X: Final[float] = 20.0   # Oyuncu bu kadar altina girince birakir
+# Oyuncu tam altina hic girmezse (oda gecisi bunu garanti etmiyor) Tirmanan
+# sonsuza kadar tavanda asili kalirdi - "yapisik dusman" gibi okunuyordu
+# (Arda'nin canli oynanis geri bildirimi, 22.08.2026). Bu kadar kare
+# boyunca farkinda ama tetiklenmediyse yine de birakir.
+CLIMBER_PATIENCE_FRAMES: Final[int] = 150
 # Isiktan kacma (docs/bolum-03.md Oda 3) - tavanda kayarak uzaklasir.
 CLIMBER_FLEE_SPEED: Final[float] = 0.5
 

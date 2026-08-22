@@ -30,8 +30,9 @@ import pygame  # noqa: E402
 
 from src.combat.hitbox import Hitbox, Team  # noqa: E402
 from src.config import (  # noqa: E402
-    BLOATED_BLAST_DAMAGE, ENEMY_MIN_TELL_FRAMES, MAX_SIMULTANEOUS_ATTACKERS,
-    SHAMBLER_BEAT_FRAMES, TILE_SIZE,
+    BLOATED_BLAST_DAMAGE, CLIMBER_PATIENCE_FRAMES,
+    ENEMY_UNREACHABLE_PATIENCE_FRAMES, ENEMY_MIN_TELL_FRAMES,
+    MAX_SIMULTANEOUS_ATTACKERS, SHAMBLER_BEAT_FRAMES, TILE_SIZE,
 )
 from src.core.game import Game  # noqa: E402
 from src.entities.enemies.bloated import Bloated  # noqa: E402
@@ -329,6 +330,38 @@ def main() -> int:
               f"{dropped_at} >= {Climber.tell_frames}")
     game.shutdown()
 
+    # --- 8b. Tirmanan - oyuncu hic tam altina girmezse "sabir" ile birakir --
+    # Arda'nin canli oynanis geri bildirimi: oda duzeni oyuncuyu Tirmanan'in
+    # tam altindan gecirmeyebilir - o zaman sonsuza kadar tavanda "yapisik"
+    # kaliyordu. Oyuncu yakinken (farkinda) ama hic tam altina girmeden.
+    print("\n--- tirmanan (sabir ile birakma) ---")
+    game, scene = make_scene()
+    climber = place(scene, Climber, 20, tile_y=3)
+    scene.enemies = [climber]
+    scene.tokens.clear()
+    # Yakinda ama YANINDA duruyor, tam altinda degil - overhead_player
+    # hep False kalsin diye CLIMBER_TRIGGER_X'in disinda ama
+    # ENEMY_SIGHT_RANGE icinde.
+    scene.player.body.x = climber.body.center_x + 60
+    scene.player.body.y = climber.body.y
+    patient_dropped_at = None
+    for frame in range(CLIMBER_PATIENCE_FRAMES + Climber.tell_frames + 20):
+        step(game, scene)
+        if frame == 0:
+            check(not climber.overhead_player,
+                  "test kurulumu: oyuncu hic tam altina girmiyor")
+        if not climber.hanging:
+            patient_dropped_at = frame
+            break
+    check(patient_dropped_at is not None,
+          "oyuncu hic tam altina girmese de sabir esiginde birakiyor",
+          f"{patient_dropped_at}")
+    if patient_dropped_at is not None:
+        check(patient_dropped_at >= CLIMBER_PATIENCE_FRAMES,
+              "sabir esiginden ONCE birakmiyor (erken tetiklenmiyor)",
+              f"{patient_dropped_at} >= {CLIMBER_PATIENCE_FRAMES}")
+    game.shutdown()
+
     # --- 9. Can bari yok ----------------------------------------------------
     print("\n--- can bari yok ---")
     source = (ROOT / "src" / "entities" / "enemy_render.py").read_text(
@@ -345,6 +378,11 @@ def main() -> int:
     # (guclu knockback_up, ya da bolum tasariminda bir yukselti), oyuncu
     # TAM ALTINDAYSA yatay mesafe hep kucuk kaliyor ve dusman erisemeyecegi
     # bir hedefe sonsuza dek TELL/ATTACK denemesi yapiyordu.
+    #
+    # Ikinci tur (Arda'nin "hala yapisik" geri bildirimi, 22.08.2026): bosuna
+    # saldirmamak yetmiyordu - dusman sonsuza dek yukarida bekleyebiliyordu.
+    # Simdi sabir esigi (ENEMY_UNREACHABLE_PATIENCE_FRAMES) dolunca en yakin
+    # kenari arayip oradan iniyor.
     print("\n--- dikey erisim (ust platforma sikisma) ---")
     game, scene = make_scene()
     # `combat_room.py`'nin gercek "ust kat" platformu: satir 7, sutun 18-21.
@@ -355,17 +393,28 @@ def main() -> int:
     scene.player.body.x = stuck.body.center_x - stuck.body.width * 0.5
     scene.player.body.y = 12 * TILE_SIZE             # Zeminde - 6 tile asagida
     start_y = stuck.body.y
+
+    # Once: sabir esigine kadar ne bosuna saldirir ne de kipirdar.
     bad_states = 0
-    for _ in range(600):
+    for _ in range(ENEMY_UNREACHABLE_PATIENCE_FRAMES - 10):
         step(game, scene)
         if stuck.state in (EnemyState.TELL, EnemyState.ATTACK):
             bad_states += 1
     check(stuck.aware, "dusman oyuncunun farkina variyor (goruş bozulmadi)")
     check(bad_states == 0,
-          "erisilemez hedefe TELL/ATTACK denemesi YAPMIYOR",
+          "sabir esigine kadar erisilemez hedefe TELL/ATTACK denemesi YAPMIYOR",
           f"{bad_states} kare TELL/ATTACK durumunda")
     check(abs(stuck.body.y - start_y) < 2.0,
-          "dusman platformdan dusmuyor - saglam zeminde kaliyor",
+          "sabir esigine kadar platformdan dusmuyor",
+          f"y={stuck.body.y:.1f} (baslangic {start_y:.1f})")
+
+    # Sonra: sabir dolunca kenari bulup iniyor - sonsuza dek "yapisik" kalmiyor.
+    for _ in range(600):
+        step(game, scene)
+        if stuck.body.y > start_y + 4.0:
+            break
+    check(stuck.body.y > start_y + 4.0,
+          "sabir dolunca en yakin kenari bulup platformdan iniyor",
           f"y={stuck.body.y:.1f} (baslangic {start_y:.1f})")
     game.shutdown()
 

@@ -20,9 +20,9 @@ from src.art.animation import CHARACTERS
 from src.art.animator import Animator
 from src.config import (
     CLIMBER_ACTIVE_FRAMES, CLIMBER_DAMAGE, CLIMBER_DROP_SPEED,
-    CLIMBER_FLEE_SPEED, CLIMBER_HEALTH, CLIMBER_POISE, CLIMBER_REACH,
-    CLIMBER_RECOVER_FRAMES, CLIMBER_SPEED, CLIMBER_TRIGGER_X,
-    TELL_FRAMES_CLIMBER,
+    CLIMBER_FLEE_SPEED, CLIMBER_HEALTH, CLIMBER_PATIENCE_FRAMES,
+    CLIMBER_POISE, CLIMBER_REACH, CLIMBER_RECOVER_FRAMES, CLIMBER_SPEED,
+    CLIMBER_TRIGGER_X, TELL_FRAMES_CLIMBER,
 )
 from src.entities.enemy import Enemy, EnemyState
 
@@ -55,6 +55,10 @@ class Climber(Enemy):
         self.hanging = True
         self.anchor_x = self.body.center_x
         self.anchor_y = self.body.y
+        # Oyuncu tam altina hic girmezse (oda gecisi/platform duzeni bunu
+        # garanti etmiyor) sonsuza kadar tavanda asili kalmasin diye -
+        # farkinda oldugu surece sayan bir sabir sayaci.
+        self.aware_frames = 0
 
     # --- Asili durum --------------------------------------------------------
     @property
@@ -111,7 +115,14 @@ class Climber(Enemy):
             self._drop()
             return
 
-        if self.overhead_player and self.scene.tokens.request(self):
+        # Sabir sayaci: oyuncu farkindayken ama hic tam altina girmiyorsa
+        # (oda duzeni bunu garanti etmez) esik asilinca yine de birakir -
+        # "yapisik dusman" hissi sonsuza kadar surmesin.
+        self.aware_frames = self.aware_frames + 1 if self.aware else 0
+        patient_drop = self.aware_frames >= CLIMBER_PATIENCE_FRAMES
+
+        if ((self.overhead_player or patient_drop)
+                and self.scene.tokens.request(self)):
             self._begin_tell()
 
     def _drop(self) -> None:
