@@ -26,6 +26,9 @@ SCENES = {
     "menu": ("src.ui.menu", "MainMenuScene"),
     "bolum1": ("src.scenes.chapter01", "Chapter01Scene"),
     "bolum2": ("src.scenes.chapter02", "Chapter02Scene"),
+    # Bolum 1 -> 2 gecisi (yariktan dusus). Ayrica dogrudan
+    # acilabilsin: ara sahneyi tek basina ayarlamak icin.
+    "inis": ("src.scenes.chapter02_cinematics", "DescentCinematic"),
     "bolum3": ("src.scenes.chapter03", "Chapter03Scene"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),

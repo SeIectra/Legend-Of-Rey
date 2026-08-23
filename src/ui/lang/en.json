@@ -159,7 +159,8 @@
     "ch02_echo_secret": "Someone came before you. They did not leave.",
     "ch02_echo_boss": "This one was waiting for you.",
     "ch02_echo_exit": "Down. Further down.",
-    "ch02_rey_claw2": "He was still fighting."
+    "ch02_rey_claw2": "He was still fighting.",
+    "ch02_echo_fall": "good. deeper now."
   },
   "combat": {
     "counter": "COUNTER",

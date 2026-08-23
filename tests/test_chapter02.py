@@ -350,6 +350,50 @@ def main() -> int:
 
     game.shutdown()
 
+    # --- Inis ara sahnesi (ilk gercek StoryScene kullanimi) -----------------
+    # `src/scenes/story.py` yazilmisti ama hicbir yerden cagrilmiyordu.
+    # DEVIR.md'nin kendi dersi: "yazilip hic calistirilmayan kod hatasiz
+    # gorunur, hatasiz degildir" (tileset.py ve Boss.draw_health_bar ayni
+    # tuzaga dusmustu). Bu test o altyapiyi bastan sona oynatiyor.
+    print("\n--- inis ara sahnesi ---")
+    from src.scenes.chapter02_cinematics import DescentCinematic
+    from src.scenes.story import Panel
+
+    check(all(isinstance(x, Panel) for x in DescentCinematic.PANELS),
+          "ara sahne Panel listesiyle tanimli",
+          str(len(DescentCinematic.PANELS)) + " panel")
+    cine_game = Game()
+    cine_game.scenes.set_root(DescentCinematic, transition=False,
+                              character="rey")
+    cine_game.scenes._flush()
+    cine = cine_game.scenes.current
+    # `duration_frames` StoryScene'de PROPERTY (panellerden hesaplaniyor) -
+    # sinif uzerinden okunursa property nesnesi doner, ornek uzerinden
+    # okunmali.
+    check(cine.duration_frames > 0, "sure panellerden hesaplaniyor",
+          str(cine.duration_frames) + " kare")
+    surface = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT))
+
+    seen_panels = set()
+    seen_line = False
+    for _ in range(cine.duration_frames + 400):
+        cine_game.input.begin_frame(); cine_game.input.end_frame()
+        cine.update()
+        if cine.panel is not None:
+            seen_panels.add(cine.panel.name)
+        if cine.dialogue.current is not None:
+            seen_line = True
+        cine.draw(surface)          # cizim de patlamamali
+        if cine.finished:
+            break
+
+    check(len(seen_panels) == len(DescentCinematic.PANELS),
+          "butun paneller sirayla oynadi",
+          ", ".join(sorted(seen_panels)))
+    check(seen_line, "sinematik icinde replik gosterildi (Arda'nin karari)")
+    check(cine.finished, "ara sahne kendiliginden bitti - takilmiyor")
+    cine_game.shutdown()
+
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")

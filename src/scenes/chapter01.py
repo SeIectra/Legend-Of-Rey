@@ -387,11 +387,14 @@ class Chapter01Scene(PlayScene):
         """Bolum 1 bitti - Rey zindana iner.
 
         Gecis **kesme degil**: yarik yukarida kaldi, Rey asagi iniyor.
-        Bolum 2 dogrudan aciliyor; ara sahne icin dogru an bu degil,
-        inisin kendisi zaten Bolum 2'nin ilk odasi (docs/bolum-02.md).
+        `docs/bolum-02.md` Oda 1 bunu acikca tarif ediyor ("Rey yariktan
+        asagi duser, yuvarlanarak iner") - o dusus artik bir ara sahne
+        (`chapter02_cinematics.DescentCinematic`). Eskiden Bolum 2
+        dogrudan aciliyordu ve oyuncu kendini bir anda baska bir yerde
+        buluyordu.
         """
-        from src.scenes.chapter02 import Chapter02Scene
-        self.scenes.replace(Chapter02Scene, character=self.character)
+        from src.scenes.chapter02_cinematics import DescentCinematic
+        self.scenes.replace(DescentCinematic, character=self.character)
 
     def on_echo_tutorial(self) -> None:
         """Yanki Gorusu burada ogreniliyor.

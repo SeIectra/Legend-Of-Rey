@@ -159,7 +159,8 @@
     "ch02_echo_secret": "Senden önce biri gelmiş. Dönmemiş.",
     "ch02_echo_boss": "Bu seni bekliyordu.",
     "ch02_echo_exit": "Aşağıda. Daha aşağıda.",
-    "ch02_rey_claw2": "Hâlâ direniyormuş."
+    "ch02_rey_claw2": "Hâlâ direniyormuş.",
+    "ch02_echo_fall": "iyi. daha derine."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",
