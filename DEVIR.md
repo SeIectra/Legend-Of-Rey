@@ -7,7 +7,7 @@ Okuma sırası: **1) `CLAUDE.md`** (bağlayıcı kurallar — anayasa) → **2) 
 dosya** (nerede kaldık) → 3) gerekirse `docs/` altındaki ilgili tasarım
 belgesi.
 
-Son güncelleme: **23.08.2026** (Faz E tamamlandı) · Ardeko Studios · Arda Güner
+Son güncelleme: **24.08.2026** (Faz E ✅, Faz G Bölüm 2 iniş sahnesi ✅) · Ardeko Studios · Arda Güner
 
 > `GOREVLER.md` **silindi** (23.08.2026, Arda'nın isteği: "bir devir.md
 > olsun diğerlerini sil kafa karıştırmasın"). İçindeki canlı bilgi bu
@@ -76,12 +76,15 @@ Yedi faza bölündü:
 | **D** | Çevre ve dekor (köy, köylüler, gökyüzü katmanları) | ✅ |
 | **E** | Karakter sprite'ları (silah izi, ikincil hareket, geçiş kareleri) | ✅ |
 | **F** | HUD ve arayüz | ⬜ **SIRADAKİ** |
-| **G** | Bölüm 2 ve 3'ün ara sahneleri (`story.py` asıl burada kullanılacak) | ⬜ |
+| **G** | Bölüm 2/3 ara sahneleri | 🟡 **Bölüm 2 iniş sahnesi ✅** (`story.py` artık kullanılıyor) · B3 güçlendirmesi ⬜ |
 
-**Faz C'nin yarım kalan parçası:** ışık/karartma sistemi
-(`src/systems/light.py` + `src/art/lighting.py`) hâlâ **yalnızca Bölüm
-3'e bağlı**. Bölüm 1'in yarığı ve Bölüm 2'nin meşaleleri gerçek ışık
-vermiyor, sadece çiziliyor. Faz E'den önce ya da sonra yapılabilir.
+**Işık sistemi hakkında bir düzeltme (24.08.2026):** Bu belge bir ara
+"ışık sistemi yalnızca Bölüm 3'e bağlı, B1/B2'ye de bağlanmalı" diyordu —
+**yanlıştı.** `lighting.render` bir *tam karanlık maskesi*; Bölüm 3'ün
+mekaniği ("Meşale Mahzeni") tam olarak o. Bölüm 1/2'ye takmak onları
+oynanamaz yapardı. İkisinin de zaten meşale/yarık parıltısı (`radial_glow`)
+var ve doğru görsel o. Işık huzmesi denendi, üç tur sonra kaldırıldı —
+gerekçe `src/art/ambience.py` başında yazılı.
 
 ---
 
