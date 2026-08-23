@@ -41,6 +41,8 @@ from src.world.rooms.chapter01 import (
     ECHO_TUTORIAL_TILE, LEVEL, PROLOGUE, RIFT_TILE, SCENERY,
     TUTORIAL_ATTACK_AFTER, TUTORIAL_MOVE_AFTER,
 )
+from src.scenes import chapter01_render
+from src.world import village_backdrop
 from src.world.tilemap import TileMap
 
 # Yarik **Cemo'nun oldugu yerde** aciliyor, sabit bir tile'da degil.
@@ -413,199 +415,32 @@ class Chapter01Scene(PlayScene):
 
     # --- Cizim --------------------------------------------------------------
     def draw_background(self, surface: pygame.Surface, offset) -> None:
+        """Gece gokyuzu -> ay -> uzak tepeler -> koy. Dort parallax katmani.
+
+        Ilk halinde yalnizca yildizlar ve evler vardi; aradaki bosluk
+        "gokyuzu" degil "hiclik" gibi okunuyordu (ayni tuzak magara arka
+        planinda da yasanmisti - DEVIR.md 4 madde 19). Ay ve uzak tepe
+        siluetleri o boslugu **mesafeye** ceviriyor.
+
+        Katman hizlari bilerek farkli: yildiz 0.10, ay 0.04 (neredeyse
+        sabit - cok uzak), tepeler 0.35, koy 1.0.
+        """
         ox, _oy = offset
-        # Gece gokyuzu - yildizlar parallax ile yavas kayar.
         surface.fill(palette.color("abyss_dark"))
-        for i in range(60):
-            x = (i * 97 - int(ox * 0.25)) % INTERNAL_WIDTH
-            y = (i * 53) % 120
-            tone = "bone" if i % 5 == 0 else "stone_dark"
-            surface.fill(palette.color(tone), (x, y, 1, 1))
-        self._draw_scenery(surface, offset)
-
-    def _draw_scenery(self, surface: pygame.Surface, offset) -> None:
-        """Evler, kuyu, cit. Carpisma yok - yalnizca dekor.
-
-        Koyun koye benzemesi icin sart: duz zemin uzerinde iki platform
-        "koy" degil "test odasi" gibi okunuyordu.
-        """
-        ox, oy = offset
-        for tx, ty, tw, th, kind in SCENERY:
-            x = tx * TILE_SIZE - ox
-            base = (ty + 1) * TILE_SIZE - oy
-            width = tw * TILE_SIZE
-            height = th * TILE_SIZE
-            if x + width < 0 or x > INTERNAL_WIDTH:
-                continue                     # Gorunmeyeni cizme
-
-            if kind == "house":
-                surface.fill(palette.color("ink_soft"),
-                             (x, base - height, width, height))
-                # Cati: ustte ucgen.
-                for i in range(height // 3):
-                    inset = int(width * 0.5 * i / max(1, height // 3))
-                    surface.fill(palette.color("earth_dark"),
-                                 (x + inset, base - height - i,
-                                  width - inset * 2, 1))
-                # Isikli pencere - koyde hayat var.
-                surface.fill(palette.color("ember"),
-                             (x + width // 2 - 1, base - height // 2, 3, 3))
-                pygame.draw.rect(surface, palette.color("void"),
-                                 pygame.Rect(x, base - height, width, height), 1)
-            elif kind == "well":
-                surface.fill(palette.color("stone_darkest"),
-                             (x, base - height, width, height))
-                surface.fill(palette.color("stone_dark"),
-                             (x - 2, base - height, width + 4, 2))
-            else:                            # cit
-                for i in range(0, width, 5):
-                    surface.fill(palette.color("earth_dark"),
-                                 (x + i, base - height, 1, height))
-                surface.fill(palette.color("earth_dark"),
-                             (x, base - height + 2, width, 1))
-
-    def _draw_sword(self, surface: pygame.Surface, offset) -> None:
-        """Yerde duran kilic - hafif suzulur ve parildar.
-
-        Toplanabilir bir seyin **toplanabilir gorunmesi** gerekiyor: durgun
-        bir sprite dekor sanilir.
-        """
-        if self.sword_pos is None:
-            return
-        ox, oy = offset
-        bob = int(round(math.sin(self.game.frame * 0.06) * 2))
-        x = int(self.sword_pos[0]) - ox
-        y = int(self.sword_pos[1]) - oy + bob
-
-        glow = radial_glow(14, palette.color("gold"), peak=0.30)
-        surface.blit(glow, (x - 14, y - 14),
-                     special_flags=pygame.BLEND_RGB_ADD)
-        # Kilic: dikey namlu + capraz balcak.
-        surface.fill(palette.color("stone_light"), (x, y - 9, 1, 14))
-        surface.fill(palette.color("bone"), (x, y - 9, 1, 3))
-        surface.fill(palette.color("brass" if False else "gold"),
-                     (x - 3, y + 2, 7, 1))
-        surface.fill(palette.color("earth_dark"), (x, y + 3, 1, 3))
+        village_backdrop.draw_sky(surface, ox, self.game.frame)
+        village_backdrop.draw(surface, offset, self.game.frame)
 
     def draw_foreground(self, surface: pygame.Surface, offset) -> None:
-        self._draw_sword(surface, offset)
-        self._draw_rift(surface, offset)
+        chapter01_render.draw_sword(self, surface, offset)
+        chapter01_render.draw_rift(self, surface, offset)
         for villager in self.villagers:
             villager.draw(surface, offset)
         if not self.cemo_gone:
-            self._draw_cemo(surface, offset)
-        self._draw_necklace(surface, offset)
-
-    def _draw_necklace(self, surface: pygame.Surface, offset) -> None:
-        """Kolye: once havada (verilirken), sonra oyuncunun boynunda.
-
-        Boyundaki hali **diegetik gosterge** (CLAUDE.md 9): Yanki kademesi
-        ve kolye pusulasi bir HUD cubugu ile degil, bu sprite'in
-        parildamasiyla anlatiliyor. Bu yuzden aldiktan sonra da cizilmeye
-        devam ediyor - bir kez gorunup kaybolan bir efekt degil.
-        """
-        if not (self.gift_flying or self.necklace):
-            return
-        ox, oy = offset
-        if self.gift_flying:
-            wx, wy = self.gift_position()
-            # Ucarken donuyor: sabit bir nesne "kaydiriliyor" gibi okunur.
-            spin = math.sin(self.gift_progress * math.pi * 3.0)
-            glow_peak = 0.45
-        else:
-            wx, wy = self._necklace_target()
-            spin = 0.0
-            # Boyundayken nabiz atiyor - kolye pusulasinin gorsel dili.
-            glow_peak = 0.16 + 0.06 * math.sin(self.game.frame * 0.07)
-
-        x = int(round(wx)) - ox
-        y = int(round(wy)) - oy
-
-        glow = radial_glow(9, palette.color("gold"), peak=glow_peak)
-        surface.blit(glow, (x - 9, y - 9), special_flags=pygame.BLEND_RGB_ADD)
-        # Zincir: iki yana acilan kisa kollar. Donusu genislikle veriyoruz -
-        # bu olcekte gercek rotasyon bulanik piksel demek.
-        span = max(1, int(round(2 + abs(spin) * 2)))
-        surface.fill(palette.color("brass" if False else "gold"),
-                     (x - span, y - 2, span * 2 + 1, 1))
-        # Tas: tek piksel, paletin en parlak altini.
-        surface.fill(palette.color("gold"), (x, y - 1, 1, 2))
-        surface.fill(palette.color("white_flash"), (x, y - 1, 1, 1))
-
-    def _draw_rift(self, surface: pygame.Surface, offset) -> None:
-        if self.rift <= 0.0:
-            return
-        ox, oy = offset
-        x = int(self.rift_x) - ox
-        y = int(self.rift_y) - oy
-        width = int(26 * self.rift)
-        height = int(40 * self.rift)
-
-        glow = radial_glow(max(4, height), palette.color("violet"),
-                           peak=0.5 * self.rift)
-        surface.blit(glow, (x - height, y - height),
-                     special_flags=pygame.BLEND_RGB_ADD)
-        # Yarik: zeminde acilan dikey bir gedik.
-        for i in range(height):
-            t_value = i / max(1, height)
-            span = max(1, int(width * (1.0 - t_value) * 0.5))
-            surface.fill(palette.color("void"), (x - span, y - i, span * 2, 1))
-            if t_value < 0.5:
-                surface.fill(palette.color("violet_dark"),
-                             (x - span // 2, y - i, max(1, span), 1))
-
-    def _draw_cemo(self, surface: pygame.Surface, offset) -> None:
-        ox, oy = offset
-        facing = 1 if self.beat in ("taken", "chase") else -1
-        image = self.cemo.render(facing)
-        if image is None:
-            return
-        foot = 27          # CEMO_SPEC.foot_y
-        # Gomuldukce sprite'in alti kirpilir: yarigin icinde kaybolur.
-        visible = max(1, image.get_height() - int(self.cemo_sink))
-        image = image.subsurface((0, 0, image.get_width(), visible))
-        surface.blit(image, (int(self.cemo_x - image.get_width() * 0.5) - ox,
-                             int(self.cemo_y - foot) - oy))
-
-        icon = self._cemo_balloon()
-        if icon:
-            balloon.draw(surface, icon,
-                         int(self.cemo_x) - ox,
-                         int(self.cemo_y - foot) - oy,
-                         frame=self.game.frame,
-                         colour=palette.color("violet_bright")
-                         if icon == "alert" else palette.role("ui_text"))
-
-    def _cemo_balloon(self) -> str:
-        return {
-            "wake": "necklace",
-            "gift": "necklace",
-            "taken": "alert",
-            "chase": "alert",
-        }.get(self.beat, "")
+            chapter01_render.draw_cemo(self, surface, offset)
+        chapter01_render.draw_necklace(self, surface, offset)
 
     def draw_overlay(self, surface: pygame.Surface) -> None:
-        self._draw_tutorial(surface)
-
-    def _draw_tutorial(self, surface: pygame.Surface) -> None:
-        """Ogreti metni **son care**. Once oyuncuya deneme sansi verilir."""
-        hint = ""
-        if self.beat != "play":
-            return
-        if not self.moved and self.game.frame > TUTORIAL_MOVE_AFTER:
-            hint = t("chapter01.hint_move",
-                     left=self.game.input.binding_label(Action.LEFT),
-                     right=self.game.input.binding_label(Action.RIGHT))
-        elif (self.moved and not self.attacked and self.enemies
-                # Yumrukla bile saldirilabiliyor artik - ipucu kilica
-                # bakmiyor, sadece dusman gorunur olunca tetikleniyor.
-                and self.game.frame > TUTORIAL_ATTACK_AFTER):
-            hint = t("chapter01.hint_attack",
-                     key=self.game.input.binding_label(Action.ATTACK))
-        if not hint:
-            return
-        text.draw(surface, hint, INTERNAL_WIDTH // 2, HINT_Y,
-                  color=palette.role("ui_text_dim"), align="center")
+        chapter01_render.draw_tutorial(self, surface)
 
     def debug_lines(self) -> list[str]:
         return super().debug_lines() + [
