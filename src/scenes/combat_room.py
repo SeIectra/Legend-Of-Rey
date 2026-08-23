@@ -65,6 +65,8 @@ HUD_MARGIN = 6
 
 
 class CombatRoomScene(PlayScene):
+    postfx_grade = "descent"
+
     def setup(self) -> None:
         self.tilemap = TileMap(ROOM_ROWS)
         self.player = self.make_player(

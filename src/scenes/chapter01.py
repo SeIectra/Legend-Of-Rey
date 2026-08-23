@@ -82,6 +82,7 @@ class Chapter01Scene(PlayScene):
     # Bolum basi karti (src/ui/chapter_card.py) - oynanisi durdurmaz.
     chapter_number = 1
     chapter_name_key = "chapter.village"
+    postfx_grade = "village"   # src/art/postfx.py
 
     def setup(self) -> None:
         self.tilemap = TileMap(LEVEL.terrain_rows)

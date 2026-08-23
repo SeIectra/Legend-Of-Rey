@@ -122,7 +122,11 @@
     "auto_combo": "Otomatik combo",
     "auto_combo_note": "Açıkken tek tuşla zincir devam eder.",
     "damage_numbers": "Hasar sayıları",
-    "rumble": "Kol titreşimi"
+    "rumble": "Kol titreşimi",
+    "postfx": "Atmosfer katmanı",
+    "postfx_low": "Hafif",
+    "postfx_normal": "Normal",
+    "postfx_note": "Kenar karartması ve bölüm renk tonu. Kapatınca sahne düz görünür."
   },
   "ability": {
     "sword": "KILIÇ  ·  J ile saldır",

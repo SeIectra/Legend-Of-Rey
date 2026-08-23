@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pygame
 
-from src.art import palette
+from src.art import palette, postfx
 from src.audio import synth
 from src.audio.mixer import AudioMixer
 from src.config import (
@@ -184,6 +184,10 @@ class Game:
             from src.art import animator, tileset
             animator.clear_cache()
             tileset.clear_cache()
+            # Post-fx katmani da palet renklerinden uretiliyor - o da
+            # bayatlar. Bir donem unutulmustu ve renk korlugu moduna
+            # gecince sahne yeni renklerde, vinyet eski tonda kaliyordu.
+            postfx.clear_cache()
         # Ses ve sarsinti ayarlarini sahneler kendi okur; burada zorlamiyoruz.
 
     def _apply_language(self, code: object) -> None:
@@ -333,6 +337,9 @@ class Game:
             return
         self.canvas.fill(palette.color("void"))
         self.scenes.draw(self.canvas)
+        # Post-fx sahneden SONRA, hata ayiklama/imlecten ONCE: vinyet
+        # oyunu cerceveler ama arayuzu ve imleci karartmamali.
+        self._apply_postfx()
         if self.debug_overlay:
             self._draw_debug()
         self._draw_cursor()
@@ -346,6 +353,20 @@ class Game:
             scaled = pygame.transform.scale(self.canvas, self.viewport.size)
             self.screen.blit(scaled, self.viewport.topleft)
         pygame.display.flip()
+
+    def _apply_postfx(self) -> None:
+        """Vinyet + bolum renk derecelendirmesi (src/art/postfx.py).
+
+        Derecelendirmeyi sahne secer (`Scene.postfx_grade`); vermeyen
+        sahne katmani hic almaz - menu ve sinematikler kendi kompozisyonunu
+        zaten kuruyor.
+        """
+        scene = self.scenes.current
+        grade = getattr(scene, "postfx_grade", "") if scene else ""
+        if not grade:
+            return
+        strength = float(self.settings.get("postfx", 1.0))
+        postfx.apply(self.canvas, grade, strength)
 
     def _draw_cursor(self) -> None:
         """Ozel imlec - yalnizca fare **son kullanilan** girdiyse gorunur.

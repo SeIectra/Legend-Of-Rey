@@ -122,7 +122,11 @@
     "auto_combo": "Auto combo",
     "auto_combo_note": "When on, one button carries the chain.",
     "damage_numbers": "Damage numbers",
-    "rumble": "Controller rumble"
+    "rumble": "Controller rumble",
+    "postfx": "Atmosphere layer",
+    "postfx_low": "Subtle",
+    "postfx_normal": "Normal",
+    "postfx_note": "Edge darkening and per-chapter colour tone. Off shows the raw scene."
   },
   "ability": {
     "sword": "SWORD  ·  attack with J",
