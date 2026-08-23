@@ -1,101 +1,49 @@
-# LORE — Legend of Rey: Echoes
+# Legend of Rey (LORE)
 
-2D yandan kaydırmalı aksiyon-platformer. Samsung tuşlu telefonlardaki
-*Forgotten Warrior*'dan ilham alır: silahsız başlarsın, gizlice vurursun,
-ilerledikçe kılıcı ve büyüleri kazanırsın.
+Pygame ile yapılan, yandan görünümlü aksiyon-RPG. **Ardeko Studios.**
 
-> **Durum:** Faz 1–6 tamamlandı (motor, sanat üretimi, oynanış, dünya,
-> düşmanlar, arayüz). Act I oynanabilir. Kalan içerik için
-> [docs/ROADMAP.md](docs/ROADMAP.md).
+Kafasının içindeki sesler yüzünden lanetli sayılan **Rey**, kaçırılan
+kardeşi **Cemo**'yu kurtarmak için zindana iner — ve o sesler ona yardım
+ederken, aslında onu çağırıyordur.
 
-## Hikâye
+18 bölüm · ~4 saat · 2 oynanabilir karakter (Rey, Ardo) · PC (klavye +
+gamepad).
 
-Aethelmoor'da *Bölünme* dünyanın Özü'nü paramparça etti. Kırılan anılar
-"Yankı" olarak geride kaldı. Rey uyurken Kül Korosu kardeşi Ardo'yu
-kaçırır; ağabeyi Cael sesiyle ona yol gösterir — ama Cael'in kendisi de bir
-yankıdır.
-
-**Rey** — esmer, uzun koyu saçlı bir kadın savaşçı. Silahsız başlar; Echobrand'i
-Act I'in sonunda kuşanır.
-
-## Kurulum
+## Çalıştırma
 
 ```bash
 python -m venv .venv
-.venv/Scripts/python -m pip install -r requirements.txt   # Windows
-.venv/Scripts/python run.py
+.venv/Scripts/python.exe -m pip install pygame-ce numpy   # Windows
+.venv/Scripts/python.exe main.py
 ```
 
-Linux/macOS'ta `.venv/bin/python`. Python 3.11+ gerekir.
-
-## Kontroller
-
-| Tuş | Eylem |
-|-----|-------|
-| `←` `→` / `A` `D` | Hareket |
-| `Space` / `W` / `↑` / `Z` | Zıpla — **basılı tut = daha yüksek** |
-| `J` / `X` | Saldır (kılıçla 3'lü kombo) |
-| `Shift` / `L` | Atılma *(Act I sonunda açılır)* |
-| `E` | Etkileşim (sandık, kapı, Echo Shrine) |
-| `Esc` | Duraklat |
-| `F3` `F11` `F12` | Hata ayıklama · Tam ekran · Ekran görüntüsü |
-
-Gamepad desteklenir (A zıpla, X saldır, RB atılma, Start duraklat).
-
-### Kaçınma
-
-Üç yolu var, sırayla açılırlar:
-
-1. **Baştan itibaren:** düşmanın kırmızı yanıp sönen *hazırlık pozunu* gör ve
-   menzilden çık. Her saldırının uyarısı vardır; zorluk tepki hızından değil,
-   ne zaman geri çekileceğine karar vermekten gelir.
-2. **Zıplama:** yerdeki saldırıların çoğu havada ıskalar.
-3. **Atılma** (`Shift`) — Act I sonunda açılır. 50 piksel ileri sıçrar ve
-   **süresince hasar almazsın** (i-frame). Saldırıyı iptal edip atılabilirsin;
-   akıcı savaşın anahtarı budur. 0.42 saniye bekleme süresi var.
-
-## Oynanış
-
-**Silahsız başlarsın.** Act I boyunca tek gerçek saldırın **sırttan vuruş**:
-seni fark etmemiş bir düşmana arkadan vurmak üç kat hasar verir ve goblini tek
-vuruşta düşürür. Koşarak yaklaşırsan ayak sesin seni ele verir — yavaş git.
-
-**Her düşman saldırmadan önce hazırlanır.** Kırmızı yanıp sönen hazırlık pozunu
-görürsün: kaç, vur ya da beklemeyi seç. Zorluk tepki hızından değil, karardan
-gelir.
-
-**Essence** hem para hem tecrübe. Düşenler sana doğru çekilir.
-
-## Teknik
-
-- **480×270 sanal çözünürlük**, tam sayı katıyla ölçeklenir → keskin pixel art
-- **Sabit 1/60 zaman adımı** → fizik makineden bağımsız ve deterministik
-- **Prosedürel sanat**: tüm sprite, tile, efekt ve arka planlar kodla üretilir;
-  tek palet, tutarlı stil, sıfır dış asset bağımlılığı
-- **Dinamik 2B ışıklandırma**, parçacık sistemi, hitstop, travma tabanlı
-  ekran sarsıntısı, Act'e göre renk derecelendirme
-- **Veri odaklı bölümler**: ASCII harita + JSON, kodda bölüm mantığı yok
-
-## Geliştirme
+Linux/macOS'ta `.venv/bin/python`. **Python 3.11+** gerekir.
 
 ```bash
-python tools/make_levels.py     # Bölüm tasarla + doğrula
-python tools/smoke_test.py      # Uçtan uca başsız test
-python tools/combat_test.py     # Savaş sistemleri
-python tools/sprite_sheet.py    # Sprite kontakt sayfası
+.venv/Scripts/python.exe main.py dovus     # dövüş test odası
+.venv/Scripts/python.exe main.py bolum3    # doğrudan Bölüm 3
 ```
 
-Mimari notlar: [CLAUDE.md](CLAUDE.md) · Yol haritası: [docs/ROADMAP.md](docs/ROADMAP.md)
+## Belgeler
 
-`legacy/` ilk sürümün kaynağıdır; referans olarak duruyor, çalışmıyor.
+| Dosya | Ne için |
+|---|---|
+| **`CLAUDE.md`** | Bağlayıcı kurallar — bu repoda çalışan herkes (insan ya da AI) önce bunu okur |
+| **`DEVIR.md`** | **Projenin durumu, kalan işler, öğrenilen dersler.** Tek devir belgesi. |
+| `docs/` | Tasarım paketi — GDD, dövüş sistemi, bölüm tasarımları, asset planı |
 
-## Erişilebilirlik
+Yeni bir oturuma devrederken: **`CLAUDE.md` → `DEVIR.md`** sırasıyla oku.
 
-Ayarlar menüsünden ekran sarsıntısı ve flaş şiddeti tamamen kapatılabilir.
-Fotosensitivite bir tercih değil, bir gerekliliktir.
+## Doğrulama
 
-## Geliştirici
+```bash
+for f in tests/test_*.py; do .venv/Scripts/python.exe "$f" || echo "KIRIK: $f"; done
+.venv/Scripts/python.exe tools/reachability.py    # her oda geçilebilir mi
+.venv/Scripts/python.exe tools/roster.py          # düşman kadro sayfası
+```
 
-Arda Güner — <ardaguner2000@gmail.com> · [ardeko.itch.io](https://ardeko.itch.io/legend-of-rey)
+## Not
 
-Lisans: [LICENSE](LICENSE)
+`_prototype/` terk edilmiş bir v2.x denemesidir — **referans olarak
+bakılabilir, asla import edilmez.** Oradaki hikâye ve isimler (Aethelmoor,
+Cael, Echobrand) artık geçerli değil.

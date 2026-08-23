@@ -1,3 +1,7 @@
+> **NOT (23.08.2026):** `GOREVLER.md` silindi; gorev listesi ve
+> proje durumu artik tek yerde: kok dizindeki `DEVIR.md`.
+> Bu belge paketin ILK halini anlatiyor, tarihsel referans.
+
 # LEGEND OF REY (LORE) — Tasarım Paketi
 
 Ardeko Studios · Pygame · 18 bölüm · ~4 saat

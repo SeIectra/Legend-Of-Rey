@@ -2,7 +2,7 @@
 
 Duz zemin, uc kat platform, alti dusman. Dovus degerleri ayarlanirken hep
 gerekecek. `F4` ile kutu kipine gecip "kutularla eglenceli mi?" sorusunu
-sorabilirsin (GOREVLER Gorev 1 ve 5).
+sorabilirsin (DEVIR gorev 1 ve 5).
 
 Butun game feel baglantisi `PlayScene`'de - burada yalnizca sahne kuruluyor.
 """
@@ -51,7 +51,7 @@ SPAWN_TILE = (6, 12)
 # denenebilsin. Kuklalar karsilik vermez, dusmanlar verir.
 DUMMY_TILES = ((40, 12),)
 
-# Alti dusman - "kalabalik okunabilir mi?" sinavi bu (GOREVLER Gorev 2).
+# Alti dusman - "kalabalik okunabilir mi?" sinavi bu (DEVIR gorev 2).
 # Hepsi gorus menzili icinde (ENEMY_SIGHT_RANGE = 170px ~ 10 tile). Once
 # odaya yaymistim ve alti dusmanin ancak ikisi oyuncuyu goruyordu - yani
 # "kalabalik okunabilir mi?" sorusu hic sorulmamis oluyordu. Tezgahin isi

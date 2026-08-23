@@ -27,6 +27,8 @@ Kafasının içindeki sesler yüzünden lanetli sayılan Rey, kaçırılan karde
 | `docs/asset-plani.md` | Asset listesi, stil kuralları, tutarlılık protokolü |
 | `docs/bolum-02.md` | Dikey dilim — Bölüm 2 oda oda tasarım |
 | `docs/bolum-03.md` | Bölüm 3 — Meşale Mahzeni, mor alev, Mum Bekçisi |
+
+**Durum ve devir bilgisi `DEVIR.md`'de** (tek devir belgesi — `GOREVLER.md` 23.08.2026'da silindi).
 | `docs/menu-ui.md` | Ana menü, karakter seçimi, ayarlar, HUD, UX prensipleri |
 | `docs/yapi.md` | 18 bölümün tam akışı |
 | `docs/derinlestirme.md` | Araştırma temelli ekler — ileri game feel, yenilikçi mekanikler, erişilebilirlik, Pygame performans |
@@ -155,7 +157,9 @@ lore/
 Bu projenin en büyük riski, farklı oturumlarda üretilen sprite'ların birbirini tutmaması.
 
 ### Palet
-`src/art/palette.py` içinde **32 renk sabit** — kaynağı `tools/palette.json`. Her sprite bu paletten üretilir.
+`src/art/palette.py` içinde **37 renk sabit** — kaynağı `tools/palette.json`. Her sprite bu paletten üretilir.
+(32 idi; Arda 23.08.2026'da beş yeşil eklenmesini onayladı — palette hiç yeşil yoktu ve
+`rot` zinciri Yankı'nın camgöbeğine bağlıydı. Gerekçe: `DEVIR.md` §7.)
 **Palet dışı renk kullanmak yasaktır.** Yeni renk gerekiyorsa önce sor.
 *Tek istisna:* Ardeko Studios intro logosu (dışarıdan gelen marka varlığı).
 
@@ -262,7 +266,9 @@ Palet tek kaynak olduğu için bunların çoğu neredeyse bedava. Ayarlar menüs
 - **Türkçe:** yorumlar ve commit mesajları Türkçe. Değişken/fonksiyon adları İngilizce.
 - **Tip ipuçları** zorunlu.
 - **Sihirli sayı yok.** Tüm dövüş/denge değerleri `src/config.py` içinde adlandırılmış sabitler.
-- **Dosya başına tek sorumluluk.** 400 satırı geçen dosya bölünür.
+- **Dosya başına tek sorumluluk.** Bölmek iyi bir refleks ama
+  **zorunlu değil** — 400 satır sınırını Arda kaldırdı (23.08.2026,
+  bkz. `DEVIR.md` §3).
 - **Global state yok.** Bağımlılıklar parametre olarak geçer.
 - **Kısa fonksiyon.** 50 satırı geçen fonksiyon bölünür.
 

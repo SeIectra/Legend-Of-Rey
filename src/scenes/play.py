@@ -393,7 +393,7 @@ class PlayScene(Scene):
         self.game.play_sound("bloated_explode")
 
     def on_combo_threshold(self, player, threshold: int) -> None:
-        # Saldirgan oynayan kademesini geri kazanir (GOREVLER Gorev 3.1).
+        # Saldirgan oynayan kademesini geri kazanir (DEVIR gorev 3.1).
         # Korkak oynayan iyilesemez - can siseleri nadir tutuluyor.
         if (threshold >= COMBO_TO_RESTORE and self.echo is not None
                 and self.echo.restore()):

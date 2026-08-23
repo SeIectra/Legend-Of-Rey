@@ -82,7 +82,7 @@ class Game:
         #   sprite     - normal oyun
         #   silhouette - siluet testi: sprite tek renge iner, okunurluk sinavi
         #   box        - "kutularla oyna": sanat tamamen kalkar, dovusun kendisi
-        #                eglenceli mi diye bakilir (GOREVLER Gorev 1)
+        #                eglenceli mi diye bakilir (DEVIR gorev 1)
         self.render_modes = ("sprite", "silhouette", "box")
         self.render_mode = "sprite"
         self.last_ui_sound = ""      # Gorev 10'da ses sistemine baglanacak

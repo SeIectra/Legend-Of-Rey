@@ -4,7 +4,7 @@ Davranis `player.py`'de, cizim burada. Ayirmanin iki sebebi var: dosya basina
 tek sorumluluk (CLAUDE.md 11) ve kutu kipinin oynanis kodunu kirletmemesi.
 
 **Kutu kipi (F4)** gecici bir sey degil, kalici bir arac: "kutularla eglenceli
-mi?" sorusunu sprite'lari atmadan sormanin yolu (GOREVLER Gorev 1 ve 5).
+mi?" sorusunu sprite'lari atmadan sormanin yolu (DEVIR gorev 1 ve 5).
 Bir gun dovus hissi bozuldugunda ilk bakilacak yer orasi.
 """
 from __future__ import annotations
