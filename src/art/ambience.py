@@ -41,7 +41,15 @@ from src.config import INTERNAL_HEIGHT, INTERNAL_WIDTH
 AMBIENCE_MAX = 64
 
 # Atmosfer tipleri: (parcacik rengi, sayi, dikey hiz araligi, yatay
-# suruklenme, boyut agirligi, isik huzmesi var mi).
+# suruklenme).
+#
+# **Isik huzmesi denendi ve KALDIRILDI (24.08.2026).** Mesalelerden asagi
+# acilan koniler uc tur ayarlamaya ragmen "isik" degil "turuncu leke"
+# gibi okundu: kucuk bir mesalenin `radial_glow` halesi zaten dogru
+# gorsel, ustune koni eklemek kati bir sekil uretiyor. Huzme gorunur bir
+# ortam (yogun sis) ve guclu kontrast ister; dar bir magarada ikisi de
+# yok. Kullanilmayan kodu birakmak DEVIR.md'nin kendi dersini cignerdi -
+# gerekirse gercek baglamiyla yeniden yazilir.
 #
 # "dust"  - kapali mekan tozu, agir agir asagi suzulur (B2, B3)
 # "night" - kucuk kar/tohum benzeri gece zerreleri, yana savrulur (B1)
@@ -51,11 +59,11 @@ PRESETS: dict[str, dict] = {
     # olmadan toz zerreleri "white_flash"e kadar cikiyor ve magarada
     # YILDIZ gibi okunuyordu - hava degil gokyuzu.
     "dust":  {"chain": "bone_pale", "count": 40, "vy": (0.06, 0.22),
-              "drift": 0.18, "shafts": True, "max_step": 1},
+              "drift": 0.18, "max_step": 1},
     "night": {"chain": "steel", "count": 30, "vy": (0.05, 0.14),
-              "drift": 0.42, "shafts": False, "max_step": 2},
+              "drift": 0.42, "max_step": 2},
     "ember": {"chain": "torchlight", "count": 26, "vy": (-0.30, -0.10),
-              "drift": 0.22, "shafts": True, "max_step": 2},
+              "drift": 0.22, "max_step": 2},
 }
 
 
@@ -131,31 +139,3 @@ class Ambience:
             x = int(round(mote.x))
             y = int(round(mote.y))
             surface.fill(colour, (x, y, mote.size, mote.size))
-
-    def draw_shafts(self, surface: pygame.Surface,
-                    sources: tuple[tuple[float, float], ...]) -> None:
-        """Isik huzmesi - bir kaynaktan asagi acilan soluk koni.
-
-        `sources` ekran koordinatinda (x, y) listesi; genelde mesaleler.
-        Huzme **toplamali** (`BLEND_RGB_ADD`) ciziliyor: karanligi
-        aydinlatiyor, uzerine boya surmuyor.
-        """
-        if not self.preset["shafts"] or not sources:
-            return
-        tone = palette.chain_color(self.preset["chain"], 1)
-        for sx, sy in sources:
-            x = int(round(sx))
-            y = int(round(sy))
-            height = 46
-            if x < -30 or x > INTERNAL_WIDTH + 30:
-                continue
-            shaft = pygame.Surface((30, height), pygame.SRCALPHA)
-            for row in range(height):
-                t = row / height
-                half = int(2 + t * 11)
-                # Ucta soner - keskin biten bir huzme "cizim" gibi okunur.
-                alpha = int(26 * (1.0 - t) * (1.0 - t))
-                if alpha <= 0:
-                    continue
-                shaft.fill((*tone, alpha), (15 - half, row, half * 2, 1))
-            surface.blit(shaft, (x - 15, y), special_flags=pygame.BLEND_RGB_ADD)
