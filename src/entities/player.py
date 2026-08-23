@@ -16,6 +16,8 @@ from src.combat.combo import (
 )
 from src.combat.hitbox import Hitbox, Team, melee_rect
 from src.config import (
+    LAND_FRAMES_HARD, LAND_FRAMES_SOFT, TURN_FRAMES,
+    TURN_PIVOT_MIN_SPEED, HARD_LAND_AIR_FRAMES,
     APEX_GRAVITY_SCALE, APEX_SPEED_THRESHOLD, COYOTE_FRAMES, DODGE_SPEED,
      JUMP_CUT_MULTIPLIER, PLAYER_AIR_ACCEL,
     PLAYER_AIR_FRICTION, PLAYER_GROUND_ACCEL, PLAYER_GROUND_FRICTION,
@@ -69,6 +71,11 @@ class Player(Actor):
         self.chain = ChainState(window_frames=stats.chain_window,
                                 chain_table=weapons.get(self.weapon).chain)
         self.trail = WeaponTrail()
+        # Gecis kareleri (src/art/animation.py::_land/_turn):
+        # kalan kare sayisi. 0 = gecis oynamayior.
+        self.land_frames = 0
+        self.turn_frames = 0
+        self._last_facing = 1
         self._apply_weapon_sprite()
         self.dodge = DodgeState(charges=stats.dodge_charges,
                                 max_charges=stats.dodge_charges)
@@ -125,6 +132,17 @@ class Player(Actor):
         self.flash.update()
         self.squash.update()
         self.trail.update()
+        if self.land_frames > 0:
+            self.land_frames -= 1
+        if self.turn_frames > 0:
+            self.turn_frames -= 1
+        # Kosarken yon degistirmek tek karede aynalanma degil, bir PIVOT.
+        # Yavas yururken tetiklenmiyor: yerinde donen karakter surekli
+        # pivot yapardi ve hareket "kaygan" gorunurdu.
+        if (self.facing != self._last_facing and self.body.grounded
+                and abs(self.body.vx) > TURN_PIVOT_MIN_SPEED):
+            self.turn_frames = TURN_FRAMES
+        self._last_facing = self.facing
 
         self.dodge.update(self.body.grounded)
         if self.combo.update():
@@ -287,6 +305,11 @@ class Player(Actor):
             self.coyote_frames = COYOTE_FRAMES
             if not self.body.was_grounded and self.air_frames > 10:
                 self.squash.land()
+                # Yuksekten inen daha uzun toparlanir - inisin bedeli
+                # dususun boyuna bagli olmali.
+                self.land_frames = (LAND_FRAMES_HARD
+                                    if self.air_frames >= HARD_LAND_AIR_FRAMES
+                                    else LAND_FRAMES_SOFT)
                 self.scene.on_player_land(self, self.air_frames)
             self.air_frames = 0
         else:

@@ -13,7 +13,7 @@ from __future__ import annotations
 from src.art.animation import ANIMATIONS, CHARACTERS
 from src.art.spritegen import weapon_tip
 from src.combat.combo import AttackPhase
-from src.config import DODGE_TOTAL_FRAMES
+from src.config import DODGE_TOTAL_FRAMES, PLAYER_RUN_SPEED
 
 
 def update_animation(player) -> None:
@@ -23,6 +23,8 @@ def update_animation(player) -> None:
     butcesindeki konumdan secilir. Boylece animasyon dovus zamanlamasini
     asla kaydiramaz.
     """
+    _update_sway(player)
+
     if player.dead:
         player.animator.play("death")
         player.animator.update()
@@ -46,6 +48,13 @@ def update_animation(player) -> None:
         return
     elif not player.body.grounded:
         player.animator.play("jump" if player.body.vy < -0.3 else "fall")
+    # Gecis kareleri kosu/duruştan ONCE bakiliyor: ikisi de kisa surer ve
+    # bittiginde normal duruma kendiliginden donulur. Sonra bakilsaydi
+    # kosan bir karakter inis/pivot karesini hic gostermezdi.
+    elif player.land_frames > 0:
+        player.animator.play("land")
+    elif player.turn_frames > 0:
+        player.animator.play("turn")
     elif abs(player.body.vx) > 0.25:
         player.animator.play("run")
     else:
@@ -101,3 +110,20 @@ def _feed_trail(player, state: str, progress: float) -> None:
     world_x = player.body.center_x - spec.cell_width * 0.5 + tip_x
     world_y = player.body.bottom - player.sprite_foot_y + tip_y
     player.trail.add(world_x, world_y)
+
+
+def _update_sway(player) -> None:
+    """Pelerin/sac/etegin ikincil hareketini besler.
+
+    Hedef, karakterin **kendi yonundeki** hizi: ileri kosarken kumas
+    arkaya savrulur, geri geri giderken one. Sprite her zaman saga bakar
+    halde uretiliyor ve sola bakarken aynalaniyor - bu yuzden `facing`
+    ile carpmak iki yonde de dogru sonucu veriyor.
+
+    Havadayken dusus hizi da katiliyor: serbest dususte kumas yukari
+    savrulmali, yoksa karakter havada donmus gibi gorunuyor.
+    """
+    forward = player.body.vx * player.facing / max(0.1, PLAYER_RUN_SPEED)
+    if not player.body.grounded:
+        forward += abs(player.body.vy) * 0.16
+    player.animator.update_sway(forward)

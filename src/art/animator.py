@@ -16,7 +16,10 @@ from __future__ import annotations
 import pygame
 
 from src.art import palette
-from src.art.animation import ANIMATIONS, CHARACTERS, build_sprite_set
+from src.art.animation import (
+    ANIMATIONS, CHARACTERS, SWAY_BIASES, SWAY_NEUTRAL, build_sprite_set,
+    has_cloth,
+)
 from src.art.forge import flip_h, silhouette, squash_surface, tint
 from src.art.spritegen import CharSpec
 
@@ -27,21 +30,44 @@ HOLD_OVERRIDES: dict[str, int] = {
     "fall": 6,
     "idle": 9,         # Nefes yavas
     "death": 8,
+    # Gecis kareleri kisa: uc kare x uc oyun karesi = 9 kare (~0.15 sn).
+    # Varsayilan 7'de tutulsalardi inis ve donus agir cekim gorunurdu.
+    "land": 3,
+    "turn": 3,
 }
 
-_sprite_cache: dict[str, dict[str, list[pygame.Surface]]] = {}
+# Onbellek anahtari (ad, sallanma_indeksi). Kumasi olmayan karakterler
+# yalnizca notr varyanti alir - varyant uretmek bos maliyet olurdu.
+_sprite_cache: dict[tuple[str, int], dict[str, list[pygame.Surface]]] = {}
+
+# Sallanma varyanti YALNIZCA bu karakterlere uretiliyor. Oyuncu her karede
+# ekranda ve kontrol edilen sey o; dusman/NPC icin ek 2x sprite bellegi
+# gorunmeyecek bir kazanc icin odenirdi.
+SWAY_CHARACTERS: frozenset[str] = frozenset({"rey", "rey_armed", "ardo"})
 _flipped_cache: dict[int, pygame.Surface] = {}
 _silhouette_cache: dict[int, pygame.Surface] = {}
 _tint_cache: dict[tuple, pygame.Surface] = {}
 
 
-def sprite_set(name: str) -> dict[str, list[pygame.Surface]]:
+def sway_levels(name: str) -> int:
+    """Bu karakterin kac sallanma varyanti var? Kumasi yoksa 1."""
+    spec = CHARACTERS.get(name)
+    if spec is None or name not in SWAY_CHARACTERS or not has_cloth(spec):
+        return 1
+    return len(SWAY_BIASES)
+
+
+def sprite_set(name: str, sway: int = SWAY_NEUTRAL
+               ) -> dict[str, list[pygame.Surface]]:
     """Karakterin tum animasyonlari - ilk cagirmada uretilir, sonra onbellek."""
-    cached = _sprite_cache.get(name)
+    if sway_levels(name) == 1:
+        sway = SWAY_NEUTRAL
+    key = (name, sway)
+    cached = _sprite_cache.get(key)
     if cached is None:
         spec: CharSpec = CHARACTERS[name]
-        cached = build_sprite_set(spec)
-        _sprite_cache[name] = cached
+        cached = build_sprite_set(spec, SWAY_BIASES[sway])
+        _sprite_cache[key] = cached
     return cached
 
 
@@ -98,7 +124,16 @@ class Animator:
 
     def __init__(self, character: str) -> None:
         self.character = character
-        self.frames = sprite_set(character)
+        self.levels = sway_levels(character)
+        # Sallanma yayı: hedefi GECIKMELI takip eder. Ikincil hareketin
+        # tamami bu gecikmede - anlik takip etseydi pelerin govdeye
+        # yapisik olurdu ve hicbir sey kazanmazdik. Duran karakterde
+        # hedef 0'a duser ama yay asar (overshoot) ve pelerin one
+        # savrulur: durusun "agirligi" buradan okunuyor.
+        self.sway_value = 0.0        # -1..+1 surekli
+        self.sway_velocity = 0.0
+        self.sway_index = SWAY_NEUTRAL
+        self.frames = sprite_set(character, self.sway_index)
         self.state = "idle"
         self.index = 0
         self.hold = 0
@@ -134,6 +169,38 @@ class Animator:
             else:
                 self.index = len(sequence) - 1
                 self.finished = True
+
+    def update_sway(self, target: float) -> None:
+        """Sallanmayi bir yay gibi hedefe yaklastirir.
+
+        `target` -1..+1: **arkaya dogru** ne kadar savruluyor. Genelde
+        yatay hizdan turetiliyor (bkz. `player_anim.update_animation`).
+
+        Kritik sayilar: sertlik dusuk (0.14) ki gecikme hissedilsin,
+        sonumleme 0.80 ki durusta bir kez asip geri gelsin. Sonumlemeyi
+        1.0'a yaklastirmak sonsuz salinim, 0.5'e cekmek gecikmesiz
+        takip demek - ikisi de ikincil hareketi oldururdu.
+        """
+        if self.levels <= 1:
+            return
+        target = max(-1.0, min(1.0, target))
+        self.sway_velocity += (target - self.sway_value) * 0.14
+        self.sway_velocity *= 0.80
+        self.sway_value += self.sway_velocity
+
+        # Surekli degeri ayrik varyanta cevir. Histerezis (0.34/0.26)
+        # sinirdaki bir degerin iki varyant arasinda titremesini onler -
+        # tek esik olsaydi karakter kosarken pelerin carpardi.
+        index = self.sway_index
+        if self.sway_value > 0.34:
+            index = 2
+        elif self.sway_value < -0.34:
+            index = 0
+        elif abs(self.sway_value) < 0.26:
+            index = SWAY_NEUTRAL
+        if index != self.sway_index:
+            self.sway_index = index
+            self.frames = sprite_set(self.character, index)
 
     def set_progress(self, ratio: float) -> None:
         """Ilerlemeyle surulen kip - saldirilar icin.

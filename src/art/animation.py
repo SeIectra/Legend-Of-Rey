@@ -193,8 +193,50 @@ def _attack_thrust(t: float) -> Pose:
     )
 
 
+def _land(t: float) -> Pose:
+    """Inis - dizler bukulur, govde cokup toparlanir.
+
+    Gecis karesi: `fall` ile `idle` arasindaki bosluk. Olmadiginda
+    karakter havadan zemine ANINDA gecip hicbir agirlik hissettirmiyordu -
+    inisin bedeli yalnizca squash'la anlatiliyordu, poz sabit kaliyordu.
+    """
+    # Ilk yaride cok, sonra hizla toparlanir: bir kavis degil, bir DARBE.
+    dip = math.sin(min(1.0, t * 1.6) * math.pi) if t < 0.62 else 0.0
+    return Pose(
+        dy=dip * 2.4, squash=1.0 - dip * 0.22, lean=0.25 * dip,
+        head_dy=dip * 1.2,
+        leg_front=(math.pi / 2 - 0.30 * dip, 0.85 * dip),
+        leg_back=(math.pi / 2 + 0.34 * dip, 0.80 * dip),
+        arm_front=(math.pi / 2 - 0.55 * dip, 0.35),
+        arm_back=(math.pi / 2 + 0.50 * dip, 0.30),
+        weapon_angle=math.pi / 2 + 0.5,
+        cape_sway=1.6 * (1.0 - dip),      # kumas govdeden sonra oturur
+    )
+
+
+def _turn(t: float) -> Pose:
+    """Donus - hizli yon degistirirken ayak kaydirma (pivot).
+
+    Kosarken yon degistirmek eskiden ANINDA aynalanmayla oluyordu:
+    karakter tek karede ters donuyordu ve hareket "kayiyor" gibi
+    okunuyordu. Bu poz o bir kareyi uc kareye yayiyor.
+    """
+    lean = -0.9 * (1.0 - t)          # once geri yaslanir, sonra duzelir
+    return Pose(
+        dy=-0.4, lean=lean, head_dx=lean * 1.1, squash=1.0 + 0.05 * (1.0 - t),
+        leg_front=(math.pi / 2 + 0.55 * (1.0 - t), 0.20),
+        leg_back=(math.pi / 2 - 0.45 * (1.0 - t), 0.55),
+        arm_front=(math.pi / 2 - 0.75 * (1.0 - t), 0.30),
+        arm_back=(math.pi / 2 + 0.65 * (1.0 - t), 0.35),
+        weapon_angle=math.pi / 2 + 0.7,
+        cape_sway=2.4 * (1.0 - t),        # pelerin donuse en gec uyar
+    )
+
+
 # state -> (poz fonksiyonu, kare sayisi, dongusel mu)
 ANIMATIONS: dict[str, tuple] = {
+    "land": (_land, 3, False),
+    "turn": (_turn, 3, False),
     "idle": (_idle, 6, True),
     "run": (_run, 8, True),
     "jump": (_jump, 1, False),
@@ -208,7 +250,22 @@ ANIMATIONS: dict[str, tuple] = {
 }
 
 
-def build_animation(spec: CharSpec, state: str) -> list[pygame.Surface]:
+# --- Ikincil hareket: sallanma varyantlari ----------------------------------
+# Pelerin/sac/etek gercek ikincil harekette govdeyi GERIDEN takip eder ve
+# durunca one savrulur. Sprite'lar onceden uretilip onbelleklendigi icin
+# bunu cizim aninda yapamayiz - o yuzden ayni animasyonu uc farkli
+# sallanma yanliligiyla uretip calisma zamaninda GECIKMELI olarak
+# seciyoruz (bkz. `Animator.sway`).
+#
+# Yanliligin isareti onemli: `draw_humanoid` pelerinin alt kenarini
+# `-sway*3` ile ceker, yani POZITIF sallanma pelerini SOLA - saga bakan
+# bir karakterde ARKAYA - atar. Trailing = pozitif.
+SWAY_BIASES: tuple[float, ...] = (-1.2, 0.0, 1.8)
+SWAY_NEUTRAL = 1                      # SWAY_BIASES icindeki notr indeks
+
+
+def build_animation(spec: CharSpec, state: str,
+                    sway_bias: float = 0.0) -> list[pygame.Surface]:
     """Bir durumun tum karelerini uretir (saga bakar halde)."""
     pose_fn, count, looping = ANIMATIONS.get(state, ANIMATIONS["idle"])
     frames: list[pygame.Surface] = []
@@ -216,13 +273,23 @@ def build_animation(spec: CharSpec, state: str) -> list[pygame.Surface]:
         # Donguseller [0,1) tarar (son kare ilkine esit olmasin);
         # tek seferlikler [0,1] tam araligi tarar.
         t = index / count if looping else index / max(1, count - 1)
-        frames.append(draw_humanoid(spec, pose_fn(t)).resolve())
+        pose = pose_fn(t)
+        if sway_bias:
+            pose = replace(pose, cape_sway=pose.cape_sway + sway_bias)
+        frames.append(draw_humanoid(spec, pose).resolve())
     return frames
 
 
-def build_sprite_set(spec: CharSpec) -> dict[str, list[pygame.Surface]]:
+def build_sprite_set(spec: CharSpec,
+                     sway_bias: float = 0.0) -> dict[str, list[pygame.Surface]]:
     """Bir karakterin tum animasyonlari. Baslangicta bir kez uretilir."""
-    return {state: build_animation(spec, state) for state in ANIMATIONS}
+    return {state: build_animation(spec, state, sway_bias)
+            for state in ANIMATIONS}
+
+
+def has_cloth(spec: CharSpec) -> bool:
+    """Sallanacak bir seyi var mi? Yoksa varyant uretmek bos maliyet."""
+    return bool(spec.cape or spec.long_hair or spec.hem or spec.tail)
 
 
 # --- Karakter kutuphanesi ---------------------------------------------------

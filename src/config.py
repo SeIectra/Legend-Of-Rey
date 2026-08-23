@@ -226,6 +226,13 @@ SOUND_PITCH_VARIANCE: Final[float] = 0.08   # Her tekrarli efekt +-%8
 # (assets/audio/SES-LISTESI.md 2). `Player._update_ground_state()` zaten
 # `air_frames > 10` olmadan hic cagirmiyor - bu esik onun USTUNDE.
 HARD_LAND_AIR_FRAMES: Final[int] = 30
+# Gecis kareleri (src/art/animation.py::_land/_turn). Ikisi de KISA:
+# oynanisi kilitlemiyorlar, yalnizca o kadar kare boyunca gecis pozu
+# cizilyor. Uzun tutulsalardi hareket agir cekim gorunurdu.
+LAND_FRAMES_SOFT: Final[int] = 7      # Normal inis
+LAND_FRAMES_HARD: Final[int] = 12     # Yuksekten inis - daha uzun toparlanir
+TURN_FRAMES: Final[int] = 8           # Kosarken yon degistirme pivotu
+TURN_PIVOT_MIN_SPEED: Final[float] = 0.9   # Bu hizin altinda pivot yok
 # Kac piksel yol alinca bir adim sesi caliyor (Player._update_footsteps).
 # Yuruyus hizinin dogal bir sonucu olsun diye kare sayisi degil mesafe.
 # Ilk deger (11px) kosarken saniyede ~11 adim sesi veriyordu - rahatsiz

@@ -412,6 +412,42 @@ def main() -> int:
     check(not _trail.active, "iz omru bitince tamamen siliniyor",
           str(len(_trail.points)))
 
+    # --- Ikincil hareket ve gecis kareleri (Faz E) --------------------------
+    print("\n--- ikincil hareket ve gecis kareleri ---")
+    from src.art.animation import ANIMATIONS, SWAY_BIASES, SWAY_NEUTRAL
+    from src.art.animator import Animator, sway_levels
+
+    check("land" in ANIMATIONS and "turn" in ANIMATIONS,
+          "gecis kareleri tanimli (land, turn)")
+    for _st in ("land", "turn"):
+        _fn, _n, _loop = ANIMATIONS[_st]
+        check(not _loop, f"{_st} DONGUSEL DEGIL - bir kez oynar", str(_loop))
+
+    check(sway_levels("rey_armed") == len(SWAY_BIASES),
+          "oyuncunun sallanma varyantlari var", str(sway_levels("rey_armed")))
+    check(sway_levels("shambler") == 1,
+          "kumasi olmayan dusman varyant uretmiyor (bos maliyet yok)")
+
+    # Yay GECIKMELI olmali: hedefe aninda ulasirsa ikincil hareket yoktur.
+    _anim = Animator("rey_armed")
+    _anim.update_sway(1.0)
+    check(_anim.sway_index == SWAY_NEUTRAL,
+          "sallanma tek karede hedefe ATLAMIYOR (gecikme var)",
+          str(_anim.sway_index))
+    for _ in range(40):
+        _anim.update_sway(1.0)
+    check(_anim.sway_index == len(SWAY_BIASES) - 1,
+          "surekli kosuda kumas tamamen arkaya savruluyor",
+          str(_anim.sway_index))
+    # Ani durusta yay ASMALI - kumas one savrulur.
+    _overshot = False
+    for _ in range(60):
+        _anim.update_sway(0.0)
+        if _anim.sway_index == 0:
+            _overshot = True
+    check(_overshot,
+          "ani duruşta kumas ONE savruluyor (yay asiyor)")
+
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")
