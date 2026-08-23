@@ -325,6 +325,51 @@ def main() -> int:
     check(True, "fare 'son kullanilan' iken render cokmuyor")
     game.shutdown()
 
+    # --- HUD can cubugu: bolmeli + hayalet ----------------------------------
+    print("\n--- can cubugu ---")
+    from src.ui.hud import GHOST_DELAY_FRAMES, HEALTH_SEGMENTS, HUD
+
+    check(HEALTH_SEGMENTS >= 4,
+          "can cubugu bolmeli - 'kac vurus kaldi' sayilarak okunuyor",
+          str(HEALTH_SEGMENTS) + " bolme")
+
+    class _FakePlayer:
+        """HUD'un okudugu iki alan: `health` (aciga cikarma tetikleyicisi)
+        ve `health_ratio` (cizim)."""
+
+        def __init__(self) -> None:
+            self.ratio = 1.0
+
+        @property
+        def health(self) -> int:
+            return int(self.ratio * 100)
+
+        @property
+        def health_ratio(self) -> float:
+            return self.ratio
+
+    _hud = HUD(game)
+    _fake = _FakePlayer()
+    _hud.update(_fake)
+    _fake.ratio = 0.4
+    for _ in range(GHOST_DELAY_FRAMES - 2):
+        _hud.update(_fake)
+    check(_hud.ghost_ratio > 0.9,
+          "hasarin hemen ardindan hayalet HALA yukarida (darbe okunuyor)",
+          str(round(_hud.ghost_ratio, 2)))
+    for _ in range(200):
+        _hud.update(_fake)
+    check(abs(_hud.ghost_ratio - 0.4) < 0.01,
+          "hayalet sonunda gercek cana yetisiyor",
+          str(round(_hud.ghost_ratio, 2)))
+
+    # Iyilesme GERIDEN gelmemeli - kazanc hemen okunmali.
+    _fake.ratio = 0.9
+    _hud.update(_fake)
+    check(abs(_hud.ghost_ratio - 0.9) < 0.01,
+          "can artinca hayalet ANINDA yetisiyor (iyilesme gecikmiyor)",
+          str(round(_hud.ghost_ratio, 2)))
+
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")

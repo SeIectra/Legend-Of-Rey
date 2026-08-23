@@ -30,7 +30,16 @@ from src.ui.font_data import GLYPH_HEIGHT
 
 MARGIN = 6
 HEALTH_WIDTH = 62
-HEALTH_HEIGHT = 4
+HEALTH_HEIGHT = 5
+# Can cubugu **bolmeli**: duz bir dolgu "ne kadar kaldi" sorusunu
+# ancak goz karariyla cevapliyordu. Bolmeler "kac vurus kaldi"yi bir
+# bakista veriyor - okuma degil sayma isi.
+HEALTH_SEGMENTS = 8
+# Kaybedilen kisim ANINDA silinmiyor: soluk bir "hayalet" olarak durup
+# geriden bosaliyor. Oyuncu boylece NE KADAR yedigini goruyor; anlik
+# silinmede darbenin buyuklugu hic okunmuyordu.
+GHOST_DELAY_FRAMES = 14       # Bosalmaya baslamadan once bekleme
+GHOST_DRAIN_PER_FRAME = 0.012 # Kare basina bosalan oran
 FADE_FRAMES = 20              # Gorunurluk bitiminde yumusak sonme
 GOLD_VISIBLE_FRAMES = 150
 ECHO_VISIBLE_FRAMES = 120
@@ -41,6 +50,10 @@ class HUD:
     def __init__(self, game) -> None:
         self.game = game
         self.health_frames = 0
+        # Hayalet can: gercek canin gerisinden gelen soluk bant.
+        self.ghost_ratio = 1.0
+        self.ghost_hold = 0
+        self.frame = 0
         self.gold_frames = 0
         self.echo_frames = 0
         self.toast = ""
@@ -69,6 +82,8 @@ class HUD:
     # --- Dongu --------------------------------------------------------------
     def update(self, player=None, gold: int = 0, echo_tier: int = 2) -> None:
         self.frame += 1
+        self.frame += 1
+        self._update_ghost(player)
         self.health_frames = max(0, self.health_frames - 1)
         self.gold_frames = max(0, self.gold_frames - 1)
         self.echo_frames = max(0, self.echo_frames - 1)
@@ -105,6 +120,25 @@ class HUD:
         self._draw_echo(surface, echo_tier)
         self._draw_toast(surface)
 
+    def _update_ghost(self, player) -> None:
+        """Hayalet cani gercek canin ardindan surukler.
+
+        Can ARTINCA hayalet aninda yetisiyor (iyilesme geriden gelmemeli -
+        kazanc hemen okunmali); AZALINCA once bekliyor, sonra yavasca
+        bosaliyor.
+        """
+        if player is None:
+            return
+        ratio = player.health_ratio
+        if ratio >= self.ghost_ratio:
+            self.ghost_ratio = ratio
+            self.ghost_hold = 0
+            return
+        if self.ghost_hold < GHOST_DELAY_FRAMES:
+            self.ghost_hold += 1
+            return
+        self.ghost_ratio = max(ratio, self.ghost_ratio - GHOST_DRAIN_PER_FRAME)
+
     @staticmethod
     def _fade_alpha(frames_left: int) -> int:
         if frames_left <= 0:
@@ -114,19 +148,45 @@ class HUD:
         return int(255 * frames_left / FADE_FRAMES)
 
     def _draw_health(self, surface: pygame.Surface, player) -> None:
-        # Can dolu ve uzun suredir hasar yoksa gosterge kaybolur.
+        """Bolmeli can cubugu + geriden bosalan hayalet.
+
+        Uc bilgi ayni anda okunuyor:
+          * **Ne kadar var**   - dolu bolme sayisi
+          * **Ne kadar yedin** - hayaletle dolu arasindaki soluk bant
+          * **Tehlikede misin**- %25 altinda nabiz atiyor
+        """
         alpha = self._fade_alpha(self.health_frames)
         if alpha <= 0:
             return
+        ratio = player.health_ratio
         rect = pygame.Rect(MARGIN, MARGIN, HEALTH_WIDTH, HEALTH_HEIGHT)
         layer = pygame.Surface((rect.width + 2, rect.height + 2),
                                pygame.SRCALPHA)
         layer.fill((*palette.color("ink"), alpha))
-        filled = int(rect.width * player.health_ratio)
+
+        # Hayalet once (altta), gercek can ustune biner.
+        ghost = int(rect.width * self.ghost_ratio)
+        if ghost > 0:
+            layer.fill((*palette.color("blood_dark"), alpha),
+                       (1, 1, ghost, rect.height))
+
+        colour = palette.color("blood_bright")
+        if ratio < 0.25:
+            # Az can: nabiz. Sabit kirmizi "tehlikedeyim" demiyordu,
+            # yalnizca "kirmizi bir cubuk" diyordu.
+            pulse = 0.5 + 0.5 * math.sin(self.frame * 0.22)
+            colour = (palette.color("danger") if pulse > 0.5
+                      else palette.color("danger_bright"))
+        filled = int(rect.width * ratio)
         if filled > 0:
-            colour = (palette.color("danger") if player.health_ratio < 0.25
-                      else palette.color("blood_bright"))
             layer.fill((*colour, alpha), (1, 1, filled, rect.height))
+
+        # Bolme cizgileri EN USTTE - dolgunun uzerine oyuluyor.
+        step = rect.width / HEALTH_SEGMENTS
+        for index in range(1, HEALTH_SEGMENTS):
+            x = 1 + int(index * step)
+            layer.fill((*palette.color("ink"), alpha), (x, 1, 1, rect.height))
+
         surface.blit(layer, (rect.x - 1, rect.y - 1))
 
     def _draw_combo(self, surface: pygame.Surface, player) -> None:

@@ -154,13 +154,14 @@
     "ch01_echo_rift": "below... below...",
     "ch01_echo_alone": "you can get him back. i know the way.",
     "ch01_echo_sword": "take it. you will need it.",
-    "ch01_echo_wall": "it is thin here. can you hear it?",
+    "ch01_echo_wall": "see it? the wall is thin here.",
     "ch02_echo_wall": "The wall is thin. Listen.",
     "ch02_echo_secret": "Someone came before you. They did not leave.",
     "ch02_echo_boss": "This one was waiting for you.",
     "ch02_echo_exit": "Down. Further down.",
     "ch02_rey_claw2": "He was still fighting.",
-    "ch02_echo_fall": "good. deeper now."
+    "ch02_echo_fall": "good. deeper now.",
+    "ch01_echo_gift": "i am lending you my eyes. for now."
   },
   "combat": {
     "counter": "COUNTER",

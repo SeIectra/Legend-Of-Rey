@@ -414,7 +414,22 @@ class Chapter01Scene(PlayScene):
             return
         if self.player.grant(abilities.ECHO_SIGHT):
             self.on_ability_gained(abilities.ECHO_SIGHT)
-            self.say(Line("echo", "line.ch01_echo_wall"))
+            # **Sesin kendini tanittigi an.** Ekranda "YANKI GORUSU" yazisi
+            # cikarken ses ayni anda o gorusu KENDI gozu olarak
+            # sahipleniyor - oyuncu ikisini boyle birlestiriyor.
+            #
+            # Arda'nin tespiti (24.08.2026): "oyunda mor konusan seyin
+            # senin yankin oldugunu anlamasi lazim." Oyun boyunca mor bir
+            # sey fisildiyordu ve oyuncu onun mekanikle ayni sey oldugunu
+            # hicbir yerde ogrenmiyordu. Ses isimsiz kaliyor (konusmaci
+            # etiketi hala "..."), ama artik yetenegin SAHIBI oldugunu
+            # soyluyor - isim vermeden kimlik kuruluyor.
+            #
+            # "simdilik" B14'un on hazirligi: docs/yapi.md - "Yanki lanet
+            # degil, asagidaki seyin sesi. Hep yardim ediyordu cunku onu
+            # cekiyordu." Odunc verilen bir sey geri istenir.
+            self.say(Line("echo", "line.ch01_echo_gift"),
+                     Line("echo", "line.ch01_echo_wall"))
 
     # --- Cizim --------------------------------------------------------------
     def draw_background(self, surface: pygame.Surface, offset) -> None:

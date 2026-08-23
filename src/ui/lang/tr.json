@@ -154,13 +154,14 @@
     "ch01_echo_rift": "aşağıda... aşağıda...",
     "ch01_echo_alone": "onu geri alabilirsin. ben yolu biliyorum.",
     "ch01_echo_sword": "al onu. lazım olacak.",
-    "ch01_echo_wall": "burası ince. duyuyor musun?",
+    "ch01_echo_wall": "gördün mü? burası ince.",
     "ch02_echo_wall": "Duvar ince. Dinle.",
     "ch02_echo_secret": "Senden önce biri gelmiş. Dönmemiş.",
     "ch02_echo_boss": "Bu seni bekliyordu.",
     "ch02_echo_exit": "Aşağıda. Daha aşağıda.",
     "ch02_rey_claw2": "Hâlâ direniyormuş.",
-    "ch02_echo_fall": "iyi. daha derine."
+    "ch02_echo_fall": "iyi. daha derine.",
+    "ch01_echo_gift": "gözlerimi sana veriyorum. şimdilik."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",

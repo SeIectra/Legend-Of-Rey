@@ -79,8 +79,17 @@ def _draw_silhouette(surface, enemy, ox: int, oy: int, fade: float,
                      echo) -> None:
     """Dusmanin siluetı - duvar ardindan gorunur."""
     rect = enemy.body.rect.move(-ox, -oy)
-    colour = palette.color("echo_bright" if echo.tier == ECHO_TIER_CLEAR
-                           else "echo")
+    # **Ortaya cikanlar MOR** (24.08.2026). Eskiden camgobegiydi
+    # ("echo"/"echo_bright") ve Yanki'nin SESI mordu - iki farkli renk
+    # ailesi. Oyuncu mor bir seyin fisildadigini goruyordu, sonra
+    # camgobegi bir gorus yetenegi kazaniyordu ve ikisi arasinda hicbir
+    # gorsel bag yoktu (Arda'nin tespiti: "mor konusan seyin senin yankin
+    # oldugunu anlamasi lazim").
+    #
+    # Artik uc kanal da ayni renkte: ses mor, aktifken vinyet mor
+    # (TIER_TINT), ortaya cikanlar mor. "Mor olan sey sana gosteriyor."
+    colour = palette.color("violet_bright" if echo.tier == ECHO_TIER_CLEAR
+                           else "violet")
     ghost = pygame.Surface(rect.size, pygame.SRCALPHA)
     ghost.fill((*colour, int(150 * fade * echo.strength)))
     surface.blit(ghost, rect.topleft)
@@ -91,12 +100,12 @@ def _draw_crack(surface, wall, ox: int, oy: int, echo) -> None:
     """Kirilabilir duvarin catlagi - yalnizca Yanki ile gorunur."""
     rect = wall.rect.move(-ox, -oy)
     glow = radial_glow(max(6, rect.width // 2),
-                       palette.color("echo_bright"),
+                       palette.color("violet_bright"),
                        peak=0.35 * echo.strength)
     surface.blit(glow, (rect.centerx - glow.get_width() // 2,
                         rect.centery - glow.get_height() // 2),
                  special_flags=pygame.BLEND_RGB_ADD)
-    pygame.draw.rect(surface, palette.color("echo_bright"), rect, 1)
+    pygame.draw.rect(surface, palette.color("violet_bright"), rect, 1)
 
 
 def draw_sonar(surface: pygame.Surface, offset: tuple[int, int], echo,
@@ -230,7 +239,8 @@ def draw_answer(surface: pygame.Surface, offset: tuple[int, int],
         # Eksik cevap titrer - guvenilmezligi hareketiyle belli eder.
         x += int(math.sin(echo.answer_frames * 0.4) * 2)
 
-    colour = palette.color("echo_bright")
+    # Cevap oku da Yanki'nin isi - ayni mor.
+    colour = palette.color("violet_bright")
     direction = echo.answer_direction if hasattr(echo, "answer_direction") else 1
     for i in range(7):
         width = 7 - i
