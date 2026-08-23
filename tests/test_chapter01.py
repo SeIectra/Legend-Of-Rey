@@ -142,6 +142,51 @@ def main() -> int:
               ", ".join(seen_keys))
     game5.shutdown()
 
+    # --- Kolye gercekten EL DEGISTIRIYOR ------------------------------------
+    # Eskiden `necklace` "alone" adiminda sessizce True oluyordu: oyunun
+    # butun hikayesi o kolyeye asili ama oyuncu onun kendisine gectigi ani
+    # hic gormuyordu. Artik Cemo'dan firlayip bir yay cizerek geliyor ve
+    # VARDIGI karede aliniyor.
+    # `make_scene()` prologu ATLIYOR (beat_index = len(PROLOGUE)) - hediye
+    # prologun icinde oldugu icin onunla test edilemez. Pasif oyuncu
+    # testindeki gibi sahneyi dogrudan kuruyoruz.
+    print("\n--- kolye ucusu: Cemo'dan oyuncuya ---")
+    game6 = Game()
+    game6.scenes.set_root(Chapter01Scene, transition=False, character="rey")
+    game6.scenes._flush()
+    gift = game6.scenes.current
+    check(not gift.necklace, "baslangicta kolye YOK")
+    check(gift.gift_frames < 0, "baslangicta kolye havada degil")
+
+    saw_flight = False
+    flight_positions: list[tuple[float, float]] = []
+    got_at = None
+    for frame in range(sum(f for f, _ in PROLOGUE) + 60):
+        game6.input.begin_frame()
+        game6.input.end_frame()
+        gift.update()
+        if gift.gift_flying:
+            saw_flight = True
+            flight_positions.append(gift.gift_position())
+        if gift.necklace and got_at is None:
+            got_at = frame
+
+    check(saw_flight, "kolye havada bir sure gorunuyor (ucus var)")
+    check(got_at is not None, "kolye sonunda oyuncuya geciyor", str(got_at))
+    check(len(flight_positions) > 1, "ucus birden fazla kare suruyor",
+          f"{len(flight_positions)} kare")
+    if len(flight_positions) > 2:
+        # Yay: orta noktanin yuksekligi iki ucun ortalamasindan YUKARIDA
+        # olmali (ekran koordinatinda kucuk y = yukari). Duz gitseydi
+        # "isinlandi" gibi okunurdu.
+        first_y = flight_positions[0][1]
+        last_y = flight_positions[-1][1]
+        mid_y = flight_positions[len(flight_positions) // 2][1]
+        check(mid_y < (first_y + last_y) * 0.5,
+              "ucus DUZ degil, yay ciziyor (firlatilmis nesne gibi)",
+              f"orta {mid_y:.1f} < ortalama {(first_y + last_y) * 0.5:.1f}")
+    game6.shutdown()
+
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")

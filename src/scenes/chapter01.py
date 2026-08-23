@@ -24,6 +24,7 @@ import math
 import pygame
 
 from src.art import palette
+from src.art.animation import CHARACTERS
 from src.art.animator import Animator
 from src.art.glow import radial_glow
 from src.config import INTERNAL_HEIGHT, INTERNAL_WIDTH, TILE_SIZE
@@ -57,6 +58,20 @@ SHOCK_LOCK_FRAMES = 46   # Rey yerden kalkana kadar
 # kaybolur - Arda'nin "bunlar cok anlamsiz cumleler" geri bildiriminin
 # kaynagi buydu. Azami: sonsuza dek beklemez, sahne kilitlenmez.
 DIALOGUE_GRACE_FRAMES = 100
+
+# --- Kolyenin verilisi ------------------------------------------------------
+# Kolye bir donem hic EL DEGISTIRMIYORDU: Cemo'nun basinda bir ikon
+# beliriyor, sonra "alone" adiminda sessizce `necklace = True` oluyordu.
+# Oyunun butun hikayesi o kolyeye asili (docs/yapi.md B1: "Elde sadece
+# kolye") ama oyuncu onun kendisine gectigi ani hic gormuyordu.
+#
+# Artik "gift" adiminin bu oranindan sonra kolye Cemo'dan ayrilip
+# oyuncuya dogru bir yay cizerek gidiyor; vardigi karede parlama +
+# parcacik + ses tetikleniyor. Bir jest, bir replikten daha iyi anlatir.
+GIFT_RELEASE_AT = 0.55       # "gift" adiminin ne kadari gecince firlar
+GIFT_FLIGHT_FRAMES = 34      # Ucus suresi
+GIFT_ARC_HEIGHT = 14.0       # Yayin tepe yuksekligi (piksel)
+NECKLACE_CHEST_OFFSET = 5.0  # Oyuncunun merkezinden gogse kadar
 
 
 class Chapter01Scene(PlayScene):
@@ -93,6 +108,10 @@ class Chapter01Scene(PlayScene):
         self.necklace = False        # Rey kolyeyi aldi mi
         self.rift = 0.0              # Yarigin acilma orani 0..1
         self.echo_taught = False
+
+        # Kolyenin ucusu: -1 = henuz firlamadi, 0..GIFT_FLIGHT_FRAMES = havada.
+        self.gift_frames = -1
+        self.gift_from = (0.0, 0.0)  # Firladigi nokta (dunya koordinati)
 
         # Yaratiklar prologdan **sonra** cikar: koy once sakin olmali,
         # yoksa Cemo'nun kacirilisi bir dovusun icinde kayboluyor.
@@ -132,7 +151,65 @@ class Chapter01Scene(PlayScene):
         self._advance_prologue()
         self._update_rift()
         self._update_cemo()
+        self._update_gift()
         self._watch_player()
+
+    # --- Kolyenin verilisi --------------------------------------------------
+    @property
+    def gift_flying(self) -> bool:
+        return 0 <= self.gift_frames < GIFT_FLIGHT_FRAMES
+
+    @property
+    def gift_progress(self) -> float:
+        if not self.gift_flying:
+            return 0.0
+        return self.gift_frames / GIFT_FLIGHT_FRAMES
+
+    def _necklace_target(self) -> tuple[float, float]:
+        """Kolyenin varacagi nokta - oyuncunun gogsu."""
+        body = self.player.body
+        return (body.center_x, body.center_y - NECKLACE_CHEST_OFFSET)
+
+    def gift_position(self) -> tuple[float, float]:
+        """Ucus sirasindaki dunya konumu. Duz cizgi + parabolik yay.
+
+        Duz gitseydi "isinlandi" gibi okunurdu; yay onu ATILMIS bir nesne
+        yapiyor - kucuk bir detay ama jesti fiziksel kiliyor.
+        """
+        t_value = self.gift_progress
+        fx, fy = self.gift_from
+        tx, ty = self._necklace_target()
+        x = fx + (tx - fx) * t_value
+        y = fy + (ty - fy) * t_value
+        y -= math.sin(t_value * math.pi) * GIFT_ARC_HEIGHT
+        return (x, y)
+
+    def _update_gift(self) -> None:
+        # Firlatma ani: "gift" adiminin belli bir orani gecince.
+        if self.gift_frames < 0 and self.beat == "gift":
+            length = PROLOGUE[self.beat_index][0]
+            if self.beat_frames >= length * GIFT_RELEASE_AT:
+                foot = CHARACTERS["cemo"].foot_y
+                self.gift_from = (self.cemo_x,
+                                  self.cemo_y - foot - balloon.height_of())
+                self.gift_frames = 0
+            return
+
+        if not self.gift_flying:
+            return
+
+        self.gift_frames += 1
+        if self.gift_frames < GIFT_FLIGHT_FRAMES:
+            return
+
+        # Vardi. Kazanim ani: parlama + parcacik + ses **ayni karede**
+        # (CLAUDE.md 7'nin uclu senkron kurali - ayri cagrilirsa kare
+        # kaymasi olur ve his bozulur).
+        self.necklace = True
+        tx, ty = self._necklace_target()
+        self.juice.explosion(tx, ty, ImpactWeight.NORMAL)
+        self.particles.burst(tx, ty, count=12, path="spark")
+        self.game.play_sound("item_pickup")
 
     def _update_rift(self) -> None:
         """Yarigin acilip kapanmasi Cemo'dan **bagimsiz**.
@@ -201,7 +278,9 @@ class Chapter01Scene(PlayScene):
             # Ses ilk kez burada duyuluyor: yarik acilirken. Iki kelime.
             self.say(Line("echo", "line.ch01_echo_rift"), auto_advance=True)
         elif self.beat == "alone":
-            self.necklace = True
+            # `self.necklace` burada DEGIL, kolye ucusu varinca ayarlaniyor
+            # (bkz. _update_gift). Eskiden burada sessizce True oluyordu ve
+            # oyuncu kolyenin kendisine gectigi ani hic gormuyordu.
             self.cemo_gone = True
         elif self.beat == "play":
             self._release_creatures()
@@ -375,6 +454,43 @@ class Chapter01Scene(PlayScene):
         self._draw_rift(surface, offset)
         if not self.cemo_gone:
             self._draw_cemo(surface, offset)
+        self._draw_necklace(surface, offset)
+
+    def _draw_necklace(self, surface: pygame.Surface, offset) -> None:
+        """Kolye: once havada (verilirken), sonra oyuncunun boynunda.
+
+        Boyundaki hali **diegetik gosterge** (CLAUDE.md 9): Yanki kademesi
+        ve kolye pusulasi bir HUD cubugu ile degil, bu sprite'in
+        parildamasiyla anlatiliyor. Bu yuzden aldiktan sonra da cizilmeye
+        devam ediyor - bir kez gorunup kaybolan bir efekt degil.
+        """
+        if not (self.gift_flying or self.necklace):
+            return
+        ox, oy = offset
+        if self.gift_flying:
+            wx, wy = self.gift_position()
+            # Ucarken donuyor: sabit bir nesne "kaydiriliyor" gibi okunur.
+            spin = math.sin(self.gift_progress * math.pi * 3.0)
+            glow_peak = 0.45
+        else:
+            wx, wy = self._necklace_target()
+            spin = 0.0
+            # Boyundayken nabiz atiyor - kolye pusulasinin gorsel dili.
+            glow_peak = 0.16 + 0.06 * math.sin(self.game.frame * 0.07)
+
+        x = int(round(wx)) - ox
+        y = int(round(wy)) - oy
+
+        glow = radial_glow(9, palette.color("gold"), peak=glow_peak)
+        surface.blit(glow, (x - 9, y - 9), special_flags=pygame.BLEND_RGB_ADD)
+        # Zincir: iki yana acilan kisa kollar. Donusu genislikle veriyoruz -
+        # bu olcekte gercek rotasyon bulanik piksel demek.
+        span = max(1, int(round(2 + abs(spin) * 2)))
+        surface.fill(palette.color("brass" if False else "gold"),
+                     (x - span, y - 2, span * 2 + 1, 1))
+        # Tas: tek piksel, paletin en parlak altini.
+        surface.fill(palette.color("gold"), (x, y - 1, 1, 2))
+        surface.fill(palette.color("white_flash"), (x, y - 1, 1, 1))
 
     def _draw_rift(self, surface: pygame.Surface, offset) -> None:
         if self.rift <= 0.0:
