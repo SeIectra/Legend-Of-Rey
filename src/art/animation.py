@@ -300,14 +300,42 @@ ARDO_SPEC = replace(
 #   Sismek      kocaman yuvarlak govde, minik kafa, gudук uzuvlar - balon
 
 # Suruklenen - combo hedef tahtasi. Yavas, tek saldiri.
+# ============================================================================
+# DUSMAN KADROSU - docs/gdd.md 7, uc katman
+# ============================================================================
+# Olculmus tasarim kurali (23.08.2026, prototiple kiyaslama):
+#
+#   1. **Her dusmanin siluetten disari tasan bir parcasi olmali.** Prototipin
+#      dusmanlari okunurdu cunku hepsinde vardi (bicak, yay, boynuz,
+#      kafatasi). Bizim ilk uc dusmanimizin ucunde de `weapon="none"` idi ve
+#      hicbir cikinti yoktu - Arda'nin "karisik cizgilerden ibaret, hicbir
+#      sey anlasilmiyor" geri bildiriminin birinci sebebi buydu.
+#   2. **Kafa govdeden ACIK olmali.** Prototipte yesil surat/beyaz kafatasi
+#      koyu govdenin uzerinde duruyordu; bizimkinde kafa govdeyle ayni
+#      koyuluktaydi ve Suruklenen'in kafasi gorunmuyordu bile.
+#   3. **Govde parlaklik araligi >= 0.40 olmali.** Olculdu: Tirmanan 0.153
+#      (hair+cloth+cloth_dark UCU DE "shadow" idi), prototip iskelet 0.722.
+#      Ayni renk sayisi, dort kat az kontrast.
+#   4. **Boyut hiyerarsisi gorunur olmali.** Uc dusmanimiz da 40x36 idi;
+#      prototipte 32'den 72'ye yayiliyordu. Tehdit seviyesi siluetten
+#      okunmali, can barindan degil (CLAUDE.md 7: dusman can bari yok).
+#
+# `rot` zinciri artik YESIL (23.08.2026). Eskiden ['ink_soft','echo_dark',
+# 'echo','echo_bright'] idi - yani camgobegi, cunku palette hic yesil yoktu.
+# Dusmanlarin turkuaz gorunmesinin sebebi buydu. Arda +5 renk onayladi.
+
+# --- KATMAN 1 · Curuyenler --------------------------------------------------
+# *Soru: combo kurmayi ogren* - yavas, okunur, affedici.
+
+# Suruklenen - combo hedef tahtasi. Yavas, tek saldiri.
 SHAMBLER_SPEC = CharSpec(
     name="shambler",
     cell_width=40, cell_height=36, foot_y=31,
-    head_radius=3.4, torso_height=5.6, torso_width=6.0,
     # Kollar bacaklardan uzun: yerde surunuyormus gibi sarkiyor.
     # Bacaklar bir donem 3.4'tu ve siluet bacaksiz bir sutuna donuyordu -
     # govdeyi kisaltip bacagi uzatmak ikisini de cozdu.
     thigh=4.4, shin=4.4, upper_arm=5.0, fore_arm=5.2,
+    head_radius=3.4, torso_height=5.6, torso_width=6.0,
     limb_width=2.5, shoulder_width=5.0,
     # Deri ve giysi **ayri zincir**: bir donem ikisi de "rot" idi ve dusman
     # tek duz kutle gibi okunuyordu. Curuyen et uzerinde kahverengi pacavra.
@@ -315,39 +343,161 @@ SHAMBLER_SPEC = CharSpec(
     cloth_dark="shadow", armor="rock", accent="rot",
     glow_eyes=150,
     weapon="none",
+    claws=3.4,          # Silahsiz ama silueti kiran uzun pence
+    hunch=1.2,          # Cokmus omuz - "surukleniyor" duruştan okunur
 )
 
 # Tirmanan - dikey farkindalik. Tavanda bekler, tepeden iner.
 CLIMBER_SPEC = CharSpec(
     name="climber",
-    cell_width=40, cell_height=36, foot_y=30,
+    cell_width=44, cell_height=34, foot_y=28,
     # Minik govde + upuzun ince uzuv + genis omuz = orumceksi siluet.
     head_radius=2.7, torso_height=4.4, torso_width=4.2,
     thigh=5.4, shin=5.6, upper_arm=5.2, fore_arm=5.4,
     limb_width=1.7, shoulder_width=6.6,
-    # Koyu govde, solgun uzuvlar, mor goz: tavanda once gozleri gorunur.
-    skin="rot", hair="shadow", cloth="shadow",
-    cloth_dark="shadow", armor="rock", accent="arcane",
+    # DUZELTME: hair/cloth/cloth_dark UCU DE "shadow" idi - govde parlaklik
+    # araligi 0.153, yani neredeyse duz siyah. Ekranda kalan sey gercekten
+    # "karisik cizgiler"di. Govde artik "rock" (orta ton), uzuvlar "rot"
+    # (yesil), sadece en derin golge "shadow".
+    skin="rot", hair="shadow", cloth="rock",
+    cloth_dark="shadow", armor="steel", accent="arcane",
     pointed_ears=True,
     glow_eyes=215,               # Karanlikta once gozleri gorunur
     weapon="none",
+    claws=4.2,          # Tavana tutunan uzun pence - asili haldeyken de okunur
 )
 
 # Sismek - konumlandirma. Yaklasir, siser, patlar.
 BLOATED_SPEC = CharSpec(
     name="bloated",
-    cell_width=40, cell_height=36, foot_y=31,
+    cell_width=44, cell_height=40, foot_y=34,
     # Govde genis ve yuvarlak, uzuvlar gudук: balon gibi okunsun.
     # 11 genislik denendi - yaratik degil kutu gibi gorunuyordu ve minik
     # kafa tamamen kayboluyordu.
-    head_radius=3.0, torso_height=6.6, torso_width=9.0,
+    head_radius=2.8, torso_height=8.0, torso_width=12.0,
     thigh=3.0, shin=3.0, upper_arm=2.6, fore_arm=2.6,
-    limb_width=2.8, shoulder_width=6.8,
+    limb_width=3.0, shoulder_width=7.4,
     # Sisen kese kirmizi: tehlike rengiyle akraba, "patlayacak" okunur.
-    skin="gore", hair="shadow", cloth="rot",
+    skin="rot", hair="shadow", cloth="gore",
     cloth_dark="shadow", armor="leather", accent="torchlight",
     glow_eyes=120,
     weapon="none",
+    spikes=3,           # Sirttan cikan kabarcik dikenleri - "sisiyor" okunur
+)
+
+# --- KATMAN 2 · Lanetli Muhafizlar ------------------------------------------
+# *Soru: combo'yu KIRMAYI ogren.* Her biri combo'yu farkli bir yerinden
+# keser: Kalkanli onden, Mizrakli mesafeden, Okcu uzaktan, Komutan
+# kalabalikla. Hepsi zirhli/askeri - Curuyenler'in pacavrasindan bir
+# bakista ayrilir.
+#
+# Goblin kanonu: CLAUDE.md "Goblin ayri dusman olarak eklenmiyor; Katman
+# 2'nin Kalkanli'si goblin'in ruhuyla yapilacak" diyor. Kalkanli bu yuzden
+# yesil derili + sivri kulakli - prototipin goblin'inin devami.
+
+SHIELDBEARER_SPEC = CharSpec(          # Kalkanli
+    name="shieldbearer",
+    cell_width=44, cell_height=40, foot_y=34,
+    head_radius=3.5, torso_height=6.6, torso_width=7.0,
+    thigh=4.4, shin=4.4, upper_arm=4.0, fore_arm=4.0,
+    limb_width=2.7, shoulder_width=6.6,
+    skin="moss", hair="hair_dark", cloth="leather",
+    cloth_dark="shadow", armor="steel", accent="brass",
+    shoulder_pads=True, shoulder_chain="steel",
+    pointed_ears=True,          # goblin ruhu
+    weapon="knife", shield=True, shield_chain="steel",
+)
+
+SPEARMAN_SPEC = CharSpec(              # Mizrakli
+    name="spearman",
+    cell_width=56, cell_height=40, foot_y=34,   # Mizrak icin genis hucre
+    head_radius=3.4, torso_height=6.4, torso_width=6.0,
+    thigh=5.0, shin=5.0, upper_arm=4.2, fore_arm=4.2,
+    limb_width=2.4, shoulder_width=5.8,
+    skin="moss", hair="hair_dark", cloth="cloth_grey",
+    cloth_dark="shadow", armor="steel", accent="brass",
+    pointed_ears=True,
+    weapon="spear",
+    crest=2.4, crest_chain="gore",      # Kisa migfer tepeligi
+)
+
+ARCHER_SPEC = CharSpec(                # Okcu
+    name="archer",
+    cell_width=48, cell_height=40, foot_y=34,
+    head_radius=3.3, torso_height=6.0, torso_width=5.6,
+    thigh=4.6, shin=4.6, upper_arm=4.0, fore_arm=4.0,
+    limb_width=2.2, shoulder_width=5.4,
+    skin="moss", hair="hair_dark", cloth="moss",
+    cloth_dark="shadow", armor="leather", accent="rot",
+    pointed_ears=True, hood=True,
+    weapon="bow",
+)
+
+COMMANDER_SPEC = CharSpec(             # Komutan
+    name="commander",
+    cell_width=52, cell_height=48, foot_y=41,   # Kadronun en uzunu
+    head_radius=3.8, torso_height=8.2, torso_width=8.0,
+    thigh=5.6, shin=5.6, upper_arm=4.8, fore_arm=4.8,
+    limb_width=3.0, shoulder_width=8.4,
+    skin="moss", hair="hair_dark", cloth="cloth_grey",
+    cloth_dark="shadow", armor="brass", accent="gore",
+    shoulder_pads=True, shoulder_chain="brass", cape=True,
+    pointed_ears=True,
+    weapon="axe", weapon_chain="brass",
+    crest=5.0, crest_chain="gore",      # Yuksek tepelik - kalabalikta bulunur
+)
+
+# --- KATMAN 3 · Yanki'nin Cocuklari -----------------------------------------
+# *Soru: yardimci sisteminin ihanetiyle yuzles.* Hicbiri "et" degil -
+# ucu de Yanki'nin morunu tasiyor ve insansi orandan bilincli olarak
+# sapiyor. Katman 1/2'nin yanina konunca AYRI BIR TURDEN olduklari
+# anlasilmali.
+
+SILENT_SPEC = CharSpec(                # Sessiz - Yanki onu gostermez
+    name="silent",
+    cell_width=44, cell_height=40, foot_y=34,
+    head_radius=3.0, torso_height=6.8, torso_width=5.0,
+    thigh=5.2, shin=5.2, upper_arm=4.6, fore_arm=4.6,
+    limb_width=2.0, shoulder_width=5.0,
+    # Neredeyse tamamen koyu - ADI bu. Ama "shadow" tuzagina dusmuyoruz:
+    # govde "rock", yalniz orta hat "shadow". Gozu YOK (glow_eyes=0):
+    # kadronun tek gozsuz uyesi, siluetten taninir.
+    skin="rock", hair="shadow", cloth="shadow",
+    cloth_dark="shadow", armor="rock", accent="arcane",
+    hood=True, cape=True,
+    weapon="knife",
+    claws=2.6,
+)
+
+ECHOING_SPEC = CharSpec(               # Yankilayan - sesini taklit eder
+    name="echoing",
+    cell_width=48, cell_height=42, foot_y=36,
+    # Oyuncunun oranlarina KASITLI olarak yakin - "seni taklit ediyor"
+    # rahatsizligi buradan gelir. Ama uzuvlar bir tik uzun: tam degil,
+    # neredeyse. Tekinsiz vadi bilincli.
+    head_radius=3.9, torso_height=7.4, torso_width=6.2,
+    thigh=5.2, shin=5.2, upper_arm=4.4, fore_arm=4.6,
+    limb_width=2.3, shoulder_width=5.4,
+    skin="arcane", hair="arcane", cloth="arcane",
+    cloth_dark="shadow", armor="arcane", accent="arcane",
+    long_hair=True, hair_length=9.0, cape=True,
+    glow_eyes=235,
+    weapon="sword", weapon_chain="arcane",
+)
+
+SPLITTER_SPEC = CharSpec(              # Bolunen - vurunca ikiye ayrilir
+    name="splitter",
+    cell_width=48, cell_height=42, foot_y=36,
+    head_radius=3.6, torso_height=7.0, torso_width=8.4,
+    thigh=4.2, shin=4.2, upper_arm=4.0, fore_arm=4.0,
+    limb_width=2.6, shoulder_width=7.8,
+    skin="rot", hair="arcane", cloth="arcane",
+    cloth_dark="shadow", armor="arcane", accent="rot",
+    glow_eyes=200,
+    weapon="none",
+    claws=3.0,
+    spikes=4,           # Bolunme cizgileri gibi okunan sirt dikenleri
+    tail=5.0,           # Ikiye ayrilacak govdenin uzantisi
 )
 
 # Cemo - Rey'in kucuk kardesi. Esmer, kivircik sacli, tatli bir cocuk.
@@ -368,11 +518,31 @@ CEMO_SPEC = CharSpec(
 )
 
 CHARACTERS: dict[str, CharSpec] = {
+    # Oynanabilirler
     "rey": REY_SPEC,
     "rey_armed": REY_ARMED_SPEC,
     "ardo": ARDO_SPEC,
+    "cemo": CEMO_SPEC,
+    # Katman 1 - Curuyenler (B1-B6)
     "shambler": SHAMBLER_SPEC,
     "climber": CLIMBER_SPEC,
     "bloated": BLOATED_SPEC,
-    "cemo": CEMO_SPEC,
+    # Katman 2 - Lanetli Muhafizlar (B7-B13)
+    # SANAT hazir; hicbir bolume YERLESTIRILMEDI (CLAUDE.md 3: ileri bolum
+    # icerigi sirasi gelmeden yazilmaz). Dovus test odasindan gorulebilir.
+    "shieldbearer": SHIELDBEARER_SPEC,
+    "spearman": SPEARMAN_SPEC,
+    "archer": ARCHER_SPEC,
+    "commander": COMMANDER_SPEC,
+    # Katman 3 - Yanki'nin Cocuklari (B14-B18) - ayni not
+    "silent": SILENT_SPEC,
+    "echoing": ECHOING_SPEC,
+    "splitter": SPLITTER_SPEC,
+}
+
+# Katman uyeligi - kadro sayfasi ve ileride dusman havuzu secimi icin.
+TIERS: dict[str, tuple[str, ...]] = {
+    "curuyenler": ("shambler", "climber", "bloated"),
+    "muhafizlar": ("shieldbearer", "spearman", "archer", "commander"),
+    "yanki": ("silent", "echoing", "splitter"),
 }

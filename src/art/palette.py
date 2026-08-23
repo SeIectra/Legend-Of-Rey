@@ -1,4 +1,4 @@
-"""Palet - 32 renk, tek gercek kaynak.
+"""Palet - 37 renk, tek gercek kaynak.
 
 Bu modul renk **tanimlamaz**; `tools/palette.json` dosyasini okur. Boylece
 oyun kodu ile asset boru hatti (quantize, shade, outline) ayni renkleri
@@ -22,7 +22,7 @@ from pathlib import Path
 RGB = tuple[int, int, int]
 
 _PALETTE_PATH = Path(__file__).resolve().parents[2] / "tools" / "palette.json"
-EXPECTED_COLOR_COUNT = 32
+EXPECTED_COLOR_COUNT = 37
 
 
 class PaletteError(RuntimeError):

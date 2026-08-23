@@ -4,7 +4,7 @@ Calistir:
     python tests/test_foundation.py
 
 Uc sey kanitlanir:
-  1. Palet tam olarak 32 renk ve kontur en koyu 2. renk
+  1. Palet tam olarak 37 renk ve kontur en koyu 2. renk
   2. Turkce'nin tamami fontta var
   3. tr_upper/tr_lower Python'un yanlis yaptigi yerlerde dogru
 """
@@ -35,7 +35,7 @@ def check(condition: bool, label: str, detail: str = "") -> None:
 
 # --- 1. Palet ---------------------------------------------------------------
 print("--- palet ---")
-check(len(palette.COLORS) == 32, "palet 32 renk", f"{len(palette.COLORS)}")
+check(len(palette.COLORS) == 37, "palet 37 renk", f"{len(palette.COLORS)}")
 
 darkest = palette.darkest_names(2)
 check(palette.OUTLINE_NAME == darkest[1],

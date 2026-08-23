@@ -168,6 +168,31 @@
       252,
       250,
       246
+    ],
+    "moss_darkest": [
+      18,
+      34,
+      28
+    ],
+    "moss_dark": [
+      34,
+      62,
+      42
+    ],
+    "moss": [
+      64,
+      108,
+      58
+    ],
+    "moss_light": [
+      110,
+      158,
+      82
+    ],
+    "bile": [
+      176,
+      200,
+      110
     ]
   },
   "_rampalar": "Tonlama icin koyudan aciga siralar. shade.py ve spritegen bunlari kullanir.",
@@ -225,6 +250,13 @@
     "bone": [
       "bone",
       "white_flash"
+    ],
+    "moss": [
+      "moss_darkest",
+      "moss_dark",
+      "moss",
+      "moss_light",
+      "bile"
     ]
   },
   "_yollar": "Parcacik renk yollari - derinlestirme.md 1.3. Parcacik omru boyunca bu diziyi izler.",
@@ -338,10 +370,10 @@
       "white_flash"
     ],
     "rot": [
-      "ink_soft",
-      "echo_dark",
-      "echo",
-      "echo_bright"
+      "ink",
+      "moss_dark",
+      "moss_light",
+      "bile"
     ],
     "gore": [
       "blood_dark",
@@ -372,6 +404,12 @@
       "ember",
       "ember_light",
       "gold"
+    ],
+    "moss": [
+      "moss_darkest",
+      "moss",
+      "moss_light",
+      "bile"
     ]
   },
   "_renk_korlugu_aciklama": "Otomatik uretildi: tools/colorblind.py. Elle duzenleme - bir sonraki calistirmada uzerine yazilir. Daltonize (duzeltme), simulasyon degil - oyuncunun GERCEKTEN gorecegi renkler.",
@@ -536,6 +574,31 @@
         252,
         251,
         247
+      ],
+      "moss_darkest": [
+        18,
+        27,
+        16
+      ],
+      "moss_dark": [
+        34,
+        50,
+        5
+      ],
+      "moss": [
+        64,
+        88,
+        0
+      ],
+      "moss_light": [
+        110,
+        135,
+        0
+      ],
+      "bile": [
+        176,
+        186,
+        50
       ]
     },
     "deuteranopia": {
@@ -698,6 +761,31 @@
         252,
         250,
         246
+      ],
+      "moss_darkest": [
+        18,
+        31,
+        18
+      ],
+      "moss_dark": [
+        34,
+        56,
+        12
+      ],
+      "moss": [
+        64,
+        98,
+        0
+      ],
+      "moss_light": [
+        110,
+        145,
+        0
+      ],
+      "bile": [
+        176,
+        189,
+        26
       ]
     },
     "tritanopia": {
@@ -860,6 +948,31 @@
         252,
         250,
         242
+      ],
+      "moss_darkest": [
+        18,
+        35,
+        25
+      ],
+      "moss_dark": [
+        34,
+        64,
+        23
+      ],
+      "moss": [
+        64,
+        112,
+        0
+      ],
+      "moss_light": [
+        110,
+        163,
+        0
+      ],
+      "bile": [
+        176,
+        204,
+        0
       ]
     }
   }

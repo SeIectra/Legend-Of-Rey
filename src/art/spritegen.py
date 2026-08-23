@@ -77,7 +77,23 @@ class CharSpec:
     hem_length: float = 5.0
     tattoo: bool = False
     glow_eyes: int = 0
-    weapon: str = "none"             # none sword knife club staff
+    weapon: str = "none"             # none sword knife club staff spear bow axe
+
+    # --- Siluet kirici ek parcalar ------------------------------------------
+    # Olculdu (22.08.2026): prototipin dusmanlari okunur cunku HEPSININ
+    # siluetten disari tasan bir parcasi var (bicak, yay, boynuz, kafatasi).
+    # Bizim uc dusmanimizin ucunde de `weapon="none"` idi ve hicbir cikinti
+    # yoktu - dikdortgen bir lekeye donuyorlardi ("karisik cizgilerden
+    # ibaret", Arda). Asagidakiler o cikintiyi saglar.
+    shield: bool = False             # Arka kolda kalkan - onden vurulmaz okunur
+    shield_chain: str = "steel"
+    claws: float = 0.0               # Parmak uclarindan uzayan pence (piksel)
+    claw_chain: str = "bone_pale"
+    spikes: int = 0                  # Sirttan cikan diken sayisi
+    crest: float = 0.0               # Miğfer tepeligi/ibik yuksekligi
+    crest_chain: str = ""            # Bos ise `accent`
+    tail: float = 0.0                # Arkadan uzanan kuyruk uzunlugu
+    hunch: float = 0.0               # Omuz cizgisini one egen kamburluk
 
 
 @dataclass
@@ -163,6 +179,105 @@ def _draw_weapon(canvas: Canvas, hx: float, hy: float, angle: float,
         tip_y = hy + math.sin(angle) * 14
         canvas.line(hx, hy, tip_x, tip_y, 2.0, "leather", 1)
         canvas.disc(tip_x, tip_y, 2.4, "arcane", 3, glow=200)
+    elif kind == "spear":
+        # Uzun sap + parlak uc. Silueti YATAY olarak kiran tek silah -
+        # "yaklasma" tehdidi bir bakista okunsun (Mizrakli'nin butun
+        # ogretisi mesafe).
+        tip_x = hx + math.cos(angle) * 19
+        tip_y = hy + math.sin(angle) * 19
+        canvas.line(hx - math.cos(angle) * 5, hy - math.sin(angle) * 5,
+                    tip_x, tip_y, 1.6, "leather", 1)
+        canvas.taper(tip_x - math.cos(angle) * 4, tip_y - math.sin(angle) * 4,
+                     tip_x, tip_y, 2.6, 0.8, "bone_pale", 3)
+    elif kind == "bow":
+        # Yay govdeye DIK duran genis bir kavis - hicbir yakin dovus silahi
+        # bu silueti vermez, "uzaktan vurur" ondan once anlasilir.
+        perp = angle + math.pi / 2
+        span = 9.0
+        ax, ay = hx + math.cos(perp) * span, hy + math.sin(perp) * span
+        bx, by = hx - math.cos(perp) * span, hy - math.sin(perp) * span
+        bulge = 3.4
+        mx = hx + math.cos(angle) * bulge
+        my = hy + math.sin(angle) * bulge
+        canvas.taper(ax, ay, mx, my, 1.0, 1.8, "leather", 2)
+        canvas.taper(mx, my, bx, by, 1.8, 1.0, "leather", 2)
+        canvas.line(ax, ay, bx, by, 1.0, "bone_pale", 2)      # kiris
+    elif kind == "axe":
+        haft_x = hx + math.cos(angle) * 10
+        haft_y = hy + math.sin(angle) * 10
+        canvas.line(hx, hy, haft_x, haft_y, 1.8, "leather", 1)
+        perp = angle + math.pi / 2
+        canvas.polygon([
+            (haft_x, haft_y),
+            (haft_x + math.cos(perp) * 4.6 + math.cos(angle) * 1.5,
+             haft_y + math.sin(perp) * 4.6 + math.sin(angle) * 1.5),
+            (haft_x + math.cos(perp) * 4.0 - math.cos(angle) * 3.5,
+             haft_y + math.sin(perp) * 4.0 - math.sin(angle) * 3.5),
+        ], chain, 3)
+
+
+def _draw_shield(canvas: Canvas, hx: float, hy: float,
+                 spec: CharSpec) -> None:
+    """Arka koldaki kalkan - govdenin onune tasar.
+
+    Kalkanli'nin butun ogretisi "onden vurulmaz, arkaya gec". O bilgi
+    siluetten okunmali: kalkan govdenin on hattini duz bir duvara cevirir,
+    oyuncu daha ilk karede yanina gecmesi gerektigini anlar.
+    """
+    canvas.polygon([
+        (hx - 1.0, hy - 5.0),
+        (hx + 3.2, hy - 4.2),
+        (hx + 3.6, hy + 3.0),
+        (hx - 0.4, hy + 5.2),
+    ], spec.shield_chain, 2)
+    canvas.line(hx + 1.4, hy - 4.0, hx + 1.6, hy + 4.2, 1.0,
+                spec.shield_chain, 3)          # ortadan gecen kabartma
+
+
+def _draw_claws(canvas: Canvas, hx: float, hy: float, angle: float,
+                spec: CharSpec) -> None:
+    """Elden uzayan uc pence. Silahsiz yaratiga siluet cikintisi verir.
+
+    **Kolun yonunde degil, ONE dogru aciliyor.** Ilk surumde dogrudan
+    `angle` kullaniyordu; idle pozunda kollar govdenin yaninda asagi
+    sarktigi icin penceler de asagi bakiyor ve govde sutununun icinde
+    kayboluyordu - siluet testi bunu yakaladi (uc Curuyen de ayni
+    ayirt edilemez sutun cikiyordu). Oneki 0.9 radyanlik sapma pencelerin
+    dis hattan tasmasini garanti eder.
+    """
+    forward = angle - 0.9
+    for offset in (-0.38, 0.0, 0.38):
+        tip = forward + offset
+        canvas.taper(hx, hy,
+                     hx + math.cos(tip) * spec.claws,
+                     hy + math.sin(tip) * spec.claws,
+                     1.5, 0.6, spec.claw_chain, 3)
+
+
+def _draw_spikes(canvas: Canvas, shoulder_x: float, shoulder_y: float,
+                 hip_y: float, spec: CharSpec) -> None:
+    """Sirttan cikan dikenler - ust hattı tirtiklastirir."""
+    span = max(1.0, hip_y - shoulder_y)
+    for i in range(spec.spikes):
+        t = (i + 0.5) / spec.spikes
+        base_y = shoulder_y + span * t
+        base_x = shoulder_x - spec.torso_width * 0.34
+        length = 3.4 - 1.4 * t
+        canvas.taper(base_x, base_y, base_x - length, base_y - length * 0.7,
+                     1.8, 0.6, spec.accent, 3)
+
+
+def _draw_tail(canvas: Canvas, cx: float, hip_y: float,
+               spec: CharSpec, sway: float) -> None:
+    """Arkadan uzanan kuyruk. Insansi silueti bir bakista kirar."""
+    steps = int(spec.tail)
+    x, y = cx - spec.torso_width * 0.3, hip_y
+    for i in range(steps):
+        t = i / max(1.0, steps - 1.0)
+        x -= 1.0
+        y += math.sin(t * 2.2 + sway) * 0.9 + 0.25
+        canvas.disc(x, y, max(0.8, 1.8 - t * 1.1), spec.cloth_dark,
+                    2 if i % 2 else 1)
 
 
 def _draw_back_hair(canvas: Canvas, cx: float, cy: float, spec: CharSpec,
@@ -269,6 +384,18 @@ def _draw_head(canvas: Canvas, cx: float, cy: float, spec: CharSpec) -> None:
                      cx + radius * 1.4, cy - radius * 1.9, 2.2, 0.8,
                      "bone_pale", 3)
 
+    if spec.crest > 0.0:
+        # Migferin tepeliği: yukari dogru uzanan yelpaze. Komutan'i
+        # kalabaligin icinde bir bakista bulmayi saglar - "once bunu
+        # sustur" karari siluetten verilir.
+        tone = spec.crest_chain or spec.accent
+        for i in range(5):
+            t = i / 4.0
+            height = spec.crest * (0.55 + 0.45 * math.sin(t * math.pi))
+            x = cx - radius * 0.8 + radius * 1.6 * t
+            canvas.line(x, cy - radius * 0.85, x, cy - radius * 0.85 - height,
+                        1.4, tone, 3 if i % 2 else 2)
+
 
 def _draw_eyes(canvas: Canvas, cx: float, cy: float, spec: CharSpec) -> None:
     """Iki piksel goz, agiz yok - stil sozlesmesi."""
@@ -309,7 +436,10 @@ def draw_humanoid(spec: CharSpec, pose: Pose) -> Canvas:
     hip_y = foot_y - leg_length
     torso_height = spec.torso_height * pose.squash
     shoulder_y = hip_y - torso_height
-    shoulder_x = cx + pose.lean * 2.5
+    # Kamburluk omuz cizgisini one/asagi ceker - "cokmus/sinsi" duruslar
+    # (Suruklenen, Sessiz) bundan okunur, ayri bir poz tablosu gerekmez.
+    shoulder_x = cx + pose.lean * 2.5 + spec.hunch
+    shoulder_y += spec.hunch * 0.45
     head_x = cx + pose.head_dx
     head_y = shoulder_y - spec.head_radius + 1.5 + pose.head_dy
 
@@ -324,7 +454,13 @@ def draw_humanoid(spec: CharSpec, pose: Pose) -> Canvas:
             (shoulder_x - spec.shoulder_width * 0.9 - sway * 5, hip_y + 4),
         ], spec.accent, 1)
 
+    if spec.tail > 0.0:
+        _draw_tail(canvas, cx, hip_y, spec, pose.cape_sway)
+
     _draw_back_hair(canvas, head_x, head_y, spec, pose.cape_sway)
+
+    if spec.spikes:
+        _draw_spikes(canvas, shoulder_x, shoulder_y, hip_y, spec)
 
     # Arka uzuvlar - bir basamak koyu, derinlik bundan gelir.
     _draw_leg(canvas, cx, hip_y, *pose.leg_back, spec, spec.cloth_dark, 1)
@@ -332,6 +468,9 @@ def draw_humanoid(spec: CharSpec, pose: Pose) -> Canvas:
                           *pose.arm_back, spec, spec.cloth, 1)
     if spec.weapon != "none" and pose.weapon_hand in ("back", "both"):
         _draw_weapon(canvas, back_hand[0], back_hand[1], pose.weapon_angle, spec)
+    if spec.claws > 0.0:
+        _draw_claws(canvas, back_hand[0], back_hand[1],
+                    pose.arm_back[0] + pose.arm_back[1], spec)
 
     # Govde
     canvas.polygon([
@@ -378,6 +517,13 @@ def draw_humanoid(spec: CharSpec, pose: Pose) -> Canvas:
     if spec.weapon != "none" and pose.weapon_hand in ("front", "both"):
         _draw_weapon(canvas, front_hand[0], front_hand[1], pose.weapon_angle,
                      spec)
+    if spec.claws > 0.0:
+        _draw_claws(canvas, front_hand[0], front_hand[1],
+                    pose.arm_front[0] + pose.arm_front[1], spec)
+    # Kalkan **en son** - govdenin de silahin da onunde durmali, yoksa
+    # "onden vurulmaz" bilgisi siluette kayboluyor.
+    if spec.shield:
+        _draw_shield(canvas, front_hand[0], front_hand[1], spec)
 
     canvas.shade()
     canvas.outline("shadow", 1)
