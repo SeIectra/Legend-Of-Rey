@@ -517,12 +517,33 @@ CEMO_SPEC = CharSpec(
     weapon="none",
 )
 
+# Koylu - Bolum 1'in koyunu yasayan bir yer yapan pasif NPC.
+# Kasitli olarak SILIK: oyuncu, Cemo ve dusmanlarla yarismamali. Sade
+# giysi, aksesuar yok, silah yok. Kalabaligin bir uyesi gibi okunsun -
+# tek tek karakter gibi degil. Farklilik `seed` ile gelen ritimden
+# geliyor, sprite'tan degil (bes ayri sprite uretmek bu olcekte
+# gorunmeyecek bir maliyet olurdu).
+VILLAGER_SPEC = CharSpec(
+    name="villager",
+    cell_width=40, cell_height=38, foot_y=32,
+    head_radius=3.5, torso_height=6.6, torso_width=5.6,
+    thigh=4.6, shin=4.6, upper_arm=3.8, fore_arm=3.8,
+    limb_width=2.3, shoulder_width=5.0,
+    skin="skin_tan", hair="hair_dark", cloth="leather",
+    cloth_dark="shadow", armor="rock", accent="earth_dark"
+    if False else "leather",
+    hem=6.0, hem_length=4.0,     # Basit tunik - koylu kiyafeti
+    weapon="none",
+)
+
+
 CHARACTERS: dict[str, CharSpec] = {
     # Oynanabilirler
     "rey": REY_SPEC,
     "rey_armed": REY_ARMED_SPEC,
     "ardo": ARDO_SPEC,
     "cemo": CEMO_SPEC,
+    "villager": VILLAGER_SPEC,
     # Katman 1 - Curuyenler (B1-B6)
     "shambler": SHAMBLER_SPEC,
     "climber": CLIMBER_SPEC,

@@ -35,6 +35,7 @@ from src.ui import balloon, text
 from src.ui.dialogue import Line
 from src.ui.i18n import t
 from src.entities.enemies.shambler import Shambler
+from src.entities.villager import Villager
 from src.systems import abilities
 from src.world.rooms.chapter01 import (
     ECHO_TUTORIAL_TILE, LEVEL, PROLOGUE, RIFT_TILE, SCENERY,
@@ -132,6 +133,23 @@ class Chapter01Scene(PlayScene):
         self.sword_pos = ((sword_at.x, sword_at.feet_y - 10)
                           if sword_at and self.character != "ardo" else None)
 
+        # Koyluler: her evin onunde bir tane, kapisi kendi evi.
+        # Arda'nin istegi - "olaylar patlak verdiginde koyluler evlerine
+        # kacsin". Kayip boylece Cemo'yla sinirli kalmiyor, koyun kendisi
+        # bosaliyor. `seed` her koyluye kendi ritmini veriyor; `random`
+        # yok, ayni sahne her acilista ayni sekilde yasiyor.
+        ground_y = LEVEL.first("player").feet_y
+        self.villagers = []
+        for index, (tx, ty, tw, th, kind) in enumerate(SCENERY):
+            if kind != "house":
+                continue
+            door_x = (tx + tw * 0.5) * TILE_SIZE
+            # Kapinin biraz yanindan basliyor - hepsi kapida durmasin.
+            start_x = door_x + (12 if index % 2 else -12)
+            self.villagers.append(
+                Villager(start_x, ground_y, door_x, seed=index))
+        self.villagers_fled = False
+
         # Ogreti durumu
         self.moved = False
         self.attacked = False
@@ -154,6 +172,7 @@ class Chapter01Scene(PlayScene):
         self._update_rift()
         self._update_cemo()
         self._update_gift()
+        self._update_villagers()
         self._watch_player()
 
     # --- Kolyenin verilisi --------------------------------------------------
@@ -286,6 +305,23 @@ class Chapter01Scene(PlayScene):
             self.cemo_gone = True
         elif self.beat == "play":
             self._release_creatures()
+
+    def _update_villagers(self) -> None:
+        """Koyluler gezinir; yarik acilinca evlerine kacar.
+
+        Tetikleyici "taken" adimi - yarigin acildigi an. Daha once
+        (kolye verilirken) kacsalardi neye tepki verdikleri belirsiz
+        kalirdi; daha sonra kacsalardi tepki gecikmis gorunurdu.
+        """
+        if not self.villagers_fled and self.beat in ("taken", "chase"):
+            self.villagers_fled = True
+            for villager in self.villagers:
+                villager.flee()
+        for villager in self.villagers:
+            villager.update()
+        # Eve giren listeden dusuyor - her karede `gone` kontrolu yerine
+        # liste kisaliyor.
+        self.villagers = [v for v in self.villagers if not v.gone]
 
     def _update_cemo(self) -> None:
         if self.cemo_gone:
@@ -454,6 +490,8 @@ class Chapter01Scene(PlayScene):
     def draw_foreground(self, surface: pygame.Surface, offset) -> None:
         self._draw_sword(surface, offset)
         self._draw_rift(surface, offset)
+        for villager in self.villagers:
+            villager.draw(surface, offset)
         if not self.cemo_gone:
             self._draw_cemo(surface, offset)
         self._draw_necklace(surface, offset)

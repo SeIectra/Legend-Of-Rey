@@ -187,6 +187,43 @@ def main() -> int:
               f"orta {mid_y:.1f} < ortalama {(first_y + last_y) * 0.5:.1f}")
     game6.shutdown()
 
+    # --- Koyluler: gezinir, yarik acilinca evlerine kacar -------------------
+    # Arda'nin istegi: "ilk basta etrafta koyluler dolasabilir. Olaylar
+    # patlak verdiginde koyluler evlerine kacsin." Prologun anlatimi
+    # "sakin koy -> yarik -> kayip" uzerine kurulu; koy yasamiyorsa
+    # kaybedilen sey de soyut kaliyor.
+    print("\n--- koyluler: gezinme ve kacis ---")
+    game7 = Game()
+    game7.scenes.set_root(Chapter01Scene, transition=False, character="rey")
+    game7.scenes._flush()
+    village = game7.scenes.current
+
+    check(len(village.villagers) >= 3, "koyde birden fazla koylu var",
+          str(len(village.villagers)))
+    start_positions = [v.x for v in village.villagers]
+
+    # Yarik acilmadan once: gezinirler, hicbiri kacmaz.
+    for _ in range(120):
+        game7.input.begin_frame(); game7.input.end_frame()
+        village.update()
+    check(not village.villagers_fled, "yarik acilmadan kimse kacmiyor")
+    moved = sum(1 for v, x0 in zip(village.villagers, start_positions)
+                if abs(v.x - x0) > 1.0)
+    check(moved > 0, "koyluler gercekten geziniyor (yerlerinde durmuyorlar)",
+          str(moved) + " koylu hareket etti")
+    check(all(v.state == "wander" for v in village.villagers),
+          "hepsi hala gezinme durumunda")
+
+    # Prologun geri kalanini oynat: yarik acilir, koyluler kacar.
+    for _ in range(sum(f for f, _ in PROLOGUE) + 240):
+        game7.input.begin_frame(); game7.input.end_frame()
+        village.update()
+    check(village.villagers_fled, "yarik acilinca kacis tetiklendi")
+    check(not village.villagers,
+          "butun koyluler evlerine girdi (listeden dustuler)",
+          str(len(village.villagers)) + " kaldi")
+    game7.shutdown()
+
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")
