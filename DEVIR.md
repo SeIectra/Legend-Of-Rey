@@ -7,7 +7,7 @@ Okuma sırası: **1) `CLAUDE.md`** (bağlayıcı kurallar — anayasa) → **2) 
 dosya** (nerede kaldık) → 3) gerekirse `docs/` altındaki ilgili tasarım
 belgesi.
 
-Son güncelleme: **23.08.2026** · Ardeko Studios · Arda Güner
+Son güncelleme: **23.08.2026** (Faz E-1: silah izi + test süresi) · Ardeko Studios · Arda Güner
 
 > `GOREVLER.md` **silindi** (23.08.2026, Arda'nın isteği: "bir devir.md
 > olsun diğerlerini sil kafa karıştırmasın"). İçindeki canlı bilgi bu
@@ -74,7 +74,7 @@ Yedi faza bölündü:
 | **B** | Bölüm 1 prologu — kolyenin verilişi | ✅ |
 | **C** | Atmosfer + ışık (post-fx vinyet/tint, toz/zerre katmanı) | ✅ |
 | **D** | Çevre ve dekor (köy, köylüler, gökyüzü katmanları) | ✅ |
-| **E** | Karakter sprite'ları (pelerin/saç ikincil hareket, geçiş kareleri, silah izi) | ⬜ **SIRADAKİ** |
+| **E** | Karakter sprite'ları | 🟡 **silah izi ✅** · pelerin/saç ikincil hareket ve geçiş kareleri ⬜ |
 | **F** | HUD ve arayüz | ⬜ |
 | **G** | Bölüm 2 ve 3'ün ara sahneleri (`story.py` asıl burada kullanılacak) | ⬜ |
 
@@ -315,7 +315,21 @@ Hepsi gerçek hataydı, çoğu testle yakalandı.
 19. **Teleport ile test etmek gerçek senaryoyu atlayabilir.** Mini-boss
     kapısının oyuncuyu duvara gömme hatası, `teleport()` tabanlı testlerin
     atladığı bir kare penceresindeydi. **Yürünen senaryoyu test et.**
-20. **Heredoc (`<<'EOF'`) Türkçe metin ve ters bölü ile güvenilmez.**
+20. **`pygame.quit()` bu makinede ÇOK pahalı.** Ölçüldü (cProfile):
+    `Game.shutdown()` sonrası bir sonraki `pygame.init()` **40 saniye**
+    sürüyor. Kodla ilgisi yok, SDL yeniden başlatma maliyeti. Testler
+    bunu 25 kez ödüyordu (suite 20+ dk). **Testte `Game`'i yeniden
+    yaratma** — sahne durumu zaten `set_root` ile sıfırlanıyor. Tek
+    `Game`, sonda tek `shutdown()`.
+
+21. **İki yerde aynı matematik = sessiz kayma.** Silah izi kılıcın
+    ucundan çıkmalı; formülleri `draw_humanoid`'den kopyalasaydık biri
+    değiştiğinde iz kılıçtan kayardı ve bunu ancak ekran görüntüsüne
+    bakınca fark ederdik. `spritegen.weapon_tip()` **aynı** iskelet
+    zincirini paylaşıyor, `WEAPON_LENGTH` de silah boylarının tek
+    kaynağı.
+
+22. **Heredoc (`<<'EOF'`) Türkçe metin ve ters bölü ile güvenilmez.**
     Uzun metni Write aracıyla yaz, kısa yamaları Python betiğiyle uygula.
     `\n` kaçışları iki kez yorumlanıp gerçek satır sonuna dönüşebiliyor.
 
