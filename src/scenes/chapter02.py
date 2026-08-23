@@ -71,6 +71,10 @@ def _load(path: str):
 class Chapter02Scene(PlayScene):
     """Ilk Inis: sekiz oda, bir gizli oda, bir mini-boss."""
 
+    # Bolum basi karti (src/ui/chapter_card.py) - oynanisi durdurmaz.
+    chapter_number = 2
+    chapter_name_key = "chapter.first_descent"
+
     def setup(self) -> None:
         self.tilemap = TileMap(LEVEL.terrain_rows)
 

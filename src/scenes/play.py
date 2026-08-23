@@ -34,6 +34,7 @@ from src.systems.compass import Compass
 from src.systems.echo import Answer, EchoState
 from src.systems.save import read_save
 from src.ui import echo_view
+from src.ui.chapter_card import ChapterCard
 from src.ui.dialogue import Dialogue
 from src.ui import text
 from src.ui.hud import HUD
@@ -59,6 +60,12 @@ class PlayScene(Scene):
     # "Taş zeminde"/"Toprak/koy zemininde") - zindan varsayilan, Bolum 1
     # (koy) kendi degerini ezer.
     footstep_sound = "step_stone"
+
+    # Bolum basi karti - alt sinif ikisini de verirse gosterilir.
+    # `0` = kart yok (dovus test odasi, temel dogrulama ekrani gibi
+    # bolum olmayan sahneler).
+    chapter_number: int = 0
+    chapter_name_key: str = ""
 
     def setup(self) -> None:
         """Alt sinif sahneyi burada kurar.
@@ -99,6 +106,12 @@ class PlayScene(Scene):
         # yuruyebilir. Durdursaydik her replik bir kesinti olurdu ve oyuncu
         # okumak yerine gecmeye calisirdi.
         self.dialogue = Dialogue()
+
+        # Bolum basi karti - alt sinif `chapter_number`/`chapter_name_key`
+        # verirse gosterilir. Ara sahne DEGIL, bindirme: oynanisi
+        # durdurmuyor, oyuncu ilk kareden itibaren yuruyebilir.
+        self.card = (ChapterCard(self.chapter_number, self.chapter_name_key)
+                     if self.chapter_number else None)
 
         self.setup()
 
@@ -155,6 +168,8 @@ class PlayScene(Scene):
         self.compass.update(self.player)
         self._update_necklace_audio()
         self.dialogue.update(self.game)
+        if self.card is not None:
+            self.card.update()
         # Kirilabilir duvarlar Yanki ile parliyor. Liste kucuk (oda basina
         # birkac tane), her karede uretmek sorun degil.
         self.breakables = [_WallTarget(r)
@@ -267,6 +282,10 @@ class PlayScene(Scene):
             self._draw_hitboxes(surface, offset)
         self._draw_hud(surface)
         self.dialogue.draw(surface, self.game.frame)
+        # Kart diyalogun USTUNDE ama Yanki saciliminin ALTINDA: bolum
+        # adi her zeminde okunmali, ama Yanki acikken o da bulanir.
+        if self.card is not None:
+            self.card.draw(surface)
         self.draw_overlay(surface)
 
         # Kromatik kayma en son: arayuz dahil her seyin uzerine. Yanki

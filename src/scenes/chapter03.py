@@ -82,6 +82,10 @@ def _load(path: str):
 class Chapter03Scene(PlayScene):
     """Mesale Mahzeni: 7 oda, gizli Mum Bekcisi cebi, mini-boss."""
 
+    # Bolum basi karti (src/ui/chapter_card.py) - oynanisi durdurmaz.
+    chapter_number = 3
+    chapter_name_key = "chapter.torch_crypt"
+
     def setup(self) -> None:
         self.tilemap = TileMap(LEVEL.terrain_rows)
 

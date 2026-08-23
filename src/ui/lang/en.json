@@ -144,8 +144,8 @@
     "echo": "…"
   },
   "line": {
-    "ch01_cemo_gift": "Wear it. I made it myself.",
-    "ch01_rey_thanks": "Thanks, little one.",
+    "ch01_cemo_gift": "I made you a necklace.",
+    "ch01_rey_thanks": "Nice work, little one.",
     "ch01_echo_first": "wake",
     "ch01_echo_rift": "below... below...",
     "ch01_echo_alone": "you can get him back. i know the way.",
@@ -235,5 +235,8 @@
     "fener": "LANTERN  -  +40% light radius, +10% damage in darkness",
     "fener_desc": "A light that burns even in the deepest dark.",
     "unknown": "Unknown charm"
+  },
+  "chapter_card": {
+    "number": "CHAPTER {number}"
   }
 }

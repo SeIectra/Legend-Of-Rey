@@ -64,6 +64,10 @@ class Chapter01Scene(PlayScene):
 
     footstep_sound = "step_earth"    # Koy toprak zemini - zindan tasi degil
 
+    # Bolum basi karti (src/ui/chapter_card.py) - oynanisi durdurmaz.
+    chapter_number = 1
+    chapter_name_key = "chapter.village"
+
     def setup(self) -> None:
         self.tilemap = TileMap(LEVEL.terrain_rows)
         # `amb_village_night` donguluk sesi kaldirildi (Arda'nin canli

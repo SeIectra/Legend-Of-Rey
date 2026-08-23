@@ -144,8 +144,8 @@
     "echo": "…"
   },
   "line": {
-    "ch01_cemo_gift": "Boynuna tak. Ben yapayım dedim.",
-    "ch01_rey_thanks": "Elin sağolsun, ufaklık.",
+    "ch01_cemo_gift": "Sana kolye yaptım.",
+    "ch01_rey_thanks": "Eline sağlık, ufaklık.",
     "ch01_echo_first": "uyan",
     "ch01_echo_rift": "aşağıda... aşağıda...",
     "ch01_echo_alone": "onu geri alabilirsin. ben yolu biliyorum.",
@@ -235,5 +235,8 @@
     "fener": "FENER  ·  ışık yarıçapı %40 artar, karanlıkta hasar %10 artar",
     "fener_desc": "Karanlığın derinliğinde bile yanan bir ışık.",
     "unknown": "Bilinmeyen tılsım"
+  },
+  "chapter_card": {
+    "number": "BÖLÜM {number}"
   }
 }
