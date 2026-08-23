@@ -298,16 +298,17 @@ def main() -> int:
     check(pause.confirm_quit.selected.text == "İPTAL",
           "ana menu onayinda varsayilan IPTAL")
 
-    game.shutdown()
+    # Buradaki `game.shutdown()` + yeni `Game()` cifti KALDIRILDI:
+    # `pygame.quit()` sonrasi bir sonraki `pygame.init()` bu makinede
+    # 40 SANIYE suruyor (olculdu 23.08.2026; kodla ilgisi yok, SDL
+    # yeniden baslatma maliyeti). Ayni Game surdurulunce hem 40 saniye
+    # kazaniliyor hem de `Canvas.resolve()`'un istedigi acik ekran modu
+    # zaten korunmus oluyor.
 
     # --- 10. Ozel imlec (C&C tarzi) ------------------------------------------
     print("\n--- ozel imlec ---")
     from src.ui import cursor
 
-    # `pygame.quit()` az once cagrildi (Game.shutdown) - Canvas.resolve()
-    # `.convert_alpha()` icin acik bir ekran modu istiyor, once yeni bir
-    # Game() ile pencereyi geri kur.
-    game = Game()
     game.scenes.set_root(CombatRoomScene, transition=False)
     game.scenes._flush()
 

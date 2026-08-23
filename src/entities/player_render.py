@@ -39,6 +39,10 @@ def draw_player(player, surface: pygame.Surface,
         return
 
     ox, oy = offset
+    # Iz sprite'tan ONCE: kilicin ARKASINDA kalan bir sey, onunde degil.
+    # Sonra cizilseydi karakterin uzerine binerdi ve "efekt" gibi
+    # okunurdu; altta kalinca "hava yarilmis" gibi okunuyor.
+    player.trail.draw(surface, offset)
     # Sprite hucresi govdeden buyuk: yatayda merkezle, dikeyde sprite'in
     # **taban cizgisini** govdenin altina hizala. Hucrenin altini hizalamak
     # karakteri havada birakir. Squash yuksekligi degistirdigi icin taban

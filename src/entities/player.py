@@ -23,6 +23,7 @@ from src.config import (
 )
 from src.art.animation import CHARACTERS
 from src.art.animator import Animator
+from src.art.trail import WeaponTrail
 from src.core.input import Action
 from src.entities.actor import Actor
 from src.entities.character_stats import CharacterStats, REY
@@ -67,6 +68,7 @@ class Player(Actor):
         self.weapon = weapons.starting_weapon(stats.name.lower())
         self.chain = ChainState(window_frames=stats.chain_window,
                                 chain_table=weapons.get(self.weapon).chain)
+        self.trail = WeaponTrail()
         self._apply_weapon_sprite()
         self.dodge = DodgeState(charges=stats.dodge_charges,
                                 max_charges=stats.dodge_charges)
@@ -122,6 +124,7 @@ class Player(Actor):
             self.hurt_frames -= 1
         self.flash.update()
         self.squash.update()
+        self.trail.update()
 
         self.dodge.update(self.body.grounded)
         if self.combo.update():

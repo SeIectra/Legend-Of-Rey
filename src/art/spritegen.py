@@ -147,15 +147,25 @@ def _draw_arm(canvas: Canvas, sx: float, sy: float, shoulder_angle: float,
     return hx, hy
 
 
+# Her silahin elden uca uzunlugu (piksel). `_draw_weapon` ve `weapon_tip`
+# AYNI sozlugu okuyor: iki yerde ayri sayi olsaydi silah izi kilictan
+# kayardi ve bunu ancak ekran goruntusune bakinca fark ederdik.
+WEAPON_LENGTH: dict[str, float] = {
+    "sword": 13.0, "knife": 7.0, "club": 11.0, "staff": 14.0,
+    "spear": 19.0, "axe": 10.0, "bow": 0.0, "none": 0.0,
+}
+
+
 def _draw_weapon(canvas: Canvas, hx: float, hy: float, angle: float,
                  spec: CharSpec) -> None:
     kind = spec.weapon
     if kind == "none":
         return
     chain = spec.weapon_chain
+    reach = WEAPON_LENGTH.get(kind, 0.0)
     if kind == "sword":
-        tip_x = hx + math.cos(angle) * 13
-        tip_y = hy + math.sin(angle) * 13
+        tip_x = hx + math.cos(angle) * reach
+        tip_y = hy + math.sin(angle) * reach
         canvas.taper(hx, hy, tip_x, tip_y, 3.2, 0.9, chain, 3)
         guard = angle + math.pi / 2
         canvas.line(hx + math.cos(guard) * 2, hy + math.sin(guard) * 2,
@@ -164,27 +174,27 @@ def _draw_weapon(canvas: Canvas, hx: float, hy: float, angle: float,
         canvas.line(hx, hy, hx - math.cos(angle) * 3, hy - math.sin(angle) * 3,
                     2.0, "leather", 2)
     elif kind == "knife":
-        tip_x = hx + math.cos(angle) * 7
-        tip_y = hy + math.sin(angle) * 7
+        tip_x = hx + math.cos(angle) * reach
+        tip_y = hy + math.sin(angle) * reach
         canvas.taper(hx, hy, tip_x, tip_y, 2.4, 0.8, "bone_pale", 2)
         canvas.line(hx, hy, hx - math.cos(angle) * 2, hy - math.sin(angle) * 2,
                     2.0, "leather", 1)
     elif kind == "club":
-        tip_x = hx + math.cos(angle) * 11
-        tip_y = hy + math.sin(angle) * 11
+        tip_x = hx + math.cos(angle) * reach
+        tip_y = hy + math.sin(angle) * reach
         canvas.taper(hx, hy, tip_x, tip_y, 2.2, 4.6, "leather", 1)
         canvas.disc(tip_x, tip_y, 2.6, "leather", 2)
     elif kind == "staff":
-        tip_x = hx + math.cos(angle) * 14
-        tip_y = hy + math.sin(angle) * 14
+        tip_x = hx + math.cos(angle) * reach
+        tip_y = hy + math.sin(angle) * reach
         canvas.line(hx, hy, tip_x, tip_y, 2.0, "leather", 1)
         canvas.disc(tip_x, tip_y, 2.4, "arcane", 3, glow=200)
     elif kind == "spear":
         # Uzun sap + parlak uc. Silueti YATAY olarak kiran tek silah -
         # "yaklasma" tehdidi bir bakista okunsun (Mizrakli'nin butun
         # ogretisi mesafe).
-        tip_x = hx + math.cos(angle) * 19
-        tip_y = hy + math.sin(angle) * 19
+        tip_x = hx + math.cos(angle) * reach
+        tip_y = hy + math.sin(angle) * reach
         canvas.line(hx - math.cos(angle) * 5, hy - math.sin(angle) * 5,
                     tip_x, tip_y, 1.6, "leather", 1)
         canvas.taper(tip_x - math.cos(angle) * 4, tip_y - math.sin(angle) * 4,
@@ -203,8 +213,8 @@ def _draw_weapon(canvas: Canvas, hx: float, hy: float, angle: float,
         canvas.taper(mx, my, bx, by, 1.8, 1.0, "leather", 2)
         canvas.line(ax, ay, bx, by, 1.0, "bone_pale", 2)      # kiris
     elif kind == "axe":
-        haft_x = hx + math.cos(angle) * 10
-        haft_y = hy + math.sin(angle) * 10
+        haft_x = hx + math.cos(angle) * reach
+        haft_y = hy + math.sin(angle) * reach
         canvas.line(hx, hy, haft_x, haft_y, 1.8, "leather", 1)
         perp = angle + math.pi / 2
         canvas.polygon([
@@ -528,3 +538,42 @@ def draw_humanoid(spec: CharSpec, pose: Pose) -> Canvas:
     canvas.shade()
     canvas.outline("shadow", 1)
     return canvas
+
+
+def weapon_tip(spec: CharSpec, pose: Pose) -> tuple[float, float] | None:
+    """Silahin ucunun hucre icindeki konumu. Silah yoksa `None`.
+
+    `draw_humanoid` ile **ayni** iskelet formullerini kullaniyor. Silah
+    izi (`src/art/trail.py`) bunu okuyor: iz kilicin ucundan cikmali,
+    yaklasik bir noktadan degil. Formulleri kopyalasaydik biri
+    degistiginde oteki sessizce kayardi.
+    """
+    if spec.weapon == "none":
+        return None
+    reach = WEAPON_LENGTH.get(spec.weapon, 0.0)
+    if reach <= 0.0:
+        return None
+
+    cx = spec.cell_width * 0.5 + pose.dx
+    foot_y = spec.foot_y + pose.dy
+    hip_y = foot_y - (spec.thigh + spec.shin) * pose.squash
+    shoulder_y = hip_y - spec.torso_height * pose.squash + spec.hunch * 0.45
+    shoulder_x = cx + pose.lean * 2.5 + spec.hunch
+
+    # Silahi tutan kol: `weapon_hand` "back" ise arka omuzdan.
+    if pose.weapon_hand == "back":
+        sx, sy = shoulder_x - 1, shoulder_y + 1
+        shoulder_angle, elbow_angle = pose.arm_back
+    else:
+        sx, sy = shoulder_x + 1, shoulder_y + 1
+        shoulder_angle, elbow_angle = pose.arm_front
+
+    # Ust kol -> on kol -> el (draw_humanoid._draw_arm ile ayni zincir).
+    ex = sx + math.cos(shoulder_angle) * spec.upper_arm
+    ey = sy + math.sin(shoulder_angle) * spec.upper_arm
+    wrist = shoulder_angle + elbow_angle
+    hx = ex + math.cos(wrist) * spec.fore_arm
+    hy = ey + math.sin(wrist) * spec.fore_arm
+
+    return (hx + math.cos(pose.weapon_angle) * reach,
+            hy + math.sin(pose.weapon_angle) * reach)

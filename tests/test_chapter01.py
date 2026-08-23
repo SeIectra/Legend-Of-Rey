@@ -41,6 +41,20 @@ def check(condition: bool, label: str, detail: str = "") -> None:
         failures.append(label)
 
 
+def fresh(game: Game, character: str = "rey") -> Chapter01Scene:
+    """Sahneyi bastan kurar - Game'i YENIDEN YARATMADAN.
+
+    `Game.shutdown()` `pygame.quit()` cagiriyor ve bu makinede bir
+    sonraki `pygame.init()` 40 saniye suruyor (olculdu 23.08.2026; kodla
+    ilgisi yok, SDL yeniden baslatma maliyeti). Yedi ayri Game yaratmak
+    testi 284 saniyeye cikariyordu. Sahne durumu zaten `set_root` ile
+    sifirlaniyor - Game'i tazelemeye gerek yok.
+    """
+    game.scenes.set_root(Chapter01Scene, transition=False, character=character)
+    game.scenes._flush()
+    return game.scenes.current
+
+
 def make_scene(game: Game, character: str) -> Chapter01Scene:
     game.scenes.set_root(Chapter01Scene, transition=False, character=character)
     game.scenes._flush()
@@ -74,41 +88,34 @@ def main() -> int:
     check(ardo.toast == "", "hicbir bildirim gosterilmedi", repr(ardo.toast))
     check(ardo.echo_taught,
           "tetikleyici yine de 'ogretildi' isaretleniyor - tekrar denenmiyor")
-    game.shutdown()
 
     # --- Rey: ayni ogreti hala calismali (fix asiri kisitlamiyor) -----------
     print("\n--- Rey: Yanki Gorusu ogretisi hala calisiyor ---")
-    game2 = Game()
-    rey = make_scene(game2, "rey")
+    rey = make_scene(game, "rey")
     check(rey.echo is not None, "Rey'in Yankisi var")
     rey.player.body.set_feet(ECHO_TUTORIAL_TILE.x, ECHO_TUTORIAL_TILE.feet_y)
     rey.player.body.vx = rey.player.body.vy = 0.0
-    idle(game2, rey, 5)
+    idle(game, rey, 5)
     check(rey.player.has(abilities.ECHO_SIGHT),
           "Rey ogretiyle Yanki Gorusu'nu kazaniyor")
-    game2.shutdown()
 
     # --- Ardo zaten kilicla basliyor - yerde ikinci bir kilic gormemeli -----
     # Arda'nin bildirdigi celiski: "karakter kilici almadan once de kilici
     # oluyor" - Ardo zaten silahli baslarken sahne yine de bir "al beni"
     # kilic prop'u gosteriyordu.
     print("\n--- Ardo zaten silahli - yerde ikinci kilic YOK ---")
-    game3 = Game()
-    ardo2 = make_scene(game3, "ardo")
+    ardo2 = make_scene(game, "ardo")
     check(ardo2.player.has(abilities.SWORD),
           "Ardo basta zaten kilica sahip")
     check(ardo2.sword_pos is None,
           "Ardo icin yerde kilic prop'u YOK (celiskili gorunmesin)")
-    game3.shutdown()
 
     print("\n--- Rey icin yerde kilic prop'u hala var ---")
-    game4 = Game()
-    rey2 = make_scene(game4, "rey")
+    rey2 = make_scene(game, "rey")
     check(not rey2.player.has(abilities.SWORD),
           "Rey basta kilica sahip degil")
     check(rey2.sword_pos is not None,
           "Rey icin yerde kilic prop'u duruyor (bulunacak)")
-    game4.shutdown()
 
     # --- Prolog: pasif oyuncu (hic onaylamiyor) hicbir repligi kaybetmez ----
     # Arda'nin bildirdigi "bunlar cok anlamsiz cumleler" hatasi: cok-replikli
@@ -119,15 +126,14 @@ def main() -> int:
     # Bu test hic girdi vermeden butun prologu oynatir ve 5 repligin de
     # (atlanmadan) en az bir kere gorundugunu dogrular.
     print("\n--- prolog: pasif oyuncu replik kaybetmiyor ---")
-    game5 = Game()
-    game5.scenes.set_root(Chapter01Scene, transition=False, character="rey")
-    game5.scenes._flush()
-    prolog_scene = game5.scenes.current
+    game.scenes.set_root(Chapter01Scene, transition=False, character="rey")
+    game.scenes._flush()
+    prolog_scene = game.scenes.current
     seen_keys: list[str] = []
     last_key = None
     for _ in range(sum(frames for frames, _ in PROLOGUE) + 60):
-        game5.input.begin_frame()
-        game5.input.end_frame()
+        game.input.begin_frame()
+        game.input.end_frame()
         prolog_scene.update()
         cur = prolog_scene.dialogue.current
         key = cur.key if cur else None
@@ -140,7 +146,6 @@ def main() -> int:
         check(expected_key in seen_keys,
               f"pasif oyuncu da '{expected_key}' repligini goruyor",
               ", ".join(seen_keys))
-    game5.shutdown()
 
     # --- Kolye gercekten EL DEGISTIRIYOR ------------------------------------
     # Eskiden `necklace` "alone" adiminda sessizce True oluyordu: oyunun
@@ -151,10 +156,9 @@ def main() -> int:
     # prologun icinde oldugu icin onunla test edilemez. Pasif oyuncu
     # testindeki gibi sahneyi dogrudan kuruyoruz.
     print("\n--- kolye ucusu: Cemo'dan oyuncuya ---")
-    game6 = Game()
-    game6.scenes.set_root(Chapter01Scene, transition=False, character="rey")
-    game6.scenes._flush()
-    gift = game6.scenes.current
+    game.scenes.set_root(Chapter01Scene, transition=False, character="rey")
+    game.scenes._flush()
+    gift = game.scenes.current
     check(not gift.necklace, "baslangicta kolye YOK")
     check(gift.gift_frames < 0, "baslangicta kolye havada degil")
 
@@ -162,8 +166,8 @@ def main() -> int:
     flight_positions: list[tuple[float, float]] = []
     got_at = None
     for frame in range(sum(f for f, _ in PROLOGUE) + 60):
-        game6.input.begin_frame()
-        game6.input.end_frame()
+        game.input.begin_frame()
+        game.input.end_frame()
         gift.update()
         if gift.gift_flying:
             saw_flight = True
@@ -185,7 +189,6 @@ def main() -> int:
         check(mid_y < (first_y + last_y) * 0.5,
               "ucus DUZ degil, yay ciziyor (firlatilmis nesne gibi)",
               f"orta {mid_y:.1f} < ortalama {(first_y + last_y) * 0.5:.1f}")
-    game6.shutdown()
 
     # --- Koyluler: gezinir, yarik acilinca evlerine kacar -------------------
     # Arda'nin istegi: "ilk basta etrafta koyluler dolasabilir. Olaylar
@@ -193,10 +196,9 @@ def main() -> int:
     # "sakin koy -> yarik -> kayip" uzerine kurulu; koy yasamiyorsa
     # kaybedilen sey de soyut kaliyor.
     print("\n--- koyluler: gezinme ve kacis ---")
-    game7 = Game()
-    game7.scenes.set_root(Chapter01Scene, transition=False, character="rey")
-    game7.scenes._flush()
-    village = game7.scenes.current
+    game.scenes.set_root(Chapter01Scene, transition=False, character="rey")
+    game.scenes._flush()
+    village = game.scenes.current
 
     check(len(village.villagers) >= 3, "koyde birden fazla koylu var",
           str(len(village.villagers)))
@@ -204,7 +206,7 @@ def main() -> int:
 
     # Yarik acilmadan once: gezinirler, hicbiri kacmaz.
     for _ in range(120):
-        game7.input.begin_frame(); game7.input.end_frame()
+        game.input.begin_frame(); game.input.end_frame()
         village.update()
     check(not village.villagers_fled, "yarik acilmadan kimse kacmiyor")
     moved = sum(1 for v, x0 in zip(village.villagers, start_positions)
@@ -216,13 +218,14 @@ def main() -> int:
 
     # Prologun geri kalanini oynat: yarik acilir, koyluler kacar.
     for _ in range(sum(f for f, _ in PROLOGUE) + 240):
-        game7.input.begin_frame(); game7.input.end_frame()
+        game.input.begin_frame(); game.input.end_frame()
         village.update()
     check(village.villagers_fled, "yarik acilinca kacis tetiklendi")
     check(not village.villagers,
           "butun koyluler evlerine girdi (listeden dustuler)",
           str(len(village.villagers)) + " kaldi")
-    game7.shutdown()
+
+    game.shutdown()
 
     print("\n=== SONUC ===")
     if failures:

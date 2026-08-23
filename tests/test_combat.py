@@ -324,7 +324,9 @@ def main() -> int:
     check(dummy.flash.active or dummy.flash.frames_left >= 0,
           "hedef flasi tetiklendi")
 
-    h.game.shutdown()
+    # `h.game.shutdown()` KALDIRILDI - `pygame.quit()` sonrasi bir sonraki
+    # `pygame.init()` bu makinede 40 SANIYE suruyor (olculdu 23.08.2026;
+    # kodla ilgisi yok, SDL yeniden baslatma maliyeti).
 
     # --- Yetenek kapisi ------------------------------------------------------
     # Rey artik yumrukla basliyor (src/combat/weapons.py) - saldiri bastan
@@ -368,6 +370,47 @@ def main() -> int:
     check(gate.player.dodge.active,
           "kacinma ogrenildikten sonra atilabiliyor")
     gate.game.shutdown()
+
+    # --- Silah izi (src/art/trail.py) ---------------------------------------
+    # Iz, sprite'i cizen AYNI poz fonksiyonundan hesaplaniyor
+    # (spritegen.weapon_tip). Iki yerde ayri matematik olsaydi iz kilictan
+    # kayardi ve bunu ancak ekran goruntusune bakinca fark ederdik.
+    print("\n--- silah izi ---")
+    from src.art.spritegen import WEAPON_LENGTH, weapon_tip
+    from src.art.animation import ANIMATIONS, CHARACTERS
+    from src.art.trail import TRAIL_LIFE_FRAMES, TRAIL_MAX_POINTS, WeaponTrail
+
+    check(weapon_tip(CHARACTERS["shambler"], ANIMATIONS["idle"][0](0.0)) is None,
+          "silahsiz karakterin izi YOK")
+    check(weapon_tip(CHARACTERS["rey_armed"], ANIMATIONS["attack1"][0](0.5)) is not None,
+          "kilicli karakterin ucu hesaplaniyor")
+
+    # Savurma boyunca uc gercekten HAREKET etmeli - sabit kalirsa iz olmaz.
+    _fn, _count, _loop = ANIMATIONS["attack1"]
+    _tips = [weapon_tip(CHARACTERS["rey_armed"], _fn(i / max(1, _count - 1)))
+             for i in range(_count)]
+    _span = max(t[0] for t in _tips) - min(t[0] for t in _tips)
+    check(_span > 10.0, "savurma boyunca uc genis bir yay ciziyor",
+          f"{_span:.1f}px yatay yayilim")
+
+    # WEAPON_LENGTH tek kaynak mi? Her silah tipi tanimli olmali.
+    _kinds = set()
+    for _spec in CHARACTERS.values():
+        _kinds.add(_spec.weapon)
+    _missing = _kinds - set(WEAPON_LENGTH)
+    check(not _missing, "her silah tipinin uzunlugu WEAPON_LENGTH'te tanimli",
+          str(_missing))
+
+    # Iz sinirli: nokta sayisi ust siniri asmamali, omru bitince dusmeli.
+    _trail = WeaponTrail()
+    for _i in range(TRAIL_MAX_POINTS * 3):
+        _trail.add(_i * 4.0, 0.0)
+    check(len(_trail.points) <= TRAIL_MAX_POINTS,
+          "iz nokta sayisi ust siniri asmiyor", str(len(_trail.points)))
+    for _ in range(TRAIL_LIFE_FRAMES + 2):
+        _trail.update()
+    check(not _trail.active, "iz omru bitince tamamen siliniyor",
+          str(len(_trail.points)))
 
     print("\n=== SONUC ===")
     if failures:

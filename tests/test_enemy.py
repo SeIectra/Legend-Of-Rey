@@ -50,11 +50,21 @@ def check(condition: bool, label: str, detail: str = "") -> None:
         failures.append(label)
 
 
+# Tek Game, defalarca sahne. `Game.shutdown()` `pygame.quit()` cagiriyor
+# ve bu makinede bir sonraki `pygame.init()` 40 SANIYE suruyor (olculdu
+# 23.08.2026; kodla ilgisi yok, SDL yeniden baslatma maliyeti). Bu dosya
+# 17 kez kapatip aciyordu - tek basina 11 dakika. Sahne durumu zaten
+# `set_root` ile sifirlaniyor, Game'i tazelemeye gerek yok.
+_GAME: Game | None = None
+
+
 def make_scene(game: Game | None = None) -> tuple[Game, CombatRoomScene]:
-    game = game or Game()
-    game.scenes.set_root(CombatRoomScene, transition=False)
-    game.scenes._flush()
-    return game, game.scenes.current
+    global _GAME
+    if _GAME is None:
+        _GAME = Game()
+    _GAME.scenes.set_root(CombatRoomScene, transition=False)
+    _GAME.scenes._flush()
+    return _GAME, _GAME.scenes.current
 
 
 def step(game, scene, count: int = 1) -> None:
@@ -146,7 +156,6 @@ def main() -> int:
 
     check(len(holders) >= 3, "hak birden fazla dusmana geciyor - sira donuyor",
           f"{len(holders)} farkli dusman")
-    game.shutdown()
 
     # --- 3. Tell gercekten hitbox'tan once mu? ------------------------------
     print("\n--- tell hitbox'tan once ---")
@@ -179,7 +188,6 @@ def main() -> int:
     else:
         check(False, "tell ve hitbox gozlemlendi",
               f"tell={tell_started} hitbox={hitbox_frame}")
-    game.shutdown()
 
     # --- 4. Ritim imzasi determinist mi? ------------------------------------
     # Ayni kosullarda ayni tip ayni karede saldirmali. Rastgele saldiran
@@ -199,7 +207,6 @@ def main() -> int:
                 found = frame
                 break
         first_attack_frames.append(found)
-        game.shutdown()
 
     check(len(set(first_attack_frames)) == 1 and first_attack_frames[0] is not None,
           "Suruklenen her denemede ayni karede saldiriyor",
@@ -234,7 +241,6 @@ def main() -> int:
           "poise kirilinca tell iptal oldu", enemy.state.name)
     check(not scene.tokens.holds(enemy),
           "sendeleyen dusman hakki birakti - sira donuyor")
-    game.shutdown()
 
     # --- 6. Ekoloji: Sismek patlamasi dusmanlari da vurur -------------------
     print("\n--- ekoloji: dost ates ---")
@@ -260,7 +266,6 @@ def main() -> int:
           str(victim_health - victim.health))
 
     # Oyuncuya da isliyor mu? Tek tarafli dost ates riski yok eder.
-    game.shutdown()
     game, scene = make_scene()
     bloated = place(scene, Bloated, 20)
     scene.enemies = [bloated]
@@ -274,7 +279,6 @@ def main() -> int:
     check(scene.player.health < before,
           "patlama oyuncuyu da vuruyor - risk gercek",
           f"{before} -> {scene.player.health}")
-    game.shutdown()
 
     # --- 7. Fitil yanınca durmaz -------------------------------------------
     print("\n--- fitil yanınca durmaz ---")
@@ -299,7 +303,6 @@ def main() -> int:
     check(lit and (bloated.fuse_lit or bloated.exploded),
           "yanan fitil sendelemeyle sonmuyor",
           f"lit={bloated.fuse_lit} patladi={bloated.exploded}")
-    game.shutdown()
 
     # --- 8. Tirmanan tavanda bekliyor, altindan gecince dusuyor -------------
     print("\n--- tirmanan ---")
@@ -328,7 +331,6 @@ def main() -> int:
         check(dropped_at >= Climber.tell_frames,
               "birakmadan once telegraf var",
               f"{dropped_at} >= {Climber.tell_frames}")
-    game.shutdown()
 
     # --- 8b. Tirmanan - oyuncu hic tam altina girmezse "sabir" ile birakir --
     # Arda'nin canli oynanis geri bildirimi: oda duzeni oyuncuyu Tirmanan'in
@@ -364,7 +366,6 @@ def main() -> int:
         check(patient_dropped_at >= CLIMBER_PATIENCE_FRAMES,
               "sabir esiginden ONCE birakmiyor (erken tetiklenmiyor)",
               f"{patient_dropped_at} >= {CLIMBER_PATIENCE_FRAMES}")
-    game.shutdown()
 
     # --- 8c. Tirmanan - saldiri hakki HICBIR ZAMAN yok, yine de birakir -----
     # 8b, `tokens.clear()` ile bos bir yonetici kullaniyor ve odada TEK
@@ -418,7 +419,6 @@ def main() -> int:
         check(climber.state is not EnemyState.TELL,
               "bu birakma bir saldiri TELL'i degil - hakka bagli olmayan dogrudan dusme",
               f"state={climber.state}")
-    game.shutdown()
 
     # --- 8d. Tirmanan - surekli isiktan kacsa da sabir esiginde birakir -----
     # `_fleeing_light` sabir sayacindan ONCE `return` ediyordu (Bolum 3 Oda
@@ -457,7 +457,6 @@ def main() -> int:
         check(fled_dropped_at + 1 >= CLIMBER_PATIENCE_FRAMES,
               "sabir esiginden ONCE birakmiyor (erken tetiklenmiyor)",
               f"{fled_dropped_at + 1} >= {CLIMBER_PATIENCE_FRAMES}")
-    game.shutdown()
 
     # --- 8e. Tirmanan - isiktan kacarken vurulursa yine de ANINDA duser -----
     # `_fleeing_light` STAGGER/TELL kontrolunden ONCE `return` ediyordu -
@@ -490,7 +489,6 @@ def main() -> int:
     check(not climber.hanging,
           "isiktan kacarken vurulan Tirmanan sabir beklemeden aninda duser",
           f"hanging={climber.hanging}")
-    game.shutdown()
 
     # --- 9. Can bari yok ----------------------------------------------------
     print("\n--- can bari yok ---")
@@ -546,7 +544,6 @@ def main() -> int:
     check(stuck.body.y > start_y + 4.0,
           "sabir dolunca en yakin kenari bulup platformdan iniyor",
           f"y={stuck.body.y:.1f} (baslangic {start_y:.1f})")
-    game.shutdown()
 
     # Ayni oyuncu SEVIYEDEYSE saldiri hala calismali - fix'in asiri
     # kisitlayici olmadigini dogrular.
@@ -563,7 +560,6 @@ def main() -> int:
             attacked = True
             break
     check(attacked, "ayni seviyedeyken saldiri hala calisiyor (fix asiri kisitlamiyor)")
-    game.shutdown()
 
     # --- 10c. Dikey erisim - oyuncuyu HIC gormeden kopuk platformdan iner ---
     # 10b'nin ayni-sinif ikizi: onceki sayac yalnizca `_approach()` icinde,
@@ -598,7 +594,6 @@ def main() -> int:
     check(not was_ever_aware,
           "test kurulumu: dusman hic 'farkinda' olmadi - yalnizca sabirla indi",
           f"aware={was_ever_aware}")
-    game.shutdown()
 
     # --- 11. Sonmus Olan - "surukleme" hamlesi ATTACK'ta kilitlenmiyor ------
     # `ExtinguishedOne._think()`'in eski hali `state is ATTACK and
@@ -640,7 +635,6 @@ def main() -> int:
     check(not stuck,
           "surukleme ATTACK'ta sonsuza dek kilitlenmiyor - RECOVER/ORBIT'e geciyor",
           f"state={boss.state}")
-    game.shutdown()
 
     # --- 10. Kalicilik ------------------------------------------------------
     print("\n--- kalici izler ---")
@@ -653,7 +647,9 @@ def main() -> int:
     check(scene.decals.count == after_splat,
           "lekeler zamanla silinmiyor - bolum boyunca kaliyor",
           str(scene.decals.count))
-    game.shutdown()
+
+    if _GAME is not None:
+        _GAME.shutdown()
 
     print("\n=== SONUC ===")
     if failures:
