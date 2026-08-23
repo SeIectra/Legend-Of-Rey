@@ -7,7 +7,7 @@ Okuma sırası: **1) `CLAUDE.md`** (bağlayıcı kurallar — anayasa) → **2) 
 dosya** (nerede kaldık) → 3) gerekirse `docs/` altındaki ilgili tasarım
 belgesi.
 
-Son güncelleme: **23.08.2026** (Faz E-1: silah izi + test süresi) · Ardeko Studios · Arda Güner
+Son güncelleme: **23.08.2026** (Faz E tamamlandı) · Ardeko Studios · Arda Güner
 
 > `GOREVLER.md` **silindi** (23.08.2026, Arda'nın isteği: "bir devir.md
 > olsun diğerlerini sil kafa karıştırmasın"). İçindeki canlı bilgi bu
@@ -74,8 +74,8 @@ Yedi faza bölündü:
 | **B** | Bölüm 1 prologu — kolyenin verilişi | ✅ |
 | **C** | Atmosfer + ışık (post-fx vinyet/tint, toz/zerre katmanı) | ✅ |
 | **D** | Çevre ve dekor (köy, köylüler, gökyüzü katmanları) | ✅ |
-| **E** | Karakter sprite'ları | 🟡 **silah izi ✅** · pelerin/saç ikincil hareket ve geçiş kareleri ⬜ |
-| **F** | HUD ve arayüz | ⬜ |
+| **E** | Karakter sprite'ları (silah izi, ikincil hareket, geçiş kareleri) | ✅ |
+| **F** | HUD ve arayüz | ⬜ **SIRADAKİ** |
 | **G** | Bölüm 2 ve 3'ün ara sahneleri (`story.py` asıl burada kullanılacak) | ⬜ |
 
 **Faz C'nin yarım kalan parçası:** ışık/karartma sistemi
