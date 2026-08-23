@@ -83,6 +83,7 @@ class Chapter01Scene(PlayScene):
     chapter_number = 1
     chapter_name_key = "chapter.village"
     postfx_grade = "village"   # src/art/postfx.py
+    ambience_preset = "night"
 
     def setup(self) -> None:
         self.tilemap = TileMap(LEVEL.terrain_rows)

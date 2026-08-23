@@ -15,6 +15,7 @@ from __future__ import annotations
 import pygame
 
 from src.art import palette
+from src.art.ambience import Ambience
 from src.art.particles import ParticleField
 from src.combat.attack_token import AttackTokenManager
 from src.combat.hitbox import HitboxManager, Team
@@ -67,6 +68,11 @@ class PlayScene(Scene):
     chapter_number: int = 0
     chapter_name_key: str = ""
 
+    # Odanin havasi (src/art/ambience.py). Bos = atmosfer katmani yok.
+    # `particles` olaylar icin (vurus/olum), bu SUREKLI olan sey - oda
+    # hicbir sey olmasa bile yasiyor gorunsun.
+    ambience_preset: str = ""
+
     def setup(self) -> None:
         """Alt sinif sahneyi burada kurar.
 
@@ -112,6 +118,8 @@ class PlayScene(Scene):
         # durdurmuyor, oyuncu ilk kareden itibaren yuruyebilir.
         self.card = (ChapterCard(self.chapter_number, self.chapter_name_key)
                      if self.chapter_number else None)
+        self.ambience = (Ambience(self.ambience_preset)
+                         if self.ambience_preset else None)
 
         self.setup()
 
@@ -170,6 +178,8 @@ class PlayScene(Scene):
         self.dialogue.update(self.game)
         if self.card is not None:
             self.card.update()
+        if self.ambience is not None:
+            self.ambience.update(self.camera.offset)
         # Kirilabilir duvarlar Yanki ile parliyor. Liste kucuk (oda basina
         # birkac tane), her karede uretmek sorun degil.
         self.breakables = [_WallTarget(r)
@@ -268,6 +278,11 @@ class PlayScene(Scene):
         self.player.draw(surface, offset)
         self.particles.draw(surface, offset)
         self.draw_foreground(surface, offset)
+        # Atmosfer aktorlerin ONUNDE: toz "odanin icinde" degil "kamerayla
+        # oyuncu arasinda" olmali, yoksa zemin dokusu sanilir. Yanki
+        # karartmasinin ALTINDA kaliyor - Yanki acikken hava da bulaniyor.
+        if self.ambience is not None:
+            self.ambience.draw(surface)
 
         # Sira: once dunya kararir (bedel), sonra gizli seyler o karanligi
         # delerek cikar (kazanc). Ters sirada Yanki acilinca ekran

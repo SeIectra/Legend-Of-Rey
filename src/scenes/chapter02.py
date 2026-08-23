@@ -75,6 +75,7 @@ class Chapter02Scene(PlayScene):
     chapter_number = 2
     chapter_name_key = "chapter.first_descent"
     postfx_grade = "descent"   # src/art/postfx.py
+    ambience_preset = "dust"
 
     def setup(self) -> None:
         self.tilemap = TileMap(LEVEL.terrain_rows)

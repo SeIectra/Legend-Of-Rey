@@ -86,6 +86,7 @@ class Chapter03Scene(PlayScene):
     chapter_number = 3
     chapter_name_key = "chapter.torch_crypt"
     postfx_grade = "crypt"   # src/art/postfx.py
+    ambience_preset = "ember"
 
     def setup(self) -> None:
         self.tilemap = TileMap(LEVEL.terrain_rows)

@@ -170,6 +170,37 @@ check(CHAIN_WINDOW_FRAMES == 12, "zincir penceresi 12 kare")
 check(DODGE_IFRAMES == 6, "kacinma 6 kare dokunulmazlik")
 
 # --- Sonuc ------------------------------------------------------------------
+# --- Atmosfer katmani (src/art/ambience.py) ---------------------------------
+# CLAUDE.md 4: parcacik ust siniri 200. Atmosfer katmani onun bir dilimini
+# kullanmali, dovus parcaciklarina yer birakmali. Ayrica zerreler ekrandan
+# cikinca YOK EDILMEMELI - karsi kenardan geri girmeli (sabit sayi, sifir
+# tahsis).
+print("\n--- atmosfer katmani ---")
+from src.art.ambience import AMBIENCE_MAX, PRESETS, Ambience  # noqa: E402
+
+check(AMBIENCE_MAX <= 100,
+      "atmosfer ust siniri dovus parcaciklarina yer birakiyor",
+      str(AMBIENCE_MAX) + " <= 100 (toplam sinir 200)")
+
+for _preset_name in PRESETS:
+    _air = Ambience(_preset_name)
+    check(len(_air.motes) <= AMBIENCE_MAX,
+          _preset_name + ": zerre sayisi ust siniri asmiyor",
+          str(len(_air.motes)))
+    _before = len(_air.motes)
+    # Kamerayi cok uzaga kaydir: her zerre ekrandan defalarca cikar.
+    for _ in range(400):
+        _air.update((900.0, 500.0))
+    check(len(_air.motes) == _before,
+          _preset_name + ": zerre sayisi sabit (sarma var, yeniden uretim yok)",
+          str(_before) + " -> " + str(len(_air.motes)))
+    _outside = [m for m in _air.motes
+                if not (-4 <= m.x <= INTERNAL_WIDTH + 4
+                        and -4 <= m.y <= INTERNAL_HEIGHT + 4)]
+    check(not _outside,
+          _preset_name + ": hicbir zerre ekran disinda kaybolmuyor",
+          str(len(_outside)) + " kacak")
+
 print("\n=== SONUC ===")
 if failures:
     print(f"{len(failures)} BASARISIZ:")
