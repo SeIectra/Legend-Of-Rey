@@ -147,6 +147,29 @@ class PlayScene(Scene):
         if self.game.input.pressed(Action.PAUSE):
             from src.ui.pause import PauseScene
             self.scenes.push(PauseScene, save_data=self.save_data)
+            return
+        if event.key == pygame.K_r and self.player.dead:
+            self.restart()
+
+    def restart(self) -> None:
+        """Olumden sonra sahneyi bastan kurar.
+
+        **Bu bir yumusak kilit duzeltmesi.** Olum ekrani "OLDUN - R ile
+        sifirla" yaziyordu ama R'yi YALNIZCA dovus test odasi dinliyordu;
+        bolumlerde tusun hicbir karsiligi yoktu, yazi bos bir soz
+        veriyordu (24.08.2026'da bulundu).
+
+        Boss arenasinin cikisi anahtarla acilir hale gelince bu gercek bir
+        kilitlenmeye donustu: boss'a yenilen oyuncu ne sifirlayabiliyor ne
+        de cikabiliyordu. Cikis kapisini "olunce de ac" yapmak daha kolay
+        olurdu ama o zaman olmek boss'u atlamanin YOLU olurdu - dogru
+        cozum sifirlamanin gercekten calismasi.
+
+        `on_enter` sahneyi bastan kuruyor (dovus odasinin `K_r`'siyle ayni
+        yol). Kayit dosyasina dokunulmuyor: altin ve Yanki kademesi
+        olumden once neyse o kaliyor.
+        """
+        self.on_enter(character=self.character)
 
     def update(self) -> None:
         self.player.update()

@@ -467,6 +467,46 @@ def main() -> int:
               "delta " + str(round(hanger.body.y - start_y, 1)) + "px")
     climb_game.shutdown()
 
+    # --- Olumden sonra R gercekten sifirliyor (YUMUSAK KILIT) ---------------
+    # Olum ekrani "OLDUN - R ile sifirla" yaziyordu ama R'yi YALNIZCA dovus
+    # test odasi dinliyordu; bolumlerde tusun hicbir karsiligi yoktu.
+    # Boss arenasinin cikisi anahtarla acilir hale gelince bu gercek bir
+    # kilitlenmeye donustu: yenilen oyuncu ne sifirlayabiliyor ne
+    # cikabiliyordu.
+    print("\n--- olumden sonra R sifirliyor ---")
+    dead_game = Game()
+    dead_game.scenes.set_root(Chapter02Scene, transition=False, character="rey")
+    dead_game.scenes._flush()
+    dead = dead_game.scenes.current
+    start_x = dead.player.body.center_x
+
+    dead.player.body.set_feet(2600.0, 14 * TILE_SIZE)
+    for _ in range(20):
+        dead_game.input.begin_frame(); dead_game.input.end_frame()
+        dead.update()
+    dead.player.health = 0
+    dead.player.dead = True
+
+    # Diri oyuncuda R HICBIR SEY yapmamali - yanlislikla sifirlama olmasin.
+    dead.player.dead = False
+    reset_event = pygame.event.Event(pygame.KEYDOWN, key=pygame.K_r)
+    moved_x = dead.player.body.center_x
+    dead.handle_event(reset_event)
+    check(abs(dead_game.scenes.current.player.body.center_x - moved_x) < 1.0,
+          "DIRI oyuncuda R sifirlamiyor (kaza korumasi)")
+
+    dead.player.dead = True
+    dead.handle_event(reset_event)
+    fresh = dead_game.scenes.current
+    check(not fresh.player.dead, "R'den sonra oyuncu diri")
+    check(fresh.player.health == fresh.player.max_health,
+          "cani dolu", str(fresh.player.health))
+    check(abs(fresh.player.body.center_x - start_x) < 2.0,
+          "bolum basina dondu", str(round(fresh.player.body.center_x, 1)))
+    check(fresh.exit_door.locked and not fresh.has_key,
+          "kapi yeniden kilitli - olmek boss'u atlamanin yolu DEGIL")
+    dead_game.shutdown()
+
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")
