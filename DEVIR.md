@@ -7,7 +7,7 @@ Okuma sırası: **1) `CLAUDE.md`** (bağlayıcı kurallar — anayasa) → **2) 
 dosya** (nerede kaldık) → 3) gerekirse `docs/` altındaki ilgili tasarım
 belgesi.
 
-Son güncelleme: **24.08.2026** (Faz E ✅, Faz G Bölüm 2 iniş sahnesi ✅) · Ardeko Studios · Arda Güner
+Son güncelleme: **24.08.2026** (boss kapısı + anahtar, yumuşak kilit düzeltmesi) · Ardeko Studios · Arda Güner
 
 > `GOREVLER.md` **silindi** (23.08.2026, Arda'nın isteği: "bir devir.md
 > olsun diğerlerini sil kafa karıştırmasın"). İçindeki canlı bilgi bu
@@ -75,7 +75,7 @@ Yedi faza bölündü:
 | **C** | Atmosfer + ışık (post-fx vinyet/tint, toz/zerre katmanı) | ✅ |
 | **D** | Çevre ve dekor (köy, köylüler, gökyüzü katmanları) | ✅ |
 | **E** | Karakter sprite'ları (silah izi, ikincil hareket, geçiş kareleri) | ✅ |
-| **F** | HUD ve arayüz | ⬜ **SIRADAKİ** |
+| **F** | HUD ve arayüz | 🟡 can çubuğu ✅ · gerisi ⬜ |
 | **G** | Bölüm 2/3 ara sahneleri | 🟡 **Bölüm 2 iniş sahnesi ✅** (`story.py` artık kullanılıyor) · B3 güçlendirmesi ⬜ |
 
 **Işık sistemi hakkında bir düzeltme (24.08.2026):** Bu belge bir ara
@@ -318,21 +318,35 @@ Hepsi gerçek hataydı, çoğu testle yakalandı.
 19. **Teleport ile test etmek gerçek senaryoyu atlayabilir.** Mini-boss
     kapısının oyuncuyu duvara gömme hatası, `teleport()` tabanlı testlerin
     atladığı bir kare penceresindeydi. **Yürünen senaryoyu test et.**
-20. **`pygame.quit()` bu makinede ÇOK pahalı.** Ölçüldü (cProfile):
+20. **Gövdesi katı tile ile ÇAKIŞAN aktör tamamen donar.** Hiçbir yöne
+    kımıldayamaz ve `grounded=True` bildirir. Çarpışma çözücünün
+    "çakışmadan dışarı it" kurtarma yolu yok. Aynı sınıf hata **üç kez**
+    çıktı: mini-boss kapısının oyuncuyu gömmesi, Tırmanan'ın tavana
+    gömülü doğması, ve bir testin oyuncuyu platformun içine koyması.
+    Bir şeyi elle konumlandırırken (spawn, teleport, tilemap değişikliği)
+    gövdenin **tamamının** boş tile'da olduğunu doğrula.
+
+21. **Ekranda verilen her söz tutulmalı.** Ölüm ekranı "R ile sıfırla"
+    yazıyordu ama `K_r`'yi yalnızca dövüş odası dinliyordu. Yıllarca
+    zararsız göründü; arena çıkışı anahtarla açılır olunca gerçek bir
+    yumuşak kilide dönüştü. Bir metin bir tuştan söz ediyorsa o tuşun
+    çalıştığı **test edilmeli**.
+
+22. **`pygame.quit()` bu makinede ÇOK pahalı.** Ölçüldü (cProfile):
     `Game.shutdown()` sonrası bir sonraki `pygame.init()` **40 saniye**
     sürüyor. Kodla ilgisi yok, SDL yeniden başlatma maliyeti. Testler
     bunu 25 kez ödüyordu (suite 20+ dk). **Testte `Game`'i yeniden
     yaratma** — sahne durumu zaten `set_root` ile sıfırlanıyor. Tek
     `Game`, sonda tek `shutdown()`.
 
-21. **İki yerde aynı matematik = sessiz kayma.** Silah izi kılıcın
+23. **İki yerde aynı matematik = sessiz kayma.** Silah izi kılıcın
     ucundan çıkmalı; formülleri `draw_humanoid`'den kopyalasaydık biri
     değiştiğinde iz kılıçtan kayardı ve bunu ancak ekran görüntüsüne
     bakınca fark ederdik. `spritegen.weapon_tip()` **aynı** iskelet
     zincirini paylaşıyor, `WEAPON_LENGTH` de silah boylarının tek
     kaynağı.
 
-22. **Heredoc (`<<'EOF'`) Türkçe metin ve ters bölü ile güvenilmez.**
+24. **Heredoc (`<<'EOF'`) Türkçe metin ve ters bölü ile güvenilmez.**
     Uzun metni Write aracıyla yaz, kısa yamaları Python betiğiyle uygula.
     `\n` kaçışları iki kez yorumlanıp gerçek satır sonuna dönüşebiliyor.
 
