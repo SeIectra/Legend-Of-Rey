@@ -22,7 +22,7 @@ from src.config import (
     CLIMBER_ACTIVE_FRAMES, CLIMBER_DAMAGE, CLIMBER_DROP_SPEED,
     CLIMBER_FLEE_SPEED, CLIMBER_HEALTH, CLIMBER_PATIENCE_FRAMES,
     CLIMBER_POISE, CLIMBER_REACH, CLIMBER_RECOVER_FRAMES, CLIMBER_SPEED,
-    CLIMBER_TRIGGER_X, TELL_FRAMES_CLIMBER,
+    CLIMBER_TRIGGER_X, TELL_FRAMES_CLIMBER, TILE_SIZE,
 )
 from src.entities.enemy import Enemy, EnemyState
 
@@ -53,12 +53,42 @@ class Climber(Enemy):
         self.animator = Animator(self.sprite_name)
         self.sprite_foot_y = CHARACTERS[self.sprite_name].foot_y
         self.hanging = True
+        self._settle_under_ceiling()
         self.anchor_x = self.body.center_x
         self.anchor_y = self.body.y
         # Oyuncu tam altina hic girmezse (oda gecisi/platform duzeni bunu
         # garanti etmiyor) sonsuza kadar tavanda asili kalmasin diye -
         # farkinda oldugu surece sayan bir sabir sayaci.
         self.aware_frames = 0
+
+    def _settle_under_ceiling(self) -> None:
+        """Govdeyi tavanin ALTINA hizalar - icine degil.
+
+        Arda'nin bildirdigi hata (24.08.2026): *"mini boss'tan hemen once
+        tepedeki asilanlar asagi dusemiyor."* Kok neden olculdu: oda
+        verisindeki `t` isareti satir 4'te ve `feet_y` satir 5'in ustu
+        oluyor, yani 18 piksellik govde y=62'den basliyor - **satir 3'un
+        icinde**, ki orasi kati tas. Tirmanan tavana gomulu doguyordu.
+        Birakma komutu geliyor (`vy` ayarlaniyor) ama bir sonraki karede
+        carpisma cozucu mevcut cakismayi gorup `grounded=True` deyip hizi
+        sifirliyordu: dusme emri veriliyor, dusus hic olmuyor.
+
+        Isaretin bir tile asagi tasinmasi da cozerdi ama oda verisine
+        dokunmak yalnizca BU uc Tirmanan'i duzeltirdi; buradaki hizalama
+        gelecekteki her odada dogru davranisi garanti ediyor - `t`
+        isaretini tavanin hangi satirina koyarsan koy.
+        """
+        tilemap = getattr(self.scene, "tilemap", None)
+        if tilemap is None:
+            return
+        column = int(self.body.center_x) // TILE_SIZE
+        # Basin bulundugu satir kati oldugu surece bir tile asagi in.
+        # `guard` sonsuz donguye karsi: tamamen dolu bir sutunda takilmasin.
+        for _ in range(8):
+            head_row = int(self.body.y) // TILE_SIZE
+            if not tilemap.is_solid(column, head_row):
+                break
+            self.body.y = float((head_row + 1) * TILE_SIZE)
 
     # --- Asili durum --------------------------------------------------------
     @property

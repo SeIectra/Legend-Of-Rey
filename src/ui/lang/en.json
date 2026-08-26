@@ -210,7 +210,9 @@
     "gold_found": "{count} gold",
     "secret_found": "Hidden room opened",
     "boss_gold": "{count} gold",
-    "ardo_tracks": "A crack in the wall - tracked"
+    "ardo_tracks": "A crack in the wall - tracked",
+    "key_taken": "KEY TAKEN  ·  the exit is open",
+    "door_locked": "Locked. A key is needed."
   },
   "chapter03": {
     "gold_found": "{count} gold",

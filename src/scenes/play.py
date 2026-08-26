@@ -508,6 +508,17 @@ class PlayScene(Scene):
         olmali - dagitilsaydi biri farkli hissettirirdi.
         """
         self.show_toast(t(abilities.label_key(ability)), frames=180)
+        self.pickup_juice()
+
+    def pickup_juice(self) -> None:
+        """Bir sey kazanmanin GORUNTUSU - yaziyi cagiran belirler.
+
+        `on_ability_gained`'dan ayrildi: anahtar, tilsim, silah gibi
+        yetenek OLMAYAN kazanimlar da ayni parlama/parcacik/sesi
+        kullanmali ama kendi yazisini yazmali. Once anahtar icin
+        `on_ability_gained("")` cagirmistim - `abilities.label_key("")`
+        "?" donuyor ve ekranda soru isareti cikiyordu.
+        """
         self.juice.explosion(self.player.body.center_x,
                              self.player.body.center_y, ImpactWeight.NORMAL)
         self.particles.burst(self.player.body.center_x,

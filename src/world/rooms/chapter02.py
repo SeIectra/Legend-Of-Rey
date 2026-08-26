@@ -295,6 +295,14 @@ SECRET_WALL_MIN_COLUMN = 88
 ARENA_DOOR_COLUMN = 157
 ARENA_DOOR_ROWS = range(4, 14)
 
+# Arenanin CIKIS kapisi - bastan KILITLI (src/world/keydoor.py).
+# Arda'nin bildirdigi hata: giris kapisi muhurlense de arkada hicbir sey
+# yoktu, oyuncu boss'a hic dokunmadan saga yuruyup cikis odasina
+# geciyordu. Bu kapi o kacagi kapatiyor; anahtari boss dusuruyor.
+# Sutun 180: arenanin sag ucu, cikis odasi (184) baslamadan once.
+ARENA_EXIT_COLUMN = 180
+ARENA_EXIT_ROWS = range(4, 14)
+
 # Yanki odasinda ses bu kadar kare sonra **kendiliginden** yukselir.
 # Belge "oyuncu takilir, birkac saniye sonra" diyor: 150 kare = 2.5 saniye.
 # Daha kisasi oyuncuya takilma firsati vermiyor, daha uzunu sikiyor.

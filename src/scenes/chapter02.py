@@ -37,9 +37,11 @@ from src.ui.chapter_end import ChapterEndScene, ChapterResult
 from src.ui.dialogue import Line
 from src.ui.i18n import t
 from src.world import cave_backdrop
+from src.world.keydoor import BossKey, LockedDoor
 from src.world.pickups import Chest
 from src.world.rooms.chapter02 import (
-    ARENA_DOOR_COLUMN, ARENA_DOOR_ROWS, BOSS_GOLD, CHEST_GOLD_MAIN,
+    ARENA_DOOR_COLUMN, ARENA_DOOR_ROWS, ARENA_EXIT_COLUMN,
+    ARENA_EXIT_ROWS, BOSS_GOLD, CHEST_GOLD_MAIN,
     CHEST_GOLD_SECRET, CLAW_LINGER_FRAMES, CLAW_MARKS, ECHO_RISE_DELAY,
     ECHO_RISE_FRAMES, LEVEL, ROOM_STARTS, SECRETS_TOTAL,
     SECRET_CHAMBER_FLOOR_ROW, SECRET_WALL_MIN_COLUMN, TORCHES,
@@ -123,6 +125,13 @@ class Chapter02Scene(PlayScene):
         self.arena_sealed = False
         self.boss = None
         self.boss_defeated = False
+        # Arenanin CIKIS kapisi - bastan kilitli. Boss'u atlayip gecmeyi
+        # engelliyor (Arda'nin bildirdigi kacak). Anahtari boss dusuruyor.
+        self.exit_door = LockedDoor(ARENA_EXIT_COLUMN, ARENA_EXIT_ROWS)
+        self.exit_door.close(self.tilemap)
+        self.boss_key: BossKey | None = None
+        self.has_key = False
+        self._door_hinted = False
 
         self.earned_gold = 0
         self.frames = 0
@@ -208,6 +217,7 @@ class Chapter02Scene(PlayScene):
         self._update_chests()
         self._update_hush()
         self._update_arena()
+        self._update_key()
         self._check_exit()
 
     def _update_echo_room(self) -> None:
@@ -356,6 +366,42 @@ class Chapter02Scene(PlayScene):
         if self.save_data is not None:
             self.save_data.gold += BOSS_GOLD
         self.show_toast(t("chapter02.boss_gold", count=BOSS_GOLD), frames=180)
+        self._drop_key()
+
+    def _drop_key(self) -> None:
+        """Boss oldu - cikis anahtari onun bulundugu yere duser.
+
+        Bayrak yerine NESNE olmasi bilincli (bkz. src/world/keydoor.py):
+        oyuncu odulu goruyor, yerden aliyor. Boss oyuncuyu oldurup sahne
+        bayrak yuzunden acilirsa zafer hissi kayboluyordu.
+        """
+        if self.boss_key is not None:
+            return
+        if self.boss is not None:
+            x, y = self.boss.body.center_x, self.boss.body.bottom
+        else:
+            # Boss hic dogmadiysa (bolum secimiyle atlanirsa) anahtar
+            # kapinin onunde belirsin - oyuncu kilitli kalmasin.
+            x = (ARENA_EXIT_COLUMN - 3) * TILE_SIZE
+            y = self.player.body.bottom
+        self.boss_key = BossKey(x, y)
+        self.game.play_sound("item_pickup")
+
+    def _update_key(self) -> None:
+        self.exit_door.update()
+        # Kilitli kapiya dayanan oyuncuya sebebini bir kez soyle - yoksa
+        # onu siradan bir duvar sanip geri doner.
+        if (self.exit_door.bumped_by(self.player) and not self._door_hinted):
+            self._door_hinted = True
+            self.show_toast(t("chapter02.door_locked"), frames=150)
+        if self.boss_key is None or self.has_key:
+            return
+        self.boss_key.update()
+        if self.boss_key.try_take(self.player):
+            self.has_key = True
+            self.exit_door.unlock(self.tilemap)
+            self.pickup_juice()
+            self.show_toast(t("chapter02.key_taken"), frames=180)
 
     def _check_exit(self) -> None:
         exit_at = LEVEL.first("exit")
@@ -427,6 +473,9 @@ class Chapter02Scene(PlayScene):
 
     def draw_foreground(self, surface: pygame.Surface, offset) -> None:
         cave_backdrop.draw_torches(surface, offset, TORCHES, self.game.frame)
+        self.exit_door.draw(surface, offset, self.game.frame)
+        if self.boss_key is not None:
+            self.boss_key.draw(surface, offset)
         for chest in self.chests:
             chest.draw(surface, offset, self.game.frame)
         self._draw_claw_marks(surface, offset)

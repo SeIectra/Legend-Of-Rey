@@ -35,7 +35,9 @@ import pygame  # noqa: E402
 pygame.init()
 pygame.display.set_mode((64, 64))
 
-from src.config import INTERNAL_HEIGHT, INTERNAL_WIDTH, TILE_SIZE  # noqa: E402
+from src.config import (  # noqa: E402
+    CLIMBER_PATIENCE_FRAMES, INTERNAL_HEIGHT, INTERNAL_WIDTH, TILE_SIZE,
+)
 from src.core.game import Game  # noqa: E402
 from src.core.input import Action  # noqa: E402
 from src.scenes.chapter02 import Chapter02Scene  # noqa: E402
@@ -393,6 +395,77 @@ def main() -> int:
     check(seen_line, "sinematik icinde replik gosterildi (Arda'nin karari)")
     check(cine.finished, "ara sahne kendiliginden bitti - takilmiyor")
     cine_game.shutdown()
+
+    # --- Boss atlanamaz: kilitli cikis + anahtar ----------------------------
+    # Arda'nin bildirdigi kacak (24.08.2026): "birinci boss fight ile hic
+    # kapismadan bolumu gecebiliyorsun, sadece ilerlemek yeterli." Arena
+    # kapisi yalnizca GIRISI muhurluyordu; arka tarafta hicbir sey yoktu.
+    print("\n--- boss atlanamaz (kilitli cikis + anahtar) ---")
+    from src.world.rooms.chapter02 import ARENA_EXIT_COLUMN, ARENA_EXIT_ROWS
+
+    skip_game = Game()
+    skip_game.scenes.set_root(Chapter02Scene, transition=False, character="rey")
+    skip_game.scenes._flush()
+    skip = skip_game.scenes.current
+
+    check(skip.exit_door.locked, "cikis kapisi bastan KILITLI")
+    blocked = all(skip.tilemap.is_solid(ARENA_EXIT_COLUMN, r)
+                  for r in ARENA_EXIT_ROWS)
+    check(blocked, "kilitli kapinin butun satirlari kati - gecilemez")
+    check(skip.boss_key is None, "anahtar boss olmeden ortada YOK")
+
+    # Boss'u oldur: anahtar dusmeli, kapi HALA kilitli olmali.
+    skip._open_arena()
+    check(skip.boss_key is not None, "boss olunce anahtar dustu")
+    check(skip.exit_door.locked,
+          "anahtar dusunce kapi HENUZ acilmiyor - alinmasi gerek")
+
+    # Anahtari al: kapi acilmali.
+    skip.player.body.set_feet(skip.boss_key.x, skip.boss_key.feet_y)
+    for _ in range(10):
+        skip_game.input.begin_frame(); skip_game.input.end_frame()
+        skip.update()
+    check(skip.has_key, "anahtar alindi")
+    check(not skip.exit_door.locked, "anahtarla kapi acildi")
+    opened = all(not skip.tilemap.is_solid(ARENA_EXIT_COLUMN, r)
+                 for r in ARENA_EXIT_ROWS)
+    check(opened, "kapinin butun satirlari acildi - gecilebilir")
+    skip_game.shutdown()
+
+    # --- Tirmanan tavana GOMULU dogmuyor -----------------------------------
+    # Arda: "mini boss'tan hemen once tepedeki asilanlar asagi dusemiyor."
+    # Kok neden: govde tavan tile'inin ICINDE basliyordu, carpisma cozucu
+    # cakismayi gorup `grounded` deyip dususu iptal ediyordu.
+    print("\n--- Tirmanan tavana gomulu dogmuyor ---")
+    from src.entities.enemies.climber import Climber
+
+    climb_game = Game()
+    climb_game.scenes.set_root(Chapter02Scene, transition=False,
+                               character="rey")
+    climb_game.scenes._flush()
+    climb = climb_game.scenes.current
+    climb.player.body.set_feet(110 * TILE_SIZE, 13 * TILE_SIZE)
+    for _ in range(5):
+        climb_game.input.begin_frame(); climb_game.input.end_frame()
+        climb.update()
+    hangers = [e for e in climb.enemies if isinstance(e, Climber)]
+    check(bool(hangers), "odada Tirmanan var", str(len(hangers)))
+    if hangers:
+        hanger = hangers[0]
+        head_row = int(hanger.body.y) // TILE_SIZE
+        column = int(hanger.body.center_x) // TILE_SIZE
+        check(not climb.tilemap.is_solid(column, head_row),
+              "Tirmanan'in bulundugu satir KATI DEGIL (tavana gomulu degil)",
+              "satir " + str(head_row))
+        start_y = hanger.body.y
+        for _ in range(CLIMBER_PATIENCE_FRAMES + 120):
+            climb_game.input.begin_frame(); climb_game.input.end_frame()
+            climb.update()
+        check(not hanger.hanging, "sabir esiginde birakti")
+        check(hanger.body.y > start_y + TILE_SIZE,
+              "gercekten ASAGI DUSTU (birakma emri bosa gitmiyor)",
+              "delta " + str(round(hanger.body.y - start_y, 1)) + "px")
+    climb_game.shutdown()
 
     print("\n=== SONUC ===")
     if failures:

@@ -213,3 +213,10 @@ BRAZIER_TILE = (_room7_start + 18, 13)
 # (`_room7_start`) degil, buradan birkac tile sonrasi kapaniyor - oyuncu
 # odaya gercekten girdiginden ve mangali/boss'u gordugunden emin olunca.
 ARENA_DOOR_COLUMN = _room7_start + 3
+
+# Arenanin CIKIS kapisi - bastan KILITLI (src/world/keydoor.py).
+# Bolum 2 ile ayni kacak buradaydi: giris muhurlense de arka taraf acikti,
+# oyuncu boss'a hic dokunmadan cikisa yurüyebiliyordu. Anahtari boss
+# dusuruyor. Sutun: arenanin sag ucu, cikis (207) baslamadan once.
+ARENA_EXIT_COLUMN = _room7_start + 26
+ARENA_EXIT_ROWS = range(4, 14)

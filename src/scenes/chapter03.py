@@ -47,9 +47,11 @@ from src.ui.chapter_end import ChapterEndScene, ChapterResult
 from src.ui.i18n import t
 from src.ui.widgets import panel
 from src.world import cave_backdrop
+from src.world.keydoor import BossKey, LockedDoor
 from src.world.pickups import Chest
 from src.world.rooms.chapter03 import (
-    ARENA_DOOR_COLUMN, BRAZIER_TILE, LEVEL, PURPLE_FLAME_TILE,
+    ARENA_DOOR_COLUMN, ARENA_EXIT_COLUMN, ARENA_EXIT_ROWS,
+    BRAZIER_TILE, LEVEL, PURPLE_FLAME_TILE,
     ROOM3_SOCKET_INDICES, ROOM_STARTS, SECRET_POCKET_ABS_COLUMNS,
     SECRET_WALL_MIN_COLUMN, TORCHES, WIND_ZONES,
 )
@@ -133,6 +135,13 @@ class Chapter03Scene(PlayScene):
         self.boss = None
         self.arena_sealed = False
         self.boss_defeated = False
+        # Bolum 2 ile ayni kacak buradaydi da: giris muhurlense de arka
+        # taraf acikti. Kilitli cikis + boss'un dusurdugu anahtar.
+        self.exit_door = LockedDoor(ARENA_EXIT_COLUMN, ARENA_EXIT_ROWS)
+        self.exit_door.close(self.tilemap)
+        self.boss_key: BossKey | None = None
+        self.has_key = False
+        self._door_hinted = False
         self.secret_found = False
 
         self.earned_gold = 0
@@ -216,6 +225,7 @@ class Chapter03Scene(PlayScene):
         self._update_purple_flame()
         self._update_brazier_input()
         self._update_arena()
+        self._update_key()
         self._update_blackout()
         self._check_exit()
 
@@ -468,6 +478,34 @@ class Chapter03Scene(PlayScene):
                     and charms.FENER not in self.save_data.charms):
                 self.save_data.charms.append(charms.FENER)
         self.show_toast(t("chapter03.boss_gold", count=CHAPTER3_BOSS_GOLD), frames=200)
+        self._drop_key()
+
+    def _drop_key(self) -> None:
+        """Sonmus Olan oldu - cikis anahtari duser (src/world/keydoor.py)."""
+        if self.boss_key is not None:
+            return
+        if self.boss is not None:
+            x, y = self.boss.body.center_x, self.boss.body.bottom
+        else:
+            x = (ARENA_EXIT_COLUMN - 3) * TILE_SIZE
+            y = self.player.body.bottom
+        self.boss_key = BossKey(x, y)
+
+    def _update_key(self) -> None:
+        self.exit_door.update()
+        # Kilitli kapiya dayanan oyuncuya sebebini bir kez soyle - yoksa
+        # onu siradan bir duvar sanip geri doner.
+        if (self.exit_door.bumped_by(self.player) and not self._door_hinted):
+            self._door_hinted = True
+            self.show_toast(t("chapter02.door_locked"), frames=150)
+        if self.boss_key is None or self.has_key:
+            return
+        self.boss_key.update()
+        if self.boss_key.try_take(self.player):
+            self.has_key = True
+            self.exit_door.unlock(self.tilemap)
+            self.pickup_juice()
+            self.show_toast(t("chapter02.key_taken"), frames=180)
 
     def _update_blackout(self) -> None:
         if self.blackout_frames > 0:
@@ -572,6 +610,9 @@ class Chapter03Scene(PlayScene):
         lit_sconces = [tuple(entry) for entry in self.sconces]
         cave_backdrop.draw_torches(surface, offset, lit_sconces, self.game.frame)
         self.brazier.draw(surface, offset, self.game.frame)
+        self.exit_door.draw(surface, offset, self.game.frame)
+        if self.boss_key is not None:
+            self.boss_key.draw(surface, offset)
         if self.candle_keeper is not None:
             self.candle_keeper.draw(surface, offset)
         for chest in self.chests:

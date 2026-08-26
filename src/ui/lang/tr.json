@@ -210,7 +210,9 @@
     "gold_found": "{count} altın",
     "secret_found": "Gizli oda açıldı",
     "boss_gold": "{count} altın",
-    "ardo_tracks": "Duvarda bir çatlak — iz sürüldü"
+    "ardo_tracks": "Duvarda bir çatlak — iz sürüldü",
+    "key_taken": "ANAHTAR ALINDI  ·  çıkış açıldı",
+    "door_locked": "Kilitli. Bir anahtar gerek."
   },
   "chapter03": {
     "gold_found": "{count} altın",
