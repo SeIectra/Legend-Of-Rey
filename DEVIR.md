@@ -128,9 +128,11 @@ kılar. Kendiliğinden geri alma.
    **Bölüm 1 prologu iki karakter de oynuyor** (23.08.2026 kararı).
    Replikler bu yüzden **nötr** yazıldı (ne "abla" ne "kardeş" geçiyor) —
    Cemo'nun Rey'in kardeşi olduğu kanon bozulmadan Ardo oynanışında da
-   doğru okunuyor. **Açık kalan:** Ardo'nun kendi motivasyonu hiç
-   yazılmadı; `docs/yapi.md` onu B6'da tanıtıyor ama karakter seçimi
-   baştan veriyor.
+   doğru okunuyor. **Ardo'nun motivasyonu yazıldı (24.08.2026):** Yankı
+   Rey'in laneti olduğu için Ardo onu **duymuyor** — yalnız iniyor, ve bu
+   bir eksiklik değil karakter farkı. Kendi üç repliği var: kolyeye
+   teşekkür, yarığı tanıması ("Bu yarığı daha önce gördüm"), ve inme
+   gerekçesi ("Aşağıda ne olduğunu biliyorum. Onu orada bırakamam").
 
 8. **Düşman katman sırası DEĞİŞMEDİ** (23.08.2026'da tartışıldı, Arda
    mevcut sırayı onayladı). Ama şu eklendi: **bir sonraki katmanın en
@@ -409,7 +411,12 @@ Sırası gelmediği için değil, **gözden kaçmasın** diye:
 3. **Ardo'nun oynanışı Rey'in aynısı** — sayılar farklı, İz Sürme
    mekaniği (`docs/derinlestirme.md` §2.4) yok.
 4. **Ardo'nun Bölüm 1'deki motivasyonu yazılmadı** (bkz. §3 madde 7).
-5. **Bölüm 2'nin ödülü eksik:** belge mini-boss sonrası **ilk silah
+5. **Boss kapısı + anahtar (24.08.2026)** — `src/world/keydoor.py`.
+   Bölüm 2 ve 3'ün arena çıkışı kilitli, boss ölünce anahtar düşüyor.
+   Aynı yapı sonraki boss odalarında da kullanılmalı; Bölüm 2/3'e
+   bakarak bağlanır (`_drop_key` / `_update_key`).
+
+6. **Bölüm 2'nin ödülü eksik:** belge mini-boss sonrası **ilk silah
    seçimi** (Hançer/Balta) veriyor, şu an sadece 55 altın. Altyapı hazır
    (`src/combat/weapons.py`), eksik olan **içerik/akış**: seçim ekranı,
    kayda yazma, Hançer/Balta sprite'ları.
