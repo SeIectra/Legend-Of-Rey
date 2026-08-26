@@ -161,7 +161,10 @@
     "ch02_echo_exit": "Down. Further down.",
     "ch02_rey_claw2": "He was still fighting.",
     "ch02_echo_fall": "good. deeper now.",
-    "ch01_echo_gift": "i am lending you my eyes. for now."
+    "ch01_echo_gift": "i am lending you my eyes. for now.",
+    "ch01_ardo_thanks": "Nice work, little one.",
+    "ch01_ardo_rift": "I have seen this rift before.",
+    "ch01_ardo_alone": "I know what waits down there. I will not leave him to it."
   },
   "combat": {
     "counter": "COUNTER",

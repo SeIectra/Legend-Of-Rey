@@ -302,6 +302,38 @@ def main() -> int:
 
     game.shutdown()
 
+    # --- Boss atlanamaz: Bolum 3'un de kilitli cikisi var -------------------
+    # Bolum 2'deki kacagin aynisi buradaydi: giris muhurlense de arka taraf
+    # acikti. `_seal_arena`'nin Bolum 3'e hic tasinmamis olmasiyla ayni
+    # sinif hata - bir bolume yazilan seyin otekine tasinmasi unutuluyor.
+    print("\n--- Bolum 3: kilitli cikis + anahtar ---")
+    from src.world.rooms.chapter03 import ARENA_EXIT_COLUMN, ARENA_EXIT_ROWS
+
+    gate_game = Game()
+    gate_game.scenes.set_root(Chapter03Scene, transition=False, character="rey")
+    gate_game.scenes._flush()
+    gate = gate_game.scenes.current
+
+    check(gate.exit_door.locked, "Bolum 3 cikis kapisi bastan KILITLI")
+    check(all(gate.tilemap.is_solid(ARENA_EXIT_COLUMN, r)
+              for r in ARENA_EXIT_ROWS),
+          "kapinin butun satirlari kati")
+    exit_spot = LEVEL.first("exit")
+    check(exit_spot is not None and ARENA_EXIT_COLUMN < exit_spot.tile_x,
+          "kapi CIKISTAN ONCE - atlanamiyor",
+          f"kapi {ARENA_EXIT_COLUMN} < cikis {exit_spot.tile_x if exit_spot else -1}")
+
+    gate._open_arena()
+    check(gate.boss_key is not None, "boss olunce anahtar dustu")
+    check(gate.exit_door.locked, "anahtar dusunce kapi HENUZ acik degil")
+    gate.player.body.set_feet(gate.boss_key.x, gate.boss_key.feet_y)
+    for _ in range(10):
+        gate_game.input.begin_frame(); gate_game.input.end_frame()
+        gate.update()
+    check(gate.has_key and not gate.exit_door.locked,
+          "anahtarla kapi acildi")
+    gate_game.shutdown()
+
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")

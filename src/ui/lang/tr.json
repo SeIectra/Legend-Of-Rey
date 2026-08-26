@@ -161,7 +161,10 @@
     "ch02_echo_exit": "Aşağıda. Daha aşağıda.",
     "ch02_rey_claw2": "Hâlâ direniyormuş.",
     "ch02_echo_fall": "iyi. daha derine.",
-    "ch01_echo_gift": "gözlerimi sana veriyorum. şimdilik."
+    "ch01_echo_gift": "gözlerimi sana veriyorum. şimdilik.",
+    "ch01_ardo_thanks": "Eline sağlık, ufaklık.",
+    "ch01_ardo_rift": "Bu yarığı daha önce gördüm.",
+    "ch01_ardo_alone": "Aşağıda ne olduğunu biliyorum. Onu orada bırakamam."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",

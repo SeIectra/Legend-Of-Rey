@@ -225,6 +225,46 @@ def main() -> int:
           "butun koyluler evlerine girdi (listeden dustuler)",
           str(len(village.villagers)) + " kaldi")
 
+    # --- Yanki Rey'in laneti: Ardo onu DUYMAZ ------------------------------
+    # Olculdu (24.08.2026): prolog replikleri karakterden bagimsiz
+    # oynuyordu. Ardo da mor sesi duyuyordu - ona yol gostermeyi teklif
+    # eden bir ses duyup sonra o yetenegi hic almiyordu. Ayrica tesekkur
+    # repligi sabit "rey" konusmaciyla yaziliydi: Ardo oynarken ekranda
+    # "REY" etiketi cikiyordu.
+    print("\n--- Yanki Rey'e ozel, replikler oynanan karaktere ait ---")
+
+    def prologue_lines(character: str):
+        game.scenes.set_root(Chapter01Scene, transition=False,
+                             character=character)
+        game.scenes._flush()
+        scene = game.scenes.current
+        seen, last = [], None
+        for _ in range(sum(f for f, _ in PROLOGUE) + 80):
+            game.input.begin_frame(); game.input.end_frame()
+            scene.update()
+            cur = scene.dialogue.current
+            key = (cur.speaker, cur.key) if cur else None
+            if key is not None and key != last:
+                seen.append(key)
+            last = key
+        return seen
+
+    rey_lines = prologue_lines("rey")
+    ardo_lines = prologue_lines("ardo")
+
+    check(any(sp == "echo" for sp, _ in rey_lines),
+          "Rey Yanki'yi duyuyor",
+          str(sum(1 for sp, _ in rey_lines if sp == "echo")) + " replik")
+    check(not any(sp == "echo" for sp, _ in ardo_lines),
+          "Ardo Yanki'yi DUYMUYOR (Yanki Rey'in laneti)",
+          ", ".join(sp for sp, _ in ardo_lines))
+    check(not any(sp == "rey" for sp, _ in ardo_lines),
+          "Ardo oynarken hicbir replik REY etiketiyle cikmiyor",
+          ", ".join(sp for sp, _ in ardo_lines))
+    check(any(sp == "ardo" for sp, _ in ardo_lines),
+          "Ardo kendi sesiyle konusuyor (motivasyonu yaziliyor)",
+          str(sum(1 for sp, _ in ardo_lines if sp == "ardo")) + " replik")
+
     game.shutdown()
 
     print("\n=== SONUC ===")

@@ -163,6 +163,22 @@ class Chapter01Scene(PlayScene):
         self._on_beat_start()
 
     @property
+    def has_echo(self) -> bool:
+        """Yanki bu oynanista var mi? (Rey'de var, Ardo'da yok.)"""
+        return self.echo is not None
+
+    def _thanks_key(self) -> str:
+        """Kolyeye tesekkur - oynanan karakterin agzindan.
+
+        Anahtarlar DUZ yazili: f-string ile kurulani `tests/test_lang.py`
+        kaynak taramasinda goremiyor ve "olu anahtar" sayiyor (bu tuzaga
+        projede bes kez dusuldu).
+        """
+        if self.character == "ardo":
+            return "line.ch01_ardo_thanks"
+        return "line.ch01_rey_thanks"
+
+    @property
     def beat(self) -> str:
         if self.beat_index >= len(PROLOGUE):
             return "play"
@@ -275,14 +291,32 @@ class Chapter01Scene(PlayScene):
         # oyuncu onaylamasa bile dizinin tamami gosterilmeli. Asagidaki
         # `sword`/`wall` replikleri (etkilesimle tetiklenir, zamanlayici
         # yok) bilerek varsayilanda kaliyor.
-        if self.beat == "wake":
+        # **Yanki Rey'in laneti** (docs/gdd.md 4) - Ardo onu DUYMAZ.
+        # Olculdu (24.08.2026): prolog replikleri karakterden bagimsiz
+        # oynuyordu, yani Ardo da mor sesi duyuyordu; ona yol gostermeyi
+        # teklif eden bir ses duyup sonra o yetenegi hic almiyordu.
+        # Ardo yalniz iniyor - ve bu bir eksiklik degil, KARAKTER FARKI:
+        # Rey'in kafasinda bir rehber var, Ardo'nun yok.
+        if self.beat == "wake" and self.has_echo:
             # Sesin ilk kelimesi. Tek kelime - Rey uyanirken.
             self.say(Line("echo", "line.ch01_echo_first"), auto_advance=True)
         elif self.beat == "gift":
+            # Tesekkur OYNANAN karaktere ait. Sabit "rey" yaziliydi ve
+            # Ardo oynarken replik "REY" etiketiyle cikiyordu.
             self.say(Line("cemo", "line.ch01_cemo_gift"),
-                     Line("rey", "line.ch01_rey_thanks"), auto_advance=True)
+                     Line(self.character, self._thanks_key()),
+                     auto_advance=True)
         elif self.beat == "alone":
-            self.say(Line("echo", "line.ch01_echo_alone"), auto_advance=True)
+            if self.has_echo:
+                self.say(Line("echo", "line.ch01_echo_alone"),
+                         auto_advance=True)
+            else:
+                # Ardo'nun kendi gerekcesi. `docs/yapi.md` onu "egitimli
+                # yabanci" diye tanitiyor - asagida ne oldugunu BILIYOR,
+                # inme sebebi bu. Bu satir DEVIR'de acik duran "Ardo'nun
+                # motivasyonu hic yazilmadi" maddesini kapatiyor.
+                self.say(Line("ardo", "line.ch01_ardo_alone"),
+                         auto_advance=True)
 
         if self.beat == "taken":
             # Yer sarsilir. Radyal - yarilmanin yonu yok.
@@ -299,7 +333,11 @@ class Chapter01Scene(PlayScene):
             self.player.body.vx = -1.8
             self.player.body.vy = -1.2
             # Ses ilk kez burada duyuluyor: yarik acilirken. Iki kelime.
-            self.say(Line("echo", "line.ch01_echo_rift"), auto_advance=True)
+            # Ardo'da ses yok - onun yerine kendi tanimasi geliyor.
+            if self.has_echo:
+                self.say(Line("echo", "line.ch01_echo_rift"), auto_advance=True)
+            else:
+                self.say(Line("ardo", "line.ch01_ardo_rift"), auto_advance=True)
         elif self.beat == "alone":
             # `self.necklace` burada DEGIL, kolye ucusu varinca ayarlaniyor
             # (bkz. _update_gift). Eskiden burada sessizce True oluyordu ve
