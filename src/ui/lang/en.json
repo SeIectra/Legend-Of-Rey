@@ -164,7 +164,11 @@
     "ch01_echo_gift": "i am lending you my eyes. for now.",
     "ch01_ardo_thanks": "Nice work, little one.",
     "ch01_ardo_rift": "I have seen this rift before.",
-    "ch01_ardo_alone": "I know what waits down there. I will not leave him to it."
+    "ch01_ardo_alone": "I know what waits down there. I will not leave him to it.",
+    "ch02_ardo_boss": "It has grown. Something fed it.",
+    "ch02_ardo_exit": "The trail goes deeper. That is where they take him.",
+    "ch02_ardo_secret": "Someone came before you. They did not return.",
+    "ch02_ardo_claw2": "Still fighting, then."
   },
   "combat": {
     "counter": "COUNTER",

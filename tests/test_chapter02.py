@@ -507,6 +507,44 @@ def main() -> int:
           "kapi yeniden kilitli - olmek boss'u atlamanin yolu DEGIL")
     dead_game.shutdown()
 
+    # --- Yanki Rey'e ozel, Bolum 2'de de -----------------------------------
+    # Bolum 1'de duzeltilen hatanin aynisi burada da vardi: uc Yanki
+    # repligi kapisizdi ve tirmik izi tepkisi sabit "rey" konusmacisiyla
+    # yaziliydi. Bir bolume yazilan duzeltmenin otekine tasinmamasi bu
+    # projenin en sik tekrarlanan hatasi.
+    print("\n--- Bolum 2: Yanki Rey'e ozel ---")
+    from src.world.rooms.chapter02 import ROOM_STARTS as _ROOMS
+
+    def room_speakers(character: str):
+        rs_game = Game()
+        rs_game.scenes.set_root(Chapter02Scene, transition=False,
+                                character=character)
+        rs_game.scenes._flush()
+        scene = rs_game.scenes.current
+        found = []
+        for _room, column in _ROOMS:
+            scene.player.body.set_feet((column + 3) * TILE_SIZE, 13 * TILE_SIZE)
+            for _ in range(4):
+                rs_game.input.begin_frame(); rs_game.input.end_frame()
+                scene.update()
+            cur = scene.dialogue.current
+            if cur is not None:
+                found.append(cur.speaker)
+        rs_game.shutdown()
+        return found
+
+    rey_speakers = room_speakers("rey")
+    ardo_speakers = room_speakers("ardo")
+    check("echo" in rey_speakers, "Rey Bolum 2'de Yanki'yi duyuyor",
+          ", ".join(rey_speakers))
+    check("echo" not in ardo_speakers,
+          "Ardo Bolum 2'de Yanki'yi DUYMUYOR", ", ".join(ardo_speakers))
+    check("rey" not in ardo_speakers,
+          "Ardo oynarken REY etiketi cikmiyor", ", ".join(ardo_speakers))
+    check("ardo" in ardo_speakers,
+          "Ardo kendi gozlemiyle konusuyor - oda sessiz kalmiyor",
+          ", ".join(ardo_speakers))
+
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")

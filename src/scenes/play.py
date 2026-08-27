@@ -36,7 +36,7 @@ from src.systems.echo import Answer, EchoState
 from src.systems.save import read_save
 from src.ui import echo_view
 from src.ui.chapter_card import ChapterCard
-from src.ui.dialogue import Dialogue
+from src.ui.dialogue import Dialogue, Line
 from src.ui import text
 from src.ui.hud import HUD
 from src.ui.i18n import t
@@ -225,6 +225,27 @@ class PlayScene(Scene):
 
     def update_scene(self) -> None:
         """Alt sinifa ait kare islemleri (tetikleyiciler, anlatim)."""
+
+    @property
+    def has_echo(self) -> bool:
+        """Yanki bu oynanista var mi? (Rey'de var, Ardo'da yok.)
+
+        `docs/gdd.md` 4: Yanki **Rey'in laneti**. Bir donem replikler
+        karakterden bagimsiz oynuyordu ve Ardo da mor sesi duyuyordu -
+        sahip olmadigi bir gucun sesini. Her Yanki repligi bunun ardina
+        alinmali.
+        """
+        return self.echo is not None
+
+    def say_player(self, key: str, ardo_key: str = "", **kwargs) -> None:
+        """Oynanan karakterin agzindan replik.
+
+        Sabit `Line("rey", ...)` yaziliydi ve Ardo oynarken ekranda REY
+        etiketi cikiyordu. `ardo_key` verilmezse ayni metin kullanilir -
+        cogu tepki iki karakter icin de gecerli.
+        """
+        chosen = ardo_key if (self.character == "ardo" and ardo_key) else key
+        self.say(Line(self.character, chosen), **kwargs)
 
     def say(self, *lines, auto_advance: bool = False) -> None:
         """Replik dizisi baslatir. `lines` `Line` nesneleri.

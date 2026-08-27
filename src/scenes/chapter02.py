@@ -191,11 +191,24 @@ class Chapter02Scene(PlayScene):
         sinirina girer girmez kapatilinca, sinir kapi sutununa cok yakin
         oldugu icin kapi neredeyse oyuncunun yuzune kapaniyordu).
         """
+        # Yanki replikleri `has_echo` ardinda: Ardo onu duymaz (Yanki
+        # Rey'in laneti, docs/gdd.md 4). Ardo ayni ANLARI kendi
+        # gozlemiyle karsiliyor - odalar onun icin sessiz kalmasin ama
+        # sahip olmadigi bir gucun sesini de duymasin.
         if name == "miniboss":
-            self.say(Line("echo", "line.ch02_echo_boss"))
+            if self.has_echo:
+                self.say(Line("echo", "line.ch02_echo_boss"))
+            else:
+                self.say_player("line.ch02_ardo_boss")
         elif name == "cikis":
-            self.say(Line("rey", "line.ch02_rey_claw2"),
-                     Line("echo", "line.ch02_echo_exit"))
+            # Tirmik izi tepkisi oynanan karakterin agzindan - sabit
+            # "rey" yaziliydi ve Ardo oynarken REY etiketi cikiyordu.
+            if self.has_echo:
+                self.say(Line("rey", "line.ch02_rey_claw2"),
+                         Line("echo", "line.ch02_echo_exit"))
+            else:
+                self.say(Line("ardo", "line.ch02_ardo_claw2"),
+                         Line("ardo", "line.ch02_ardo_exit"))
 
     # --- Dongu --------------------------------------------------------------
     def echo_held(self) -> bool:
@@ -458,7 +471,12 @@ class Chapter02Scene(PlayScene):
         if secret and not self.secret_found:
             self.secret_found = True
             self.show_toast(t("chapter02.secret_found"), frames=200)
-            self.say(Line("echo", "line.ch02_echo_secret"))
+            # Gizli odadaki bulgu Yanki'ya ozel bir sezgi degil - iskeleti
+            # Ardo da goruyor. Ayni metin, farkli agiz.
+            if self.has_echo:
+                self.say(Line("echo", "line.ch02_echo_secret"))
+            else:
+                self.say_player("line.ch02_ardo_secret")
             return
         super().on_wall_broken(rects)
 

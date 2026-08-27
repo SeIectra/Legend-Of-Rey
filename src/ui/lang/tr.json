@@ -164,7 +164,11 @@
     "ch01_echo_gift": "gözlerimi sana veriyorum. şimdilik.",
     "ch01_ardo_thanks": "Eline sağlık, ufaklık.",
     "ch01_ardo_rift": "Bu yarığı daha önce gördüm.",
-    "ch01_ardo_alone": "Aşağıda ne olduğunu biliyorum. Onu orada bırakamam."
+    "ch01_ardo_alone": "Aşağıda ne olduğunu biliyorum. Onu orada bırakamam.",
+    "ch02_ardo_boss": "Büyümüş. Beslenmiş.",
+    "ch02_ardo_exit": "Daha derine iniyor. Demek ki oraya götürüyorlar.",
+    "ch02_ardo_secret": "Senden önce biri gelmiş. Dönmemiş.",
+    "ch02_ardo_claw2": "Hâlâ direniyormuş."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",

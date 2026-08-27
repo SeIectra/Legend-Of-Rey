@@ -162,11 +162,6 @@ class Chapter01Scene(PlayScene):
         # calismiyordu ve o repligi kimse duymuyordu.
         self._on_beat_start()
 
-    @property
-    def has_echo(self) -> bool:
-        """Yanki bu oynanista var mi? (Rey'de var, Ardo'da yok.)"""
-        return self.echo is not None
-
     def _thanks_key(self) -> str:
         """Kolyeye tesekkur - oynanan karakterin agzindan.
 
