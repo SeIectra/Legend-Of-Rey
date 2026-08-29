@@ -168,7 +168,15 @@
     "ch02_ardo_boss": "Büyümüş. Beslenmiş.",
     "ch02_ardo_exit": "Daha derine iniyor. Demek ki oraya götürüyorlar.",
     "ch02_ardo_secret": "Senden önce biri gelmiş. Dönmemiş.",
-    "ch02_ardo_claw2": "Hâlâ direniyormuş."
+    "ch02_ardo_claw2": "Hâlâ direniyormuş.",
+    "ch03_echo_enter": "burada gözlerim işe yaramaz. ateş bul.",
+    "ch03_ardo_enter": "Karanlık. Demek ışığı olan kazanıyor.",
+    "ch03_echo_keeper": "o bana bakmıyor. sana bakıyor.",
+    "ch03_ardo_keeper": "Saldırmıyor. Demek bir şey istiyor.",
+    "ch03_echo_purple": "evet. şimdi seni çok daha iyi duyuyorum.",
+    "ch03_ardo_purple": "Bu ateş sönmüyor. Hiç sönmemiş olabilir.",
+    "ch03_echo_boss": "bu bir zamanlar ışık taşıyordu.",
+    "ch03_ardo_boss": "Işığını kaybetmiş. Ya da birileri almış."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",

@@ -168,7 +168,15 @@
     "ch02_ardo_boss": "It has grown. Something fed it.",
     "ch02_ardo_exit": "The trail goes deeper. That is where they take him.",
     "ch02_ardo_secret": "Someone came before you. They did not return.",
-    "ch02_ardo_claw2": "Still fighting, then."
+    "ch02_ardo_claw2": "Still fighting, then.",
+    "ch03_echo_enter": "my eyes are useless here. find fire.",
+    "ch03_ardo_enter": "Dark. So whoever holds the light wins.",
+    "ch03_echo_keeper": "it is not looking at me. it is looking at you.",
+    "ch03_ardo_keeper": "It does not attack. So it wants something.",
+    "ch03_echo_purple": "yes. now i hear you so much better.",
+    "ch03_ardo_purple": "This fire does not die. Perhaps it never did.",
+    "ch03_echo_boss": "this carried light, once.",
+    "ch03_ardo_boss": "It lost its light. Or someone took it."
   },
   "combat": {
     "counter": "COUNTER",

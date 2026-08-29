@@ -44,6 +44,7 @@ from src.systems.economy import TradeOffer
 from src.systems.light import LightState
 from src.ui import text as text_ui
 from src.ui.chapter_end import ChapterEndScene, ChapterResult
+from src.ui.dialogue import Line
 from src.ui.i18n import t
 from src.ui.widgets import panel
 from src.world import cave_backdrop
@@ -126,6 +127,7 @@ class Chapter03Scene(PlayScene):
                               if keeper_spot is not None else None)
         self.trading = False
         self.trade_index = 0
+        self._keeper_seen = False
 
         self.room = ""
         self.entered_rooms: set[str] = set()
@@ -200,9 +202,28 @@ class Chapter03Scene(PlayScene):
         # kapi sutununu gecince kapatiyor (Bolum 2'de yasanan ayni hata:
         # oda sinirina girer girmez kapatilinca kapi neredeyse oyuncunun
         # yuzune kapaniyordu - bkz. ARENA_DOOR_COLUMN).
-        if name == "mor_alev":
+        # Yanki replikleri `has_echo` ardinda (Yanki Rey'in laneti,
+        # docs/gdd.md 4). Ardo ayni anlari kendi gozlemiyle karsiliyor -
+        # Bolum 1 ve 2'de kurulan ayni desen.
+        if name == "isigin_kurali":
+            self._voice("line.ch03_echo_enter", "line.ch03_ardo_enter")
+        elif name == "sonmus_olan":
+            self._voice("line.ch03_echo_boss", "line.ch03_ardo_boss")
+        elif name == "mor_alev":
             from src.scenes.chapter03_cinematics import PurpleCinematic
             self.scenes.push(PurpleCinematic)
+
+    def _voice(self, echo_key: str, ardo_key: str) -> None:
+        """Yanki konusur, Yanki yoksa oynanan karakter konusur.
+
+        Bolum 3 bastan sona SESSIZDI - Mum Bekcisi, Mor Alev karari ve
+        mini-boss dahil hicbir anda replik yoktu. Arda'nin "hikaye
+        sunumlarini gelistir" istegi icin en buyuk bosluk burasiydi.
+        """
+        if self.has_echo:
+            self.say(Line("echo", echo_key))
+        else:
+            self.say(Line(self.character, ardo_key))
 
     # --- Dongu ------------------------------------------------------------------
     def update_scene(self) -> None:
@@ -381,6 +402,12 @@ class Chapter03Scene(PlayScene):
         self.juice.explosion(px, py, ImpactWeight.NORMAL)
         self.particles.burst(px, py, 14, path="echo", speed=(0.4, 1.6))
         self.show_toast(t("chapter03.purple_taken"), frames=200)
+        # Alev Yanki'nin kademesini YUKSELTIYOR (yukarida `restore()`).
+        # Yani ses bu isten KAZANCLI cikiyor - ve bunu soyluyor.
+        # docs/yapi.md B14: "Yanki lanet degil, asagidaki seyin sesi. Hep
+        # yardim ediyordu cunku onu cekiyordu." Bu replik o donusun
+        # tohumu: oyuncu simdi anlamiyor, B14'te hatirliyor.
+        self._voice("line.ch03_echo_purple", "line.ch03_ardo_purple")
 
     # --- Sandiklar -------------------------------------------------------------------
     def _update_chests(self) -> None:
@@ -415,6 +442,12 @@ class Chapter03Scene(PlayScene):
             return                       # "Mor alev tasiyani tanimiyor"
         near = (abs(self.candle_keeper.x - self.player.body.center_x) < 20
                 and abs(self.candle_keeper.feet_y - self.player.body.feet[1]) < 24)
+        # Bekci'nin KENDISI konusmuyor (candle_keeper.py: "konusmayan,
+        # savasmayan"). Tepki oyuncunun - dusmanca bir dunyada dusman
+        # olmayan bir varlikla karsilasmak bir an olmali.
+        if near and not self._keeper_seen:
+            self._keeper_seen = True
+            self._voice("line.ch03_echo_keeper", "line.ch03_ardo_keeper")
         if near and not self.trading and self.game.input.pressed(Action.INTERACT):
             self.trading = True
             self.trade_index = 0
