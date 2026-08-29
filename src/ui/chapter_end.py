@@ -112,14 +112,22 @@ class ChapterEndScene(Scene):
         data = self.result
         if data is None:
             return []
-        secrets = f"{data.secrets_found}/{data.secrets_total}"
         rows = [
             ("chapter_end.time", format_time(data.frames), "ui_text"),
             ("chapter_end.combo", str(data.best_combo), "ui_text"),
             ("chapter_end.gold", str(data.gold), "ui_text"),
-            ("chapter_end.secrets", secrets,
-             "danger" if data.missed_secret else "ui_text"),
         ]
+        # Gizli alani olmayan bolumde satir **hic** gorunmuyor. "0/0" bu
+        # ekranin isini tersine cevirirdi: satirin butun anlami "bir sey
+        # kacirdin" demek, ve kacirilacak bir sey yokken oyuncuya yanlis
+        # bir eksiklik duygusu verirdi (Bolum 4 bir ★nefes bolumu).
+        # Varsayilan davranis degismedi: Bolum 2 ve 3 birer gizli alan
+        # bildiriyor ve satirlarini aynen goruyor (DEVIR.md 6/18 -
+        # paylasilan sinifa eklenen davranis eskisini korumali).
+        if data.secrets_total > 0:
+            rows.append(("chapter_end.secrets",
+                         f"{data.secrets_found}/{data.secrets_total}",
+                         "danger" if data.missed_secret else "ui_text"))
         if data.purple_flame_taken is not None:
             value_key = ("chapter_end.taken" if data.purple_flame_taken
                         else "chapter_end.left")

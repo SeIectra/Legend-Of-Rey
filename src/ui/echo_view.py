@@ -59,6 +59,13 @@ def draw_reveal(surface: pygame.Surface, offset: tuple[int, int],
     ox, oy = offset
     px, py = player.body.center_x, player.body.center_y
     reach = echo.sight_range
+    # Yetenek agacinin gorus carpani (YANKI dali: ERIM, KAVRAYIS).
+    # `EchoState`'e koymadik - o sinif oyuncuyu tanimiyor ve durumu saf
+    # kalmali. Menzili KULLANAN taraf carpani biniyor.
+    skills = getattr(player, "skills", None)
+    if skills:
+        from src.systems import skilltree
+        reach *= skilltree.echo_sight_scale(skills, player)
 
     for enemy in enemies:
         distance = math.hypot(enemy.body.center_x - px,

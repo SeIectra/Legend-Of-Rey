@@ -30,6 +30,8 @@ SCENES = {
     # acilabilsin: ara sahneyi tek basina ayarlamak icin.
     "inis": ("src.scenes.chapter02_cinematics", "DescentCinematic"),
     "bolum3": ("src.scenes.chapter03", "Chapter03Scene"),
+    # Bolum 4 - "Kayit Odasi". ★nefes: dovus yok (docs/yapi.md B4).
+    "bolum4": ("src.scenes.chapter04", "Chapter04Scene"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }

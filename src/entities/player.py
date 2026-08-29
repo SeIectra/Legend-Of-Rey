@@ -32,7 +32,7 @@ from src.entities.character_stats import CharacterStats, REY
 from src.combat import weapons
 from src.entities.player_anim import attack_progress, update_animation
 from src.entities.player_render import draw_player
-from src.systems import abilities, charms
+from src.systems import abilities, charms, skilltree
 
 ATTACK_REACH = 22
 ATTACK_HEIGHT = 18
@@ -62,6 +62,10 @@ class Player(Actor):
         # Takili tilsimlar. Yetenekten ayri tutuluyor: yetenek "yapabilir
         # misin", tilsim "ne kadar iyi yapiyorsun" sorusunu cevapliyor.
         self.charms: set[str] = set()
+        # Acilmis yetenek agaci dugumleri. `charms` ile ayni desen:
+        # kume, ve etkiler `skilltree.py`'deki toplayicilardan
+        # geliyor. `PlayScene` kayittan dolduruyor.
+        self.skills: set[str] = set()
 
         # Silah: Rey yumrukla baslar (kilici Bolum 1'de bulur), Ardo
         # egitimli bir yabanci - kilicla gelir (src/combat/weapons.py).
@@ -213,6 +217,33 @@ class Player(Actor):
 
     def has(self, ability: str) -> bool:
         return ability in self.abilities
+
+    def apply_skills(self, keys) -> None:
+        """Kayittan gelen yetenekleri uygular.
+
+        `PlayScene` sahne kurulurken cagiriyor. Duz bonuslar (can, zincir
+        penceresi, kacinma sarji) **kurulus aninda** biniyor; carpanlar
+        (hasar, savunma) her kullanimda toplayicilardan okunuyor.
+
+        Ayrim bilincli: duz bonus bir kez uygulanmali (iki kez cagrilirsa
+        can iki kat artardi), carpan ise her seferinde taze hesaplanmali
+        (kosullu olanlar var - orn. yalniz combo yuksekken).
+        """
+        self.skills = set(keys)
+        if not self.skills:
+            return
+        bonus_health = skilltree.max_health_bonus(self.skills)
+        if bonus_health:
+            self.max_health += bonus_health
+            self.health = min(self.max_health, self.health + bonus_health)
+        window_bonus = skilltree.chain_window_bonus(self.skills)
+        if window_bonus:
+            # Taban pencere (`docs/dovus-sistemi.md`, BAGLAYICI) degismiyor;
+            # yetenek onun USTUNE ekliyor.
+            self.chain.window_frames += window_bonus
+        charge_bonus = skilltree.dodge_charge_bonus(self.skills)
+        if charge_bonus and hasattr(self.dodge, "max_charges"):
+            self.dodge.max_charges += charge_bonus
 
     def equip(self, charm: str) -> bool:
         """Tilsim tak. Zaten takiliysa `False` doner."""
@@ -381,6 +412,13 @@ class Player(Actor):
             scale = charms.damage_scale(self.charms, self)
             if scale != 1.0:
                 damage = max(1, round(damage * scale))
+        # Yetenek agaci carpani da AYNI YERDE biniyor - tilsimla ayni
+        # gerekce, ve ikisi carpimsal birlesiyor (bir dugum + bir tilsim
+        # ust uste gelirse ikisi de sayiliyor).
+        if self.skills:
+            skill_scale = skilltree.damage_scale(self.skills, self)
+            if skill_scale != 1.0:
+                damage = max(1, round(damage * skill_scale))
         self.last_hit_was_counter = is_counter
 
         box = Hitbox(
@@ -420,6 +458,14 @@ class Player(Actor):
         original = box.damage
         if echo is not None and echo.active:
             box.damage = max(1, round(box.damage * echo.damage_multiplier))
+        # Yetenek agacinin SAVUNMA carpani (TAS dali + Yanki SIPER'i).
+        # `<1.0` koruma demek. Yanki cezasindan SONRA biniyor: siper
+        # yeteneginin isi tam olarak o cezayi hafifletmek, o yuzden onun
+        # ustune uygulanmali - once uygulansaydi ceza siperi yutardi.
+        if self.skills:
+            guard = skilltree.defence_scale(self.skills, self)
+            if guard != 1.0:
+                box.damage = max(1, round(box.damage * guard))
         try:
             result = super().take_damage(box, direction)
         finally:

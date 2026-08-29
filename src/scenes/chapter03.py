@@ -606,7 +606,16 @@ class Chapter03Scene(PlayScene):
             data.secrets_total += 1
             if "chapter.torch_crypt" not in data.chapters_cleared:
                 data.chapters_cleared.append("chapter.torch_crypt")
-        self.scenes.push(ChapterEndScene, result=result)
+        # Bolum 4 artik var - ozet ekrani kapaninca dogrudan ona geciliyor.
+        # (Onceden `on_continue` verilmiyordu ve ana menuye donuluyordu;
+        # Bolum 2'nin B3'e baglanmasiyla ayni desen.)
+        character = self.character
+
+        def _continue() -> None:
+            from src.scenes.chapter04 import Chapter04Scene
+            self.scenes.set_root(Chapter04Scene, character=character)
+
+        self.scenes.push(ChapterEndScene, result=result, on_continue=_continue)
 
     # --- Yanki: sonar --------------------------------------------------------------------
     def update(self) -> None:

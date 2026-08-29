@@ -123,6 +123,12 @@ class PlayScene(Scene):
 
         self.setup()
 
+        # Yetenek agacindan acilanlar oyuncuya biniyor. `setup()`'tan
+        # SONRA: oyuncu orada yaratiliyor. Duz bonuslar (can, pencere,
+        # sarj) burada bir kez uygulaniyor.
+        if self.save_data is not None:
+            self.player.apply_skills(getattr(self.save_data, "skills", ()))
+
         self.camera.set_bounds(self.tilemap.bounds)
         self.decals = DecalField(*self.tilemap.bounds.size)
         self.camera.snap_to(self.player.body.center_x, self.player.body.center_y)
@@ -439,7 +445,15 @@ class PlayScene(Scene):
     def on_combo_threshold(self, player, threshold: int) -> None:
         # Saldirgan oynayan kademesini geri kazanir (DEVIR gorev 3.1).
         # Korkak oynayan iyilesemez - can siseleri nadir tutuluyor.
-        if (threshold >= COMBO_TO_RESTORE and self.echo is not None
+        # ONARIM yetenegi esigi dusuruyor (20 -> 14). Tabani degistirmiyor,
+        # ustune indirim biniyor - `docs/dovus-sistemi.md`'nin sayilari
+        # yerinde kaliyor.
+        needed = COMBO_TO_RESTORE
+        if self.player.skills:
+            from src.systems import skilltree
+            needed = max(1, needed
+                         - skilltree.restore_combo_reduction(self.player.skills))
+        if (threshold >= needed and self.echo is not None
                 and self.echo.restore()):
             self.on_echo_tier_changed(self.echo.tier, gained=True)
         if threshold >= COMBO_THRESHOLD_HIGH:

@@ -70,7 +70,7 @@ class SaveData:
     # Kazanilan yetenekler. **Liste**, bit maskesi degil: yeni yetenek
     # eklemek kayit surumunu degistirmiyor, eski kayitlar sadece ona sahip
     # olmuyor (src/systems/abilities.py).
-    abilities: list = field(default_factory=list)
+    abilities: list[str] = field(default_factory=list)
     max_health: int = 80
     health: int = 80
 
@@ -87,7 +87,21 @@ class SaveData:
     weapon: str = "sword"
     armor: str = "light"
     charms: list[str] = field(default_factory=list)
-    abilities: list[str] = field(default_factory=list)
+
+    # Yetenek agaci (src/systems/skilltree.py). Yeteneklerle **ayni**
+    # gerekceyle liste: yeni dugum eklemek kayit surumunu degistirmiyor,
+    # eski kayitlar sadece o dugume sahip olmuyor. Bit maskesi olsaydi
+    # agaci yeniden siralamak eski kayitlarin yeteneklerini kaydirirdi.
+    #
+    # `skill_points` **kalan** havuz, kazanilan toplam degil: harcanan puan
+    # zaten `skills` listesinden okunabiliyor (`skilltree.spent_points`) ve
+    # ayni bilgiyi iki yerde tutmak ikisinin ayrismasi demek.
+    #
+    # Ikisi de varsayilanli, `from_dict` eksik alani doldurmuyor -> bu
+    # alanlari hic bilmeyen ESKI KAYITLAR sorunsuz aciliyor, sifir puanla.
+    # Bu yuzden SAVE_VERSION artmadi.
+    skill_points: int = 0
+    skills: list[str] = field(default_factory=list)
 
     # Bolum 3'un karari - B14'un twist sahnesini etkileyecek
     purple_flame_taken: bool = False

@@ -54,6 +54,11 @@ GRADES: dict[str, tuple[str, float, float]] = {
     # Bolum 3 - mesale mahzeni. Kehribar; zaten karartma maskesi var,
     # vinyet onun ustune binmesin diye dusuk.
     "crypt": ("ember_dark", 0.12, 0.22),
+    # Bolum 4 - kayit odasi. ★nefes: dovus yok, gerilim dusuyor. Ton
+    # topraga kayiyor (sicak ama olu bir oda), vinyet "descent"ten hafif -
+    # cerceve daralirsa oda sikistirir, oysa bu bolum tam tersini
+    # yapmali. Gerilimi tasarim degil **derecelendirme** de anlatiyor.
+    "record": ("earth_dark", 0.11, 0.24),
     # Menu/sinematik - notr ama cerceveli.
     "void": ("void", 0.0, 0.34),
 }

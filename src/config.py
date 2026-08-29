@@ -449,3 +449,81 @@ CHAPTER3_BOSS_GOLD: Final[int] = 70
 # Fener tilsimi - mini-boss odulu.
 FENER_LIGHT_RADIUS_BONUS: Final[float] = 0.40
 FENER_DARK_DAMAGE_BONUS: Final[float] = 0.10
+
+
+# =============================================================================
+# BOLUM 4 - KAYIT ODASI   (docs/yapi.md B4 - "★nefes")
+# =============================================================================
+# Dovus yok. Butun sayilar **zamanlama** sayisi: bir seyin ne kadar surdugu,
+# ne kadar yakindan fark edildigi. Hicbiri denge degeri degil.
+
+# Kelimesiz gunluk: bir sayfa bu kadar kare ekranda kalir, sonra kendi
+# kendine cevrilir. 150 kare = 2.5 saniye - bir resmi okumaya yetiyor,
+# oyuncuyu tutmaya yetmiyor. Tusa basmak gerekmiyor: gunlukte tek kelime
+# yok, o yuzden "cevir" diyen bir yazi da olamaz (docs/yapi.md: jestle
+# anlatim). Yaklasinca acilir, uzaklasinca kapanir.
+JOURNAL_PAGE_FRAMES: Final[int] = 150
+JOURNAL_FADE_FRAMES: Final[int] = 12          # Acilma/kapanma - menu kurali
+JOURNAL_NEAR_RANGE: Final[float] = TILE_SIZE * 2.0
+
+# Kamp: sonmus atesin basinda dinlenme. Iyilesme + yetenek agaci kancasi.
+CAMP_NEAR_RANGE: Final[float] = TILE_SIZE * 1.5
+
+# Yarim harita bu kadar yakindan alinir - dokununca, tusa basmadan
+# (src/world/pickups.py'nin sandik gerekcesiyle ayni: odulle oyuncu
+# arasina tus koymak yalnizca kaciran oyuncu uretir).
+HALF_MAP_PICKUP_RANGE: Final[float] = TILE_SIZE * 1.2
+
+# Kolye ani - "sessiz karakter ani" (docs/yapi.md B4). Kelimesiz.
+# 180 kare = 3 saniye: bir jestin okunmasi icin yeterli, oyuncunun
+# kontrolu kaybettigini hissetmesi icin kisa. Oynanis durmuyor - oyuncu
+# yurumeye devam edebilir, an onun etrafinda olup bitiyor.
+NECKLACE_MOMENT_RANGE: Final[float] = TILE_SIZE * 1.5
+NECKLACE_MOMENT_FRAMES: Final[int] = 180
+# Yanki kademesi anin **sonunda** geri geliyor (docs/gdd.md 4: "Kademe
+# kazanimi: kontrol noktalari ve nefes bolumleri"). Basinda verilseydi
+# toast jestin uzerine binerdi.
+NECKLACE_RESTORE_AT: Final[int] = 150
+
+
+# =============================================================================
+# YETENEK AGACI   (docs/gdd.md 6 - "3 dal x 4 seviye", docs/yapi.md B4)
+# =============================================================================
+# **Hicbir deger asagidaki baglayici tabanlari degistirmiyor.** Yetenekler
+# CHAIN, DODGE_*, CHAIN_WINDOW_FRAMES gibi belgelenmis kare degerlerinin
+# USTUNE biner (carpan ya da bonus); taban sayilar oldugu gibi kalir.
+SKILL_BRANCH_LEVELS: Final[int] = 4     # docs/gdd.md 6: dal basina dort seviye
+
+# Seviye basina bedel (yetenek puani). Bir dalin tamami 1+1+2+2 = 6 puan.
+# `docs/ekonomi-uretim.md` 1 oyun boyunca kabaca **6 yetenek puani**
+# ongoruyor: yani butun butce ya tek bir dali dibine kadar acar, ya da uc
+# dalin ilk iki seviyesini. Secim gercek bir secim - agacin tamami 18 puan
+# eder ve asla toplanamaz.
+SKILL_COST_BY_LEVEL: Final[tuple[int, ...]] = (1, 1, 2, 2)
+
+# --- Dal 1: KESKIN (dovus) ---------------------------------------------------
+SKILL_EDGE_DAMAGE_BONUS: Final[float] = 0.06     # Kosulsuz hasar
+SKILL_FLOW_CHAIN_FRAMES: Final[int] = 2          # Zincir penceresine EK kare
+SKILL_MOMENTUM_DAMAGE_BONUS: Final[float] = 0.15  # COMBO_THRESHOLD_MID ustunde
+SKILL_FINISHER_DAMAGE_BONUS: Final[float] = 0.25  # Yalniz bitirici vurusta
+
+# --- Dal 2: YANKI (Rey'in laneti) --------------------------------------------
+# Ardo bu dali oynamaz - Yanki'yi duymuyor (DEVIR.md 3.7). Etkiler onda
+# sessizce 1.0 doner; `branch_usable()` ekranin bunu gostermesini sagliyor.
+SKILL_REACH_SIGHT_BONUS: Final[float] = 0.25     # Gorus menzili
+SKILL_WARD_DEFENCE_RELIEF: Final[float] = 0.12   # Yanki ACIKKEN alinan hasar
+SKILL_GRIP_SIGHT_BONUS: Final[float] = 0.30      # Gorus menzili (ikinci kat)
+SKILL_MEND_COMBO_RELIEF: Final[int] = 6          # COMBO_TO_RESTORE'dan dusulur
+
+# --- Dal 3: TAS (dayaniklilik) -----------------------------------------------
+SKILL_HIDE_HEALTH_BONUS: Final[int] = 5          # docs/gdd.md 6: "+5 can"
+SKILL_GUARD_DEFENCE_RELIEF: Final[float] = 0.06  # Kosulsuz alinan hasar
+SKILL_ROLL_DODGE_CHARGES: Final[int] = 1         # Kacinma sarji
+SKILL_WILL_HEALTH_BONUS: Final[int] = 10
+SKILL_WILL_DEFENCE_RELIEF: Final[float] = 0.08
+
+# Bolum 4'te kampta dinlenince verilen yetenek puani. Bir tane: oyuncu
+# agaci ilk kez gorurken harcayacak bir seyi olsun ama secim ANLAMLI
+# kalsin - uc dalin ilk dugumu de 1 puan, yani ilk karar "hangi dal"
+# sorusunun kendisi.
+REST_SKILL_POINTS: Final[int] = 1

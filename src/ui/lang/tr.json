@@ -176,7 +176,15 @@
     "ch03_echo_purple": "evet. şimdi seni çok daha iyi duyuyorum.",
     "ch03_ardo_purple": "Bu ateş sönmüyor. Hiç sönmemiş olabilir.",
     "ch03_echo_boss": "bu bir zamanlar ışık taşıyordu.",
-    "ch03_ardo_boss": "Işığını kaybetmiş. Ya da birileri almış."
+    "ch03_ardo_boss": "Işığını kaybetmiş. Ya da birileri almış.",
+    "ch04_echo_enter": "burada kimse yok. artık yok.",
+    "ch04_ardo_enter": "Burada dövüşülmemiş. Burada beklenmiş.",
+    "ch04_echo_camp": "o da aşağı iniyordu. duyuyor musun? hiçbir şey.",
+    "ch04_ardo_camp": "Kamp kurmuş. Demek yolu uzun sanmış.",
+    "ch04_echo_map": "yarısı eksik. eksik olan taraf bizim gittiğimiz taraf.",
+    "ch04_ardo_map": "Yarısını çizebilmiş. Gerisini görmeye ömrü yetmemiş.",
+    "ch04_echo_exit": "dinlendin. şimdi devam et.",
+    "ch04_ardo_exit": "Yeterince durdum. Aşağısı beklemez."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",
@@ -208,7 +216,8 @@
   "chapter": {
     "village": "Köy",
     "first_descent": "İlk İniş",
-    "torch_crypt": "Meşale Mahzeni"
+    "torch_crypt": "Meşale Mahzeni",
+    "record_room": "Kayıt Odası"
   },
   "chapter_end": {
     "heading": "BÖLÜM TAMAMLANDI",
@@ -242,6 +251,12 @@
     "trade_title": "MUM BEKÇİSİ",
     "trade_owned": "alındı"
   },
+  "chapter04": {
+    "gold_found": "{count} altın",
+    "hint_rest": "{key} — ateşin başında dinlen",
+    "rested": "Ateş yeniden yandı",
+    "map_found": "YARIM HARİTA"
+  },
   "trade": {
     "torch": "Meşale",
     "wick": "Sönmez Fitil",
@@ -258,6 +273,47 @@
     "fener": "FENER  ·  ışık yarıçapı %40 artar, karanlıkta hasar %10 artar",
     "fener_desc": "Karanlığın derinliğinde bile yanan bir ışık.",
     "unknown": "Bilinmeyen tılsım"
+  },
+  "skilltree": {
+    "title": "YETENEK AĞACI",
+    "points": "Yetenek puanı: {count}",
+    "owned": "Açıldı",
+    "cost": "Bedel: {count} puan",
+    "locked": "Kilitli — önceki seviye ya da puan eksik",
+    "unavailable": "Bu dal sana kapalı."
+  },
+  "skill": {
+    "blade": "KESKİN",
+    "blade_desc": "Vuruşun ağırlığı.",
+    "blade_edge": "BİLEME",
+    "blade_edge_desc": "Hasar %6 artar.",
+    "blade_flow": "AKIŞ",
+    "blade_flow_desc": "Zincir penceresi 2 kare uzar.",
+    "blade_momentum": "İVME",
+    "blade_momentum_desc": "10+ combo'da hasar %15 artar.",
+    "blade_finisher": "SON SÖZ",
+    "blade_finisher_desc": "Bitirici vuruşta hasar %25 artar.",
+    "echo": "YANKI",
+    "echo_desc": "Sesin gösterdiği yol. Yalnız Rey duyar.",
+    "echo_reach": "ERİM",
+    "echo_reach_desc": "Yankı görüşü %25 uzağı gösterir.",
+    "echo_ward": "SİPER",
+    "echo_ward_desc": "Yankı açıkken alınan hasar %12 azalır.",
+    "echo_grip": "KAVRAYIŞ",
+    "echo_grip_desc": "Yankı görüşü %30 daha uzağı gösterir.",
+    "echo_mend": "ONARIM",
+    "echo_mend_desc": "Yankı 20 yerine 14 combo'da iyileşir.",
+    "stone": "TAŞ",
+    "stone_desc": "Ayakta kalmak.",
+    "stone_hide": "POST",
+    "stone_hide_desc": "Azami can +5.",
+    "stone_guard": "KORUMA",
+    "stone_guard_desc": "Alınan hasar %6 azalır.",
+    "stone_roll": "YUVARLANMA",
+    "stone_roll_desc": "Kaçınma hakkı +1.",
+    "stone_will": "İRADE",
+    "stone_will_desc": "Azami can +10, alınan hasar %8 azalır.",
+    "unknown": "Bilinmeyen yetenek"
   },
   "chapter_card": {
     "number": "BÖLÜM {number}"

@@ -176,7 +176,15 @@
     "ch03_echo_purple": "yes. now i hear you so much better.",
     "ch03_ardo_purple": "This fire does not die. Perhaps it never did.",
     "ch03_echo_boss": "this carried light, once.",
-    "ch03_ardo_boss": "It lost its light. Or someone took it."
+    "ch03_ardo_boss": "It lost its light. Or someone took it.",
+    "ch04_echo_enter": "no one is here. not any more.",
+    "ch04_ardo_enter": "Nobody fought here. Somebody waited.",
+    "ch04_echo_camp": "he was going down too. hear that? nothing.",
+    "ch04_ardo_camp": "He made camp. So he thought the road was long.",
+    "ch04_echo_map": "half of it is missing. the missing half is our way.",
+    "ch04_ardo_map": "He drew half of it. He did not live to see the rest.",
+    "ch04_echo_exit": "you rested. now keep going.",
+    "ch04_ardo_exit": "I have stopped long enough. Below will not wait."
   },
   "combat": {
     "counter": "COUNTER",
@@ -208,7 +216,8 @@
   "chapter": {
     "village": "Village",
     "first_descent": "First Descent",
-    "torch_crypt": "The Torch Crypt"
+    "torch_crypt": "The Torch Crypt",
+    "record_room": "The Record Room"
   },
   "chapter_end": {
     "heading": "CHAPTER COMPLETE",
@@ -242,6 +251,12 @@
     "trade_title": "THE CANDLE KEEPER",
     "trade_owned": "owned"
   },
+  "chapter04": {
+    "gold_found": "{count} gold",
+    "hint_rest": "{key} - rest by the fire",
+    "rested": "The fire is burning again",
+    "map_found": "HALF A MAP"
+  },
   "trade": {
     "torch": "Torch",
     "wick": "Eternal Wick",
@@ -258,6 +273,47 @@
     "fener": "LANTERN  -  +40% light radius, +10% damage in darkness",
     "fener_desc": "A light that burns even in the deepest dark.",
     "unknown": "Unknown charm"
+  },
+  "skilltree": {
+    "title": "SKILL TREE",
+    "points": "Skill points: {count}",
+    "owned": "Unlocked",
+    "cost": "Cost: {count}",
+    "locked": "Locked — needs the level above, or points",
+    "unavailable": "This branch is closed to you."
+  },
+  "skill": {
+    "blade": "BLADE",
+    "blade_desc": "The weight of the blow.",
+    "blade_edge": "WHETSTONE",
+    "blade_edge_desc": "Damage +6%.",
+    "blade_flow": "FLOW",
+    "blade_flow_desc": "Chain window +2 frames.",
+    "blade_momentum": "MOMENTUM",
+    "blade_momentum_desc": "Damage +15% at 10+ combo.",
+    "blade_finisher": "LAST WORD",
+    "blade_finisher_desc": "Damage +25% on the finisher.",
+    "echo": "ECHO",
+    "echo_desc": "The path the voice shows. Only Rey hears it.",
+    "echo_reach": "REACH",
+    "echo_reach_desc": "Echo sight sees 25% further.",
+    "echo_ward": "WARD",
+    "echo_ward_desc": "Damage taken -12% while the Echo is open.",
+    "echo_grip": "GRIP",
+    "echo_grip_desc": "Echo sight sees another 30% further.",
+    "echo_mend": "MENDING",
+    "echo_mend_desc": "The Echo mends at 14 combo, not 20.",
+    "stone": "STONE",
+    "stone_desc": "Staying on your feet.",
+    "stone_hide": "HIDE",
+    "stone_hide_desc": "Max health +5.",
+    "stone_guard": "GUARD",
+    "stone_guard_desc": "Damage taken -6%.",
+    "stone_roll": "ROLL",
+    "stone_roll_desc": "Dodge charge +1.",
+    "stone_will": "WILL",
+    "stone_will_desc": "Max health +10, damage taken -8%.",
+    "unknown": "Unknown skill"
   },
   "chapter_card": {
     "number": "CHAPTER {number}"
