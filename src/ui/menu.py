@@ -42,6 +42,10 @@ CARD_HEIGHT = 96
 class MainMenuScene(Scene):
     def on_enter(self, reveal_buttons: bool = False,
                  **kwargs: object) -> None:
+        # Ana menu muzigi (Azula). `MusicDirector.play` ayni baglamda
+        # hicbir sey yapmiyor, yani menuye her donuste parca bastan
+        # baslamıyor - kesintisiz kaliyor.
+        self.game.music.play("menu")
         self.frame = 0
         self.save_data, self.save_status = read_save()
         self.confirm_overwrite: Menu | None = None

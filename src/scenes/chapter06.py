@@ -65,6 +65,9 @@ ENEMY_CLASSES = {
 # Oyuncu kosede bu kadar kare kalinca yoldas geliyor. Sifir olsaydi
 # "sikismak" hic yasanmazdi; cok uzun olsaydi bir olum tuzagi olurdu.
 RESCUE_DELAY = 90
+# Kurtarma parcasi (Ardo.mp3) bu kadar kare kilitli kaliyor - an
+# gecene kadar dovus muzigi devralmasin. ~10 saniye.
+RESCUE_MUSIC_FRAMES = 600
 # Soru isareti balonunun sureleri (kare).
 QUESTION_RISE = 20
 QUESTION_HOLD = 100
@@ -235,6 +238,14 @@ class Chapter06Scene(PlayScene):
             if not enemy.dead:
                 enemy.health = 0
                 enemy.die()
+        # **Ardo.mp3** - Arda: "Rey oynarken Ardo'nun girislerinde, Ardo
+        # oynarken de Rey'in girislerinde Ardo'yu cal". Parca oteki
+        # karakterin GIRISI'ne ait, karaktere degil; o yuzden hangisi
+        # geliyorsa ayni parca caliyor.
+        # `hold`, `play` degil: bir sonraki karede `_update_music`
+        # dovus baglamina donup bu ani sessizce ezerdi.
+        self.game.music.hold("companion", RESCUE_MUSIC_FRAMES,
+                             fade_ms=200)
         self.juice.explosion(x, self.player.body.center_y, ImpactWeight.KILL)
         self.particles.burst(x, self.player.body.center_y, 22, path="blood",
                              speed=(1.2, 3.4))

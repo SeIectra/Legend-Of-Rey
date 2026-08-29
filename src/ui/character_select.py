@@ -187,11 +187,17 @@ class CharacterSelectScene(Scene):
                         max_health=info.health, health=info.health)
         write_save(data)
 
-        # Kamera mor alevden **yukari** cikip koye varir. Menu gidecegin
-        # yer, oyun geldigin yer (docs/menu-ui.md 0.3).
-        from src.scenes.vertical_journey import VerticalJourneyScene
-        self.scenes.set_root(VerticalJourneyScene, transition=False,
-                             direction="up", chapter=1, character=info.key)
+        # **Prolog once.** Arda'nin istegi (29.08.2026): oyunun basinda
+        # Rey'i ve Yankisini anlatan bir kisa film. Karakter seciminden
+        # SONRA oynatiliyor cunku iki karakterin acilisi farkli - Rey'in
+        # laneti anlatiliyor, Ardo'nunki (Yankisi olmayan) baska bir sey
+        # (`src/scenes/prologue.py`).
+        #
+        # Prolog bitince kamera mor alevden **yukari** cikip koye varir.
+        # Menu gidecegin yer, oyun geldigin yer (docs/menu-ui.md 0.3).
+        from src.scenes.prologue import ArdoPrologue, ReyPrologue
+        prologue = ArdoPrologue if info.key == "ardo" else ReyPrologue
+        self.scenes.set_root(prologue, transition=False, character=info.key)
 
     # --- Cizim --------------------------------------------------------------
     def draw(self, surface: pygame.Surface) -> None:

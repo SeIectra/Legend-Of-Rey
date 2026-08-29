@@ -24,6 +24,9 @@ SCENES = {
     # kesintisiz kamera hareketi (docs/menu-ui.md 0).
     "intro": ("src.scenes.intro", "IntroScene"),
     "menu": ("src.ui.menu", "MainMenuScene"),
+    # Acilis prologu - Rey'in Yankisini anlatan kisa film.
+    "prolog": ("src.scenes.prologue", "ReyPrologue"),
+    "prolog-ardo": ("src.scenes.prologue", "ArdoPrologue"),
     "bolum1": ("src.scenes.chapter01", "Chapter01Scene"),
     "bolum2": ("src.scenes.chapter02", "Chapter02Scene"),
     # Bolum 1 -> 2 gecisi (yariktan dusus). Ayrica dogrudan

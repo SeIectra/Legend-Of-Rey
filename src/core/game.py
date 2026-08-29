@@ -111,6 +111,11 @@ class Game:
         # Muzik kisilma orani 0..1. Sahne doldurur, ses sistemi (Gorev 10)
         # okuyacak. Simdiden burada durmasi, o gun sahneleri tekrar
         # dolasmak gerekmemesi demek - dikis hazir, govde bos.
+        # Muzik yonetmeni - baglama gore parca secer
+        # (`src/audio/music.py`). `music_hush` bir donem doldurulup hic
+        # okunmuyordu; artik `update()` her kare onu yonetmene veriyor.
+        from src.audio.music import MusicDirector
+        self.music = MusicDirector(self.settings)
         self.music_hush = 0.0
         self.real_frame = 0              # Gercek kare (asla durmaz)
         self.fps = 0.0
@@ -364,6 +369,8 @@ class Game:
             # yoksa donma sirasinda istenen gecis kaybolur.
             self.scenes.transition.update()
             return
+        self.music.duck(self.music_hush)
+        self.music.update()
         self.scenes.update()
         self.frame += 1
 

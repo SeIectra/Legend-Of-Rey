@@ -74,6 +74,10 @@ class Chapter04Scene(PlayScene):
     chapter_name_key = "chapter.record_room"
     postfx_grade = "record"     # src/art/postfx.py
     ambience_preset = "dust"
+    # **Loki.mp3** - Arda: "oyunun uzucu kisimlari icin Loki".
+    # Bolum 4 olu bir maceracinin kampi: dovus yok, gunluk var,
+    # ve sonunu biliyoruz. Oyunun en uzucu odasi burasi.
+    music_context = "sad"
 
     def setup(self) -> None:
         self.tilemap = TileMap(LEVEL.terrain_rows)

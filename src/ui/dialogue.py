@@ -129,6 +129,8 @@ class Dialogue:
     """
 
     def __init__(self) -> None:
+        # Sinematiklerde kapatilabilir - bkz. `_portrait_name`.
+        self.show_portrait = True
         self.lines: tuple[Line, ...] = ()
         self.index = 0
         self.revealed = 0.0
@@ -228,9 +230,14 @@ class Dialogue:
 
         Yanki'nin portresi **yok** ve bu bilincli: kafanin icindeki sesin
         yuzu olmaz. Ayni gerekce onun kutusunu da kaldirmisti.
+
+        `show_portrait=False` sinematikler icin: prolog panelleri zaten
+        yuzu **tam ekran** gosteriyor ve kutunun yaninda ikinci bir kucuk
+        kopya cikinca hata gibi okunuyordu. Ayni yuzu iki olcekte ayni
+        anda gostermek anlatimi degil karmasayi artiriyor.
         """
         line = self.current
-        if line is None or line.speaker == ECHO:
+        if line is None or line.speaker == ECHO or not self.show_portrait:
             return ""
         return line.speaker if portrait_art.PORTRAITS.get(line.speaker) else ""
 

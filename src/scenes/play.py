@@ -277,6 +277,43 @@ class PlayScene(Scene):
     checkpoint_x: float = 0.0
     checkpoint_y: float = 0.0
 
+    # Dovus muzigi son uyanik dusmandan sonra bu kadar kare daha calar.
+    _combat_frames: int = 0
+    # Dovus yokken calacak parca. Bos = "explore" (Fade). Alt sinif
+    # ezerek kendi havasini secebiliyor - Bolum 4 "sad" (Loki) veriyor.
+    music_context: str = ""
+
+    def _update_music(self) -> None:
+        """Sahnenin durumundan muzik baglamini turetir.
+
+        Sahne "hangi dosya" demiyor, "ne oluyor" diyor
+        (`src/audio/music.py`). Dosya adlari tek yerde.
+
+        Gecikme (`COMBAT_LINGER_FRAMES`) sart: tek bir dusmanin gozden
+        kaybolmasi muzigi kesip acsaydi ses **titrerdi**. Dovus bittikten
+        sonra gerilim de hemen dusmuyor - bu hem dogru his hem dogru
+        muhendislik.
+        """
+        from src.audio.music import COMBAT_LINGER_FRAMES, combat_context
+
+        context = combat_context(self)
+        if not context:
+            if any(getattr(e, "aware", False) and not e.dead
+                   for e in self.enemies):
+                self._combat_frames = COMBAT_LINGER_FRAMES
+            elif self._combat_frames > 0:
+                self._combat_frames -= 1
+            if self._combat_frames > 0:
+                context = "combat"
+            else:
+                # Sahne kendi sakin baglamini bildirebiliyor: Bolum 4
+                # (olu maceracinin kampi) "sad", digerleri "explore".
+                context = self.music_context or "explore"
+
+        from src.audio.music import COMBAT_FADE_IN_MS
+        fade = COMBAT_FADE_IN_MS if context != "explore" else None
+        self.game.music.play(context, fade_ms=fade)
+
     def _update_traces(self) -> None:
         """Dunya iz birakiyor - oyuncu ve dusmanlarin ayak izleri.
 
@@ -319,6 +356,7 @@ class PlayScene(Scene):
             self.checkpoint_y = self.player.body.bottom
 
     def update(self) -> None:
+        self._update_music()
         self.player.update()
         self._update_death()
         self._update_checkpoint()

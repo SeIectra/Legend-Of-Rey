@@ -65,6 +65,10 @@ DIALOGUE_GRACE_FRAMES = 100
 # --- Kolyenin verilisi ------------------------------------------------------
 # Kolye bir donem hic EL DEGISTIRMIYORDU: Cemo'nun basinda bir ikon
 # beliriyor, sonra "alone" adiminda sessizce `necklace = True` oluyordu.
+# Kolye ani (Raze.mp3) bu kadar kare kilitli - ~10 saniye. Kilit
+# olmadan kesif muzigi bir sonraki karede devraliyor.
+GIFT_MUSIC_FRAMES = 600
+
 # Oyunun butun hikayesi o kolyeye asili (docs/yapi.md B1: "Elde sadece
 # kolye") ama oyuncu onun kendisine gectigi ani hic gormuyordu.
 #
@@ -296,6 +300,13 @@ class Chapter01Scene(PlayScene):
             # Sesin ilk kelimesi. Tek kelime - Rey uyanirken.
             self.say(Line("echo", "line.ch01_echo_first"), auto_advance=True)
         elif self.beat == "gift":
+            # **Raze.mp3** - Arda: "cok nadir duygusal kisimlar icin Raze".
+            # Oyunun butun hikayesi bu kolyeye asili ve bu, Cemo'yu diri
+            # gordugumuz TEK an. Parcanin ait oldugu yer burasi.
+            #
+            # `hold` cunku bir sonraki karede `_update_music` kesif
+            # baglamina donup ani sessizce ezerdi.
+            self.game.music.hold("emotional", GIFT_MUSIC_FRAMES)
             # Tesekkur OYNANAN karaktere ait. Sabit "rey" yaziliydi ve
             # Ardo oynarken replik "REY" etiketiyle cikiyordu.
             self.say(Line("cemo", "line.ch01_cemo_gift"),
