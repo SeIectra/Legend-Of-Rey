@@ -7,7 +7,7 @@ Okuma sırası: **1) `CLAUDE.md`** (bağlayıcı kurallar — anayasa) → **2) 
 dosya** (nerede kaldık) → 3) gerekirse `docs/` altındaki ilgili tasarım
 belgesi.
 
-Son güncelleme: **29.08.2026** (Bölüm 4 + Bölüm 5) · Ardeko Studios · Arda Güner
+Son güncelleme: **29.08.2026** (Bölüm 4, Bölüm 5, Kalkanlı) · Ardeko Studios · Arda Güner
 
 > `GOREVLER.md` **silindi** (23.08.2026, Arda'nın isteği: "bir devir.md
 > olsun diğerlerini sil kafa karıştırmasın"). İçindeki canlı bilgi bu
@@ -35,7 +35,7 @@ Tasarım paketi `docs/` altında ve **bağlayıcı**: `gdd.md` (ana belge),
 
 ## 2. NEREDE DURUYORUZ
 
-**~29.800 satır Python. 16 test paketi de yeşil.**
+**~30.400 satır Python. 17 test paketi de yeşil.**
 
 Oynanabilir akış:
 `intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)** →
@@ -64,6 +64,7 @@ bir uç. Bölüm 6 aynı zamanda **ilk büyük boss** ve Katman 1'in sonu.
 | 11 | Değerlendirme (karar, kod değil) | ⬜ **Arda'nın işi** |
 | 12 | Bölüm 4 — Kayıt Odası + **yetenek ağacı** | ✅ (29.08.2026) |
 | 13 | Bölüm 5 — Sular + **su seviyesi mekaniği** | ✅ (29.08.2026) |
+| 14 | **Kalkanlı** — Katman 2'nin ilk AI'ı | ✅ (29.08.2026) |
 
 **Bölüm 4 "Kayıt Odası"** (`docs/yapi.md` B4): yetenek ağacı sistemi
 (`src/systems/skilltree.py` — 3 dal × 4 düğüm) + ağaç ekranı
@@ -414,8 +415,32 @@ görülebilir); Katman 2 ve 3 **hiçbir bölüme yerleştirilmedi** —
 | Katman | Bölümler | Öğrettiği | Düşmanlar | Durum |
 |---|---|---|---|---|
 | **1 — Çürüyenler** | B1–B6 | combo **kurmayı** | Sürüklenen, Tırmanan, Şişmek | ✅ sanat + AI |
-| **2 — Lanetli Muhafızlar** | B7–B13 | combo'yu **kırmayı** | Kalkanlı, Mızraklı, Okçu, Komutan | 🟡 sanat var, **AI yok** |
+| **2 — Lanetli Muhafızlar** | B7–B13 | combo'yu **kırmayı** | Kalkanlı, Mızraklı, Okçu, Komutan | 🟡 **Kalkanlı'nın AI'ı var**; diğer üçünde sadece sanat |
 | **3 — Yankı'nın Çocukları** | B14–B18 | yardımcının ihaneti | Sessiz, Yankılayan, Bölünen | 🟡 sanat var, **AI yok** |
+
+### Kalkanlı — Katman 2'nin ilk AI'ı (29.08.2026)
+
+`src/entities/enemies/shieldbearer.py`. B5'te **tek örnekle** tanıtıldı
+(§3 madde 8). Sonraki üç Katman 2 düşmanı bunun desenini izlemeli:
+
+- **Ders metinle değil oyuncunun kendi sayacıyla veriliyor:** önden vuran
+  oyuncunun **zinciri kırılıyor**, combo sayacı sıfırlanıyor. Blok hasar
+  vermiyor — ceza can değil **ritim**. Can cezası olsaydı oyuncu deneme
+  yapmaktan korkar ve dersi hiç bulamazdı.
+- **İki geçerli cevap, bilerek iki tane:** (1) arkaya geç — kaçınma
+  düşmanın içinden geçiyor, arkadan gelen vuruş tam hasar + **kesin
+  sendeleme**; (2) saldırısını yemle, toparlanırken vur — kalkan sadece
+  beklerken yukarıda. Tek cevap bırakmak daha "saf" olurdu ama daha kötü.
+- **Dönme gecikmesi tek ayar düğmesi.** `Enemy._face_player()` anında
+  dönüyor; Kalkanlı onu **ezmek zorunda**, yoksa arkaya geçmek imkânsız
+  olur. 34 kare sonra dönüyor, ama önce 10 kare parlıyor ve duruyor —
+  sessizce dönmek "arkasındayım" sözleşmesini bozardı.
+- **Kalkan gövdeye bağlı, ele değil** (`spritegen.py`). Ele bağlıyken
+  bıçakla birlikte savruluyordu, yani "ön hat duvar" okuması tam da
+  saldırı anında kayboluyordu.
+- **Zeminle çözülen su sorunu:** Oda 3'ün tabanı bir tile yükseltildi.
+  Su tek düzlem ve düşmanlara da uygulanıyor; kod istisnası yazmak
+  "suda düşman yok" kararını gizlerdi.
 
 Artı **4 büyük boss** (B6, B13, B14, B18) ve her bölümde bir mini-boss
 ("mevcut düşmanın büyütülmüş hâli, bir ek hamle" — bilinçli olarak ucuz).
@@ -429,7 +454,9 @@ Sırası gelmediği için değil, **gözden kaçmasın** diye:
 
 1. **Işık sistemi yalnızca Bölüm 3'e bağlı.** B1'in yarığı ve B2'nin
    meşaleleri gerçek ışık vermiyor. (Faz C'nin yarım kalan parçası.)
-2. **Katman 2 ve 3'ün düşman AI'ları yok** — sadece sprite'ları var.
+2. **Katman 2'de sadece Kalkanlı'nın AI'ı var** (Mızraklı/Okçu/Komutan
+   ve Katman 3'ün üçü: sanat var, AI yok). Bu dört bağımsız dosya
+   Ultracode'un asıl hedefi (§11).
 3. **Ardo'nun oynanışı Rey'in aynısı** — sayılar farklı, İz Sürme
    mekaniği (`docs/derinlestirme.md` §2.4) yok.
 4. **Ardo'nun Bölüm 1'deki motivasyonu yazılmadı** (bkz. §3 madde 7).
