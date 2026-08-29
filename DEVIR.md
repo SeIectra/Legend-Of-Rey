@@ -7,7 +7,7 @@ Okuma sırası: **1) `CLAUDE.md`** (bağlayıcı kurallar — anayasa) → **2) 
 dosya** (nerede kaldık) → 3) gerekirse `docs/` altındaki ilgili tasarım
 belgesi.
 
-Son güncelleme: **29.08.2026** (Bölüm 4-5, Kalkanlı, silah seçimi, kontrol noktası) · Ardeko Studios · Arda Güner
+Son güncelleme: **29.08.2026** (Bölüm 4-5, Kalkanlı, silah seçimi, kontrol noktası, İz Sürme, portreler) · Ardeko Studios · Arda Güner
 
 > `GOREVLER.md` **silindi** (23.08.2026, Arda'nın isteği: "bir devir.md
 > olsun diğerlerini sil kafa karıştırmasın"). İçindeki canlı bilgi bu
@@ -35,7 +35,7 @@ Tasarım paketi `docs/` altında ve **bağlayıcı**: `gdd.md` (ana belge),
 
 ## 2. NEREDE DURUYORUZ
 
-**~31.200 satır Python. 19 test paketi de yeşil.**
+**~33.400 satır Python. 22 test paketi de yeşil.**
 
 Oynanabilir akış:
 `intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)** →
@@ -67,6 +67,8 @@ bir uç. Bölüm 6 aynı zamanda **ilk büyük boss** ve Katman 1'in sonu.
 | 14 | **Kalkanlı** — Katman 2'nin ilk AI'ı | ✅ (29.08.2026) |
 | 15 | **Bölüm 2 silah seçimi** (Hançer/Balta) | ✅ (29.08.2026) |
 | 16 | **Kontrol noktası** — ölünce odanın başından devam | ✅ (29.08.2026) |
+| 17 | **İz Sürme** — Ardo'nun karşı mekaniği | ✅ (29.08.2026) |
+| 18 | **Portre sistemi + sprite oranları** | ✅ (29.08.2026) |
 
 **Bölüm 4 "Kayıt Odası"** (`docs/yapi.md` B4): yetenek ağacı sistemi
 (`src/systems/skilltree.py` — 3 dal × 4 düğüm) + ağaç ekranı
@@ -420,6 +422,48 @@ görülebilir); Katman 2 ve 3 **hiçbir bölüme yerleştirilmedi** —
 | **2 — Lanetli Muhafızlar** | B7–B13 | combo'yu **kırmayı** | Kalkanlı, Mızraklı, Okçu, Komutan | 🟡 **Kalkanlı'nın AI'ı var**; diğer üçünde sadece sanat |
 | **3 — Yankı'nın Çocukları** | B14–B18 | yardımcının ihaneti | Sessiz, Yankılayan, Bölünen | 🟡 sanat var, **AI yok** |
 
+### Karakter sanatı — portre sistemi (29.08.2026)
+
+Arda: *"Karakterler basit pixel bloklarından oluşmuş gibi değil,
+profesyonel bir retro RPG'deki özenle çizilmiş karakterler gibi
+görünmeli. Gözleri iki piksel nokta olarak bırakma… çocuk gibi veya chibi
+görünmesin."* İstek 64×96 sprite'tı; **ölçüm başka bir cevap verdi.**
+
+| Ölçülen | Değer |
+|---|---|
+| Rey'in eski çizilen boyu | 14×29 px, kafa 8 px = **3.5 kafa** (chibi) |
+| Oyunun en dar yürünebilir geçidi | **2 tile = 32 px** (B1 (20,11), B2 (26,13)) |
+| Oyuncu gövdesi | 10×22 |
+
+64 piksellik karakter 32 piksellik koridordan geçemez — beş bölümün oda
+geometrisi + zıplama zarfı + reachability doğrulaması çöper. 8 piksellik
+kafada göz kapağı/iris/highlight/burun kümesi/dudak da **fiziksel olarak
+sığmıyor**. Bu yüzden istek **iki katmana** bölündü:
+
+1. **Portre** (`src/art/portrait.py`, 64×96, kafa 40 px) — yüzün gerçekten
+   yaşadığı yer. Göz beş katman (kapak, sklera, iris, pupil, sol-üstte
+   tek highlight); kaş eğimi **tek sayının işaretiyle** iki ifade
+   (Rey +1 açık, Ardo −1 çatık); burun kısa sırt + uç kümesi + kanat
+   gölgesi; ağız dört satır. Oranlar klasik çizim şemasından, elle
+   ayarlanmadı. `shade()` bilerek çağrılmıyor — o geçiş gözün
+   highlight'ını "kenar" sanıp eziyor.
+   Bağlandığı yerler: **diyalog kutusu** ve **karakter seçimi**.
+   Yankı'nın portresi **yok** — kafadaki sesin yüzü olmaz.
+2. **Oyun içi sprite** — 32 px bütçesi içinde: 3.5 → **4.7 kafa boyu**,
+   beli olan altı köşe gövde, **boyun**, daire olmayan kafa, saç çizgisi
+   üst üçte bire indi, gövde içi hacim sütunları.
+
+**İki yeni bağlayıcı kural** (`CLAUDE.md` §6'ya yazıldı, ikisi de
+`tests/test_sprites.py` ile korunuyor ve birbirine **karşı** çalışıyor):
+sprite ≤ 32 px, kafa/boy ≥ 4.4. Elden geçirme sırasında boy bir ara 35'e
+çıktı ve **ancak ölçüldüğü için** fark edildi.
+
+Siluet testi de gerçek hale geldi: kutu karşılaştırması kötü bir vekildi
+(Sürüklenen ile Tırmanan'ın kutusu aynı, siluetleri bambaşka). Artık
+maske IoU'su; ölçülen en dar çift **rey/ardo %25.3**.
+
+---
+
 ### Kalkanlı — Katman 2'nin ilk AI'ı (29.08.2026)
 
 `src/entities/enemies/shieldbearer.py`. B5'te **tek örnekle** tanıtıldı
@@ -459,8 +503,18 @@ Sırası gelmediği için değil, **gözden kaçmasın** diye:
 2. **Katman 2'de sadece Kalkanlı'nın AI'ı var** (Mızraklı/Okçu/Komutan
    ve Katman 3'ün üçü: sanat var, AI yok). Bu dört bağımsız dosya
    Ultracode'un asıl hedefi (§11).
-3. **Ardo'nun oynanışı Rey'in aynısı** — sayılar farklı, İz Sürme
-   mekaniği (`docs/derinlestirme.md` §2.4) yok.
+3. ~~Ardo'nun oynanışı Rey'in aynısı~~ — **kapandı (29.08.2026).**
+   `src/systems/tracking.py` + `src/ui/tracking_view.py`. Aynı tuş, zıt
+   bilgi: Rey geleceği/gizliyi **duyar**, Ardo geçmişi **görür**. Eğri
+   birebir aynı (girdi ortak), menzil bilerek farklı (Yankı 260/96/0 —
+   bir lanet, ölümle zayıflar; İz Sürme sabit 190 — zayıflamaz ama
+   berrak Yankı kadar da görmez). Bedel: Yankı ekranı **karartır**,
+   İz Sürme **ağartır** ve yaşayan düşmanlar %62 solar.
+   **Eşitlik yapısal:** Yankı ne açıklıyorsa İz Sürme de açıklıyor
+   (kırılabilir duvarlar), gerekçe farklı — Rey duvarın arkasını duyar,
+   Ardo duvardan birinin geçtiğini görür. Bölüm verisine tek satır
+   eklenmedi; `CLAUDE.md` §3 sırası gelmemiş içeriği yasakladığı için
+   eşitliğin yapısal olması şarttı.
 4. **Ardo'nun Bölüm 1'deki motivasyonu yazılmadı** (bkz. §3 madde 7).
 5. **Boss kapısı + anahtar (24.08.2026)** — `src/world/keydoor.py`.
    Bölüm 2 ve 3'ün arena çıkışı kilitli, boss ölünce anahtar düşüyor.
