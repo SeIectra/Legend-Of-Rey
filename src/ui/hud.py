@@ -215,8 +215,14 @@ class HUD:
         if alpha <= 0:
             return
         y = MARGIN + HEALTH_HEIGHT + 6
-        pygame.draw.circle(surface, palette.color("gold"),
-                           (MARGIN + 3, y + 4), 3)
+        # Jeton da SOLMALI. `pygame.draw.circle` alfayi yok sayiyor -
+        # sayi silinirken jeton tam opak kalip birden kayboluyordu.
+        # Alfali bir yuzeye cizip blit etmek tek dogru yol.
+        coin = pygame.Surface((7, 7), pygame.SRCALPHA)
+        pygame.draw.circle(coin, (*palette.color("gold"), alpha), (3, 3), 3)
+        # Sol ustten isik (CLAUDE.md 6): tek piksellik parlak nokta.
+        coin.fill((*palette.color("white_flash"), alpha), (2, 1, 1, 1))
+        surface.blit(coin, (MARGIN, y + 1))
         text.draw(surface, str(int(self._shown_gold)), MARGIN + 10, y,
                   color=palette.role("ui_text_bright"), alpha=alpha)
 
@@ -228,7 +234,11 @@ class HUD:
         blink = (math.sin(self.frame * 0.3) * 0.5 + 0.5)
         alpha = int(alpha * (0.55 + blink * 0.45))
         dots = "●" * (echo_tier + 1) + "○" * (2 - echo_tier)
-        colour = (palette.color("echo_bright") if echo_tier > 0
+        # **MOR** (24.08.2026). Kademe gostergesi camgobegi kalan son
+        # yerdi: ses mor, vinyet mor, ortaya cikanlar mor ama kademe
+        # camgobegi. Yanki'nin butun kanallari ayni renk ailesinde olmali
+        # (Arda: "mor konusan seyin senin yankin oldugunu anlamasi lazim").
+        colour = (palette.color("violet_bright") if echo_tier > 0
                   else palette.color("stone_dark"))
         text.draw(surface, dots, INTERNAL_WIDTH - MARGIN,
                   MARGIN + GLYPH_HEIGHT + 4, color=colour, align="right",

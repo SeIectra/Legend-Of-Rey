@@ -310,7 +310,12 @@ class CharacterSelectScene(Scene):
         """
         panel(surface, ECHO_PANEL)
         keys = ECHO_TEXT["rey" if info.has_echo else "ardo"]
-        accent = (palette.color("echo_bright") if info.has_echo
+        # **MOR** - oyuncunun Yanki'yi ILK OKUDUGU yer burasi. Bolum
+        # 1'de mor bir ses fisildamaya baslamadan once beklenti burada
+        # kuruluyor; camgobegi birakmak o baglantiyi bir ekran once
+        # koparirdi (Arda: "mor konusan seyin senin yankin oldugunu
+        # anlamasi lazim").
+        accent = (palette.color("violet_bright") if info.has_echo
                   else palette.color("stone_light"))
 
         x = ECHO_PANEL.x + 8
