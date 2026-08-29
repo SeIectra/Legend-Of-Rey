@@ -7,7 +7,7 @@ Okuma sırası: **1) `CLAUDE.md`** (bağlayıcı kurallar — anayasa) → **2) 
 dosya** (nerede kaldık) → 3) gerekirse `docs/` altındaki ilgili tasarım
 belgesi.
 
-Son güncelleme: **29.08.2026** (Faz G ✅ — Bölüm 3 anlatımı, Yankı/Ardo ayrımı) · Ardeko Studios · Arda Güner
+Son güncelleme: **29.08.2026** (Faz A–G tamamlandı) · Ardeko Studios · Arda Güner
 
 > `GOREVLER.md` **silindi** (23.08.2026, Arda'nın isteği: "bir devir.md
 > olsun diğerlerini sil kafa karıştırmasın"). İçindeki canlı bilgi bu
@@ -62,7 +62,7 @@ bir uç.
 | 10 | Ses | 🟡 öncelik 1 seti sentezle var; müzik ve öncelik 2-3 yok |
 | 11 | Değerlendirme (karar, kod değil) | ⬜ **Arda'nın işi** |
 
-### Şu an üzerinde çalışılan: grafik + anlatım geçişi
+### Grafik + anlatım geçişi — **YEDİ FAZ DA TAMAM (29.08.2026)**
 
 Arda'nın 23.08.2026 isteği: *"grafikleri elinden geldiğince biraz daha
 güzelleştir ve hikaye sunumları ile ara sinematikleri geliştir."*
@@ -75,7 +75,7 @@ Yedi faza bölündü:
 | **C** | Atmosfer + ışık (post-fx vinyet/tint, toz/zerre katmanı) | ✅ |
 | **D** | Çevre ve dekor (köy, köylüler, gökyüzü katmanları) | ✅ |
 | **E** | Karakter sprite'ları (silah izi, ikincil hareket, geçiş kareleri) | ✅ |
-| **F** | HUD ve arayüz | 🟡 can çubuğu ✅ · gerisi ⬜ |
+| **F** | HUD ve arayüz | ✅ bölmeli can çubuğu + hayalet, jeton solması, Yankı göstergeleri mor |
 | **G** | Bölüm 2/3 anlatımı | ✅ B2 iniş sahnesi (`story.py`) · B3'e dört anlatım anı · Yankı/Ardo ayrımı üç bölümde de |
 
 **Işık sistemi hakkında bir düzeltme (24.08.2026):** Bu belge bir ara
