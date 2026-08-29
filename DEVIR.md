@@ -7,7 +7,7 @@ Okuma sırası: **1) `CLAUDE.md`** (bağlayıcı kurallar — anayasa) → **2) 
 dosya** (nerede kaldık) → 3) gerekirse `docs/` altındaki ilgili tasarım
 belgesi.
 
-Son güncelleme: **29.08.2026** (Bölüm 4, Bölüm 5, Kalkanlı) · Ardeko Studios · Arda Güner
+Son güncelleme: **29.08.2026** (Bölüm 4-5, Kalkanlı, silah seçimi) · Ardeko Studios · Arda Güner
 
 > `GOREVLER.md` **silindi** (23.08.2026, Arda'nın isteği: "bir devir.md
 > olsun diğerlerini sil kafa karıştırmasın"). İçindeki canlı bilgi bu
@@ -35,7 +35,7 @@ Tasarım paketi `docs/` altında ve **bağlayıcı**: `gdd.md` (ana belge),
 
 ## 2. NEREDE DURUYORUZ
 
-**~30.400 satır Python. 17 test paketi de yeşil.**
+**~31.000 satır Python. 18 test paketi de yeşil.**
 
 Oynanabilir akış:
 `intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)** →
@@ -65,6 +65,7 @@ bir uç. Bölüm 6 aynı zamanda **ilk büyük boss** ve Katman 1'in sonu.
 | 12 | Bölüm 4 — Kayıt Odası + **yetenek ağacı** | ✅ (29.08.2026) |
 | 13 | Bölüm 5 — Sular + **su seviyesi mekaniği** | ✅ (29.08.2026) |
 | 14 | **Kalkanlı** — Katman 2'nin ilk AI'ı | ✅ (29.08.2026) |
+| 15 | **Bölüm 2 silah seçimi** (Hançer/Balta) | ✅ (29.08.2026) |
 
 **Bölüm 4 "Kayıt Odası"** (`docs/yapi.md` B4): yetenek ağacı sistemi
 (`src/systems/skilltree.py` — 3 dal × 4 düğüm) + ağaç ekranı
@@ -468,10 +469,15 @@ Sırası gelmediği için değil, **gözden kaçmasın** diye:
    seviyesini izliyor). Kilit bir mekanizma değil, bir sonuç olduğunda
    daha iyi okunuyor; boss odaları dışında bu yol tercih edilmeli.
 
-6. **Bölüm 2'nin ödülü eksik:** belge mini-boss sonrası **ilk silah
-   seçimi** (Hançer/Balta) veriyor, şu an sadece 55 altın. Altyapı hazır
-   (`src/combat/weapons.py`), eksik olan **içerik/akış**: seçim ekranı,
-   kayda yazma, Hançer/Balta sprite'ları.
+6. ~~Bölüm 2'nin ödülü eksik~~ — **kapandı (29.08.2026).**
+   `src/ui/weapon_choice.py`. Boss ölünce 100 kare sonra açılıyor
+   (öldürme anında açmak zaferi keser), iptal yok (bu bir menü değil
+   **ödül**), sayılar `config.py`'nin zincir tablolarından **okunuyor**
+   (elle yazılsa ilk denge geçişinde yalan olurdu). Ölüm ödül vermiyor:
+   `_open_arena(defeated=False)`. Hançer/Balta'nın kendi sprite'ları var.
+   Seçim `PlayScene._equip_saved_weapon()` ile sonraki bölümlere
+   taşınıyor — **yalnızca Hançer/Balta**, yoksa kaydın varsayılan
+   "sword" değeri Bölüm 1'in "kılıcı buluyor" anını bozardı.
 7. **`tools/reachability.py` Bölüm 5'i yalnızca KURU doğruluyor.** BFS
    suyu bilmiyor; su yüzeyini "platform" sayan ikinci bir geçiş denendi
    ve **yanlış** çıktı (yüzmek "yüzeyde yürümek" değil, su hacminde
