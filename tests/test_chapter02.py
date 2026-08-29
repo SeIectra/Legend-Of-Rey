@@ -501,8 +501,15 @@ def main() -> int:
     check(not fresh.player.dead, "R'den sonra oyuncu diri")
     check(fresh.player.health == fresh.player.max_health,
           "cani dolu", str(fresh.player.health))
-    check(abs(fresh.player.body.center_x - start_x) < 2.0,
-          "bolum basina dondu", str(round(fresh.player.body.center_x, 1)))
+    # **Davranis 29.08.2026'da bilerek degisti:** R artik bolumun degil
+    # ODANIN basina donduruyor (kontrol noktasi - `tests/test_checkpoint.py`).
+    # Bu kontrol eskiden "bolum basina dondu" diyordu; on dakikalik bir
+    # bolumun sonunda olmek her seyi bastan oynamak demekti.
+    check(fresh.player.body.center_x > start_x + TILE_SIZE * 10,
+          "bolum basina DONMEDI - oldugu odadan devam ediyor",
+          str(round(fresh.player.body.center_x, 1)))
+    check(fresh.room == dead.checkpoint_room,
+          "kontrol noktasi odasinda", fresh.room)
     check(fresh.exit_door.locked and not fresh.has_key,
           "kapi yeniden kilitli - olmek boss'u atlamanin yolu DEGIL")
     dead_game.shutdown()

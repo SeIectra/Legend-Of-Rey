@@ -200,7 +200,7 @@
     "combo_health": "{count} COMBO · health restored",
     "combo_echo": "{count} COMBO · Echo recovers",
     "hurt": "HIT",
-    "died": "YOU DIED · press R to reset",
+    "died": "YOU DIED — press R to retry this room",
     "controls": "Arrows · Space jump · J attack · Shift dodge · Esc menu"
   },
   "echo": {

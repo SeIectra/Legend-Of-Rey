@@ -200,7 +200,7 @@
     "combo_health": "{count} COMBO · can yenilenir",
     "combo_echo": "{count} COMBO · Yankı iyileşir",
     "hurt": "HASAR",
-    "died": "ÖLDÜN · R ile sıfırla",
+    "died": "ÖLDÜN — R ile odanın başından devam et",
     "controls": "Yön · Boşluk zıpla · J saldır · Shift kaçın · Esc menü"
   },
   "echo": {

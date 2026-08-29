@@ -194,11 +194,76 @@ class PlayScene(Scene):
         `on_enter` sahneyi bastan kuruyor (dovus odasinin `K_r`'siyle ayni
         yol). Kayit dosyasina dokunulmuyor: altin ve Yanki kademesi
         olumden once neyse o kaliyor.
+
+        ## Kontrol noktasi (29.08.2026)
+
+        Bastan kurmak **dogru** ama tek basina acimasiz: on dakikalik bir
+        bolumun sonunda olen oyuncu her seye yeniden basliyordu ve bu,
+        Arda'nin yapacagi ara degerlendirmeyi zehirlerdi.
+
+        Cozum bir "kismi geri alma" DEGIL - o yol her zaman bayat durum
+        birakir (kapilar, anahtarlar, arena muhru, su seviyesi... her
+        bolumun kendi degismezleri var ve biri mutlaka unutulur). Sahne
+        yine **tamamen** bastan kuruluyor; sonra oyuncu oldugu ODANIN
+        basina isinlaniyor ve o odanin dusmanlari yeniden doguyor.
+
+        Yani: butun degismezler taze, ilerleme korunuyor. Bedeli odayi
+        bastan oynamak - retry'in olmasi gereken bedeli tam olarak bu.
+        Boss arenasi da dogal calisiyor: arena bir oda, yani boss'a
+        yenilen oyuncu arenanin basindan devam ediyor, bolumun basindan
+        degil.
         """
+        # `entered_rooms` yalnizca oda tabanli bolumlerde var (Bolum 1 ve
+        # dovus odasi oda kullanmiyor) - `getattr` ile soruluyor, ozniteligi
+        # olmayan sahnelerde sistem sessizce devre disi kaliyor.
+        room = self.checkpoint_room
+        entered = set(getattr(self, "entered_rooms", ())) if room else set()
+        x, y = self.checkpoint_x, self.checkpoint_y
+
         self.on_enter(character=self.character)
+
+        if not room:
+            return
+        # `entered_rooms` geri konuyor ki anlati TEKRARLAMASIN - ust uste
+        # olen oyuncuya ayni replikleri okutmak ogut olur. Ama odanin
+        # dusmanlari yine de dogmali, o yuzden `_spawn_room` DOGRUDAN
+        # cagriliyor (`_enter_room` "zaten girilmis" deyip donerdi).
+        self.entered_rooms = entered
+        self.room = room
+        self.player.body.set_feet(x, y)
+        spawn_room = getattr(self, "_spawn_room", None)
+        if spawn_room is not None:
+            spawn_room(room)
+        self.camera.snap_to(self.player.body.center_x,
+                            self.player.body.center_y)
+
+    # --- Kontrol noktasi ----------------------------------------------------
+    # Oda tabanli. Alt siniflar bunun icin **hicbir sey yapmiyor**: hepsi
+    # zaten `self.room` tutuyor ve odaya girerken degistiriyor, biz de
+    # o degisimi izliyoruz. Her bolume ayri bir kanca eklemek besinde
+    # birini unutmanin yoluydu.
+    #
+    # Sadece **ayaktayken** kaydediliyor: havadayken kaydedilseydi oyuncu
+    # bosluga dusup oldugunde tekrar bosluga dogar ve sonsuz olum
+    # dongusune girerdi.
+    checkpoint_room: str = ""
+    checkpoint_x: float = 0.0
+    checkpoint_y: float = 0.0
+
+    def _update_checkpoint(self) -> None:
+        room = getattr(self, "room", "")
+        if not room or self.player.dead:
+            return
+        if room != self.checkpoint_room:
+            if not self.player.body.grounded:
+                return          # havada kaydetme - bkz. yukaridaki not
+            self.checkpoint_room = room
+            self.checkpoint_x = self.player.body.center_x
+            self.checkpoint_y = self.player.body.bottom
 
     def update(self) -> None:
         self.player.update()
+        self._update_checkpoint()
         self.tokens.update()
         for enemy in self.enemies:
             enemy.update()
