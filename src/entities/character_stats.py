@@ -31,6 +31,16 @@ class CharacterStats:
     sprite_name: str        # src.art.animation.CHARACTERS icindeki anahtar
     body_color: str         # Kutu kipinde kullanilir (F4)
     accent_color: str
+    # **Omuz genisligi** (piksel) - carpisma kutusu DEGIL.
+    #
+    # Bolum 7'nin dar gecidi bunu soruyor: `docs/yapi.md` B7 *"Tek kisilik
+    # bir aralik. Ardo gecemez, Rey gecer."* Carpisma kutusunu (10)
+    # karakter basina degistirmek cazipti ama o sayi alti bolumun butun
+    # koridor/kenar/ziplama davranisini etkiliyor - Ardo bir anda baska
+    # yerlerde de takilabilirdi ve bunu ancak elle oynayarak fark
+    # ederdik. `girth` yalnizca dar gecidin sordugu bir sayi: etkisi
+    # gorunur, yayilimi sifir.
+    girth: int = 10
 
 
 REY = CharacterStats(
@@ -44,6 +54,7 @@ REY = CharacterStats(
     sprite_name="rey",
     body_color="abyss_light",
     accent_color="echo_bright",
+    girth=10,               # ince - dar gecitten gecer
 )
 
 ARDO = CharacterStats(
@@ -57,4 +68,5 @@ ARDO = CharacterStats(
     sprite_name="ardo",
     body_color="stone",
     accent_color="ember_light",
+    girth=15,               # genis omuz - dar gecide sigmaz
 )

@@ -20,7 +20,8 @@ from src.art.particles import ParticleField
 from src.combat.attack_token import AttackTokenManager
 from src.combat.hitbox import HitboxManager, Team
 from src.config import (
-    COMBO_THRESHOLD_HIGH, COMBO_THRESHOLD_MID, HARD_LAND_AIR_FRAMES,
+    COMBO_THRESHOLD_HIGH, COMBO_THRESHOLD_MID, DEATH_SCREEN_DELAY,
+    HARD_LAND_AIR_FRAMES,
     INTERNAL_WIDTH, NECKLACE_BEAT_MIN_WARMTH, TILE_SIZE,
 )
 from src.systems.echo import COMBO_TO_RESTORE
@@ -241,6 +242,7 @@ class PlayScene(Scene):
         # `entered_rooms` yalnizca oda tabanli bolumlerde var (Bolum 1 ve
         # dovus odasi oda kullanmiyor) - `getattr` ile soruluyor, ozniteligi
         # olmayan sahnelerde sistem sessizce devre disi kaliyor.
+        self.death_frames = 0        # bekleyen olum ekrani iptal
         room = self.checkpoint_room
         entered = set(getattr(self, "entered_rooms", ())) if room else set()
         x, y = self.checkpoint_x, self.checkpoint_y
@@ -293,6 +295,18 @@ class PlayScene(Scene):
             if not enemy.dead:
                 self.traces.record_step(enemy)
 
+    # Olum ekrani bu kadar kare sonra aciliyor: olum vurusunun hitstop'u,
+    # sarsintisi ve parcaciklari once bitsin. Aninda acilirsa oyuncu neyle
+    # oldugunu goremiyor.
+    death_frames: int = 0
+
+    def _update_death(self) -> None:
+        if self.death_frames <= 0:
+            return
+        self.death_frames -= 1
+        if self.death_frames == 0:
+            self._open_death_screen()
+
     def _update_checkpoint(self) -> None:
         room = getattr(self, "room", "")
         if not room or self.player.dead:
@@ -306,6 +320,7 @@ class PlayScene(Scene):
 
     def update(self) -> None:
         self.player.update()
+        self._update_death()
         self._update_checkpoint()
         self.tokens.update()
         for enemy in self.enemies:
@@ -753,8 +768,42 @@ class PlayScene(Scene):
         # olum sarmali boyle engelleniyor (docs/gdd.md 4).
         if self.echo is not None and self.echo.weaken():
             self.on_echo_tier_changed(self.echo.tier, gained=False)
-        self.show_toast(t("combat.died"))
         self.game.play_sound("player_death")
+        self.death_frames = DEATH_SCREEN_DELAY
+
+    def _open_death_screen(self) -> None:
+        """Olum ekranini acar.
+
+        **Toast yeterli degildi** (Arda, 29.08.2026 canli oynanis: *"boss
+        fight'ta olunce kaldik oyle, hicbir sey yapilmiyor"*). `restart()`
+        calisiyordu ama onu soyleyen yazi 72 karede sonuyor ve oyuncu
+        hareketsiz bir ekranla bas basa kaliyordu. Gecici bir bildirim
+        kalici bir durumu anlatamaz.
+
+        Gecikme bilincli: olum vurusunun hitstop'u, sarsintisi ve
+        parcaciklari once bitsin. Menu aninda acilirsa oyuncu neyle
+        oldugunu goremiyor.
+        """
+        from src.ui.death import DeathScene
+        self.scenes.push(DeathScene, save_data=self.save_data,
+                         room_label=self.room_label(),
+                         on_retry=self.restart)
+
+    def room_label(self) -> str:
+        """Olum ekraninda gosterilecek yer.
+
+        **Bolum adi KULLANILMIYOR.** Ilk surum onu gosteriyordu ve Bolum
+        6'da ekranda "ARDO - odanin basindan" yaziyordu: bolumun adi ama
+        oyuncu bir KARAKTER adi okuyor ve "Ardo'nun odasi mi?" diye
+        soruyor. Belirsiz bir etiket, etiketsizlikten kotudur.
+
+        Oda adlari ic anahtar (`vana_odasi`, `arena`) ve cevrilmiyor;
+        cevirmek her bolume dokuz anahtar eklerdi. Onun yerine ekran
+        **numarayi** soyluyor - hangi bolumde oldugu zaten belli, eksik
+        olan bilgi "bastan mi basliyorum" sorusuydu ve ona `death.resume_at`
+        cevap veriyor.
+        """
+        return str(self.chapter_number) if self.chapter_number else ""
 
     def on_ability_gained(self, ability: str) -> None:
         """Yetenek kazanildi. Bir sey **kazanmis** olmali - sessiz gecmesin.

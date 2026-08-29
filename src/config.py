@@ -673,3 +673,9 @@ ROTTED_BURST_REACH: Final[int] = 46
 # zincire yetiyor - pencere "kos ve iki vurus at" degil "gercekten
 # dov" olmali, yoksa team-up bir angarya gibi hissettirir.
 PLATE_STUN_FRAMES: Final[int] = 150
+
+
+# --- OLUM EKRANI (src/ui/death.py) -------------------------------------------
+# Olum vurusunun hitstop'u (12 kare), sarsintisi ve parcaciklari bitsin
+# diye bekliyor. Aninda acilirsa oyuncu neyle oldugunu goremiyor.
+DEATH_SCREEN_DELAY: Final[int] = 48

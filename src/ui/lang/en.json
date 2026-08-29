@@ -204,7 +204,6 @@
     "combo_health": "{count} COMBO · health restored",
     "combo_echo": "{count} COMBO · Echo recovers",
     "hurt": "HIT",
-    "died": "YOU DIED — press R to retry this room",
     "controls": "Arrows · Space jump · J attack · Shift dodge · Esc menu"
   },
   "echo": {
@@ -361,5 +360,12 @@
     "companion_down": "Down — but getting up",
     "boss_down": "The Rotted One has fallen — {count} gold",
     "chest_found": "Hidden chest — {count} gold"
+  },
+  "death": {
+    "title": "YOU DIED",
+    "retry": "TRY AGAIN",
+    "main_menu": "MAIN MENU",
+    "resume_at": "Chapter {room} · from the start of the room you died in",
+    "saved": "Saved"
   }
 }

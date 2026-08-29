@@ -204,7 +204,6 @@
     "combo_health": "{count} COMBO · can yenilenir",
     "combo_echo": "{count} COMBO · Yankı iyileşir",
     "hurt": "HASAR",
-    "died": "ÖLDÜN — R ile odanın başından devam et",
     "controls": "Yön · Boşluk zıpla · J saldır · Shift kaçın · Esc menü"
   },
   "echo": {
@@ -361,5 +360,12 @@
     "companion_down": "Diz çöktü — toparlanacak",
     "boss_down": "Çürümüş Olan düştü — {count} altın",
     "chest_found": "Gizli sandık — {count} altın"
+  },
+  "death": {
+    "title": "ÖLDÜN",
+    "retry": "TEKRAR DENE",
+    "main_menu": "ANA MENÜ",
+    "resume_at": "Bölüm {room} · öldüğün odanın başından",
+    "saved": "Kaydedildi"
   }
 }
