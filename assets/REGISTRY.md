@@ -19,7 +19,11 @@ Spec'ler: `src/art/animation.py :: CHARACTERS`
 |---|---|---|---|---|
 | `rey` | 48x40 | 34 | 50 | Oynanabilir - Yankisoyleyen |
 | `rey_armed` | 48x40 | 34 | 50 | Rey, kilic kusanmis (Bolum 1 sonrasi) |
+| `rey_dagger` | 48x40 | 34 | 50 | Rey + Hancer (Bolum 2 mini-boss odulu) |
+| `rey_axe` | 48x40 | 34 | 50 | Rey + Balta (Bolum 2 mini-boss odulu) |
 | `ardo` | 48x40 | 34 | 50 | Oynanabilir - yabanci |
+| `ardo_dagger` | 48x40 | 34 | 50 | Ardo + Hancer (Bolum 2 mini-boss odulu) |
+| `ardo_axe` | 48x40 | 34 | 50 | Ardo + Balta (Bolum 2 mini-boss odulu) |
 | `cemo` | 40x32 | 27 | 50 | Rey'in kucuk kardesi - menu 5. asama |
 | `villager` | 40x38 | 32 | 50 | Bolum 1 koylusu - olay patlayinca evine kaciyor |
 | `shambler` | 40x36 | 31 | 50 | Katman 1 - Suruklenen |

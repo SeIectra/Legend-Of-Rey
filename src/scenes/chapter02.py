@@ -36,6 +36,7 @@ from src.systems import abilities, charms
 from src.ui.chapter_end import ChapterEndScene, ChapterResult
 from src.ui.dialogue import Line
 from src.ui.i18n import t
+from src.ui.weapon_choice import WeaponChoiceScene
 from src.world import cave_backdrop
 from src.world.keydoor import BossKey, LockedDoor
 from src.world.pickups import Chest
@@ -47,6 +48,15 @@ from src.world.rooms.chapter02 import (
     SECRET_CHAMBER_FLOOR_ROW, SECRET_WALL_MIN_COLUMN, TORCHES,
 )
 from src.world.tilemap import EMPTY, SOLID, TileMap
+
+# Boss oldukten sonra silah secimi bu kadar kare bekler. Ekrani oldurme
+# aninda acmak patlamanin/hitstop'un/altin bildiriminin uzerine biner ve
+# zaferi keser; ~1.7 saniye sonra arena sakinlesmis oluyor.
+WEAPON_CHOICE_DELAY = 100
+
+# Toast'ta silahin adi. **Duz dize** - f-string ile kurulan anahtar
+# `tests/test_lang.py`'ye gorunmez (bu tuzaga defalarca dusuldu).
+WEAPON_LABELS = {"dagger": "weapon.dagger", "axe": "weapon.axe"}
 
 # Tirmik izi bu kadar piksel yakinda fark edilir.
 CLAW_NOTICE_RANGE = 30
@@ -130,6 +140,11 @@ class Chapter02Scene(PlayScene):
         self.exit_door = LockedDoor(ARENA_EXIT_COLUMN, ARENA_EXIT_ROWS)
         self.exit_door.close(self.tilemap)
         self.boss_key: BossKey | None = None
+        # Silah secimi (`docs/bolum-02.md` odul: 55 altin + ILK SILAH
+        # SECIMI). Sayac boss oldugunde kuruluyor - ekrani oldurme aninda
+        # acmak vurusun/patlamanin uzerine biner ve zaferi keser.
+        self.weapon_choice_frames = 0
+        self.weapon_offered = False
         self.has_key = False
         self._door_hinted = False
 
@@ -231,6 +246,7 @@ class Chapter02Scene(PlayScene):
         self._update_hush()
         self._update_arena()
         self._update_key()
+        self._update_weapon_choice()
         self._check_exit()
 
     def _update_echo_room(self) -> None:
@@ -365,13 +381,18 @@ class Chapter02Scene(PlayScene):
         # oldu" yerine "burada hep bir duvar varmis" hissine kapiliyordu.
         self.game.play_sound("rift_close")
 
-    def _open_arena(self) -> None:
+    def _open_arena(self, defeated: bool = True) -> None:
         """Boss oldu: kapi kalkar, odul verilir.
 
         Kapinin **acilmasi** kritik: oyuncu olurse de aciliyor, yoksa
-        arenada kilitli kalirdi.
+        arenada kilitli kalirdi. Ama olum yolundan gelindiginde
+        `defeated=False` - silah secimi bir ZAFER odulu, yenilgi odulu
+        degil. (Cikis kapisi zaten ayri ve anahtarla aciliyor; olmek
+        boss'u atlamanin yolu degil.)
         """
         self.boss_defeated = True
+        if defeated:
+            self.weapon_choice_frames = WEAPON_CHOICE_DELAY
         self.arena_sealed = False
         for row in ARENA_DOOR_ROWS:
             self.tilemap.set_tile(ARENA_DOOR_COLUMN, row, EMPTY)
@@ -380,6 +401,29 @@ class Chapter02Scene(PlayScene):
             self.save_data.gold += BOSS_GOLD
         self.show_toast(t("chapter02.boss_gold", count=BOSS_GOLD), frames=180)
         self._drop_key()
+
+    def _update_weapon_choice(self) -> None:
+        """Boss oldukten bir sure sonra silah secimi acilir.
+
+        Gecikme bilincli: ekrani oldurme aninda acmak patlamanin,
+        hitstop'un ve altin bildiriminin uzerine biner - oyuncu zaferi
+        yasamadan menuye dusuyor. `WEAPON_CHOICE_DELAY` kadar bekleyip
+        arena sakinlestikten sonra aciliyor.
+        """
+        if self.weapon_offered or self.weapon_choice_frames <= 0:
+            return
+        self.weapon_choice_frames -= 1
+        if self.weapon_choice_frames > 0:
+            return
+        self.weapon_offered = True
+        self.scenes.push(WeaponChoiceScene, save_data=self.save_data,
+                         player=self.player, character=self.character,
+                         on_chosen=self._on_weapon_chosen)
+
+    def _on_weapon_chosen(self, key: str) -> None:
+        self.pickup_juice()
+        self.show_toast(t("weapon.chosen", name=t(WEAPON_LABELS[key])),
+                        frames=200)
 
     def _drop_key(self) -> None:
         """Boss oldu - cikis anahtari onun bulundugu yere duser.
@@ -459,9 +503,9 @@ class Chapter02Scene(PlayScene):
 
     # --- Kancalar -----------------------------------------------------------
     def on_player_died(self, player) -> None:
-        # Arenada olen oyuncu kilitli kalmasin.
+        # Arenada olen oyuncu kilitli kalmasin - ama odulu de almasin.
         if self.arena_sealed:
-            self._open_arena()
+            self._open_arena(defeated=False)
         super().on_player_died(player)
 
     def on_wall_broken(self, rects: list[pygame.Rect]) -> None:

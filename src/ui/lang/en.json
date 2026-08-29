@@ -330,5 +330,20 @@
   "chapter05": {
     "valve_turned": "Valve turned · the water moves",
     "chest_found": "Hidden chest · {count} gold"
+  },
+  "weapon": {
+    "fists": "Fists",
+    "sword": "Sword",
+    "dagger": "Dagger",
+    "axe": "Axe",
+    "choose_title": "CHOOSE A WEAPON",
+    "choose_hint": "You keep the sword. This is your second hand.",
+    "dagger_note": "Fast, short. Three hits.",
+    "axe_note": "Slow, heavy. Bites through armour.",
+    "stat_hits": "Chain",
+    "stat_finisher": "Finisher damage",
+    "stat_frames": "Finisher frames",
+    "stat_knockback": "Knockback",
+    "chosen": "{name} equipped"
   }
 }

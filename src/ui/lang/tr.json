@@ -330,5 +330,20 @@
   "chapter05": {
     "valve_turned": "Vana çevrildi · su hareket ediyor",
     "chest_found": "Gizli sandık · {count} altın"
+  },
+  "weapon": {
+    "fists": "Yumruk",
+    "sword": "Kılıç",
+    "dagger": "Hançer",
+    "axe": "Balta",
+    "choose_title": "BİR SİLAH SEÇ",
+    "choose_hint": "Kılıç sende kalıyor. Bu, ikinci elin.",
+    "dagger_note": "Hızlı, kısa. Üç vuruş.",
+    "axe_note": "Yavaş, ağır. Zırh deler.",
+    "stat_hits": "Zincir",
+    "stat_finisher": "Bitirici hasar",
+    "stat_frames": "Bitirici kare",
+    "stat_knockback": "İtiş",
+    "chosen": "{name} kuşanıldı"
   }
 }

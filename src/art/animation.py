@@ -313,6 +313,17 @@ REY_SPEC = CharSpec(
 # degisim bedava - tek fark silah.
 REY_ARMED_SPEC = replace(REY_SPEC, name="rey_armed", weapon="sword")
 
+# Bolum 2 mini-boss odulu: Hancer ya da Balta (`docs/bolum-02.md`).
+# Ayni iskelet, yalnizca silah sekli degisiyor - tutarlilik bedava,
+# varyasyon ucuz (CLAUDE.md 6). Sayilar `config.DAGGER_CHAIN`/`AXE_CHAIN`.
+#
+# Bunlar bir ara `sprite_suffix="_armed"` ile kilicla AYNI gorunuyordu ve
+# bu bilerek boyleydi ("sanat Gorev 9'da gelecek"). Ama silah secimi bir
+# KARAR ekrani; secilen sey elde gorunmuyorsa karar geri bildirimsiz
+# kaliyor. Tek satirlik `replace` ile cozuluyorsa ertelemenin anlami yok.
+REY_DAGGER_SPEC = replace(REY_SPEC, name="rey_dagger", weapon="knife")
+REY_AXE_SPEC = replace(REY_SPEC, name="rey_axe", weapon="axe")
+
 # Ardo - yabanci. Daha agir, genis omuzlu, Yanki'si yok.
 #
 # **Kukulete kaldirildi (22.08.2026).** Onceki tasarim kapusonluydu; Arda
@@ -355,6 +366,10 @@ ARDO_SPEC = replace(
     shoulder_chain="bone_pale",
     weapon="sword",
 )
+
+# Ardo da ayni secimi yapiyor - Bolum 2 iki karakterle de oynanabiliyor.
+ARDO_DAGGER_SPEC = replace(ARDO_SPEC, name="ardo_dagger", weapon="knife")
+ARDO_AXE_SPEC = replace(ARDO_SPEC, name="ardo_axe", weapon="axe")
 
 # --- Katman 1: Curuyenler (docs/gdd.md 7) -----------------------------------
 # Ucu de ayni iskeletten cikiyor ama **oranlari bilincli olarak zit**.
@@ -608,7 +623,11 @@ CHARACTERS: dict[str, CharSpec] = {
     # Oynanabilirler
     "rey": REY_SPEC,
     "rey_armed": REY_ARMED_SPEC,
+    "rey_dagger": REY_DAGGER_SPEC,
+    "rey_axe": REY_AXE_SPEC,
     "ardo": ARDO_SPEC,
+    "ardo_dagger": ARDO_DAGGER_SPEC,
+    "ardo_axe": ARDO_AXE_SPEC,
     "cemo": CEMO_SPEC,
     "villager": VILLAGER_SPEC,
     # Katman 1 - Curuyenler (B1-B6)

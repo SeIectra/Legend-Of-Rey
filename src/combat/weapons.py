@@ -47,8 +47,12 @@ class Weapon:
 WEAPONS: dict[str, Weapon] = {
     FISTS: Weapon(FISTS, "weapon.fists", FIST_CHAIN, sprite_suffix=""),
     SWORD: Weapon(SWORD, "weapon.sword", CHAIN, sprite_suffix="_armed"),
-    DAGGER: Weapon(DAGGER, "weapon.dagger", DAGGER_CHAIN, sprite_suffix="_armed"),
-    AXE: Weapon(AXE, "weapon.axe", AXE_CHAIN, sprite_suffix="_armed"),
+    # Kendi silah sekilleri var (`animation.py`: `rey_dagger`/`rey_axe`,
+    # `ardo_dagger`/`ardo_axe`). Bir ara ikisi de "_armed" ile kilica
+    # benziyordu; secim bir KARAR ekrani oldugu icin secilen seyin elde
+    # gorunmemesi kabul edilemezdi.
+    DAGGER: Weapon(DAGGER, "weapon.dagger", DAGGER_CHAIN, sprite_suffix="_dagger"),
+    AXE: Weapon(AXE, "weapon.axe", AXE_CHAIN, sprite_suffix="_axe"),
 }
 
 

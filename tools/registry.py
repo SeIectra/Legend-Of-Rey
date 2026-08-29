@@ -28,7 +28,11 @@ TARGET = ROOT / "assets" / "REGISTRY.md"
 ROLES = {
     "rey": "Oynanabilir - Yankisoyleyen",
     "rey_armed": "Rey, kilic kusanmis (Bolum 1 sonrasi)",
+    "rey_dagger": "Rey + Hancer (Bolum 2 mini-boss odulu)",
+    "rey_axe": "Rey + Balta (Bolum 2 mini-boss odulu)",
     "ardo": "Oynanabilir - yabanci",
+    "ardo_dagger": "Ardo + Hancer (Bolum 2 mini-boss odulu)",
+    "ardo_axe": "Ardo + Balta (Bolum 2 mini-boss odulu)",
     "cemo": "Rey'in kucuk kardesi - menu 5. asama",
     "villager": "Bolum 1 koylusu - olay patlayinca evine kaciyor",
     # Katman 1 - Curuyenler (B1-B6): combo KURMAYI ogretiyor

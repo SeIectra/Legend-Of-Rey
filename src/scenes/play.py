@@ -132,10 +132,26 @@ class PlayScene(Scene):
         # sarj) burada bir kez uygulaniyor.
         if self.save_data is not None:
             self.player.apply_skills(getattr(self.save_data, "skills", ()))
+            self._equip_saved_weapon()
 
         self.camera.set_bounds(self.tilemap.bounds)
         self.decals = DecalField(*self.tilemap.bounds.size)
         self.camera.snap_to(self.player.body.center_x, self.player.body.center_y)
+
+    def _equip_saved_weapon(self) -> None:
+        """Kayittaki silahi kusandirir - Bolum 2'deki secim burada tasiniyor.
+
+        Yalnizca oyuncunun **gercekten sahip oldugu** bir silah kusaniliyor.
+        Kilic/yumruk yolu `Player.grant()` ile ilerliyor; burasi onu
+        ezmiyor, sadece Bolum 2 odulunu (Hancer/Balta) geri yukluyor.
+        Kosul olmasaydi kayitsiz/varsayilan "sword" degeri Bolum 1'de
+        yumrukla baslayan Rey'e kilic verirdi ve o bolumun butun anlati
+        ani ("kilici buluyor") bozulurdu.
+        """
+        from src.combat import weapons
+        key = getattr(self.save_data, "weapon", "")
+        if key in (weapons.DAGGER, weapons.AXE):
+            self.player.equip_weapon(key)
 
     # --- Yardimcilar --------------------------------------------------------
     def make_player(self, x: float, y: float) -> Player:
