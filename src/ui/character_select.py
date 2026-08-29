@@ -18,6 +18,7 @@ from __future__ import annotations
 import pygame
 
 from src.art import palette
+from src.art import portrait as portrait_art
 from src.art.animator import Animator
 from src.config import (
     ARDO_CHAIN_WINDOW, ARDO_DODGE_CHARGES, ARDO_MAX_HEALTH,
@@ -35,6 +36,9 @@ from src.ui.widgets import panel, value_bar
 
 SELECTED_SCALE = 2
 UNSELECTED_SCALE = 1
+# Portrenin bas+omuz kadraji (satir). Tam bust 96; bu ekranda
+# portrelere ayrilan bant baslik ile `PORTRAIT_BOTTOM` arasi 86.
+HEAD_CROP = 62
 
 # 270 piksel dar; dikey butce bastan hesaplandi. Ilk denemede baslik
 # portrelerin, sutun basliklari tanitim yazisinin uzerine biniyordu ve
@@ -210,11 +214,35 @@ class CharacterSelectScene(Scene):
         centre_x = LEFT_X if index == 0 else RIGHT_X
         scale = SELECTED_SCALE if selected else UNSELECTED_SCALE
 
-        image = self.animators[info.key].render(
-            1 if index == 0 else -1,
-            # Secili olmayan karanlikta kalir - siluete yakin.
-            tint_colour=None if selected else palette.color("stone_darkest"),
-        )
+        # **Portre varsa portre.** Bu ekran karakteri TANITIYOR; oyun ici
+        # sprite'i 2x buyutmek 7 piksellik bir kafayi 14 piksellik bloklara
+        # cevirip "basit pixel bloklari" hissini tam da tanisma aninda
+        # veriyordu (Arda'nin 29.08.2026 sikayeti). Portrede kafa 40
+        # piksel ve yuz gercekten okunuyor - `src/art/portrait.py`.
+        bust = portrait_art.portrait(info.key)
+        if bust is not None:
+            # **Bas + omuz kadraji.** Tam bust 96 piksel; bu ekranda
+            # portrelere ayrilan bant 86 piksel (`PORTRAIT_BOTTOM` ile
+            # baslik arasi) ve 2x buyutunce kafa ekranin ustunden tasip
+            # kesiliyordu - ilk denemede tam oyle oldu. Kadraj yuze
+            # odaklaniyor, ki bu ekranin isi zaten o.
+            image = bust.subsurface(
+                pygame.Rect(0, 0, bust.get_width(), HEAD_CROP)).copy()
+            if not selected:
+                # Secili olmayan karanlikta kalir - siluete yakin.
+                shade = pygame.Surface(image.get_size(), pygame.SRCALPHA)
+                shade.fill((*palette.color("abyss_dark"), 170))
+                image.blit(shade, (0, 0))
+            # Portre cozunurlugunde **buyutme gerekmiyor**: `docs/menu-ui.md`
+            # 4'un "secili buyuk" dili parlaklik + cerceve ile zaten
+            # tasiniyor, ve 2x bant disina tasardi.
+            scale = 1
+        else:
+            image = self.animators[info.key].render(
+                1 if index == 0 else -1,
+                tint_colour=(None if selected
+                             else palette.color("stone_darkest")),
+            )
         if image is None:
             return
         # Hucre karakterden buyuk (silahin savrulmasina yer birakiyor).

@@ -295,12 +295,26 @@ def has_cloth(spec: CharSpec) -> bool:
 # --- Karakter kutuphanesi ---------------------------------------------------
 # Rey - Yankisoyleyen. Esmer, uzun gur duz koyu kahve sacli.
 # Sag kopruck kemiginin altinda geyik isareti.
+# **Oranlar 29.08.2026'da elden gecirildi.** Olculdu: eski Rey 14x29
+# piksel ciziliyordu ve kafasi 8 piksseldi - yani **3.5 kafa boyu**, ki bu
+# literal olarak chibi orani (gercekci yetiskin 7-8, kahraman oyun
+# karakteri 6-7). Arda: *"Karakterler cocuk gibi veya chibi gorunmesin.
+# Daha olgun, karizmatik ve estetik yuz oranlari kullan."*
+#
+# Kafa kucultuldu (8 -> 7), govde ve bacaklar uzatildi: ~4.4 kafa boyu.
+# Daha fazlasi mumkun DEGIL ve bu tahmin degil, olculdu: oyunun en dar
+# gecidi 2 tile = 32 piksel (Bolum 1 ve 2). Sprite 32'yi gecerse karakter
+# koridorlardan gecemez ve bes bolumun oda geometrisi + ziplama zarfi +
+# `tools/reachability.py` dogrulamasi birden gecersiz olur.
+#
+# Yuzun gercek detayi bu yuzden **portrede** yasiyor
+# (`src/art/portrait.py`, kafa 40 piksel).
 REY_SPEC = CharSpec(
     name="rey",
     cell_width=48, cell_height=40, foot_y=34,
-    head_radius=4.0, torso_height=7.2, torso_width=6.4,
-    thigh=4.8, shin=4.8, upper_arm=4.0, fore_arm=4.0,
-    limb_width=2.4, shoulder_width=5.2,
+    head_radius=3.4, torso_height=8.2, torso_width=6.2,
+    thigh=4.9, shin=4.9, upper_arm=4.3, fore_arm=4.1,
+    limb_width=2.3, shoulder_width=5.6, brow_tilt=1, neck=1.0,
     skin="skin_tan", hair="hair_dark", cloth="cloth_blue",
     cloth_dark="shadow", armor="brass", accent="gore",
     long_hair=True, hair_length=11.0,
@@ -343,8 +357,11 @@ REY_AXE_SPEC = replace(REY_SPEC, name="rey_axe", weapon="axe")
 ARDO_SPEC = replace(
     REY_SPEC,
     name="ardo",
-    torso_height=8.0, torso_width=8.2, shoulder_width=7.6, limb_width=2.9,
-    thigh=4.4, shin=4.4,          # Daha kisa bacak, daha agir duruş
+    # Ayni sema, agir varyant: genis omuz, kalin uzuv, kisa bacak. Arda:
+    # *"Ardo daha guclu, genis omuzlu ve agir bir anatomiye sahip olsun."*
+    # `brow_tilt=-1`: kas ic ucu ASAGIDA = catik ve ciddi (Rey'de +1).
+    torso_height=8.2, torso_width=8.0, shoulder_width=8.0, limb_width=2.8,
+    thigh=4.6, shin=4.6, brow_tilt=-1,   # Daha kisa bacak, daha agir durus
     # Arda'nin referans gorseli koyu/siyaha yakin sac gosteriyordu - "steel"
     # (gri/gumus) o gorsele uymuyordu, sadece Rey'den ayrisin diye
     # secilmisti. Siluet testi zaten renge degil SEKLE bakiyor (duz siyaha

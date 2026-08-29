@@ -36,6 +36,7 @@ from dataclasses import dataclass
 import pygame
 
 from src.art import palette
+from src.art import portrait as portrait_art
 from src.config import INTERNAL_HEIGHT, INTERNAL_WIDTH
 from src.core.input import Action
 from src.ui import text
@@ -74,6 +75,20 @@ LINE_STEP = GLYPH_HEIGHT + 3
 MAX_LINES = 3
 CHAR_ADVANCE = GLYPH_WIDTH + TRACKING
 WRAP_WIDTH = (BOX_WIDTH - 20) // CHAR_ADVANCE
+
+# --- Portre ------------------------------------------------------------------
+# Konusan kisinin bustu kutunun **solunda**, alt kenari kutuyla hizali ve
+# uzeri kutunun ustune tasiyor - klasik JRPG kadraji.
+#
+# Neden portre: oyun ici sprite'ta kafa 7 piksel ve yuz ifadesi
+# okunamiyor (`src/art/portrait.py` basligindaki olcum). Konusan kisinin
+# YUZUNU gormek anlatimin yarisi; Arda'nin 29.08.2026 istegi tam olarak
+# buydu ve tek karsilanabilecegi yer burasi.
+PORTRAIT_X = 6
+PORTRAIT_GAP = 4
+# Portre varken metin bu kadar iceri kayiyor ve satir genisligi daraliyor.
+PORTRAIT_INSET = 56
+WRAP_WIDTH_PORTRAIT = (BOX_WIDTH - 20 - PORTRAIT_INSET) // CHAR_ADVANCE
 
 # Konusmaci kimligi renkle tasiniyor - ad etiketi okunmadan da anlasilsin.
 SPEAKER_COLOURS = {
@@ -204,16 +219,32 @@ class Dialogue:
         zaplardi. Tam metne gore olcunce kutu bastan dogru boyda duruyor,
         icine yazi akiyor.
         """
-        rows = _wrap(self.full_text, WRAP_WIDTH)[:MAX_LINES]
+        rows = _wrap(self.full_text, self._wrap_width())[:MAX_LINES]
         height = len(rows) * LINE_STEP + BOX_PADDING * 2 - 3
         return pygame.Rect(BOX_X, BOX_BOTTOM - height, BOX_WIDTH, height)
+
+    def _portrait_name(self) -> str:
+        """Bu replikte gosterilecek portre. Yoksa bos dize.
+
+        Yanki'nin portresi **yok** ve bu bilincli: kafanin icindeki sesin
+        yuzu olmaz. Ayni gerekce onun kutusunu da kaldirmisti.
+        """
+        line = self.current
+        if line is None or line.speaker == ECHO:
+            return ""
+        return line.speaker if portrait_art.PORTRAITS.get(line.speaker) else ""
+
+    def _wrap_width(self) -> int:
+        """Satir genisligi portre varken daralir - metin bustun altina
+        akmamali."""
+        return WRAP_WIDTH_PORTRAIT if self._portrait_name() else WRAP_WIDTH
 
     def draw(self, surface: pygame.Surface, frame: int = 0) -> None:
         line = self.current
         if line is None:
             return
         shown = self.full_text[:int(self.revealed)]
-        rows = _wrap(shown, WRAP_WIDTH)[:MAX_LINES]
+        rows = _wrap(shown, self._wrap_width())[:MAX_LINES]
 
         if line.speaker == ECHO:
             self._draw_echo(surface, rows, frame)
@@ -222,18 +253,30 @@ class Dialogue:
 
     def _draw_box(self, surface: pygame.Surface, line: Line,
                   rows: list[str]) -> None:
-        """Odadaki bir kisi konusuyor - cerceveli kutu, ad etiketi."""
+        """Odadaki bir kisi konusuyor - portre + cerceveli kutu + ad."""
         box = self._box_rect()
         panel(surface, box)
         colour = palette.color(SPEAKER_COLOURS.get(line.speaker, "bone"))
 
+        inset = 0
+        name = self._portrait_name()
+        if name:
+            bust = portrait_art.portrait(name)
+            if bust is not None:
+                # Alt kenar kutuyla hizali, ust kismi kutunun UZERINE
+                # tasiyor - portre kutunun icine sigmiyor (96 > 55) ve
+                # sigdirmak icin kirpmak yuzu kesip atardi.
+                surface.blit(bust, (PORTRAIT_X,
+                                    box.bottom - bust.get_height()))
+                inset = PORTRAIT_INSET
+
         label = SPEAKER_KEYS.get(line.speaker, "speaker.rey")
-        text.draw(surface, t(label), box.x + 8, box.y - 11,
+        text.draw(surface, t(label), box.x + 8 + inset, box.y - 11,
                   color=colour, outline=True)
 
         y = box.y + BOX_PADDING
         for row in rows:
-            text.draw(surface, row, box.x + 10, y,
+            text.draw(surface, row, box.x + 10 + inset, y,
                       color=palette.role("ui_text"))
             y += LINE_STEP
 

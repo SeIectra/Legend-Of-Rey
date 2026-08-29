@@ -42,6 +42,26 @@ Spec'ler: `src/art/animation.py :: CHARACTERS`
 Her karakter bu durumlarin tamamini uretir; toplam kare sayisi bu
 yuzden kadroda ayni.
 
+## Portreler
+
+Uretici: `src/art/portrait.py :: draw_portrait(spec)`  
+Spec'ler: `src/art/portrait.py :: PORTRAITS`
+
+| Ad | Boyut | Rol |
+|---|---|---|
+| `rey` | 64x96 | Diyalog + karakter secimi |
+| `ardo` | 64x96 | Diyalog + karakter secimi |
+| `cemo` | 64x96 | Diyalog |
+
+**Neden ayri bir varlik sinifi:** oyun ici sprite'ta kafa ~7 piksel ve 
+goz kapagi/iris/highlight/burun kumesi/dudak oraya sigmiyor. Sprite'i 
+buyutmek de mumkun degil - oyunun en dar gecidi 2 tile = 32 piksel 
+(olculdu, `tests/test_sprites.py` koruyor). Portrede kafa 40 piksel ve 
+istenen her sey gercekten ciziliyor.
+
+Yanki'nin portresi **yok**: kafanin icindeki sesin yuzu olmaz (ayni 
+gerekce onun diyalog kutusunu da kaldirmisti).
+
 ## Palet
 
 Tek kaynak: `tools/palette.json` - **37 renk**, 

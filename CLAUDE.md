@@ -181,7 +181,16 @@ Böylece Rey, Ardo ve muhafızlar **aynı iskeletten** çıkar. Tutarlılık gar
 ### Stil sözleşmesi — istisnasız
 - **Işık kaynağı her zaman sol üstten**
 - **Kontur:** siyah değil, paletin en koyu 2. rengi
-- **Yüz:** 2 piksel göz, ağız yok
+- **Yüz:** ~~2 piksel göz, ağız yok~~ — **Arda 29.08.2026'da genişletti.**
+  Oyun içi sprite'ta kafa ~7 piksel: göz + kaş + çene gölgesi (kaş eğimi
+  karakteri ayırır). Gerçek yüz detayı — göz kapağı, iris, highlight,
+  burun kümesi, dudak — **portrede** yaşıyor (`src/art/portrait.py`,
+  64×96, kafa 40 piksel). Gerekçe ölçüldü: oyunun en dar geçidi 2 tile
+  = 32px, sprite büyütülemez.
+- **Sprite yüksekliği ≤ 32 piksel.** Bağlayıcı ve ölçülmüş
+  (`tests/test_sprites.py`). Aşarsa karakter Bölüm 1/2'nin 2 tile'lık
+  koridorlarından geçemez.
+- **Kafa/boy oranı ≥ 4.4.** 3.5 chibi oranıdır; Arda açıkça yasakladı.
 - **Gölge:** karakterin altında 1 elips
 - **Animasyon hissi:** 8 FPS (her sanat karesi ≈ 7-8 oyun karesi)
 - **Siluet testi:** her sprite tek renk siyaha çevrildiğinde ne olduğu anlaşılmalı

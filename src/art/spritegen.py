@@ -48,6 +48,9 @@ class CharSpec:
     fore_arm: float = 4.0
     limb_width: float = 2.4
     shoulder_width: float = 5.2
+    # Kafa ile omuz arasindaki bosluk (piksel). Kafa, boyun ve omzun uc
+    # ayri form olarak okunmasini saglayan tek sayi.
+    neck: float = 1.2
 
     # Golge zincirleri
     skin: str = "skin_tan"
@@ -77,6 +80,9 @@ class CharSpec:
     hem_length: float = 5.0
     tattoo: bool = False
     glow_eyes: int = 0
+    # Kasin egimi (piksel). +1 yukari egik (acik, genc, sempatik),
+    # -1 asagi egik (catik, sert). Tek sayi, iki farkli ifade.
+    brow_tilt: int = 0
     weapon: str = "none"             # none sword knife club staff spear bow axe
 
     # --- Siluet kirici ek parcalar ------------------------------------------
@@ -122,6 +128,30 @@ def _draw_shadow(canvas: Canvas, cx: float, foot_y: float,
                  width: float) -> None:
     """Karakterin altinda tek elips - stil sozlesmesi geregi."""
     canvas.ellipse(cx, foot_y + 1, width * 0.75, 1.6, "shadow", 1)
+
+
+def _torso_volume(canvas: Canvas, cx: float, shoulder_x: float,
+                  shoulder_y: float, waist_y: float, hip_y: float,
+                  spec: CharSpec) -> None:
+    """Govdenin icine hacim: sol isik sutunu, sag golge sutunu.
+
+    `Canvas.shade()` yalnizca **kenarlara** bakiyor; govdenin ici duz
+    kaliyordu ve karakter "kagittan kesilmis" gorunuyordu. Bu iki sutun
+    gogus kafesini yuvarlatiyor - tek gecis, iki piksel genislik.
+    """
+    top = int(shoulder_y) + 1
+    bottom = int(hip_y)
+    for y in range(top, bottom):
+        t = (y - top) / max(1, bottom - top)
+        # Bel hizasinda daralip kalcada tekrar aciliyor.
+        half = spec.shoulder_width * 0.5 * (1.0 - t * 0.45) + t * t * 1.2
+        canvas.px(int(shoulder_x - half + 1), y, spec.cloth, 3)
+        canvas.px(int(shoulder_x + half - 1), y, spec.cloth, 1)
+    # Kemer/bel cizgisi - govdeyi ikiye bolen tek koyu satir. Silueti
+    # kirmiyor ama "ust govde / alt govde" ayrimini okutuyor.
+    belt = int(waist_y) + 1
+    canvas.fill_rect(int(cx - spec.torso_width * 0.32), belt,
+                     int(spec.torso_width * 0.64) + 1, 1, spec.cloth_dark, 1)
 
 
 def _draw_leg(canvas: Canvas, hx: float, hy: float, hip_angle: float,
@@ -324,7 +354,26 @@ def _draw_head(canvas: Canvas, cx: float, cy: float, spec: CharSpec) -> None:
         canvas.disc(cx - radius * 0.45, cy + radius * 0.1, radius * 0.24,
                     "shadow", 0)
     else:
-        canvas.disc(cx, cy, radius, spec.skin, 2)
+        # Kafa **daire degil**: dikeyde uzun, cenede daralan bir form.
+        # Arda: *"Kafayi basit bir kare veya oval blok olarak cizme.
+        # Alin, elmacik, yanak ve cene arasinda dogal oranlar olustur."*
+        # Bu olcekte (yaricap ~3.4) yapilabilecek en fazlasi: kafatasi
+        # icin biraz genis bir elips, altina daralan bir cene ucgeni.
+        canvas.ellipse(cx, cy - radius * 0.15, radius, radius * 1.05,
+                       spec.skin, 2)
+        canvas.polygon([
+            (cx - radius * 0.78, cy + radius * 0.30),
+            (cx + radius * 0.78, cy + radius * 0.30),
+            (cx + radius * 0.34, cy + radius * 1.12),
+            (cx - radius * 0.34, cy + radius * 1.12),
+        ], spec.skin, 2)
+        # Isik sol-ustten: sol alin acik, sag yanak ve cene alti koyu.
+        # Bu uc piksel yuze hacim veriyor - onsuz kafa duz bir leke.
+        canvas.px(int(cx - radius * 0.55), int(cy - radius * 0.45),
+                  spec.skin, 3)
+        canvas.px(int(cx + radius * 0.50), int(cy + radius * 0.25),
+                  spec.skin, 1)
+        canvas.px(int(cx), int(cy + radius * 1.05), spec.skin, 1)
         if spec.hood:
             # Kukulete **sivri ve arkaya uzanan** bir sekil olmali. Daire
             # cizince siluet uzun sacli kafadan ayirt edilemiyordu - siluet
@@ -347,11 +396,22 @@ def _draw_head(canvas: Canvas, cx: float, cy: float, spec: CharSpec) -> None:
             canvas.disc(cx + radius * 0.30, cy + radius * 0.05, radius * 0.50,
                         "shadow", 1)
         else:
-            for y in range(int(cy - radius), int(cy)):
+            # Sac cizgisi kafanin **ortasina** degil, ust ucte birine
+            # iniyor. Eskiden `cy`'ye kadar (yani yarisina) doluyordu ve
+            # yaricap kuculunce yuz bir-iki piksele dusup kayboluyordu.
+            # Alin gorunmezse yuz de gorunmez.
+            hairline = cy - radius * 0.30
+            for y in range(int(cy - radius), int(hairline) + 1):
                 for x in range(int(cx - radius), int(cx + radius + 1)):
                     dx, dy = x + 0.5 - cx, y + 0.5 - cy
-                    if dx * dx + dy * dy <= radius * radius:
+                    if dx * dx + dy * dy <= (radius + 0.6) ** 2:
                         canvas.px(x, y, spec.hair, 1)
+            # Isik sol-ustten: sacin sol tepesinde bir parlak piksel.
+            # Tek renk bir kutle "sac" degil "sapka" gibi okunuyor.
+            canvas.px(int(cx - radius * 0.55), int(cy - radius * 0.85),
+                      spec.hair, 3)
+            canvas.px(int(cx - radius * 0.15), int(cy - radius * 1.05),
+                      spec.hair, 2)
             if spec.curly_hair:
                 # Kivircik: duz kalotun uzerine tepe cikintilari. Siluette
                 # tirtikli bir ust hat birakir - Rey'in duz sacindan bir
@@ -408,7 +468,21 @@ def _draw_head(canvas: Canvas, cx: float, cy: float, spec: CharSpec) -> None:
 
 
 def _draw_eyes(canvas: Canvas, cx: float, cy: float, spec: CharSpec) -> None:
-    """Iki piksel goz, agiz yok - stil sozlesmesi."""
+    """Goz + kas + cene golgesi.
+
+    **`CLAUDE.md` 6'nin "2 piksel goz, agiz yok" kurali Arda tarafindan
+    29.08.2026'da genisletildi:** *"Gozleri sadece iki piksel nokta
+    olarak birakma. Kaslar gozlerle uyumlu olsun."*
+
+    Bu olcekte (kafa ~7 piksel) yapilabilecegin siniri var ve sinir dar:
+    goz icin 2x1, kas icin 1 piksel, goz akı icin 1 piksel. Daha
+    fazlasini istemek yuzu bulamaca cevirir - **gercek detay portrede**
+    (`src/art/portrait.py`), orada kafa 40 piksel ve istenen her sey
+    (kapak, iris, highlight, burun kumesi, dudak) gercekten ciziliyor.
+
+    Burada amac farkli: **ifade**, detay degil. Kasin egimi ve gozun
+    agirligi karakteri bir bakista ayirmali.
+    """
     eye_y = int(cy + spec.head_radius * 0.05)
     if spec.glow_eyes:
         canvas.px(int(cx + spec.head_radius * 0.35), eye_y, spec.accent, 3,
@@ -428,11 +502,20 @@ def _draw_eyes(canvas: Canvas, cx: float, cy: float, spec: CharSpec) -> None:
         canvas.fill_rect(near_x, eye_y, 2, 1, "bone_pale", 3)
         canvas.px(int(cx - spec.head_radius * 0.6), eye_y, "bone_pale", 3)
         return
-    # Badem goz: 2 piksel genis, ustunde kirpik cizgisi.
+    # On goz: iki piksel koyu + ustunde bir piksel goz aki. Goz aki
+    # gozu "delik" olmaktan cikarip "bakis" yapan sey - tek basina koyu
+    # bir leke nereye baktigini soylemiyor.
     near_x = int(cx + spec.head_radius * 0.25)
-    canvas.fill_rect(near_x, eye_y, 2, 1, "hair_dark", 1)
-    canvas.px(near_x + 1, eye_y - 1, spec.hair, 1)
-    canvas.px(int(cx - spec.head_radius * 0.6), eye_y, "hair_dark", 1)
+    canvas.fill_rect(near_x, eye_y, 2, 1, "hair_dark", 0)
+    canvas.px(near_x + 1, eye_y, "bone_pale", 2)
+    # Arka goz - perspektif geregi daha kucuk ve daha soluk.
+    canvas.px(int(cx - spec.head_radius * 0.62), eye_y, "hair_dark", 1)
+
+    # Kas: gozun bir ustunde, `brow_tilt` kadar egik. Ifadeyi tasiyan
+    # tek piksel bu - yukari egik acik/genc, asagi egik catik/sert.
+    brow_y = eye_y - 1 - max(0, spec.brow_tilt)
+    canvas.px(near_x, brow_y, spec.hair, 1)
+    canvas.px(near_x + 1, brow_y - min(0, spec.brow_tilt), spec.hair, 1)
 
 
 # --- Ana cizici -------------------------------------------------------------
@@ -451,7 +534,12 @@ def draw_humanoid(spec: CharSpec, pose: Pose) -> Canvas:
     shoulder_x = cx + pose.lean * 2.5 + spec.hunch
     shoulder_y += spec.hunch * 0.45
     head_x = cx + pose.head_dx
-    head_y = shoulder_y - spec.head_radius + 1.5 + pose.head_dy
+    # **Boyun.** Kafa eskiden omuz cizgisinin 1.5 piksel ICINE oturuyordu
+    # ve govdeye yapisik duruyordu - omuzluk takan karakterlerde (Ardo)
+    # omuzluklar kulak hizasina cikip kafayi kusatiyordu. Bir piksellik
+    # bosluk siluetin en ucuz ve en etkili duzeltmesi: kafa, boyun ve
+    # omuz uc ayri form olarak okunuyor.
+    head_y = shoulder_y - spec.head_radius - spec.neck + pose.head_dy
 
     _draw_shadow(canvas, spec.cell_width * 0.5, spec.foot_y, spec.torso_width)
 
@@ -482,20 +570,41 @@ def draw_humanoid(spec: CharSpec, pose: Pose) -> Canvas:
         _draw_claws(canvas, back_hand[0], back_hand[1],
                     pose.arm_back[0] + pose.arm_back[1], spec)
 
-    # Govde
+    # Boyun - kafayi govdeye baglayan iki piksel. Onsuz kafa havada durur.
+    canvas.fill_rect(int(head_x - 1), int(shoulder_y - spec.neck - 0.5),
+                     2, int(spec.neck + 1.5), spec.skin, 1)
+
+    # --- Govde: BELI olan alti kose ---------------------------------------
+    # Dort koseli trapez omuzdan kalcaya duz iniyordu ve "kutu" gibi
+    # okunuyordu (Arda: "kollari ve bacaklari dikdortgen gibi cizme" -
+    # ayni sey govde icin de gecerli). Alti kose bir bel veriyor:
+    # omuz genis -> bel dar -> kalca tekrar geniyor. Uc dugum, taninabilir
+    # bir insan silueti.
+    waist_y = shoulder_y + (hip_y - shoulder_y) * 0.62
+    waist = spec.torso_width * 0.30
     canvas.polygon([
         (shoulder_x - spec.shoulder_width * 0.5, shoulder_y),
         (shoulder_x + spec.shoulder_width * 0.5, shoulder_y),
-        (cx + spec.torso_width * 0.36, hip_y + 1),
-        (cx - spec.torso_width * 0.36, hip_y + 1),
+        (cx + waist, waist_y),
+        (cx + spec.torso_width * 0.38, hip_y + 1),
+        (cx - spec.torso_width * 0.38, hip_y + 1),
+        (cx - waist, waist_y),
     ], spec.cloth, 2)
+    # Hacim: sol kenar isik aliyor, sag kenar golgede. `shade()` bunu
+    # kenar bazinda zaten yapiyor ama govdenin ICI duz kaliyordu -
+    # bu iki sutun gogus kafesine yuvarlaklik veriyor.
+    _torso_volume(canvas, cx, shoulder_x, shoulder_y, waist_y, hip_y, spec)
 
     if spec.shoulder_pads:
+        # Omuzluk **omuzda** durur, kulakta degil. Eskiden yaricap 2.6 ile
+        # `shoulder_y + 0.5`'te duruyordu; omuz genisleyince (Ardo 7.6 ->
+        # 8.0) iki beyaz yumru kafayi kusatir hale gelmisti. Artik daha
+        # kucuk ve bir piksel asagida: siluette kafa serbest kaliyor.
         shoulder_tone = spec.shoulder_chain or spec.armor
-        canvas.disc(shoulder_x - spec.shoulder_width * 0.55, shoulder_y + 0.5,
-                    2.6, shoulder_tone, 3)
-        canvas.disc(shoulder_x + spec.shoulder_width * 0.55, shoulder_y + 0.5,
-                    2.6, shoulder_tone, 2)
+        canvas.ellipse(shoulder_x - spec.shoulder_width * 0.52,
+                       shoulder_y + 1.6, 2.4, 1.7, shoulder_tone, 3)
+        canvas.ellipse(shoulder_x + spec.shoulder_width * 0.52,
+                       shoulder_y + 1.6, 2.4, 1.7, shoulder_tone, 2)
 
     if spec.tattoo:
         # Sag kopruck kemiginin altinda kucuk isaret. Bu olcekte bir geyik
