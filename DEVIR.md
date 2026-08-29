@@ -7,7 +7,7 @@ Okuma sırası: **1) `CLAUDE.md`** (bağlayıcı kurallar — anayasa) → **2) 
 dosya** (nerede kaldık) → 3) gerekirse `docs/` altındaki ilgili tasarım
 belgesi.
 
-Son güncelleme: **24.08.2026** (boss kapısı + anahtar, yumuşak kilit düzeltmesi) · Ardeko Studios · Arda Güner
+Son güncelleme: **29.08.2026** (Faz G ✅ — Bölüm 3 anlatımı, Yankı/Ardo ayrımı) · Ardeko Studios · Arda Güner
 
 > `GOREVLER.md` **silindi** (23.08.2026, Arda'nın isteği: "bir devir.md
 > olsun diğerlerini sil kafa karıştırmasın"). İçindeki canlı bilgi bu
@@ -76,7 +76,7 @@ Yedi faza bölündü:
 | **D** | Çevre ve dekor (köy, köylüler, gökyüzü katmanları) | ✅ |
 | **E** | Karakter sprite'ları (silah izi, ikincil hareket, geçiş kareleri) | ✅ |
 | **F** | HUD ve arayüz | 🟡 can çubuğu ✅ · gerisi ⬜ |
-| **G** | Bölüm 2/3 ara sahneleri | 🟡 **Bölüm 2 iniş sahnesi ✅** (`story.py` artık kullanılıyor) · B3 güçlendirmesi ⬜ |
+| **G** | Bölüm 2/3 anlatımı | ✅ B2 iniş sahnesi (`story.py`) · B3'e dört anlatım anı · Yankı/Ardo ayrımı üç bölümde de |
 
 **Işık sistemi hakkında bir düzeltme (24.08.2026):** Bu belge bir ara
 "ışık sistemi yalnızca Bölüm 3'e bağlı, B1/B2'ye de bağlanmalı" diyordu —
