@@ -7,7 +7,7 @@ Okuma sırası: **1) `CLAUDE.md`** (bağlayıcı kurallar — anayasa) → **2) 
 dosya** (nerede kaldık) → 3) gerekirse `docs/` altındaki ilgili tasarım
 belgesi.
 
-Son güncelleme: **29.08.2026** (Faz A–G tamamlandı) · Ardeko Studios · Arda Güner
+Son güncelleme: **29.08.2026** (Bölüm 4 + Bölüm 5) · Ardeko Studios · Arda Güner
 
 > `GOREVLER.md` **silindi** (23.08.2026, Arda'nın isteği: "bir devir.md
 > olsun diğerlerini sil kafa karıştırmasın"). İçindeki canlı bilgi bu
@@ -35,15 +35,16 @@ Tasarım paketi `docs/` altında ve **bağlayıcı**: `gdd.md` (ana belge),
 
 ## 2. NEREDE DURUYORUZ
 
-**~19.100 satır Python. 13 test paketi de yeşil.**
+**~29.800 satır Python. 16 test paketi de yeşil.**
 
 Oynanabilir akış:
 `intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)** →
-**Bölüm 2 (İlk İniş)** → bölüm sonu ekranı → **Bölüm 3 (Meşale Mahzeni)**
-→ bölüm sonu ekranı → ana menü`
+**Bölüm 2 (İlk İniş)** → **Bölüm 3 (Meşale Mahzeni)** → **Bölüm 4 (Kayıt
+Odası)** → **Bölüm 5 (Sular)** → bölüm sonu ekranı → ana menü`
+(her bölümün arasında bölüm sonu özet ekranı var)
 
-Bölüm 3'ün sonu ana menüye dönüyor çünkü **Bölüm 4 henüz yok** — bilinçli
-bir uç.
+Bölüm 5'in sonu ana menüye dönüyor çünkü **Bölüm 6 henüz yok** — bilinçli
+bir uç. Bölüm 6 aynı zamanda **ilk büyük boss** ve Katman 1'in sonu.
 
 ### Görev listesi (eski `GOREVLER.md`'den)
 
@@ -61,6 +62,27 @@ bir uç.
 | 9 | Sanat geçişi | 🟡 sprite + tileset + post-fx var; 9-slice yok |
 | 10 | Ses | 🟡 öncelik 1 seti sentezle var; müzik ve öncelik 2-3 yok |
 | 11 | Değerlendirme (karar, kod değil) | ⬜ **Arda'nın işi** |
+| 12 | Bölüm 4 — Kayıt Odası + **yetenek ağacı** | ✅ (29.08.2026) |
+| 13 | Bölüm 5 — Sular + **su seviyesi mekaniği** | ✅ (29.08.2026) |
+
+**Bölüm 4 "Kayıt Odası"** (`docs/yapi.md` B4): yetenek ağacı sistemi
+(`src/systems/skilltree.py` — 3 dal × 4 düğüm) + ağaç ekranı
+(`src/ui/skill_tree.py`) + üç oda + günlük parçaları. Ağacın beş
+toplayıcısı (`damage_scale`, `defence_scale`, `echo_sight_scale`,
+`max_health_bonus`, `chain_window_bonus` …) gerçekten **bağlı** — bir
+ara sürümde hesaplanıp hiçbir yerde okunmuyordu. Savunma çarpanı Yankı
+cezasından **sonra** uygulanıyor: taş dalının işi tam olarak o cezayı
+yumuşatmak.
+
+**Bölüm 5 "Sular"** (`docs/yapi.md` B5): su tek bir **yatay düzlem**
+(`src/world/water.py`), tile başına su yok — vana bir sayıyı değiştiriyor.
+Kaldırma kuvveti `Body.gravity_scale` üzerinden, yani sudan çıkan gövde
+**kendiliğinden** eski davranışına dönüyor. Batma bir **oran** (0..1),
+eşik değil; eşik olsaydı su yüzeyinde gövde her karede girip çıkıp
+titrerdi. Bulmaca dört adım, atlanamaz: alt geçidi şamandıralı bir savak
+kapatıyor, yani ikinci vanaya çıkmak **zorunlu** (Bölüm 2/3'te boss
+atlanabiliyordu — o ders `keydoor.py`'ye yazılmıştı, burada kilit
+tasarıma gömülü).
 
 ### Grafik + anlatım geçişi — **YEDİ FAZ DA TAMAM (29.08.2026)**
 
@@ -415,28 +437,39 @@ Sırası gelmediği için değil, **gözden kaçmasın** diye:
    Bölüm 2 ve 3'ün arena çıkışı kilitli, boss ölünce anahtar düşüyor.
    Aynı yapı sonraki boss odalarında da kullanılmalı; Bölüm 2/3'e
    bakarak bağlanır (`_drop_key` / `_update_key`).
+   *Bölüm 5'te gerekmedi* — orada kilit **tasarıma gömülü** (savak su
+   seviyesini izliyor). Kilit bir mekanizma değil, bir sonuç olduğunda
+   daha iyi okunuyor; boss odaları dışında bu yol tercih edilmeli.
 
 6. **Bölüm 2'nin ödülü eksik:** belge mini-boss sonrası **ilk silah
    seçimi** (Hançer/Balta) veriyor, şu an sadece 55 altın. Altyapı hazır
    (`src/combat/weapons.py`), eksik olan **içerik/akış**: seçim ekranı,
    kayda yazma, Hançer/Balta sprite'ları.
-6. **Checkpoint yok.** Oyuncu ölünce sahne yeniden kurulmuyor. Arena
+7. **`tools/reachability.py` Bölüm 5'i yalnızca KURU doğruluyor.** BFS
+   suyu bilmiyor; su yüzeyini "platform" sayan ikinci bir geçiş denendi
+   ve **yanlış** çıktı (yüzmek "yüzeyde yürümek" değil, su hacminde
+   yükselmek). Üst kat `validate(..., ignore=)` ile "bilerek erişilemez"
+   kümesine alındı — yoksa araç sürekli kırmızı yanar ve zamanla göz ardı
+   edilirdi. Su yolu bunun yerine `tests/test_chapter05.py` içinde
+   **gerçek fizikle** oynatılıyor. *Aynı desen ileride bir mekanik
+   BFS'e sığmadığında tekrar kullanılmalı: aracı zorlama, testi yaz.*
+8. **Checkpoint yok.** Oyuncu ölünce sahne yeniden kurulmuyor. Arena
    kapısı ölümde açılıyor ki oyuncu kilitli kalmasın, ama gerçek çözüm
    bir yeniden doğma sistemi.
-7. **Müzik yok.** Ses efektleri var (sentezlenmiş). **Döngülü/sürekli
+9. **Müzik yok.** Ses efektleri var (sentezlenmiş). **Döngülü/sürekli
    sesler bilerek kaldırıldı** — Arda: *"cızırtı gibi, rahatsız edici"*.
    Altyapı (`play_loop`/`stop_loop`) duruyor, kullanılmıyor. Gerçek kayıt
    gelirse tekrar açılabilir.
-8. **`game.music_hush` dolduruluyor ama kimse okumuyor.** Görsel yarısı
+10. **`game.music_hush` dolduruluyor ama kimse okumuyor.** Görsel yarısı
    çalışıyor, müziği kısacak taraf müzik gelince yazılacak.
-9. **EKSTRALAR ve EKİPMAN menüde kapalı.**
-10. **Bölüm 3'ün "5 yuva" ödülü basitleştirildi** — belge "ısıyla açılan
+11. **EKSTRALAR ve EKİPMAN menüde kapalı.**
+12. **Bölüm 3'ün "5 yuva" ödülü basitleştirildi** — belge "ısıyla açılan
     gizli kapı" tarif ediyor, kodda kutlama efekti/toast var.
-11. **Gerçek 9-slice tileset yok** (köşe/kenar ayrı parça). Şu anki
+13. **Gerçek 9-slice tileset yok** (köşe/kenar ayrı parça). Şu anki
     dikdörtgen blok tasarımı için yeterli görünüyor.
-12. **`docs/asset-plani.md` güncel değil** — "Türkçe karakter eksik" ve
+14. **`docs/asset-plani.md` güncel değil** — "Türkçe karakter eksik" ve
     "prototipteki sprite kalitesi" maddeleri artık geçersiz.
-13. **`_prototype/` referans, ASLA import etme.** İçinde işe yarar
+15. **`_prototype/` referans, ASLA import etme.** İçinde işe yarar
     fikirler var (parallax, post-fx, ışıklandırma, tile üreteci).
 
 ---
@@ -483,9 +516,9 @@ Commit mesajları Türkçe ve şununla bitiyor:
   çiz → bak → düzelt) burada en verimli.
 - **Ultracode** (xhigh + çok-ajanlı paralel dağıtım) — yalnızca
   **parçalara ayrılıp doğrulanması gereken geniş iş** için: Katman 2
-  düşman AI'ları (4 bağımsız dosya), Bölüm 4 (yetenek ağacı ekranı),
-  Bölüm 5 (su mekaniği), Bölüm 6 (team-up + ilk büyük boss), 18 bölüm
-  bittikten sonra bütünsel denge geçişi.
+  düşman AI'ları (4 bağımsız dosya), Bölüm 6 (team-up + ilk büyük boss),
+  18 bölüm bittikten sonra bütünsel denge geçişi.
+  *Bölüm 4 ve 5 bu listedeydi, ikisi de Ultracode'da yapıldı ve bitti.*
 - Bu projede fan-out'un gerçek riski var: her alt-ajan **soğuk başlıyor**
   ve bu repo bağlayıcı geleneklerle dolu (37 renk paleti, zincir-adı
   tuzağı, Türkçe yorumlar, kare tabanlı zamanlama, sıra kuralı). Bağlam
