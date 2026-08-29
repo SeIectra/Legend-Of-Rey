@@ -140,9 +140,19 @@ class Game:
         """
         fullscreen = bool(self.settings.get("fullscreen", False))
         if fullscreen:
-            # (0, 0) = masaustu cozunurlugu; gercek pikselleri isteriz.
-            flags = pygame.FULLSCREEN
-            size = (0, 0)
+            # **Kenarliksiz pencere, gercek tam ekran DEGIL.**
+            #
+            # `pygame.FULLSCREEN` SDL'in ozel (exclusive) kipini aciyor ve
+            # o kip ekran modunu gercekten degistiriyor. Windows'ta bu
+            # surucuye gore saniyeler surebiliyor, bazen hic donmuyor -
+            # Arda'nin "ayari degistirince oyun donuyor" bildiriminin
+            # ikinci sebebi bu.
+            #
+            # Masaustu boyutunda kenarliksiz bir pencere ayni gorunuyu
+            # veriyor ama mod degisimi YOK: gecis aninda, alt-tab
+            # calisiyor, surucu kilitlenmesi riski ortadan kalkiyor.
+            flags = pygame.NOFRAME
+            size = self._desktop_size()
         else:
             flags = pygame.RESIZABLE
             configured = int(self.settings.get("scale") or 0)
@@ -157,7 +167,33 @@ class Game:
             self.screen = pygame.display.set_mode(size, flags)
 
         pygame.display.set_caption(WINDOW_TITLE)
+
+        # **Onbellekleri at.** Uretilen her yuzey `convert()` gormus ve
+        # donusum O ANKI ekranin piksel bicimine gore yapilmis; ekran
+        # yeniden kurulunca hepsi bayatliyor. Pygame bunu hata olarak
+        # bildirmiyor, sessizce her blit'te tek tek donusturuyor - karede
+        # yuzlerce blit oldugu icin sonuc "donma" gibi gorunuyor.
+        #
+        # Bu, Arda'nin bildirdigi donmanin BIRINCI sebebiydi.
+        from src.art import caches
+        caches.invalidate_all()
+
         self._recompute_viewport()
+
+    @staticmethod
+    def _desktop_size() -> tuple[int, int]:
+        """Masaustu cozunurlugu. Alinamazsa makul bir varsayilan.
+
+        `set_mode((0, 0))` de masaustu boyutunu verir ama `NOFRAME` ile
+        birlikte bos bir pencere aciyor - boyutu acikca istemek gerekiyor.
+        """
+        try:
+            info = pygame.display.Info()
+            if info.current_w > 0 and info.current_h > 0:
+                return (info.current_w, info.current_h)
+        except pygame.error:
+            pass
+        return (INTERNAL_WIDTH * 3, INTERNAL_HEIGHT * 3)
 
     def _recompute_viewport(self) -> None:
         if self.screen is None:
@@ -179,15 +215,13 @@ class Game:
             self._apply_language(value)
         elif key == "colorblind" and isinstance(value, str):
             palette.set_mode(value)
-            # Onbellekteki her sprite/karo eski renklerle cizilmis - temizle,
-            # bir sonraki cizimde yeni palete gore yeniden uretilirler.
-            from src.art import animator, tileset
-            animator.clear_cache()
-            tileset.clear_cache()
-            # Post-fx katmani da palet renklerinden uretiliyor - o da
-            # bayatlar. Bir donem unutulmustu ve renk korlugu moduna
-            # gecince sahne yeni renklerde, vinyet eski tonda kaliyordu.
-            postfx.clear_cache()
+            # Onbellekteki her sprite/karo/portre eski renklerle cizilmis.
+            # Liste `src/art/caches.py`'de tek yerde: bir donem burada
+            # elle sayiliyordu ve `postfx` unutulmustu - renk korlugu
+            # moduna gecince sahne yeni renklerde, vinyet eski tonda
+            # kaliyordu.
+            from src.art import caches
+            caches.invalidate_all()
         # Ses ve sarsinti ayarlarini sahneler kendi okur; burada zorlamiyoruz.
 
     def _apply_language(self, code: object) -> None:

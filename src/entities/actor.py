@@ -72,6 +72,29 @@ class Body:
         return self.y + self.height
 
     @property
+    def top(self) -> float:
+        """Govdenin ust kenari - `self.y` ile ayni sey.
+
+        Ayri bir ad olarak duruyor cunku `bottom` vardi ve `top` yoktu;
+        bu asimetri `echo_view.draw_answer`'i cokertti (Arda, 29.08.2026:
+        `AttributeError: 'Body' object has no attribute 'top'`). Yanki'ya
+        soru soruldugunda - yani nadiren - calisan bir cizim yoluydu ve
+        oyun aylarca o satira hic ugramadi.
+
+        `bottom`/`top`/`left`/`right` bir arada bulunmali: birinin varligi
+        digerlerini de bekletiyor.
+        """
+        return self.y
+
+    @property
+    def left(self) -> float:
+        return self.x
+
+    @property
+    def right(self) -> float:
+        return self.x + self.width
+
+    @property
     def feet(self) -> tuple[float, float]:
         return (self.center_x, self.y + self.height)
 

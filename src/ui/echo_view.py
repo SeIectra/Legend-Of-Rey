@@ -47,6 +47,15 @@ CHROMA_SHIFT = 1
 _vignette_cache: dict[tuple, pygame.Surface] = {}
 
 
+def clear_cache() -> None:
+    """Ekran yeniden kurulunca cagriliyor (`src/art/caches.py`).
+
+    Vinyet yuzeyleri de `convert`li: ekran bicimi degisince bayatliyorlar
+    ve her karede tek tek donusturulmeye baslaniyorlar.
+    """
+    _vignette_cache.clear()
+
+
 def draw_reveal(surface: pygame.Surface, offset: tuple[int, int],
                 echo, player, enemies, walls=()) -> None:
     """Kazanc tarafi: duvar ardindaki dusmanlar ve gizli gecitler.

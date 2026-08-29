@@ -141,6 +141,15 @@ def font() -> BitmapFont:
 
 
 # --- Cizim ------------------------------------------------------------------
+def clear_cache() -> None:
+    """Ekran yeniden kurulunca cagriliyor (`src/art/caches.py`).
+
+    Yazi yuzeyleri `convert_alpha()` gormus durumda; ekran bicimi
+    degisince menuler ve HUD de yavaslamaya dahil oluyor.
+    """
+    font()._cache.clear()
+
+
 def measure(value: str, tracking: int = TRACKING) -> tuple[int, int]:
     return font().measure(value, tracking)
 
