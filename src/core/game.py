@@ -52,6 +52,24 @@ def viewport_for(width: int, height: int) -> tuple[int, pygame.Rect]:
                               view_w, view_h)
 
 
+def desktop_size() -> tuple[int, int]:
+    """Gercek masaustu cozunurlugu.
+
+    `pygame.display.Info()` **bunun icin kullanilamaz**: bir pencere
+    acildiktan sonra masaustunu degil o anki kipi doner.
+    `get_desktop_sizes()` kipten bagimsiz.
+
+    Sahne disinda tutuldu ki `tests/test_display.py` dogrulayabilsin.
+    """
+    try:
+        sizes = pygame.display.get_desktop_sizes()
+        if sizes and sizes[0][0] > 0 and sizes[0][1] > 0:
+            return sizes[0]
+    except (pygame.error, AttributeError):
+        pass
+    return (INTERNAL_WIDTH * 3, INTERNAL_HEIGHT * 3)
+
+
 class Game:
     def __init__(self, settings: Settings | None = None) -> None:
         # Mixer formati `pygame.init()`'ten ONCE kilitlenir (44.1kHz mono) -
@@ -105,6 +123,9 @@ class Game:
         # olmadan calismaz ve pygame hata firlatir.
         self.screen: pygame.Surface | None = None
         self.scale = 1
+        # Gorunumun hangi ekran boyutuna gore hesaplandigi -
+        # her karede karsilastiriliyor (bkz. `_render`).
+        self._viewport_for_size = (0, 0)
         self.viewport = pygame.Rect(0, 0, INTERNAL_WIDTH, INTERNAL_HEIGHT)
         self._create_window()
         self.canvas = pygame.Surface(
@@ -116,13 +137,24 @@ class Game:
 
     # --- Pencere ------------------------------------------------------------
     def _best_scale(self) -> int:
-        try:
-            info = pygame.display.Info()
-            available_w = info.current_w
-            available_h = info.current_h - SCALE_SCREEN_MARGIN
-        except pygame.error:
-            return 3
-        scale = min(available_w // INTERNAL_WIDTH, available_h // INTERNAL_HEIGHT)
+        """Pencere modunda masaustune sigan en buyuk tam sayi olcek.
+
+        **`pygame.display.Info()` KULLANILMAZ.** O cagri bir pencere
+        acildiktan sonra masaustunu degil **o anki kipi** doner - yani
+        pencerenin kendi boyutunu. Olcegi ondan hesaplayinca her ayar
+        degisimi pencereyi bir kat daha kucultuyordu:
+
+            1920 -> olcek 3 -> pencere 1440 -> olcek 2 -> pencere 960 -> ...
+
+        Arda bunu canli oynanista buldu (29.08.2026): ayari degistirince
+        pencere kuculuyor ve arayuz kirpiliyordu.
+
+        `get_desktop_sizes()` gercek masaustunu veriyor ve kipten
+        etkilenmiyor.
+        """
+        width, height = desktop_size()
+        available_h = height - SCALE_SCREEN_MARGIN
+        scale = min(width // INTERNAL_WIDTH, available_h // INTERNAL_HEIGHT)
         return max(MIN_SCALE, min(scale, MAX_SCALE))
 
     def _create_window(self) -> None:
@@ -152,14 +184,34 @@ class Game:
             # veriyor ama mod degisimi YOK: gecis aninda, alt-tab
             # calisiyor, surucu kilitlenmesi riski ortadan kalkiyor.
             flags = pygame.NOFRAME
-            size = self._desktop_size()
+            size = desktop_size()
         else:
             flags = pygame.RESIZABLE
             configured = int(self.settings.get("scale") or 0)
             scale = configured or self._best_scale()
             size = (INTERNAL_WIDTH * scale, INTERNAL_HEIGHT * scale)
 
-        vsync = 1 if self.settings.get("vsync", True) else 0
+        # **vsync YALNIZCA ilk pencerede isteniyor.**
+        #
+        # Tekrarli `set_mode(..., vsync=1)` pygame-ce 2.5.8'de SEGFAULT
+        # veriyor - ikinci cagrida. Bu LORE'a ozel degil, saf pygame ile
+        # de uretiliyor:
+        #
+        #     for i in range(6):
+        #         pygame.display.set_mode((960,540), RESIZABLE, vsync=1)
+        #         pygame.display.set_mode((1024,768), NOFRAME, vsync=1)
+        #     -> 2. turda "pygame parachute: Segmentation Fault"
+        #
+        # Ayni dongu `vsync` olmadan sekiz tur sorunsuz donuyor. Arda'nin
+        # "ayari degistirince oyun donuyor" bildiriminin ucuncu ve en sert
+        # sebebi buydu: surec cokuyor ama ses is parcacigi bir sure daha
+        # calmaya devam ediyor - ekrandan tam olarak "dondu" gibi
+        # gorunuyor.
+        #
+        # Bedeli: vsync ayari **bir sonraki acilista** etkili oluyor.
+        # Cokmeyen bir oyun, aninda uygulanan bir ayardan onemli.
+        first_window = self.screen is None
+        vsync = 1 if (first_window and self.settings.get("vsync", True)) else 0
         try:
             self.screen = pygame.display.set_mode(size, flags, vsync=vsync)
         except pygame.error:
@@ -180,25 +232,14 @@ class Game:
 
         self._recompute_viewport()
 
-    @staticmethod
-    def _desktop_size() -> tuple[int, int]:
-        """Masaustu cozunurlugu. Alinamazsa makul bir varsayilan.
 
-        `set_mode((0, 0))` de masaustu boyutunu verir ama `NOFRAME` ile
-        birlikte bos bir pencere aciyor - boyutu acikca istemek gerekiyor.
-        """
-        try:
-            info = pygame.display.Info()
-            if info.current_w > 0 and info.current_h > 0:
-                return (info.current_w, info.current_h)
-        except pygame.error:
-            pass
-        return (INTERNAL_WIDTH * 3, INTERNAL_HEIGHT * 3)
 
     def _recompute_viewport(self) -> None:
         if self.screen is None:
             return
-        self.scale, self.viewport = viewport_for(*self.screen.get_size())
+        size = self.screen.get_size()
+        self._viewport_for_size = size
+        self.scale, self.viewport = viewport_for(*size)
 
     def toggle_fullscreen(self) -> None:
         # `Settings.set` degisiklik olayini tetikler, o da pencereyi kurar.
@@ -384,6 +425,16 @@ class Game:
         else:
             # Tam sayi olceklemede `scale` en hizli ve en keskin yol.
             # smoothscale burada YASAK - piksel art bulaniklasir.
+            # **Her karede dogrula.** `VIDEORESIZE` her zaman gelmiyor -
+            # ozellikle `set_mode` ile programatik kip degisiminde. Bayat
+            # bir gorunum, pencereden BUYUK bir yuzey uretip her karede
+            # olceklemek demek: ekran kirpilir ve oyun "donar" (ses
+            # devam ettigi icin tam olarak oyle gorunur).
+            #
+            # Karsilastirma iki tamsayi; maliyeti yok, kazanci butun bir
+            # hata sinifinin kapanmasi.
+            if self.screen.get_size() != self._viewport_for_size:
+                self._recompute_viewport()
             scaled = pygame.transform.scale(self.canvas, self.viewport.size)
             self.screen.blit(scaled, self.viewport.topleft)
         pygame.display.flip()

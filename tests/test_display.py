@@ -123,7 +123,7 @@ def main() -> int:
     game_source = (ROOT / "src" / "core" / "game.py").read_text(
         encoding="utf-8")
     window_body = game_source.split("def _create_window")[1].split(
-        "def _desktop_size")[0]
+        "def _recompute_viewport")[0]
     check("flags = pygame.NOFRAME" in window_body,
           "kenarliksiz pencere kullaniliyor")
     # **Atamaya** bakiyoruz, metne degil: fonksiyonun aciklamasi zaten
@@ -131,6 +131,44 @@ def main() -> int:
     # kendi yorumunu hata sanip kirmisti.
     check("flags = pygame.FULLSCREEN" not in window_body,
           "ozel (exclusive) tam ekran kipi KULLANILMIYOR")
+
+    # --- 4b. Tekrarli gecis pencereyi KUCULTMUYOR ---------------------------
+    # `pygame.display.Info()` bir pencere acildiktan sonra masaustunu degil
+    # O ANKI KIPI doner. Olcek ondan hesaplaninca her gecis pencereyi bir
+    # kat kuculuyordu: 1920 -> 1440 -> 960 -> ... Arda bunu canli
+    # oynanista buldu; arayuz pencereden buyuk cizilip kirpiliyordu.
+    print("\n--- tekrarli gecis pencereyi kucultmuyor ---")
+    from src.core.game import desktop_size
+    check(desktop_size()[0] > 0, "masaustu boyutu okunuyor",
+          str(desktop_size()))
+
+    game.settings.set("fullscreen", False)
+    first = game.screen.get_size()
+    for _ in range(4):
+        game.settings.set("fullscreen", True)
+        game.settings.set("fullscreen", False)
+    check(game.screen.get_size() == first,
+          "dort tur gidip gelince pencere AYNI boyutta",
+          f"{first} -> {game.screen.get_size()}")
+
+    # Gorunum her zaman pencerenin icinde kalmali. Disina tastigi anda
+    # her karede pencereden buyuk bir yuzey olcekleniyor - ekran kirpilir
+    # ve oyun "donar" (ses devam ettigi icin tam olarak oyle gorunur).
+    width, height = game.screen.get_size()
+    check(game.viewport.width <= width and game.viewport.height <= height,
+          "gorunum pencereye SIGIYOR",
+          f"{game.viewport.size} <= {(width, height)}")
+
+    # --- 4c. vsync yalnizca ilk pencerede -----------------------------------
+    # Tekrarli `set_mode(..., vsync=1)` pygame-ce 2.5.8'de SEGFAULT
+    # veriyor (saf pygame ile de ureniyor). Yakalanabilir bir hata degil,
+    # o yuzden tek korunma istememek.
+    print("\n--- vsync yalnizca ilk pencerede ---")
+    window_body2 = (ROOT / "src" / "core" / "game.py").read_text(
+        encoding="utf-8").split("def _create_window")[1].split(
+        "def _recompute_viewport")[0]
+    check("first_window" in window_body2,
+          "vsync yalnizca ilk pencerede isteniyor")
 
     # --- 5. Olcek matematigi bozulmadi --------------------------------------
     # Tam ekran artik masaustu boyutunda bir pencere; olcek hesabi ayni
