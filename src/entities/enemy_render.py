@@ -26,6 +26,15 @@ TELL_PULSE_PERIOD = 6
 def draw_enemy(enemy, surface: pygame.Surface,
                offset: tuple[int, int]) -> None:
     ox, oy = offset
+    # Iz Surme'nin **bedeli**: Ardo gecmise bakarken yasayan dusmanlar
+    # soluyor (`src/systems/tracking.py`). Deger sahneden okunuyor,
+    # `draw()` zincirinden gecirilmiyor - yedi dusmanin da imzasini
+    # degistirmek gerekirdi ve `box_mode`/`silhouette_mode` zaten ayni
+    # yoldan (sahne/oyun uzerinden) okunuyor.
+    #
+    # Solma BAKAN'in ozelligi, bakilanin degil: dusmanin kendi durumuna
+    # yazilsaydi Rey de Ardo'nun bedelini oderdi.
+    fade = getattr(enemy.scene, "enemy_fade", 0.0)
     rect = enemy.body.rect.move(-ox, -oy)
 
     if enemy.scene.game.box_mode:
@@ -47,6 +56,7 @@ def draw_enemy(enemy, surface: pygame.Surface,
         silhouette_mode=enemy.scene.game.silhouette_mode,
         tint_colour=colour,
         tint_strength=strength,
+        alpha=max(0, min(255, int(255 * (1.0 - fade)))),
     )
     if image is None:
         _draw_box(enemy, surface, rect)

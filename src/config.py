@@ -575,3 +575,36 @@ SHIELDBEARER_TURN_TELL_FRAMES: Final[int] = 10
 # Kalkana carpan oyuncu bu kadar geri itilir (piksel/kare). Zarar YOK -
 # ceza hasar degil, ritmini kaybetmek.
 SHIELDBEARER_BLOCK_PUSHBACK: Final[float] = 1.9
+
+
+# --- IZ SURME (Ardo'nun karsi mekanigi, src/systems/tracking.py) -------------
+# `docs/derinlestirme.md` 2.4: *"Rey gelecegi/gizliyi duyar, Ardo gecmisi
+# gorur."* Ayni tus, zit bilgi.
+#
+# Egri **bilerek Yanki ile ayni** (`echo.py` RISE_FRAMES=14/FALL=20):
+# acilirken hizli, kapanirken yavas. Iki karakterin girdisi ayni
+# hissetmeli - ayrilan sey duyu, tempo degil.
+TRACKING_RISE_FRAMES: Final[int] = 14
+TRACKING_FALL_FRAMES: Final[int] = 20
+# Okuma menzili (piksel). Yanki kademeye gore 260 / 96 / 0 (`echo.py`
+# SIGHT_RANGE); Iz Surme **sabit 190** - ikisinin arasinda.
+#
+# Asimetri bilincli: Yanki bir LANET, olumle zayifliyor ve dibi sessizlik.
+# Ardo'nun laneti yok, o yuzden Iz Surme hic zayiflamiyor - ama hicbir
+# zaman berrak bir Yanki kadar da gormuyor. "Guvenilir ama sinirli"ya
+# karsi "cok guclu ama kirilgan": ayni zindani iki farkli risk profiliyle
+# okuyorlar.
+TRACKING_RANGE: Final[float] = 190.0
+# **Bedel**: Iz Surme acikken yasayan dusmanlar bu oranda soluyor. Ardo
+# gecmise bakarken simdiyi net goremiyor. Savunmaya DOKUNMUYOR - iki
+# karakterin bedeli ayni kanaldan gelseydi mekanikler ayni sey olurdu.
+TRACKING_ENEMY_FADE: Final[float] = 0.62
+# Bir aktor kac karede bir ayak izi birakir. Her karede biraksaydi hem
+# liste dolardi hem "iz" degil "cizgi" cizerdi.
+TRACKING_STEP_FRAMES: Final[int] = 16
+# Ayni anda tutulan azami iz. Asilinca en eskisi dusuyor.
+TRACE_MAX: Final[int] = 400
+# Iz bu kadar karede tamamen solar (gorsel - iz SILINMIYOR, sadece
+# soluyor). 3600 = bir dakika: taze bir iz "az once buradaydi", soluk bir
+# iz "cok once" diyor. Yasin okunabilmesi bilginin yarisi.
+TRACE_FADE_FRAMES: Final[int] = 3600

@@ -33,8 +33,9 @@ from src.entities.player import Player
 from src.systems import abilities
 from src.systems.compass import Compass
 from src.systems.echo import Answer, EchoState
+from src.systems.tracking import BLOOD, SCORCH, TraceField, TrackingState
 from src.systems.save import read_save
-from src.ui import echo_view
+from src.ui import echo_view, tracking_view
 from src.ui.chapter_card import ChapterCard
 from src.ui.dialogue import Dialogue, Line
 from src.ui import text
@@ -105,6 +106,22 @@ class PlayScene(Scene):
         self.echo = (EchoState(tier=self.echo_tier)
                      if self.character != "ardo" else None)
         self._echo_was_active = False   # echo_open/close kenar tespiti icin
+
+        # IZ SURME - Ardo'nun karsi mekanigi (`src/systems/tracking.py`,
+        # `docs/derinlestirme.md` 2.4). Yanki'nin tam simetrigi: Rey'de
+        # `None`, Ardo'da dolu. Ayni tus (`Action.ECHO`) ikisini de aciyor;
+        # ayrilan sey duyu.
+        #
+        # Ardo artik bir EKSIKLIKLE tanimli degil - belgenin en net
+        # tespitiydi: *"Su an Ardo'nun oynanisi 'Yanki yok'. Bu zayif
+        # tasarim."*
+        self.tracking = (TrackingState() if self.character == "ardo"
+                         else None)
+        # Izler her karakterde toplaniyor - Rey oynarken de dunya iz
+        # birakiyor. Ayni kayitla Ardo bolumu bastan oynadiginda tutarli
+        # bir gecmis buluyor; ayrica ileride "zindan hatirliyor"
+        # (derinlestirme 3.4) ayni alandan beslenebilir.
+        self.traces = TraceField()
         self.compass = Compass()
         self._beat_index = -1            # necklace_beat kenar tespiti icin
         self.breakables: list = []
@@ -152,6 +169,14 @@ class PlayScene(Scene):
         key = getattr(self.save_data, "weapon", "")
         if key in (weapons.DAGGER, weapons.AXE):
             self.player.equip_weapon(key)
+
+    @property
+    def enemy_fade(self) -> float:
+        """Yasayan dusmanlarin solma orani - `enemy_render` okuyor.
+
+        Iz Surme'nin bedeli. Rey'de `tracking is None`, yani hep 0.0.
+        """
+        return self.tracking.enemy_fade if self.tracking is not None else 0.0
 
     # --- Yardimcilar --------------------------------------------------------
     def make_player(self, x: float, y: float) -> Player:
@@ -250,6 +275,24 @@ class PlayScene(Scene):
     checkpoint_x: float = 0.0
     checkpoint_y: float = 0.0
 
+    def _update_traces(self) -> None:
+        """Dunya iz birakiyor - oyuncu ve dusmanlarin ayak izleri.
+
+        **Her karakterde** calisiyor, yalnizca Ardo'da degil: Rey oynarken
+        de gecmis birikiyor. Kayit sahne omruyle sinirli (bolum bitince
+        gidiyor), yani "gecmis" burada tek bir oturumun gecmisi.
+
+        Kare butcesi: dusman basina karede bir `dict` bakisi. Izler
+        yalnizca Iz Surme acikken ve yalnizca menzildekiler CIZILIYOR
+        (`tracking_view.draw_traces`), yani asil maliyet orada ve o da
+        Ardo'ya ozel.
+        """
+        self.traces.update()
+        self.traces.record_step(self.player)
+        for enemy in self.enemies:
+            if not enemy.dead:
+                self.traces.record_step(enemy)
+
     def _update_checkpoint(self) -> None:
         room = getattr(self, "room", "")
         if not room or self.player.dead:
@@ -282,11 +325,16 @@ class PlayScene(Scene):
                            facing=self.player.facing,
                            grounded=self.player.body.grounded)
 
+        self._update_traces()
         if self.echo is not None:
             self.echo.update(self.echo_held())
             self._update_echo_audio()
             if self.game.input.pressed(Action.ECHO_ASK):
                 self.on_echo_ask()
+        if self.tracking is not None:
+            # **Ayni tus.** Rey'de Yanki, Ardo'da Iz Surme. Girdi
+            # sozlesmesi ortak, duyu farkli (derinlestirme 2.4).
+            self.tracking.update(self.echo_held())
         self.compass.update(self.player)
         self._update_necklace_audio()
         self.dialogue.update(self.game)
@@ -452,6 +500,20 @@ class PlayScene(Scene):
                                   self.enemies, self.breakables)
             echo_view.draw_answer(surface, offset, self.echo, self.player)
 
+        # Iz Surme ayni yerde ama **karartma yok**: Yanki'nin bedeli
+        # dunyanin kararmasi, Iz Surme'ninki dusmanlarin solmasi (o
+        # `_draw_enemies`'de). Ayni gorseli kullansalardi "Ardo'nun
+        # Yankisi" gibi okunurdu - oysa mesele farkli bir duyu olmasi.
+        if self.tracking is not None:
+            # Sira: once dunya agarir (isaret), sonra gecmis o soluklugun
+            # icinden cikar. Yanki'nin sirasinin aynadaki hali - orada
+            # once kararir sonra gizli seyler karanligi deler.
+            tracking_view.draw_wash(surface, self.tracking)
+            tracking_view.draw_traces(surface, offset, self.tracking,
+                                      self.player, self.traces)
+            tracking_view.draw_cracks(surface, offset, self.tracking,
+                                      self.player, self.breakables)
+
         if self.game.debug_overlay:
             self._draw_hitboxes(surface, offset)
         self._draw_hud(surface)
@@ -525,6 +587,10 @@ class PlayScene(Scene):
                              path="blood", speed=(1.0, 3.0))
         # Parcaciklar soner, leke kalir: koridora donunce dovusun izi durur.
         self.decals.splatter(enemy.body.center_x, enemy.body.feet[1], amount=10)
+        # Ayni an `TraceField`'e de yaziliyor: leke CIZILMIS PIKSEL,
+        # iz SORGULANABILIR VERI. Iz Surme "yakindakileri yasina gore
+        # goster" diyor, pisirilmis bir yuzey bunu cevaplayamaz.
+        self.traces.add(enemy.body.center_x, enemy.body.feet[1], BLOOD)
         # Bos dize = sessiz kal (orn. Sismek zaten patlama sesiyle oldu,
         # ustune binmesin - src/entities/enemies/bloated.py).
         if enemy.death_sound:
@@ -549,6 +615,7 @@ class PlayScene(Scene):
         self.particles.burst(enemy.body.center_x, enemy.body.center_y, 22,
                              path="spark", speed=(1.2, 3.6))
         self.decals.scorch(enemy.body.center_x, enemy.body.feet[1])
+        self.traces.add(enemy.body.center_x, enemy.body.feet[1], SCORCH)
         self.game.play_sound("bloated_explode")
 
     def on_shield_block(self, enemy) -> None:
