@@ -470,6 +470,28 @@ class PlayScene(Scene):
         self.decals.scorch(enemy.body.center_x, enemy.body.feet[1])
         self.game.play_sound("bloated_explode")
 
+    def on_shield_block(self, enemy) -> None:
+        """Vurus Kalkanli'nin kalkanina carpti (Katman 2, `shieldbearer.py`).
+
+        Blok **hasar vermiyor** - ceza ritmi kaybetmek. Ama geri bildirim
+        vurustan daha GURULTULU olmali: oyuncu "vurdum ama olmadi"
+        belirsizligini bir kare bile yasamamali. Kivilcim + sert sarsinti
+        + kalkan sesi, ucu birden `juice.on_hit`'ten degil ama ayni ruhla.
+        """
+        x = enemy.body.center_x + enemy.facing * 8
+        self.juice.explosion(x, enemy.body.center_y, ImpactWeight.NORMAL)
+        self.particles.burst(x, enemy.body.center_y, 8, path="spark",
+                             speed=(0.8, 2.2))
+        self.game.play_sound("enemy_blocked", muffled=self._echo_active())
+
+    def on_shield_turn(self, enemy) -> None:
+        """Kalkanli donmeye karar verdi - okunur olmali.
+
+        Sessizce donmek "arkasindayim" sozlesmesini bozar; oyuncu bunu
+        haksizlik olarak okur (docs/derinlestirme.md 4.2).
+        """
+        self.game.play_sound("enemy_tell", muffled=self._echo_active())
+
     def on_combo_threshold(self, player, threshold: int) -> None:
         # Saldirgan oynayan kademesini geri kazanir (DEVIR gorev 3.1).
         # Korkak oynayan iyilesemez - can siseleri nadir tutuluyor.

@@ -49,7 +49,12 @@ VALVE_REACH = 20.0
 # hareket ettigi icin arka arkaya basmak seviyeyi titretirdi.
 VALVE_COOLDOWN = 45
 
-ENEMY_CLASSES = {"shambler": "src.entities.enemies.shambler:Shambler"}
+ENEMY_CLASSES = {
+    "shambler": "src.entities.enemies.shambler:Shambler",
+    # Katman 2'nin ilk uyesi, tek ornek (DEVIR 3 madde 8). Yerlesim
+    # gerekcesi `src/world/rooms/chapter05.py` Oda 3'te yazili.
+    "shieldbearer": "src.entities.enemies.shieldbearer:Shieldbearer",
+}
 
 
 def _load(path: str):
@@ -85,6 +90,7 @@ class Chapter05Scene(PlayScene):
         self.earned_gold = 0
         self.secret_found = False
         self.finished = False
+        self.shield_hinted = False
 
         self.chests = [Chest(spot.x, spot.feet_y, gold=CHEST_GOLD,
                              secret=True)
@@ -131,6 +137,10 @@ class Chapter05Scene(PlayScene):
             self._voice("line.ch05_echo_enter", "line.ch05_ardo_enter")
         elif name == "vana_odasi":
             self._voice("line.ch05_echo_valve", "line.ch05_ardo_valve")
+        elif name == "alt_gecit":
+            # Kalkanli'yi **gormeden once** tanitiyoruz: yeni bir siluet
+            # bir de aciklamasiz gelirse oyuncu once olur, sonra anlar.
+            self._voice("line.ch05_echo_guard", "line.ch05_ardo_guard")
 
     def _voice(self, echo_key: str, ardo_key: str) -> None:
         """Yanki konusur, Yanki yoksa oynanan karakter (Bolum 3/4 deseni)."""
@@ -153,6 +163,23 @@ class Chapter05Scene(PlayScene):
         self._update_sluice()
         self._update_chests()
         self._check_exit()
+
+    # --- Kalkanli -----------------------------------------------------------
+    def on_shield_block(self, enemy) -> None:
+        """Kalkan ilk kez blokladi - **ipucu tam burada** veriliyor.
+
+        Odaya girerken degil, oyuncu **kendi elleriyle** duvara toslayinca:
+        onceden soylenen bir ipucu bilgi, tam o anda soylenen bir ipucu
+        cevaptir. Yankı'nin ucuncu goz rolu de bu - oyuncunun goremedigini
+        gosteriyor (Arda, 24.08.2026).
+
+        Bir kez. Tekrarlanan ipucu ogut olur.
+        """
+        super().on_shield_block(enemy)
+        if self.shield_hinted:
+            return
+        self.shield_hinted = True
+        self._voice("line.ch05_echo_block", "line.ch05_ardo_block")
 
     # --- Vana ---------------------------------------------------------------
     def _valve_positions(self) -> tuple[tuple[float, float], ...]:
@@ -273,8 +300,9 @@ class Chapter05Scene(PlayScene):
                 continue
             active = index == near
             spin = self.frames * (0.09 if self.water.moving else 0.02)
-            tone = palette.color("brass" if False else "gold") if active \
-                else palette.color("earth")
+            # "brass" bir ZINCIR adi, palet rengi degil - dogru renk adi
+            # "gold". (Zincir adi != renk adi; DEVIR 6'daki tuzak.)
+            tone = palette.color("gold" if active else "earth")
             surface.fill(palette.color("stone_darkest"), (x - 4, y - 4, 9, 9))
             for arm in range(4):
                 angle = spin + arm * math.pi / 2

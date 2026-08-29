@@ -530,10 +530,20 @@ def draw_humanoid(spec: CharSpec, pose: Pose) -> Canvas:
     if spec.claws > 0.0:
         _draw_claws(canvas, front_hand[0], front_hand[1],
                     pose.arm_front[0] + pose.arm_front[1], spec)
-    # Kalkan **en son** - govdenin de silahin da onunde durmali, yoksa
-    # "onden vurulmaz" bilgisi siluette kayboluyor.
+    # Kalkan **en son ciziliyor** - govdenin de silahin da onunde durmali,
+    # yoksa "onden vurulmaz" bilgisi siluette kayboluyor.
+    #
+    # Konumu bir **ele degil govdeye** bagli, ve bu bilincli. Iki deneme
+    # de yanlisti:
+    #   * on el: kalkan bicakla birlikte savruluyor, saldiri karelerinde
+    #     basin ustune cikiyordu - "kalkani firlatti" gibi okunuyordu.
+    #   * arka el: kalkan arkada kaliyordu, yani tam ters bilgi.
+    # Kalkan on kola kayisla bagli - kolun acisiyla degil govdenin
+    # konumuyla hareket eder. Sabit on ofset hem dogru hem okunur:
+    # Kalkanli ne yaparsa yapsin on hatti duz bir duvar.
     if spec.shield:
-        _draw_shield(canvas, front_hand[0], front_hand[1], spec)
+        _draw_shield(canvas, cx + spec.torso_width * 0.62,
+                     shoulder_y + spec.torso_height * 0.55, spec)
 
     canvas.shade()
     canvas.outline("shadow", 1)

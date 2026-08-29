@@ -41,6 +41,7 @@ MARKERS: dict[str, str] = {
     "!": "trigger",      # bolume ozel tetikleyici
     "g": "shadow_shambler",   # Golge Suruklenen - yalniz Bolum 3
     "N": "candle_keeper",     # Mum Bekcisi - yalniz Bolum 3
+    "k": "shieldbearer",      # Kalkanli - Katman 2, B5'te tek ornekle taniticiyor
 }
 
 

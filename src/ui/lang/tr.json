@@ -188,7 +188,11 @@
     "ch05_echo_enter": "su yükselmiş. burası eskiden kuruydu.",
     "ch05_ardo_enter": "Mahzeni su basmış. Birileri vanaları bırakmış.",
     "ch05_echo_valve": "çevir. su bir merdiven olabilir.",
-    "ch05_ardo_valve": "Vana. Seviyeyi değiştirebilirim."
+    "ch05_ardo_valve": "Vana. Seviyeyi değiştirebilirim.",
+    "ch05_echo_guard": "bu, çürüyenlerden değil. bunu biri eğitmiş.",
+    "ch05_ardo_guard": "Muhafız. Aşağıdan yukarı çıkmış.",
+    "ch05_echo_block": "önden olmuyor. arkasına geç — yavaş dönüyor.",
+    "ch05_ardo_block": "Kalkan önü kapatıyor. Arkası açık."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",

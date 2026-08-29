@@ -549,3 +549,29 @@ WATER_SWIM_SPEED: Final[float] = 1.05
 # Yuzey dalgasinin genligi (piksel). Duz bir cizgi "su" degil "zemin"
 # gibi okunuyordu.
 WATER_SURFACE_WAVE: Final[float] = 1.4
+
+
+# --- KALKANLI (Katman 2'nin ilk uyesi, src/entities/enemies/shieldbearer.py) -
+# `docs/gdd.md` 7: *"Kalkanli - onden vurulmaz, arkaya gec."* Katman 2'nin
+# sorusu **combo'yu KIRMAYI ogren**; Kalkanli o dersi onden veriyor.
+SHIELDBEARER_HEALTH: Final[int] = 52     # Katman 1'in hepsinden dayanikli
+SHIELDBEARER_POISE: Final[int] = 4       # Kalkani dusunce bile kolay sendelemez
+SHIELDBEARER_SPEED: Final[float] = 0.38  # Yavas - tehdit hizdan degil kalkandan
+SHIELDBEARER_DAMAGE: Final[int] = 11
+SHIELDBEARER_REACH: Final[int] = 15
+SHIELDBEARER_ACTIVE_FRAMES: Final[int] = 5
+# Uzun toparlanma **bilincli**: kalkan indiginde acilan pencere bu.
+# Oyuncunun ikinci gecerli cevabi ("saldiriyi yemle, toparlanirken vur")
+# tam olarak bu sayidan doguyor. Kisaltmak dersi tek cevaba indirger.
+SHIELDBEARER_RECOVER_FRAMES: Final[int] = 38
+TELL_FRAMES_SHIELDBEARER: Final[int] = 24  # Agir ve okunur (alt sinir 14)
+# Oyuncu arkasina gectikten sonra donmesi bu kadar surer. **Bulmacanin
+# tek ayar dugmesi bu.** Aninda donseydi arkaya gecmek imkansiz olurdu;
+# cok uzun olsaydi Kalkanli bir dusman degil bir tahta kukla olurdu.
+# 34 kare ~0.57 saniye: iki vurusluk pencere, ucuncuye yetmez.
+SHIELDBEARER_TURN_FRAMES: Final[int] = 34
+# Donusun kendisi de okunur olmali - donmeden once bu kadar kare parlar.
+SHIELDBEARER_TURN_TELL_FRAMES: Final[int] = 10
+# Kalkana carpan oyuncu bu kadar geri itilir (piksel/kare). Zarar YOK -
+# ceza hasar degil, ritmini kaybetmek.
+SHIELDBEARER_BLOCK_PUSHBACK: Final[float] = 1.9

@@ -115,10 +115,42 @@ SLUICE_COLUMN = 20
 SLUICE_ROWS = range(11, FLOOR_TOP)
 ROOM_2 = finish(_r2)
 
-# --- Oda 3: Alt Gecit. Savagin ardi - cikis. -----------------------------
-_r3 = _room(20, right_wall=True)
-stamp(_r3, 6, 13, "$")
-stamp(_r3, 16, 13, "X")
+# --- Oda 3: Alt Gecit. Savagin ardi - cikis + KALKANLI. ------------------
+#
+# **Katman 2'nin ilk uyesi burada tanitiliyor.** DEVIR 3 madde 8 (Arda'nin
+# karari): *"bir sonraki katmanin en kolay uyesi bir bolum erken
+# tanitilacak - B5'te tek bir Kalkanli."* Cesitlilik erken gelsin,
+# ogretme sirasi bozulmasin.
+#
+# Yeri bilincli: **sandiktan SONRA, cikistan ONCE**.
+#   * Bulmacanin icinde degil - su bir bulmaca, dovus alani degil.
+#   * Odul (sandik) once aliniyor, yani oyuncu yeni dusmani tok karsiliyor.
+#   * Cikisla arasinda duruyor: yanindan kacmak mumkun ama ucuz degil.
+#
+# Tek ornek: bu bir ders degil bir **tanistirma**. Kalkanli'nin gercek
+# sistemi B7'de kuruluyor (`docs/gdd.md` 7, Katman 2 = B7-B13).
+#
+# ## Zemin bir tile YUKSEK - kuru olsun diye
+#
+# Su butun haritada **tek bir duzlem** (`src/world/water.py`); oda basina
+# ayri seviye yok. Alcak su y=`WATER_LOW`'da duruyor, yani Oda 2'nin
+# zemininde bir tile su kaliyor - orasi bilerek oyle, terk edilmis bir
+# mahzen tamamen kurumaz.
+#
+# Ama `PlayScene._update_water` suyu **dusmanlara da** uyguluyor (su bir
+# mekan, "oyuncuya ozel kural" degil). Oda 3'un zemini Oda 2 ile ayni
+# satirda kalsaydi Kalkanli %70 batmis, yercekimi %40'a inmis halde
+# dovusurdu: hem okunmaz, hem "suda dusman yok" tasarim kararina aykiri.
+#
+# Cozum kodda degil **zeminde**: Oda 3'un tabani bir tile yukarida,
+# tam olarak su cizgisinin ustunde. Oyuncu savaktan gecip sudan
+# **cikiyor** - anlatim olarak da dogru okunuyor. Bir tile adim ziplama
+# zarfinin (3) cok altinda, yani gecis serbest.
+ROOM_3_FLOOR = FLOOR_TOP - 1
+_r3 = _room(20, floor=ROOM_3_FLOOR, right_wall=True)
+stamp(_r3, 6, ROOM_3_FLOOR - 1, "$")
+stamp(_r3, 12, ROOM_3_FLOOR - 1, "k")
+stamp(_r3, 16, ROOM_3_FLOOR - 1, "X")
 ROOM_3 = finish(_r3)
 
 

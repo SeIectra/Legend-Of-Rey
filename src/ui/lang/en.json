@@ -188,7 +188,11 @@
     "ch05_echo_enter": "the water has risen. this was dry once.",
     "ch05_ardo_enter": "The cellar is flooded. Someone left the valves.",
     "ch05_echo_valve": "turn it. water can be a stair.",
-    "ch05_ardo_valve": "A valve. I can change the level."
+    "ch05_ardo_valve": "A valve. I can change the level.",
+    "ch05_echo_guard": "this one is not of the rotting. someone trained it.",
+    "ch05_ardo_guard": "A guard. It came up from below.",
+    "ch05_echo_block": "not from the front. get behind it — it turns slowly.",
+    "ch05_ardo_block": "The shield covers the front. Its back is open."
   },
   "combat": {
     "counter": "COUNTER",

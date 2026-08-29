@@ -27,12 +27,32 @@ TARGET = ROOT / "assets" / "REGISTRY.md"
 
 ROLES = {
     "rey": "Oynanabilir - Yankisoyleyen",
+    "rey_armed": "Rey, kilic kusanmis (Bolum 1 sonrasi)",
     "ardo": "Oynanabilir - yabanci",
+    "cemo": "Rey'in kucuk kardesi - menu 5. asama",
+    "villager": "Bolum 1 koylusu - olay patlayinca evine kaciyor",
+    # Katman 1 - Curuyenler (B1-B6): combo KURMAYI ogretiyor
     "shambler": "Katman 1 - Suruklenen",
     "climber": "Katman 1 - Tirmanan",
     "bloated": "Katman 1 - Sismek",
-    "cemo": "Rey'in kucuk kardesi - menu 5. asama",
+    # Katman 2 - Lanetli Muhafizlar (B7-B13): combo KIRMAYI ogretiyor.
+    # Kalkanli'nin AI'i yazildi (B5'te tek ornekle tanitiliyor,
+    # DEVIR 3.8); digerlerinin yalnizca sanati var.
+    "shieldbearer": "Katman 2 - Kalkanli (AI VAR, B5'te tanitiliyor)",
+    "spearman": "Katman 2 - Mizrakli (sanat var, AI yok)",
+    "archer": "Katman 2 - Okcu (sanat var, AI yok)",
+    "commander": "Katman 2 - Komutan (sanat var, AI yok)",
+    # Katman 3 - Yanki'nin Cocuklari (B14-B18): yardimcinin ihaneti
+    "silent": "Katman 3 - Sessiz (sanat var, AI yok)",
+    "echoing": "Katman 3 - Yankilayan (sanat var, AI yok)",
+    "splitter": "Katman 3 - Bolunen (sanat var, AI yok)",
 }
+
+
+def _sound_count() -> int:
+    """Kayitli efekt sayisi. Sayiyi elle yazmak eskitiyordu."""
+    from src.audio.sfx import SFX
+    return len(SFX)
 
 
 def build() -> str:
@@ -98,7 +118,16 @@ def build() -> str:
         "",
         "## Ses",
         "",
-        "Henuz yok. Gorev 10.",
+        f"`src/audio/sfx.py :: SFX` - **{_sound_count()} efekt**, hepsi "
+        "calisma zamaninda ",
+        "sentezleniyor (numpy). Sprite'lar gibi: diskte dosya yok, kaynak "
+        "koddur. ",
+        "Her tekrarli ses +-%8 rastgele perdeyle calinir "
+        "(`CLAUDE.md` 7).",
+        "",
+        "**Muzik yok.** Donguli/surekli sesler bilerek kaldirildi "
+        "(Arda: *\"cizirti gibi, ",
+        "rahatsiz edici\"*); altyapi (`play_loop`/`stop_loop`) duruyor.",
         "",
     ]
     return "\n".join(lines)
