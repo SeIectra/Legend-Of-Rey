@@ -72,10 +72,31 @@ def desktop_size() -> tuple[int, int]:
 
 class Game:
     def __init__(self, settings: Settings | None = None) -> None:
-        # Mixer formati `pygame.init()`'ten ONCE kilitlenir (44.1kHz mono) -
+        # Mixer formati alt sistem acilmadan ONCE kilitlenir (44.1kHz mono) -
         # sonradan cagrilirsa platforma gore degisen bir varsayimla kalirdik.
         synth.init_mixer()
-        pygame.init()
+
+        # **`pygame.init()` CAGRILMIYOR.** O cagri BUTUN alt sistemleri
+        # aciyor, joystick dahil - ve joystick taramasi bu makinede
+        # **40.30 saniye** suruyor (olculdu, sonunda sifir kol buluyor):
+        #
+        #     display.init     0.00 sn
+        #     font.init        0.00 sn
+        #     joystick.init   40.30 sn   <-- burada
+        #     mixer.init       0.00 sn
+        #
+        # Sebep sistemde: SDL'in cihaz taramasi bozuk bir surucude
+        # (Arda'nin tespiti: NGENUITY/HyperX) takilip zaman asimina
+        # dusuyor. Yedi ayri SDL ayari denendi (HIDAPI, RAWINPUT, WGI,
+        # DIRECTINPUT, XINPUT, THREAD), hicbiri degistirmedi - sure her
+        # seferinde 40.3 saniye, yani sabit bir zaman asimi.
+        #
+        # Oyunun bunu beklemesi gerekmiyor: klavye ve fare hazir, kol
+        # `JOYDEVICEADDED` ile zaten sonradan da yakalaniyor
+        # (`input.py`). Bu yuzden yalnizca gereken alt sistemler
+        # aciliyor; joystick arka planda (`InputState`).
+        pygame.display.init()
+        pygame.font.init()
         self.settings = settings or Settings()
         self.settings.on_change(self._on_setting_changed)
         # Gorev 10: gercek kaydedilmis ses yok, dalga formlari koddan

@@ -118,7 +118,8 @@ class InputManager:
         self.mouse_moved = False
 
         self.joysticks: list[pygame.joystick.Joystick] = []
-        self._init_joysticks()
+        self._joystick_ready = False
+        self._begin_joystick_init()
 
     # --- Kurulum ------------------------------------------------------------
     def apply_bindings(self, bindings: dict[str, list[int]]) -> None:
@@ -130,8 +131,15 @@ class InputManager:
             self.keyboard[action] = tuple(keys)
 
     def _init_joysticks(self) -> None:
+        """Bagli kollari acar. Alt sistem hazir degilse **hicbir sey yapmaz**.
+
+        `pygame.joystick.init()` burada CAGRILMIYOR - o cagri bu makinede
+        40 saniye suruyor (bkz. `Game.__init__`). Acilis arka planda
+        (`_begin_joystick_init`); burasi yalnizca acilmis bir alt sistemin
+        cihazlarini topluyor.
+        """
         if not pygame.joystick.get_init():
-            pygame.joystick.init()
+            return
         self.joysticks = []
         for index in range(pygame.joystick.get_count()):
             try:
@@ -140,6 +148,42 @@ class InputManager:
                 self.joysticks.append(stick)
             except pygame.error:
                 pass
+
+    def _begin_joystick_init(self) -> None:
+        """Joystick alt sistemini **arka planda** acar.
+
+        Oyun klavye ve fareyle aninda basliyor; kol destegi tarama
+        bitince katiliyor. Bu makinede tarama 40 saniye suruyor ve
+        oyuncuyu o kadar bekletmenin hicbir karsiligi yok.
+
+        Thread yalnizca `pygame.joystick.init()` cagiriyor - `Joystick`
+        NESNELERI ana is parcaciginda uretiliyor (`poll_ready`). SDL'in
+        nesne yasam dongusunu is parcaciklari arasinda gezdirmek
+        gereksiz bir risk; alt sistem acilisi ise guvenli.
+        """
+        import threading
+
+        def _work() -> None:
+            try:
+                pygame.joystick.init()
+            except pygame.error:
+                pass
+            self._joystick_ready = True
+
+        self._joystick_ready = False
+        thread = threading.Thread(target=_work, daemon=True,
+                                  name="joystick-init")
+        thread.start()
+
+    def poll_ready(self) -> None:
+        """Arka plan taramasi bittiyse kollari topla. Her kare cagriliyor.
+
+        Bir kez calisiyor: `_joystick_ready` tuketiliyor.
+        """
+        if not getattr(self, "_joystick_ready", False):
+            return
+        self._joystick_ready = False
+        self._init_joysticks()
 
     def rebind(self, action: Action, keys: tuple[int, ...]) -> None:
         self.keyboard[action] = tuple(keys)
@@ -171,6 +215,8 @@ class InputManager:
     # --- Kare dongusu -------------------------------------------------------
     def begin_frame(self) -> None:
         """Her karenin basinda: edge kumelerini temizle, tamponu eskit."""
+        # Arka plan joystick taramasi bittiyse kollari topla (bir kez).
+        self.poll_ready()
         self._pressed.clear()
         self._released.clear()
         self.mouse_moved = False
