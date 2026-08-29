@@ -72,6 +72,25 @@ class Panel:
     # Replik bitmeden panel gecmesin. Varsayilan True: repligi olan bir
     # panelin isi o repligi gostermek.
     wait_for_line: bool = True
+    # **Oyuncu onaylayana kadar bekle.** Varsayilan True.
+    #
+    # Arda, canli oynanis (30.08.2026): *"Introdaki sinematik cok hizli
+    # geciyor, cumleler okunmuyor. Kullanicinin bir tusa basmasi
+    # beklenmeli."* Hakliydi: replikler `auto_advance=True` ile
+    # zamanlayiciya bagliydi ve prologun ucuncu goz panelinde YEDI replik
+    # dort saniyeye sikisiyordu.
+    #
+    # Okuma hizi oyuncunun; bir zamanlayicinin degil.
+    #
+    # **`None` = sahnenin varsayilanini kullan.** Varsayilan KAPALI ve bu
+    # bilincli: her sinematik bir konusma degil. Bolum 1 -> 2 inis
+    # sahnesinde replik DUSUS aninda geciyor, bir beat; orada tus
+    # beklemek dususu donduruyordu (test yakaladi - "ara sahne
+    # kendiliginden bitti" kontrolu kirildi ve haklyidi, oyuncu havada
+    # asili kalirdi).
+    #
+    # Prolog bir konusma, o yuzden `ReyPrologue.wait_for_input = True`.
+    wait_for_input: bool | None = None
 
     @property
     def dialogue_lines(self) -> tuple[Line, ...]:
@@ -121,6 +140,9 @@ class StoryScene(CinematicScene):
     PANELS: tuple[Panel, ...] = ()
     letterbox: bool = True
     background: str = "void"
+    # Panellerin varsayilani: replik oyuncuyu bekler mi. KAPALI - her
+    # sinematik bir konusma degil. Konusma olan sahneler (prolog) acar.
+    wait_for_input: bool = False
 
     # --- Kurulum ------------------------------------------------------------
     def on_enter(self, **kwargs: object) -> None:
@@ -154,6 +176,12 @@ class StoryScene(CinematicScene):
         return smoothstep(min(1.0, self.panel_frames / panel.frames))
 
     # --- Panel akisi --------------------------------------------------------
+    def _panel_waits(self, panel: Panel) -> bool:
+        """Bu panel oyuncuyu bekliyor mu - panel degeri, yoksa sahnenin."""
+        if panel.wait_for_input is None:
+            return self.wait_for_input
+        return panel.wait_for_input
+
     def _start_panel(self) -> None:
         panel = self.panel
         if panel is None:
@@ -161,10 +189,13 @@ class StoryScene(CinematicScene):
         self.panel_frames = 0
         lines = panel.dialogue_lines
         if lines:
-            # `auto_advance=True`: panel zamanlayicisiyla yarisiyor.
-            # Varsayilan (False) olsaydi oyuncu onaylamadikca replik
-            # ekranda kalir, panel sonsuza dek beklerdi.
-            self.dialogue.start(lines, auto_advance=True)
+            # Repligi olan panel **oyuncuyu bekler**. Bir donem
+            # `auto_advance=True` idi ve gerekcesi "yoksa panel sonsuza
+            # dek bekler" diye yazilmisti - ama `update()` bitisi zaten
+            # `finished_panels`'a bagliyor, yani sonsuz bekleme diye bir
+            # sey yok: panel bekler, sahne bekler, oyuncu okur.
+            self.dialogue.start(lines,
+                                auto_advance=not self._panel_waits(panel))
         if panel.camera is not None:
             self.camera.retarget(*panel.camera)
         self.on_panel_start(panel)
@@ -174,12 +205,21 @@ class StoryScene(CinematicScene):
         if panel is None:
             return
         self.panel_frames += 1
-        if self.panel_frames < panel.frames:
-            return
-        # Sure doldu - replik hala akiyorsa bekle (ust sinirla).
-        if (panel.wait_for_line and not self.dialogue.done
-                and self.panel_frames < panel.frames + LINE_GRACE_FRAMES):
-            return
+
+        # Repligi olan ve tus bekleyen panel **yalnizca replik bitince**
+        # geciyor - sure onu ilgilendirmiyor. `panel.frames` o panelde
+        # gorselin ne kadar surede olgunlastigini soyluyor (isik, goz
+        # acilmasi), bittikten sonra sahne oyuncuyu bekliyor.
+        if panel.dialogue_lines and self._panel_waits(panel):
+            if not self.dialogue.done:
+                return
+        else:
+            if self.panel_frames < panel.frames:
+                return
+            # Sure doldu - replik hala akiyorsa bekle (ust sinirla).
+            if (panel.wait_for_line and not self.dialogue.done
+                    and self.panel_frames < panel.frames + LINE_GRACE_FRAMES):
+                return
         self.panel_index += 1
         self._start_panel()
 
@@ -193,6 +233,21 @@ class StoryScene(CinematicScene):
     @property
     def finished_panels(self) -> bool:
         return self.panel_index >= len(self.panels)
+
+    @property
+    def skippable(self) -> bool:                 # type: ignore[override]
+        """Replik ekrandayken hizlandirma KAPALI.
+
+        `CinematicScene._advance` CONFIRM/JUMP/ATTACK basiliyken ilerlemeyi
+        3x hizlandiriyor; `Dialogue` ise ayni CONFIRM ile yaziyi hizli
+        akitiyor ve satiri ilerletiyor. Ucu ayni tusta olunca oyuncu
+        okumaya calisirken sahneyi de kosturuyordu.
+
+        Okunmamis metin atlanmaz. Gorsel paneller (repliksiz) yine
+        hizlandirilabiliyor - `CLAUDE.md` 9'un "sert kesme yok, basili
+        tutunca 3x" kurali orada aynen gecerli.
+        """
+        return self.dialogue.done
 
     def update(self) -> None:
         # `CinematicScene.update` bitisi `raw_progress`'e bakarak veriyor;

@@ -91,6 +91,11 @@ class ReyPrologue(StoryScene):
     """Rey'in acilisi - Yankinin ne oldugunu ogreten kisa film."""
 
     background = "void"
+    # **Oyuncu okuyup basar.** Arda, canli oynanis (30.08.2026): *"Introdaki
+    # sinematik cok hizli geciyor, cumleler okunmuyor."* Prolog bir
+    # KONUSMA; okuma hizi oyuncunun. Diger sinematikler (Bolum 1->2 inisi
+    # gibi) beat, orada zamanlayici dogru.
+    wait_for_input = True
 
     PANELS = (
         # 1. Once SES, sonra goruntu. Oyunun ilk yasattigi sey Yanki

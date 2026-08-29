@@ -1,0 +1,16 @@
+# Graphify bilgi grafina girmeyecekler.
+#
+# `.gitignore` zaten uygulaniyor; burasi git'te IZLENEN ama graf'a
+# girmemesi gereken seyler icin.
+
+# Terk edilmis v2.x motoru. `DEVIR.md` 9: *"`_prototype/` referans,
+# ASLA import etme."* 63 Python dosyasi ve hepsi olu kod - graf'a
+# girerse sorgular beni oraya yonlendirebilir ve tam olarak yapmamam
+# gereken seyi yaparim. Ilk kurulumda girmisti (3209 dugum).
+_prototype/
+
+# Ekran goruntuleri ve uretilen ciktilar - kaynak degil.
+build/
+
+# Aracin kendi ciktisi.
+graphify-out/

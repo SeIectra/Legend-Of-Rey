@@ -173,3 +173,7 @@ cython_debug/
 # Muzik dosyalari (MP3, ~53 MB). Depoya girmiyor - ikili dosya git
 # gecmisini sisirir ve her surumu ayri saklanir. Yedegi Arda'da.
 assets/audio/music/*.mp3
+
+# Graphify bilgi grafi - koddan uretiliyor, depoya girmiyor.
+# `graphify extract . --code-only` ile yeniden kurulur.
+graphify-out/

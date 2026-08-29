@@ -416,7 +416,18 @@ class Chapter04Scene(PlayScene):
         # Bolum 5 ("Sular") henuz yok - ozet ekrani kapaninca ana menuye
         # donuluyor. Bilincli bir uc: Bolum 3'un sonu Bolum 4 yazilana
         # kadar aynen boyleydi.
-        self.scenes.push(ChapterEndScene, result=result)
+        # **Bolum 5'e baglaniyor.** Bu zincir hic kurulmamisti: Bolum 4
+        # bitince `on_continue` verilmedigi icin `ChapterEndScene` ana
+        # menuye donuyordu. Arda canli oynanista buldu (30.08.2026):
+        # *"Kayit odasina kadar geldim, sonra ana menuye atti."*
+        character = self.character
+
+        def _continue() -> None:
+            from src.scenes.chapter05 import Chapter05Scene
+            self.scenes.set_root(Chapter05Scene, character=character)
+
+        self.scenes.push(ChapterEndScene, result=result,
+                         on_continue=_continue)
 
     # --- Cizim ------------------------------------------------------------------------------
     def draw_background(self, surface: pygame.Surface, offset) -> None:
