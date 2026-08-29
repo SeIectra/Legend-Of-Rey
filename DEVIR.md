@@ -7,7 +7,7 @@ Okuma sırası: **1) `CLAUDE.md`** (bağlayıcı kurallar — anayasa) → **2) 
 dosya** (nerede kaldık) → 3) gerekirse `docs/` altındaki ilgili tasarım
 belgesi.
 
-Son güncelleme: **29.08.2026** (Bölüm 4-5, Kalkanlı, silah seçimi, kontrol noktası, İz Sürme, portreler) · Ardeko Studios · Arda Güner
+Son güncelleme: **29.08.2026** (Bölüm 4-6, Kalkanlı, silah seçimi, kontrol noktası, İz Sürme, portreler) · Ardeko Studios · Arda Güner
 
 > `GOREVLER.md` **silindi** (23.08.2026, Arda'nın isteği: "bir devir.md
 > olsun diğerlerini sil kafa karıştırmasın"). İçindeki canlı bilgi bu
@@ -35,16 +35,16 @@ Tasarım paketi `docs/` altında ve **bağlayıcı**: `gdd.md` (ana belge),
 
 ## 2. NEREDE DURUYORUZ
 
-**~33.400 satır Python. 22 test paketi de yeşil.**
+**~35.200 satır Python. 23 test paketi de yeşil.**
 
 Oynanabilir akış:
 `intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)** →
 **Bölüm 2 (İlk İniş)** → **Bölüm 3 (Meşale Mahzeni)** → **Bölüm 4 (Kayıt
-Odası)** → **Bölüm 5 (Sular)** → bölüm sonu ekranı → ana menü`
-(her bölümün arasında bölüm sonu özet ekranı var)
+Odası)** → **Bölüm 5 (Sular)** → **Bölüm 6 (ARDO)** → bölüm sonu ekranı
+→ ana menü` (her bölümün arasında bölüm sonu özet ekranı var)
 
-Bölüm 5'in sonu ana menüye dönüyor çünkü **Bölüm 6 henüz yok** — bilinçli
-bir uç. Bölüm 6 aynı zamanda **ilk büyük boss** ve Katman 1'in sonu.
+Bölüm 6'nın sonu ana menüye dönüyor çünkü **Bölüm 7 henüz yok** — bilinçli
+bir uç. **Katman 1 (Çürüyenler, B1–B6) böylece tamamlandı.**
 
 ### Görev listesi (eski `GOREVLER.md`'den)
 
@@ -69,6 +69,7 @@ bir uç. Bölüm 6 aynı zamanda **ilk büyük boss** ve Katman 1'in sonu.
 | 16 | **Kontrol noktası** — ölünce odanın başından devam | ✅ (29.08.2026) |
 | 17 | **İz Sürme** — Ardo'nun karşı mekaniği | ✅ (29.08.2026) |
 | 18 | **Portre sistemi + sprite oranları** | ✅ (29.08.2026) |
+| 19 | **Bölüm 6 — ARDO** (yoldaş, plakalar, BOSS 1) | ✅ (29.08.2026) |
 
 **Bölüm 4 "Kayıt Odası"** (`docs/yapi.md` B4): yetenek ağacı sistemi
 (`src/systems/skilltree.py` — 3 dal × 4 düğüm) + ağaç ekranı
@@ -418,9 +419,44 @@ görülebilir); Katman 2 ve 3 **hiçbir bölüme yerleştirilmedi** —
 
 | Katman | Bölümler | Öğrettiği | Düşmanlar | Durum |
 |---|---|---|---|---|
-| **1 — Çürüyenler** | B1–B6 | combo **kurmayı** | Sürüklenen, Tırmanan, Şişmek | ✅ sanat + AI |
+| **1 — Çürüyenler** | B1–B6 | combo **kurmayı** | Sürüklenen, Tırmanan, Şişmek | ✅ **tamamlandı** — B6 finali dahil |
 | **2 — Lanetli Muhafızlar** | B7–B13 | combo'yu **kırmayı** | Kalkanlı, Mızraklı, Okçu, Komutan | 🟡 **Kalkanlı'nın AI'ı var**; diğer üçünde sadece sanat |
 | **3 — Yankı'nın Çocukları** | B14–B18 | yardımcının ihaneti | Sessiz, Yankılayan, Bölünen | 🟡 sanat var, **AI yok** |
+
+### Bölüm 6 "ARDO" — Katman 1'in finali (29.08.2026)
+
+`docs/yapi.md` B6 + `docs/gdd.md` 10. **Üç yeni sistem** bir arada:
+
+1. **Yoldaş** (`src/entities/companion.py`). Kim olduğu **kanondan**
+   türüyor — `docs/gdd.md` §3: *"Seçmediğin, ara sahnelerde havalı girişi
+   yapan taraf olur."* `Enemy` değil `Actor` alt sınıfı (saldırı hakkı /
+   kuşatma yörüngesi düşmana ait). **Ölmez, diz çöker** — ölmesi dövüşü
+   koruma görevine çevirir *ve* plaka bulmacasını çözülemez yapar.
+   **Yardım eder, oynamaz:** hasar 7 (oyuncunun ilk vuruşu 10), vuruş
+   aralığı 62 kare, tasma 120 px.
+2. **Ağırlık plakaları** (`src/world/plate.py`). Kapı **bütün** plakalar
+   aynı anda basılıyken açılıyor; tek kişi ikisine birden basamaz. Kapı
+   bir bilmece değil bir **anlaşma** — B6'nın anlatısını anlatı
+   söylemeden kapı yapıyor. Yarım saniyelik tolerans: sıfır olsaydı aynı
+   *karede* basmak gerekirdi, bir yapay zekayla imkânsıza yakın.
+3. **BOSS 1: Çürümüş Olan** (`src/entities/bosses/rotted_one.py`). Üç
+   fazın her biri bir Katman 1 düşmanını geri getiriyor (Sürüklenen →
+   Tırmanan → Şişmek): boss yeni bir şey öğretmiyor, **tier'ın sınavını**
+   yapıyor. Üç hamle üç farklı çözüm istiyor.
+   **Faz 2'nin mührü team-up'ın girdiği yer:** boss mühürlü, hiçbir vuruş
+   işlemiyor; mühür yalnızca arena plakaları basılıyken kırılıyor ve 150
+   kare (beş tam zincir) pencere açılıyor. Hasar *azalmıyor*, **geçmiyor**
+   — azalma sayısal olurdu ve oyuncu farkı görmezdi.
+
+**Öğret, sonra sına:** Oda 3 plakayı dövüşsüz öğretiyor, Oda 4 dövüşün
+ortasına koyuyor (`docs/gdd.md` §9).
+
+**Konuşma yok.** Yoldaş bölüm boyunca tek kelime etmiyor; Yankı da yoldaş
+hakkında konuşmuyor — o an B8'e ait. Soru işareti **iki karakterin
+arasında** duruyor (ilk sürümde oyuncunun tepesindeydi ve "oyuncu şaşırdı"
+gibi okunuyordu; tarif edilen şey bir **bakışma**).
+
+---
 
 ### Karakter sanatı — portre sistemi (29.08.2026)
 
@@ -491,6 +527,9 @@ maske IoU'su; ölçülen en dar çift **rey/ardo %25.3**.
 Artı **4 büyük boss** (B6, B13, B14, B18) ve her bölümde bir mini-boss
 ("mevcut düşmanın büyütülmüş hâli, bir ek hamle" — bilinçli olarak ucuz).
 Yapılan mini-boss'lar: Şişmiş Olan (B2), Sönmüş Olan (B3).
+**Yapılan büyük boss: Çürümüş Olan (B6, BOSS 1)** — üç fazı Katman 1'in
+üç düşmanından alıyor, Faz 2'nin mührü ağırlık plakalarıyla kırılıyor.
+Kalan üçü (B13, B14, B18) sırası gelmedi.
 
 ---
 
