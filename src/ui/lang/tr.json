@@ -184,7 +184,11 @@
     "ch04_echo_map": "yarısı eksik. eksik olan taraf bizim gittiğimiz taraf.",
     "ch04_ardo_map": "Yarısını çizebilmiş. Gerisini görmeye ömrü yetmemiş.",
     "ch04_echo_exit": "dinlendin. şimdi devam et.",
-    "ch04_ardo_exit": "Yeterince durdum. Aşağısı beklemez."
+    "ch04_ardo_exit": "Yeterince durdum. Aşağısı beklemez.",
+    "ch05_echo_enter": "su yükselmiş. burası eskiden kuruydu.",
+    "ch05_ardo_enter": "Mahzeni su basmış. Birileri vanaları bırakmış.",
+    "ch05_echo_valve": "çevir. su bir merdiven olabilir.",
+    "ch05_ardo_valve": "Vana. Seviyeyi değiştirebilirim."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",
@@ -217,7 +221,8 @@
     "village": "Köy",
     "first_descent": "İlk İniş",
     "torch_crypt": "Meşale Mahzeni",
-    "record_room": "Kayıt Odası"
+    "record_room": "Kayıt Odası",
+    "waters": "Sular"
   },
   "chapter_end": {
     "heading": "BÖLÜM TAMAMLANDI",
@@ -317,5 +322,9 @@
   },
   "chapter_card": {
     "number": "BÖLÜM {number}"
+  },
+  "chapter05": {
+    "valve_turned": "Vana çevrildi · su hareket ediyor",
+    "chest_found": "Gizli sandık · {count} altın"
   }
 }

@@ -527,3 +527,25 @@ SKILL_WILL_DEFENCE_RELIEF: Final[float] = 0.08
 # kalsin - uc dalin ilk dugumu de 1 puan, yani ilk karar "hangi dal"
 # sorusunun kendisi.
 REST_SKILL_POINTS: Final[int] = 1
+
+
+# --- SU SEVIYESI (Bolum 5, src/world/water.py) ------------------------------
+# Vana cevrilince su hedefe bu hizla yaklasir (piksel/kare). 0.35 =
+# saniyede ~21 piksel, yani bir tile ~0.75 saniyede. Ani sicrama okunmaz
+# ve tehlikeli olurdu; cok yavasi da bulmacayi bekleme oyununa cevirir.
+WATER_LEVEL_SPEED: Final[float] = 0.35
+# Kaldirma kuvveti: tam batmis govdenin yercekimi bu oranda azalir.
+# 0.86 = %14'u kaliyor - hafif batma "yuzmek icin tusa bas" diyor.
+# 1.0 olsaydi oyuncu suda asili kalirdi ve yuzme bir SECIM olmazdi.
+WATER_BUOYANCY: Final[float] = 0.86
+# Suda dusus hizi tavani (piksel/kare). Yoksa derin suya giren oyuncu
+# dibe cakiliyor ve su "hava" gibi hissettiriyordu.
+WATER_MAX_SINK_SPEED: Final[float] = 0.9
+# Yatay surtunme orani - suda hareket agir.
+WATER_DRAG_X: Final[float] = 0.12
+# Yuzerken yukari hiz. Ziplama hizindan (PLAYER_JUMP_SPEED) belirgin
+# dusuk: su yukselmeyi YAVASLATIYOR, engellemiyor.
+WATER_SWIM_SPEED: Final[float] = 1.05
+# Yuzey dalgasinin genligi (piksel). Duz bir cizgi "su" degil "zemin"
+# gibi okunuyordu.
+WATER_SURFACE_WAVE: Final[float] = 1.4

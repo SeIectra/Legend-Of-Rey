@@ -66,6 +66,10 @@ class Player(Actor):
         # kume, ve etkiler `skilltree.py`'deki toplayicilardan
         # geliyor. `PlayScene` kayittan dolduruyor.
         self.skills: set[str] = set()
+        # Govdenin ne kadari suyun altinda (0..1). Sahne her karede
+        # yaziyor; animasyon ve ses buna bakiyor. Susuz bolumlerde
+        # hep 0.0 kaliyor.
+        self.water_ratio = 0.0
 
         # Silah: Rey yumrukla baslar (kilici Bolum 1'de bulur), Ardo
         # egitimli bir yabanci - kilicla gelir (src/combat/weapons.py).

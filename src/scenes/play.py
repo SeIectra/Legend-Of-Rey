@@ -120,6 +120,10 @@ class PlayScene(Scene):
                      if self.chapter_number else None)
         self.ambience = (Ambience(self.ambience_preset)
                          if self.ambience_preset else None)
+        # Su seviyesi - yalnizca suyu olan bolumlerde (`setup()` kuruyor).
+        # `self.echo` ile ayni desen: yoksa `None` ve kod her yerde
+        # "su var mi?" diye dallanmiyor.
+        self.water = None
 
         self.setup()
 
@@ -209,6 +213,8 @@ class PlayScene(Scene):
             self.card.update()
         if self.ambience is not None:
             self.ambience.update(self.camera.offset)
+        if self.water is not None:
+            self._update_water()
         # Kirilabilir duvarlar Yanki ile parliyor. Liste kucuk (oda basina
         # birkac tane), her karede uretmek sorun degil.
         self.breakables = [_WallTarget(r)
@@ -218,6 +224,23 @@ class PlayScene(Scene):
         if self.toast_frames > 0:
             self.toast_frames -= 1
         self.update_scene()
+
+    def _update_water(self) -> None:
+        """Suyun seviyesini surer ve butun aktorlere etkisini uygular.
+
+        Dusmanlar da suyun icinde: yalnizca oyuncuya uygulasaydik su
+        "oyuncuya ozel bir kural" olurdu, mekan degil. Yuzme YALNIZCA
+        oyuncuda - dusmanlarin yuzme davranisi ayri bir tasarim isi ve
+        Bolum 5'te sudaki dusman yok (tasarim geregi: su bir bulmaca,
+        dovus alani degil).
+        """
+        self.water.update()
+        swimming = (self.game.input.held(Action.JUMP)
+                    and not self.player.dead)
+        self.player.water_ratio = self.water.apply(self.player.body,
+                                                   swimming)
+        for enemy in self.enemies:
+            self.water.apply(enemy.body)
 
     def echo_held(self) -> bool:
         """Yanki bu karede acik mi?
@@ -327,6 +350,11 @@ class PlayScene(Scene):
             enemy.draw(surface, offset)
         self.player.draw(surface, offset)
         self.particles.draw(surface, offset)
+        # Su aktorlerin USTUNE ama yari saydam ciziliyor: suya giren
+        # oyuncu kaybolmamali, "suyun icinde" gorunmeli.
+        if self.water is not None:
+            from src.world import water as water_draw
+            water_draw.draw(surface, offset, self.water)
         self.draw_foreground(surface, offset)
         # Atmosfer aktorlerin ONUNDE: toz "odanin icinde" degil "kamerayla
         # oyuncu arasinda" olmali, yoksa zemin dokusu sanilir. Yanki

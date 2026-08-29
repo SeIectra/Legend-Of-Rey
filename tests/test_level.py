@@ -46,8 +46,12 @@ def main() -> int:
     rooms = _known_rooms()
     check(bool(rooms), "dogrulanacak oda var", f"{len(rooms)} oda")
 
-    for name, rows, spawn in rooms:
-        report = validate(rows, spawn, name)
+    # `_known_rooms()` HER ZAMAN dortlu doner; dorduncu eleman
+    # "bilerek erisilemez" kumesi (Bolum 5'in yuzerek cikilan ust
+    # kati). Karisik uzunluk dondugu bir ara surumde bu dosya
+    # kirilmisti - sozlesme tek bicimli tutuluyor.
+    for name, rows, spawn, ignore in rooms:
+        report = validate(rows, spawn, name, ignore)
         check(report.spawn in report.spots,
               f"{name}: dogum noktasi basilabilir", str(spawn))
         check(not report.unreachable, f"{name}: her nokta ulasilabilir",

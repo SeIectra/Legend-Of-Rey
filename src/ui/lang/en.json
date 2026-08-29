@@ -184,7 +184,11 @@
     "ch04_echo_map": "half of it is missing. the missing half is our way.",
     "ch04_ardo_map": "He drew half of it. He did not live to see the rest.",
     "ch04_echo_exit": "you rested. now keep going.",
-    "ch04_ardo_exit": "I have stopped long enough. Below will not wait."
+    "ch04_ardo_exit": "I have stopped long enough. Below will not wait.",
+    "ch05_echo_enter": "the water has risen. this was dry once.",
+    "ch05_ardo_enter": "The cellar is flooded. Someone left the valves.",
+    "ch05_echo_valve": "turn it. water can be a stair.",
+    "ch05_ardo_valve": "A valve. I can change the level."
   },
   "combat": {
     "counter": "COUNTER",
@@ -217,7 +221,8 @@
     "village": "Village",
     "first_descent": "First Descent",
     "torch_crypt": "The Torch Crypt",
-    "record_room": "The Record Room"
+    "record_room": "The Record Room",
+    "waters": "The Waters"
   },
   "chapter_end": {
     "heading": "CHAPTER COMPLETE",
@@ -317,5 +322,9 @@
   },
   "chapter_card": {
     "number": "CHAPTER {number}"
+  },
+  "chapter05": {
+    "valve_turned": "Valve turned · the water moves",
+    "chest_found": "Hidden chest · {count} gold"
   }
 }

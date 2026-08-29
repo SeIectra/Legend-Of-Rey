@@ -192,10 +192,19 @@ def build_edges(grid: Grid, spots: set[Spot]) -> dict[Spot, set[Spot]]:
     return edges
 
 
-def validate(rows: list[str], spawn_tile: Spot, name: str = "oda") -> Report:
-    """Bir odayi dogrular. `spawn_tile` oyuncunun **uzerinde durdugu** tile."""
+def validate(rows: list[str], spawn_tile: Spot, name: str = "oda",
+             ignore: set[Spot] | None = None) -> Report:
+    """Bir odayi dogrular. `spawn_tile` oyuncunun **uzerinde durdugu** tile.
+
+    `ignore`: BILEREK yurunerek erisilemeyen noktalar. Bolum 5'in ust
+    kati boyle - oraya yalnizca su yukselince yuzerek cikiliyor ve BFS
+    suyu bilmiyor. Bu kume olmasaydi arac surekli kirmizi yanar,
+    zamanla goz ardi edilir ve gercek bir hatayi kacirirdik.
+    """
     grid = Grid(rows)
     spots = standing_spots(grid)
+    if ignore:
+        spots = {spot for spot in spots if spot not in ignore}
     report = Report(name=name, spots=spots, spawn=spawn_tile)
 
     if spawn_tile not in spots:
@@ -220,28 +229,50 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
     from src.scenes.combat_room import ROOM_ROWS, SPAWN_TILE
     from src.world.rooms import chapter01
 
+    # HER girdi dortlu: (ad, satirlar, dogum, bilerek_erisilemez).
+    # Karisik uzunluk dondugu bir ara surumde `tests/test_level.py`
+    # kirildi - sozlesme tek bicimli tutuluyor.
     rooms = [("dovus odasi", ROOM_ROWS,
-              (SPAWN_TILE[0], SPAWN_TILE[1] + 1))]
+              (SPAWN_TILE[0], SPAWN_TILE[1] + 1), set())]
 
     # Bolum odalari isaretleri de tasiyor; dogrulayici zemine bakar.
     spawn = chapter01.LEVEL.first("player")
     rooms.append(("bolum 1 - koy", chapter01.LEVEL.terrain_rows,
-                  (spawn.tile_x, spawn.tile_y + 1)))
+                  (spawn.tile_x, spawn.tile_y + 1), set()))
 
     from src.world.rooms import chapter02
     spawn2 = chapter02.LEVEL.first("player")
     rooms.append(("bolum 2 - ilk inis", chapter02.LEVEL.terrain_rows,
-                  (spawn2.tile_x, spawn2.tile_y + 1)))
+                  (spawn2.tile_x, spawn2.tile_y + 1), set()))
 
     from src.world.rooms import chapter03
     spawn3 = chapter03.LEVEL.first("player")
     rooms.append(("bolum 3 - mesale mahzeni", chapter03.LEVEL.terrain_rows,
-                  (spawn3.tile_x, spawn3.tile_y + 1)))
+                  (spawn3.tile_x, spawn3.tile_y + 1), set()))
 
     from src.world.rooms import chapter04
     spawn4 = chapter04.LEVEL.first("player")
     rooms.append(("bolum 4 - kayit odasi", chapter04.LEVEL.terrain_rows,
-                  (spawn4.tile_x, spawn4.tile_y + 1)))
+                  (spawn4.tile_x, spawn4.tile_y + 1), set()))
+
+    # Bolum 5: yalnizca KURU hali dogrulaniyor.
+    #
+    # Ust kata su yukselince YUZEREK cikiliyor ve BFS suyu bilmiyor.
+    # Once su yuzeyini "platform" sayan ikinci bir gecis denendi ve
+    # YANLIS cikti: yuzmek "yuzeyde yurumek" degil, su hacminde
+    # yukselmek. BFS'i o modele zorlamak araci yaniltici yapardi.
+    #
+    # Su yolu bunun yerine `tests/test_chapter05.py`'de GERCEK FIZIKLE
+    # dogrulaniyor: oyuncu suyu yukseltip yuzuyor ve ust kata gercekten
+    # cikiyor mu diye bakiliyor. Her arac yalnizca dogrulayabildigi seyi
+    # dogruluyor - zorlanmis bir BFS'ten daha guclu bir kanit.
+    from src.world.rooms import chapter05
+    spawn5 = chapter05.LEVEL.first("player")
+    dry_rows = list(chapter05.LEVEL.terrain_rows)
+    upper = chapter05.UPPER_FLOOR_ROW
+    rooms.append(("bolum 5 - sular (kuru)", dry_rows,
+                  (spawn5.tile_x, spawn5.tile_y + 1),
+                  {(x, upper) for x in range(len(dry_rows[0]))}))
     return rooms
 
 
@@ -252,8 +283,8 @@ def main() -> int:
           f"({TILE_SIZE}px tile)\n")
 
     failures = 0
-    for name, rows, spawn in _known_rooms():
-        report = validate(rows, spawn, name)
+    for name, rows, spawn, ignore in _known_rooms():
+        report = validate(rows, spawn, name, ignore)
         mark = "OK " if report.ok else "!! "
         print(mark + report.summary())
         if not report.ok:
