@@ -29,6 +29,7 @@ Spec'ler: `src/art/animation.py :: CHARACTERS`
 | `shambler` | 40x36 | 31 | 50 | Katman 1 - Suruklenen |
 | `climber` | 44x34 | 28 | 50 | Katman 1 - Tirmanan |
 | `bloated` | 44x40 | 34 | 50 | Katman 1 - Sismek |
+| `rotted_one` | 64x56 | 48 | 50 | - |
 | `shieldbearer` | 44x40 | 34 | 50 | Katman 2 - Kalkanli (AI VAR, B5'te tanitiliyor) |
 | `spearman` | 56x40 | 34 | 50 | Katman 2 - Mizrakli (sanat var, AI yok) |
 | `archer` | 48x40 | 34 | 50 | Katman 2 - Okcu (sanat var, AI yok) |

@@ -192,7 +192,11 @@
     "ch05_echo_guard": "bu, çürüyenlerden değil. bunu biri eğitmiş.",
     "ch05_ardo_guard": "Muhafız. Aşağıdan yukarı çıkmış.",
     "ch05_echo_block": "önden olmuyor. arkasına geç — yavaş dönüyor.",
-    "ch05_ardo_block": "Kalkan önü kapatıyor. Arkası açık."
+    "ch05_ardo_block": "Kalkan önü kapatıyor. Arkası açık.",
+    "ch06_rey_plates": "İki plaka. Tek başıma olmaz.",
+    "ch06_ardo_plates": "İki plaka. Yalnız basamam.",
+    "ch06_rey_arena": "Bu, ötekiler gibi değil.",
+    "ch06_ardo_arena": "Bunun için gelmiştim."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",
@@ -226,7 +230,8 @@
     "first_descent": "İlk İniş",
     "torch_crypt": "Meşale Mahzeni",
     "record_room": "Kayıt Odası",
-    "waters": "Sular"
+    "waters": "Sular",
+    "ardo": "ARDO"
   },
   "chapter_end": {
     "heading": "BÖLÜM TAMAMLANDI",
@@ -274,7 +279,8 @@
   "boss": {
     "bloated_one": "ŞİŞMİŞ OLAN",
     "extinguished_one": "SÖNMÜŞ OLAN",
-    "unknown": "İSİMSİZ"
+    "unknown": "İSİMSİZ",
+    "rotted_one": "ÇÜRÜMÜŞ OLAN"
   },
   "charm": {
     "bloody_whet": "KANLI BİLEME  ·  5+ combo'da hasar %15 artar",
@@ -345,5 +351,15 @@
     "stat_frames": "Bitirici kare",
     "stat_knockback": "İtiş",
     "chosen": "{name} kuşanıldı"
+  },
+  "chapter06": {
+    "rescued": "Biri yukarıdan indi",
+    "plate_hint": "Plaka basılı kaldı — ikisi birden gerek",
+    "gate_open": "Kapı açıldı",
+    "seal_hint": "Vuruşlar işlemiyor. Plakalar…",
+    "seal_broken": "Mühür kırıldı — şimdi!",
+    "companion_down": "Diz çöktü — toparlanacak",
+    "boss_down": "Çürümüş Olan düştü — {count} altın",
+    "chest_found": "Gizli sandık — {count} altın"
   }
 }

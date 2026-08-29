@@ -192,7 +192,11 @@
     "ch05_echo_guard": "this one is not of the rotting. someone trained it.",
     "ch05_ardo_guard": "A guard. It came up from below.",
     "ch05_echo_block": "not from the front. get behind it — it turns slowly.",
-    "ch05_ardo_block": "The shield covers the front. Its back is open."
+    "ch05_ardo_block": "The shield covers the front. Its back is open.",
+    "ch06_rey_plates": "Two plates. Not alone.",
+    "ch06_ardo_plates": "Two plates. I cannot press both.",
+    "ch06_rey_arena": "This one is not like the others.",
+    "ch06_ardo_arena": "This is what I came for."
   },
   "combat": {
     "counter": "COUNTER",
@@ -226,7 +230,8 @@
     "first_descent": "First Descent",
     "torch_crypt": "The Torch Crypt",
     "record_room": "The Record Room",
-    "waters": "The Waters"
+    "waters": "The Waters",
+    "ardo": "ARDO"
   },
   "chapter_end": {
     "heading": "CHAPTER COMPLETE",
@@ -274,7 +279,8 @@
   "boss": {
     "bloated_one": "THE BLOATED ONE",
     "extinguished_one": "THE EXTINGUISHED ONE",
-    "unknown": "NAMELESS"
+    "unknown": "NAMELESS",
+    "rotted_one": "THE ROTTED ONE"
   },
   "charm": {
     "bloody_whet": "BLOODY WHET  -  +15% damage at 5+ combo",
@@ -345,5 +351,15 @@
     "stat_frames": "Finisher frames",
     "stat_knockback": "Knockback",
     "chosen": "{name} equipped"
+  },
+  "chapter06": {
+    "rescued": "Someone dropped from above",
+    "plate_hint": "The plate stayed down — both are needed",
+    "gate_open": "The gate opened",
+    "seal_hint": "The blows do nothing. The plates…",
+    "seal_broken": "The seal broke — now!",
+    "companion_down": "Down — but getting up",
+    "boss_down": "The Rotted One has fallen — {count} gold",
+    "chest_found": "Hidden chest — {count} gold"
   }
 }

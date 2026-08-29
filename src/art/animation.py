@@ -484,6 +484,31 @@ BLOATED_SPEC = CharSpec(
     spikes=3,           # Sirttan cikan kabarcik dikenleri - "sisiyor" okunur
 )
 
+# --- BOSS 1: Curumus Olan (Bolum 6) -----------------------------------------
+# `docs/gdd.md` 8: dort buyuk boss, ilki B6'da - "Ardo'yla ilk beraber
+# dovus". Katman 1'in (Curuyenler, B1-B6) **finali**, o yuzden uc dusmanin
+# da izini tasiyor: Suruklenen'in cokuk durusu (`hunch`), Tirmanan'in
+# penceleri (`claws`), Sismek'in sisik govdesi (genis `torso_width`).
+#
+# Mini-boss'lardan (Sismis Olan, Sonmus Olan) ayrilmasi SART: onlar
+# "buyutulmus dusman", bu bir boss - `docs/gdd.md` 8 "kendi arenasi, kendi
+# animasyon seti". Ayrimi uc cikinti tasiyor: sirt dikenleri, uzun
+# penceler, kuyruk. Tek renge indirildiginde hicbir Katman 1 dusmaniyla
+# karistirilmiyor.
+ROTTED_ONE_SPEC = CharSpec(
+    name="rotted_one",
+    cell_width=64, cell_height=56, foot_y=48,
+    head_radius=4.2, torso_height=12.0, torso_width=13.0,
+    thigh=7.0, shin=7.0, upper_arm=7.5, fore_arm=7.0,
+    limb_width=4.2, shoulder_width=13.0, neck=1.0,
+    skin="rot", hair="rot", cloth="gore", cloth_dark="shadow",
+    armor="bone_pale", accent="gore",
+    weapon="none",
+    claws=5.0, claw_chain="bone_pale",
+    spikes=5, hunch=2.2, tail=9.0,
+    glow_eyes=3, brow_tilt=-1,
+)
+
 # --- KATMAN 2 · Lanetli Muhafizlar ------------------------------------------
 # *Soru: combo'yu KIRMAYI ogren.* Her biri combo'yu farkli bir yerinden
 # keser: Kalkanli onden, Mizrakli mesafeden, Okcu uzaktan, Komutan
@@ -654,6 +679,7 @@ CHARACTERS: dict[str, CharSpec] = {
     # Katman 2 - Lanetli Muhafizlar (B7-B13)
     # SANAT hazir; hicbir bolume YERLESTIRILMEDI (CLAUDE.md 3: ileri bolum
     # icerigi sirasi gelmeden yazilmaz). Dovus test odasindan gorulebilir.
+    "rotted_one": ROTTED_ONE_SPEC,
     "shieldbearer": SHIELDBEARER_SPEC,
     "spearman": SPEARMAN_SPEC,
     "archer": ARCHER_SPEC,

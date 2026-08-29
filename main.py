@@ -31,6 +31,7 @@ SCENES = {
     "inis": ("src.scenes.chapter02_cinematics", "DescentCinematic"),
     "bolum3": ("src.scenes.chapter03", "Chapter03Scene"),
     # Bolum 4 - "Kayit Odasi". ★nefes: dovus yok (docs/yapi.md B4).
+    "bolum6": ("src.scenes.chapter06", "Chapter06Scene"),
     "bolum5": ("src.scenes.chapter05", "Chapter05Scene"),
     "bolum4": ("src.scenes.chapter04", "Chapter04Scene"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),

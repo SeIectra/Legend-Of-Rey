@@ -608,3 +608,68 @@ TRACE_MAX: Final[int] = 400
 # soluyor). 3600 = bir dakika: taze bir iz "az once buradaydi", soluk bir
 # iz "cok once" diyor. Yasin okunabilmesi bilginin yarisi.
 TRACE_FADE_FRAMES: Final[int] = 3600
+
+
+# --- YOLDAS (Bolum 6, src/entities/companion.py) -----------------------------
+# `docs/gdd.md` 8: B6 "Ardo'yla ilk beraber dovus". Yoldas oynamiyor,
+# YARDIM EDIYOR - asagidaki uc sayi o farki tutuyor.
+COMPANION_HEALTH: Final[int] = 90
+# Vurus araligi seyrek: dusmani temizlemez, mesgul eder. Oyuncunun
+# zincir penceresi 12 kare; yoldas onun bes katinda bir vuruyor.
+COMPANION_ATTACK_COOLDOWN: Final[int] = 62
+# Hasar oyuncunun ilk vurusunun (10) altinda. Oldurme oyuncunun isi.
+COMPANION_DAMAGE: Final[int] = 7
+COMPANION_ATTACK_RANGE: Final[float] = 20.0
+# Savurmadan once okunur an. Dusmanin tell'i degil ama oyuncu yoldasin
+# ne yaptigini gorebilmeli - yoksa hasar "havadan" geliyor gibi olur.
+COMPANION_TELL_FRAMES: Final[int] = 12
+COMPANION_SPEED: Final[float] = 1.05
+# Oyuncudan bu kadar uzaktaki dusmani kovalamaz. Tasma olmasaydi yoldas
+# odanin obur ucuna gider ve "nerede bu ya" hissi olusurdu.
+COMPANION_LEASH: Final[float] = 120.0
+# Cani bitince OLMEZ, diz coker ve bu kadar kare sonra kalkar. Olmesi
+# dovusu bir koruma gorevine cevirirdi; ayrica agirlik plakasi bulmacasi
+# cozulemez hale gelirdi.
+COMPANION_DOWN_FRAMES: Final[int] = 210
+# Emredilen noktaya bu kadar yaklasinca "durdu" sayiliyor.
+COMPANION_HOLD_TOLERANCE: Final[float] = 10.0
+
+# --- AGIRLIK PLAKASI (Bolum 6, src/world/plate.py) ---------------------------
+# `docs/gdd.md` 9 mekanik 4: *"Agirlik plakalari | B6 | Yaratik cesedini/
+# sandigi plakaya surukle"*, `docs/yapi.md`: *"ikisi ayri plakada durmali -
+# beraberlik mekaniğe giriyor"*.
+PLATE_WIDTH: Final[int] = 20
+PLATE_HEIGHT: Final[int] = 4
+# Plaka basildiktan sonra bu kadar kare daha basili sayilir. Sifir
+# olsaydi iki kisinin ayni KAREDE basmasi gerekirdi - imkansiza yakin
+# ve adaletsiz. Yarim saniyelik tolerans bulmacayi "es zamanli" degil
+# "birlikte" yapiyor.
+PLATE_GRACE_FRAMES: Final[int] = 30
+
+
+# --- BOSS 1: CURUMUS OLAN (Bolum 6, src/entities/bosses/rotted_one.py) -------
+# Katman 1'in finali. Uc fazin her biri bir Katman 1 dusmanini geri
+# getiriyor: Suruklenen (yer ritmi), Tirmanan (tavandan dusus), Sismek
+# (yavru + patlama). Yeni bir sey OGRETMIYOR - tierin sinavini yapiyor.
+ROTTED_HEALTH: Final[int] = 420
+ROTTED_POISE: Final[int] = 8             # Combo'yu kolayca kirdirmiyor
+
+ROTTED_SWEEP_DAMAGE: Final[int] = 16
+ROTTED_SWEEP_REACH: Final[int] = 40      # Genis - kacinmayla gecilir
+ROTTED_LUNGE_DAMAGE: Final[int] = 18
+ROTTED_LUNGE_SPEED: Final[float] = 4.6   # Mesafe acarak gecilir
+ROTTED_DROP_DAMAGE: Final[int] = 20
+ROTTED_DROP_SPEED: Final[float] = 5.0
+ROTTED_CLIMB_FRAMES: Final[int] = 46     # Tavanda asili kaldigi sure
+ROTTED_SPAWN_COUNT: Final[int] = 2
+# Patlama YONSUZ: kacinmanin yonu ise yaramiyor, tek cozum menzil disina
+# cikmak. Uc hamlenin ucu de farkli cozum istiyor - ayni cozum ise
+# yarasaydi dovus tek tuslu olurdu.
+ROTTED_BURST_DAMAGE: Final[int] = 22
+ROTTED_BURST_REACH: Final[int] = 46
+
+# Faz 2'nin muhru plakalarla kirilinca boss bu kadar kare savunmasiz.
+# `docs/dovus-sistemi.md` zincir penceresi 12 kare; 150 kare ~5 tam
+# zincire yetiyor - pencere "kos ve iki vurus at" degil "gercekten
+# dov" olmali, yoksa team-up bir angarya gibi hissettirir.
+PLATE_STUN_FRAMES: Final[int] = 150

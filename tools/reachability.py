@@ -255,6 +255,20 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
     rooms.append(("bolum 4 - kayit odasi", chapter04.LEVEL.terrain_rows,
                   (spawn4.tile_x, spawn4.tile_y + 1), set()))
 
+    from src.world.rooms import chapter06
+    spawn6 = chapter06.LEVEL.first("player")
+    # Bolum 6'nin ilk odasi bilerek CIKMAZ: oyuncu kosede sikisiyor ve
+    # duvar ancak yoldas gelince aciliyor (`chapter06.py` `_open_corner`).
+    # BFS o kapiyi bilmiyor, o yuzden dogrulama duvar ACIK haliyle
+    # yapiliyor - oynanista da oyle oluyor.
+    rows6 = list(chapter06.LEVEL.terrain_rows)
+    for row_index in chapter06.CORNER_WALL_ROWS:
+        line = list(rows6[row_index])
+        line[chapter06.CORNER_WALL_TILE] = "."
+        rows6[row_index] = "".join(line)
+    rooms.append(("bolum 6 - ardo", rows6,
+                  (spawn6.tile_x, spawn6.tile_y + 1), set()))
+
     # Bolum 5: yalnizca KURU hali dogrulaniyor.
     #
     # Ust kata su yukselince YUZEREK cikiliyor ve BFS suyu bilmiyor.
