@@ -7,7 +7,7 @@ Okuma sırası: **1) `CLAUDE.md`** (bağlayıcı kurallar — anayasa) → **2) 
 dosya** (nerede kaldık) → 3) gerekirse `docs/` altındaki ilgili tasarım
 belgesi.
 
-Son güncelleme: **29.08.2026** (Bölüm 4-5, Kalkanlı, silah seçimi) · Ardeko Studios · Arda Güner
+Son güncelleme: **29.08.2026** (Bölüm 4-5, Kalkanlı, silah seçimi, kontrol noktası) · Ardeko Studios · Arda Güner
 
 > `GOREVLER.md` **silindi** (23.08.2026, Arda'nın isteği: "bir devir.md
 > olsun diğerlerini sil kafa karıştırmasın"). İçindeki canlı bilgi bu
@@ -35,7 +35,7 @@ Tasarım paketi `docs/` altında ve **bağlayıcı**: `gdd.md` (ana belge),
 
 ## 2. NEREDE DURUYORUZ
 
-**~31.000 satır Python. 18 test paketi de yeşil.**
+**~31.200 satır Python. 19 test paketi de yeşil.**
 
 Oynanabilir akış:
 `intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)** →
@@ -66,6 +66,7 @@ bir uç. Bölüm 6 aynı zamanda **ilk büyük boss** ve Katman 1'in sonu.
 | 13 | Bölüm 5 — Sular + **su seviyesi mekaniği** | ✅ (29.08.2026) |
 | 14 | **Kalkanlı** — Katman 2'nin ilk AI'ı | ✅ (29.08.2026) |
 | 15 | **Bölüm 2 silah seçimi** (Hançer/Balta) | ✅ (29.08.2026) |
+| 16 | **Kontrol noktası** — ölünce odanın başından devam | ✅ (29.08.2026) |
 
 **Bölüm 4 "Kayıt Odası"** (`docs/yapi.md` B4): yetenek ağacı sistemi
 (`src/systems/skilltree.py` — 3 dal × 4 düğüm) + ağaç ekranı
@@ -486,9 +487,15 @@ Sırası gelmediği için değil, **gözden kaçmasın** diye:
    edilirdi. Su yolu bunun yerine `tests/test_chapter05.py` içinde
    **gerçek fizikle** oynatılıyor. *Aynı desen ileride bir mekanik
    BFS'e sığmadığında tekrar kullanılmalı: aracı zorlama, testi yaz.*
-8. **Checkpoint yok.** Oyuncu ölünce sahne yeniden kurulmuyor. Arena
-   kapısı ölümde açılıyor ki oyuncu kilitli kalmasın, ama gerçek çözüm
-   bir yeniden doğma sistemi.
+8. ~~Checkpoint yok~~ — **kapandı (29.08.2026).** `PlayScene.restart()`
+   artık **odanın** başından devam ettiriyor. Kısmi geri alma değil:
+   sahne yine **tamamen** baştan kuruluyor (yoksa kapı/anahtar/arena
+   mührü/su seviyesi gibi değişmezlerden biri mutlaka bayat kalır),
+   sonra oyuncu ölduğü odanın başına ışınlanıyor ve o odanın düşmanları
+   yeniden doğuyor. Alt sınıflar bunun için **hiçbir şey yapmıyor** —
+   hepsi zaten `self.room` tutuyor, `PlayScene` o değişimi izliyor.
+   Yalnızca **yerdeyken** kaydediliyor (havada kaydedilse boşluğa düşen
+   oyuncu sonsuz ölüm döngüsüne girerdi).
 9. **Müzik yok.** Ses efektleri var (sentezlenmiş). **Döngülü/sürekli
    sesler bilerek kaldırıldı** — Arda: *"cızırtı gibi, rahatsız edici"*.
    Altyapı (`play_loop`/`stop_loop`) duruyor, kullanılmıyor. Gerçek kayıt
