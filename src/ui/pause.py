@@ -42,14 +42,32 @@ class PauseScene(Scene):
 
         self.menu = Menu([
             MenuItem("pause.resume", self._resume),
-            MenuItem("pause.equipment", None, enabled=False,
-                     hint="pause.equipment_hint"),
+            MenuItem("pause.equipment", self._open_equipment),
             MenuItem("pause.settings", self._open_settings),
             MenuItem("pause.main_menu", self._ask_quit, gap_before=True),
         ], INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2 - 30, width=120,
             centered=True, on_sound=self.game.play_sound)
 
     # --- Eylemler -----------------------------------------------------------
+    def _open_equipment(self) -> None:
+        """Silah degistirme ekrani.
+
+        Bu girdi bir donem KAPALIYDI ve ipucu olarak "Bolum 2'de acilir"
+        diyordu - ama Bolum 2'de bir sey acilmiyordu. Arayuzun tutamadigi
+        soz, olum yazisinin "R ile sifirla" deyip R'nin hicbir yerde
+        dinlenmemesiyle ayni sinif hataydi (Arda iki hatayi da canli
+        oynanista buldu).
+        """
+        from src.scenes.play import PlayScene
+        from src.ui.equipment import EquipmentScene
+        # Oyuncuyu yigindan `find` ile aliyoruz: silah degisiminin
+        # **aninda** etkili olmasi icin canli `Player` nesnesi gerekiyor.
+        # Yalnizca kayda yazmak, duraklatmadan cikinca eski silahla
+        # devam etmek demekti.
+        play = self.scenes.find(PlayScene)
+        self.scenes.push(EquipmentScene, save_data=self.save_data,
+                         player=getattr(play, "player", None))
+
     def _resume(self) -> None:
         self.scenes.pop()
 

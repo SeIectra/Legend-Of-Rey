@@ -37,7 +37,6 @@
     "heading": "PAUSED",
     "resume": "RESUME",
     "equipment": "EQUIPMENT",
-    "equipment_hint": "Unlocks in Chapter 2",
     "settings": "SETTINGS",
     "main_menu": "MAIN MENU",
     "quit_question": "Return to the main menu?",
@@ -367,5 +366,11 @@
     "main_menu": "MAIN MENU",
     "resume_at": "Chapter {room} · from the start of the room you died in",
     "saved": "Saved"
+  },
+  "equipment": {
+    "heading": "EQUIPMENT",
+    "equipped": "equipped",
+    "hint": "[▴▾] select   [Enter] equip   [Esc] back",
+    "stat_line": "{hits} hits · {damage} dmg · {frames} frames · knockback {knockback}"
   }
 }

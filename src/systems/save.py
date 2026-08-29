@@ -85,6 +85,17 @@ class SaveData:
 
     # Ekipman ve kilitler
     weapon: str = "sword"
+    # **Sahip olunan** silahlar. `weapon` yalnizca KUSANILANI tutuyordu ve
+    # Bolum 2'de Hancer/Balta secildikten sonra oyuncu bir daha kilica
+    # donemiyordu - duraklatma menusundeki EKIPMAN "Bolum 2'de acilir"
+    # diye soz veriyor ama ekran yoktu (Arda, 29.08.2026: *"balta'm veya
+    # hancerime gecemedim"*).
+    #
+    # `abilities`/`skills` ile ayni gerekceyle **liste**: yeni silah
+    # eklemek kayit surumunu degistirmiyor, eski kayitlar sadece ona
+    # sahip olmuyor. Bos birakilirsa `equipment.owned()` kayittan makul
+    # bir varsayilan turetiyor (eski kayitlar bozulmasin).
+    owned_weapons: list[str] = field(default_factory=list)
     armor: str = "light"
     charms: list[str] = field(default_factory=list)
 

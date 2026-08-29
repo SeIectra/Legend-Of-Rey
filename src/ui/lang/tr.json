@@ -37,7 +37,6 @@
     "heading": "DURAKLATILDI",
     "resume": "DEVAM",
     "equipment": "EKİPMAN",
-    "equipment_hint": "Bölüm 2'de açılır",
     "settings": "AYARLAR",
     "main_menu": "ANA MENÜ",
     "quit_question": "Ana menüye dön?",
@@ -367,5 +366,11 @@
     "main_menu": "ANA MENÜ",
     "resume_at": "Bölüm {room} · öldüğün odanın başından",
     "saved": "Kaydedildi"
+  },
+  "equipment": {
+    "heading": "EKİPMAN",
+    "equipped": "kuşanılı",
+    "hint": "[▴▾] seç   [Enter] kuşan   [Esc] geri",
+    "stat_line": "{hits} vuruş · {damage} hasar · {frames} kare · itiş {knockback}"
   }
 }

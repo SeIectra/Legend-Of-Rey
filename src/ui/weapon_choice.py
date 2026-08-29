@@ -156,6 +156,14 @@ class WeaponChoiceScene(Scene):
         self.chosen = key
         if self.save_data is not None:
             self.save_data.weapon = key
+            # **Sahiplik listesine de yaz.** Yalnizca `weapon`'a yazmak
+            # secimi geri alinamaz yapiyordu: Hancer secen oyuncu kilica
+            # bir daha donemiyordu, oysa modul basligi acikca "kilic
+            # kaybolmuyor" diyor. Duraklatma > EKIPMAN artik ikisini de
+            # gosteriyor (`src/ui/equipment.py`).
+            from src.ui import equipment
+            equipment.grant(self.save_data, key)
+            equipment.grant(self.save_data, weapons.SWORD)
         if self.player is not None:
             self.player.equip_weapon(key)
         self.game.play_sound("ui_confirm")
