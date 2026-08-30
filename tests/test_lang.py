@@ -29,7 +29,15 @@ sys.path.insert(0, str(ROOT))
 
 import pygame  # noqa: E402
 
-pygame.init()
+# `pygame.init()` DEGIL. O, joystick alt sistemini de acar ve bu
+# makinede 40 SANIYE surer (olculdu 30.08.2026 - bir surucu sorunu,
+# kodla ilgisi yok). 21 test paketi bunu ayri ayri odedigi icin butun
+# paket 14 dakikayi asiyordu.
+#
+# `src/core/game.py` de tam olarak bu yolu izliyor; test oyunla ayni
+# sekilde acilsin. Ses gerekirse `synth.init_mixer()` cagrilir.
+pygame.display.init()
+pygame.font.init()
 pygame.display.set_mode((64, 64))
 
 from src.config import INTERNAL_WIDTH  # noqa: E402

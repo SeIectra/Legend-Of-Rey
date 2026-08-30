@@ -19,6 +19,17 @@ sys.path.insert(0, str(ROOT))
 
 import pygame  # noqa: E402
 
+# Bu paket hicbir zaman ekran acmiyordu ve `forge.Canvas.resolve()`
+# `convert_alpha()` cagirdigi icin sprite ureten her yol patliyordu
+# ("cannot convert without pygame.display initialized"). Sessizce
+# kirikti; butun paketi tek seferde calistirinca ortaya cikti.
+#
+# `pygame.init()` DEGIL - o joystick'i de acar ve bu makinede 40 saniye
+# surer. `src/core/game.py` ile ayni yol.
+pygame.display.init()
+pygame.font.init()
+pygame.display.set_mode((64, 64))
+
 from src.combat.combo import AttackPhase  # noqa: E402
 from src.config import (  # noqa: E402
     CHAIN, CHAIN_WINDOW_FRAMES, COMBO_RESET_FRAMES,
@@ -369,7 +380,13 @@ def main() -> int:
     gate.tap(KEY_DODGE)
     check(gate.player.dodge.active,
           "kacinma ogrenildikten sonra atilabiliyor")
-    gate.game.shutdown()
+    # `gate.game.shutdown()` KALDIRILDI - ayni gerekce, ama bu sefer
+    # sonucu daha kotuydu: `shutdown()` `pygame.quit()` cagiriyor ve
+    # ekrani kapatiyor. Dosyanin devami (silah izi, sallanma) sprite
+    # uretiyor, `forge.Canvas.resolve()` de `convert_alpha()` cagiriyor -
+    # ekran olmadan patliyor. Paket **sessizce kirikti**; 40 saniyelik
+    # joystick beklemesi kalkinca butun paketi tek seferde calistirmak
+    # mumkun oldu ve ortaya cikti.
 
     # --- Silah izi (src/art/trail.py) ---------------------------------------
     # Iz, sprite'i cizen AYNI poz fonksiyonundan hesaplaniyor
