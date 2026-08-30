@@ -224,10 +224,28 @@ def _draw_head(canvas: Canvas, spec: PortraitSpec) -> None:
                 step = 1                      # sag yanak
             if abs(u) > 0.80:
                 step = 1                      # sakak/kenar
-            if u > 0.62 and v > 0.55:
-                step = 0                      # sag cene golgesi
             if v > 0.93:
-                step = 0                      # cene alti
+                step = 1                      # cene alti - golgede ama TEN
+            # **En koyu basamak yalnizca kenar konturunda.**
+            #
+            # Arda (30.08.2026): *"Rey yaptigin golgelendirmeden dolayi
+            # sakalli gibi duruyor."* Sebep buydu: cene alti ve sag cene
+            # kamasi `step=0` ile boyaniyordu ve `skin_tan`'in 0. basamagi
+            # `earth_dark` - yani `hair_dark` zincirinin ust ucuyla ayni
+            # renk ailesi. Cenenin genisce bir bolgesi sac rengine
+            # boyaniyordu; goz o lekeyi golge diye degil **sakal** diye
+            # okuyor.
+            #
+            # Golge silinmedi, bir basamak yukseltildi: cene hala
+            # koyu (`flesh_dark`) ama hala TEN. En koyu ton bir
+            # piksellik cerceveye cekildi - orada zaten kontur isi
+            # goruyor.
+            #
+            # Ardo'nun sert cenesi bundan etkilenmiyor: onunki
+            # `stubble=1` + `face_shadow=1` ile ayrica ciziliyor ve
+            # ikisi de yerinde duruyor.
+            if abs(u) > 0.93:
+                step = 0
             canvas.px(x, y, skin, step)
 
     # Elmacik kemigi vurgusu - yuze hacim veren tek ayrinti.

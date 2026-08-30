@@ -407,8 +407,17 @@ class Chapter06Scene(PlayScene):
             data.playtime_frames += self.frames
             data.best_combo = max(data.best_combo, self.player.combo.best)
             data.secrets_found += result.secrets_found
-        # Bolum 7 henuz yok - ozet ekrani kapaninca ana menuye donuluyor.
-        self.scenes.push(ChapterEndScene, result=result)
+        # Bolum 7'ye baglaniyor. Ara sahne UZERINDEN: "Muhur" bolumun
+        # acilisi ve Katman 2'nin ilk goruntusu - oynanisa dogrudan
+        # dusmek o gecisi yok ederdi.
+        character = self.character
+
+        def _continue() -> None:
+            from src.scenes.chapter07_cinematics import SealCinematic
+            self.scenes.set_root(SealCinematic, character=character)
+
+        self.scenes.push(ChapterEndScene, result=result,
+                         on_continue=_continue)
 
     # --- Kancalar -----------------------------------------------------------
     def on_boss_sealed(self, boss) -> None:

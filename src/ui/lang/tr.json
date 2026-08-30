@@ -227,7 +227,15 @@
         "prologue_ardo_3": "Ve geri dönmemiş.",
         "prologue_ardo_4": "Derinlerde neyin beklediğini biliyorum.",
         "prologue_ardo_5": "Onu orada bırakmayacağım.",
-        "prologue_echo_5b": "Etin ötesini... taşın ardını... gölgelerin sakladığı gerçeği."
+        "prologue_echo_5b": "Etin ötesini... taşın ardını... gölgelerin sakladığı gerçeği.",
+        "ch07_rey_seal": "Mühür... Bu kapıyı biri kapatmış. İçeriden.",
+        "ch07_ardo_seal": "Muhafız mührü. Aşağıdakiler kendilerini içeri kilitlemiş.",
+        "ch07_rey_door": "Kapı açılmıyor. Ama duvar çatlamış — orada bir aralık var.",
+        "ch07_ardo_door": "Bu kapı bu taraftan açılmaz. Kolu öbür tarafta olmalı.",
+        "ch07_rey_alone": "Öbür taraftayım. Sesler hâlâ benimle... ama o değil.",
+        "ch07_ardo_alone": "Geçti. Bu sefer bekleyen benim.",
+        "ch07_rey_together": "Yine yanımda.",
+        "ch07_ardo_together": "Beraber daha hızlı gideriz."
     },
     "combat": {
         "counter": "KARŞI VURUŞ",
@@ -261,7 +269,8 @@
         "torch_crypt": "Meşale Mahzeni",
         "record_room": "Kayıt Odası",
         "waters": "Sular",
-        "ardo": "ARDO"
+        "ardo": "ARDO",
+        "narrow_pass": "Dar Geçit"
     },
     "chapter_end": {
         "heading": "BÖLÜM TAMAMLANDI",
@@ -404,5 +413,10 @@
         "equipped": "kuşanılı",
         "hint": "[▴▾] seç   [Enter] kuşan   [Esc] geri",
         "stat_line": "{hits} vuruş · {damage} hasar · {frames} kare · itiş {knockback}"
+    },
+    "chapter07": {
+        "order_hint": "Omuzların sığmıyor — ona işaret et",
+        "door_open": "Kapı açıldı",
+        "gap_blocked": "Bu aralıktan geçemezsin"
     }
 }

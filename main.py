@@ -37,6 +37,12 @@ SCENES = {
     "bolum6": ("src.scenes.chapter06", "Chapter06Scene"),
     "bolum5": ("src.scenes.chapter05", "Chapter05Scene"),
     "bolum4": ("src.scenes.chapter04", "Chapter04Scene"),
+    "bolum7": ("src.scenes.chapter07", "Chapter07Scene"),
+    # Bolum 7'nin acilis ara sahnesi ayri girdi: sahneyi tek
+    # basina denemek isteyen "bolum7" yaziyor, gecisi gormek
+    # isteyen "bolum7-muhur".
+    "bolum7-muhur": ("src.scenes.chapter07_cinematics", "SealCinematic"),
+    "bolum7-el": ("src.scenes.chapter07_cinematics", "HandCinematic"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }

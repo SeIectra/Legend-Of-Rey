@@ -227,7 +227,15 @@
         "prologue_ardo_3": "And never came back.",
         "prologue_ardo_4": "I know what waits below.",
         "prologue_ardo_5": "I won't leave them down there.",
-        "prologue_echo_5b": "Beyond the flesh... behind the stone... the truth hidden in the shadows."
+        "prologue_echo_5b": "Beyond the flesh... behind the stone... the truth hidden in the shadows.",
+        "ch07_rey_seal": "A seal... Someone shut this door. From the inside.",
+        "ch07_ardo_seal": "A guardian seal. Whatever is down there locked itself in.",
+        "ch07_rey_door": "The door won't open. But the wall is cracked — there's a gap.",
+        "ch07_ardo_door": "This door won't open from here. The lever must be on the far side.",
+        "ch07_rey_alone": "I'm on the other side. The voices are still with me... but he isn't.",
+        "ch07_ardo_alone": "She's through. This time I'm the one waiting.",
+        "ch07_rey_together": "Beside me again.",
+        "ch07_ardo_together": "We move faster together."
     },
     "combat": {
         "counter": "COUNTER",
@@ -261,7 +269,8 @@
         "torch_crypt": "The Torch Crypt",
         "record_room": "The Record Room",
         "waters": "The Waters",
-        "ardo": "ARDO"
+        "ardo": "ARDO",
+        "narrow_pass": "The Narrow Pass"
     },
     "chapter_end": {
         "heading": "CHAPTER COMPLETE",
@@ -404,5 +413,10 @@
         "equipped": "equipped",
         "hint": "[▴▾] select   [Enter] equip   [Esc] back",
         "stat_line": "{hits} hits · {damage} dmg · {frames} frames · knockback {knockback}"
+    },
+    "chapter07": {
+        "order_hint": "Your shoulders won't fit — signal to them",
+        "door_open": "The door is open",
+        "gap_blocked": "You can't fit through this gap"
     }
 }

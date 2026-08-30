@@ -287,6 +287,33 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
     rooms.append(("bolum 5 - sular (kuru)", dry_rows,
                   (spawn5.tile_x, spawn5.tile_y + 1),
                   {(x, upper) for x in range(len(dry_rows[0]))}))
+
+    # Bolum 7: iki yer BFS'in bilmedigi bicimde aciliyor.
+    #
+    #   * **Kapi** - cark cevrilince (`chapter07.py` `_turn_winch`).
+    #     Bolum 6'nin kose duvariyla ayni durum: dogrulama kapi ACIK
+    #     haliyle yapiliyor.
+    #   * **Cukur** - uzerinden atlanmiyor, oyuncu yoldasin eliyle
+    #     cikariliyor (`HandCinematic` + `_place_after_hand`). Iki sinir
+    #     da hesaplanarak konuldu: sag duvar 4 tile
+    #     (`MAX_JUMP_HEIGHT_TILES` = 3), yatay aciklik 6 tile
+    #     (`MAX_JUMP_GAP_TILES` = 4).
+    #
+    # Cukuru `ignore`'a atmak yerine **dolduruyoruz**: ignore edilseydi
+    # otesindeki iki oda da (Gecit, Cikis) dogrulama disinda kalirdi -
+    # yani bolumun yarisi. Doldurunca yalnizca senaryolu gecis
+    # varsayiliyor, geri kalan her sey gercekten sinaniyor.
+    from src.world.rooms import chapter07
+    spawn7 = chapter07.LEVEL.first("player")
+    rows7 = [list(row) for row in chapter07.LEVEL.terrain_rows]
+    for row_index in chapter07.DOOR_ROWS:
+        for column in chapter07.DOOR_TILES:
+            rows7[row_index][column] = "."
+    for row_index in chapter07.CHASM_ROWS:
+        for column in chapter07.CHASM_TILES:
+            rows7[row_index][column] = "#"
+    rooms.append(("bolum 7 - dar gecit", ["".join(r) for r in rows7],
+                  (spawn7.tile_x, spawn7.tile_y + 1), set()))
     return rooms
 
 

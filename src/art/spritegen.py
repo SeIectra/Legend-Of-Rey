@@ -367,13 +367,24 @@ def _draw_head(canvas: Canvas, cx: float, cy: float, spec: CharSpec) -> None:
             (cx + radius * 0.34, cy + radius * 1.12),
             (cx - radius * 0.34, cy + radius * 1.12),
         ], spec.skin, 2)
-        # Isik sol-ustten: sol alin acik, sag yanak ve cene alti koyu.
-        # Bu uc piksel yuze hacim veriyor - onsuz kafa duz bir leke.
+        # Isik sol-ustten: sol alin acik, sag yanak koyu.
+        #
+        # **Cene golgesi tasindi (30.08.2026).** Arda: *"Rey yaptigin
+        # golgelendirmeden dolayi sakalli gibi duruyor."* Hakliydi ve
+        # sebebi yerdeydi: en koyu ten adimindan bir piksel, cenenin tam
+        # ORTASINA, agzin altina konuyordu - bu olcekte bir sakal
+        # lekesinin durdugu tek yer orasi.
+        #
+        # Hacim yine gerekiyor, o yuzden golge silinmedi **tasindi**:
+        # artik cenenin karanlik YANINDA (isik sol-ustten geldigi icin
+        # sag alt) ve bir adim daha acik. Cene hatti okunuyor, sakal
+        # okunmuyor.
         canvas.px(int(cx - radius * 0.55), int(cy - radius * 0.45),
                   spec.skin, 3)
-        canvas.px(int(cx + radius * 0.50), int(cy + radius * 0.25),
+        canvas.px(int(cx + radius * 0.50), int(cy + radius * 0.15),
                   spec.skin, 1)
-        canvas.px(int(cx), int(cy + radius * 1.05), spec.skin, 1)
+        canvas.px(int(cx + radius * 0.34), int(cy + radius * 0.95),
+                  spec.skin, 2)
         if spec.hood:
             # Kukulete **sivri ve arkaya uzanan** bir sekil olmali. Daire
             # cizince siluet uzun sacli kafadan ayirt edilemiyordu - siluet

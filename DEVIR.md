@@ -7,7 +7,7 @@ Okuma sırası: **1) `CLAUDE.md`** (bağlayıcı kurallar — anayasa) → **2) 
 dosya** (nerede kaldık) → 3) gerekirse `docs/` altındaki ilgili tasarım
 belgesi.
 
-Son güncelleme: **29.08.2026** (Bölüm 4-6, Kalkanlı, silah seçimi, kontrol noktası, İz Sürme, portreler) · Ardeko Studios · Arda Güner
+Son güncelleme: **30.08.2026** (Bölüm 7 + sinematik sahneleme katmanı, oyun kolu ayarı, test paketi 97 sn) · Ardeko Studios · Arda Güner
 
 > `GOREVLER.md` **silindi** (23.08.2026, Arda'nın isteği: "bir devir.md
 > olsun diğerlerini sil kafa karıştırmasın"). İçindeki canlı bilgi bu
@@ -35,16 +35,35 @@ Tasarım paketi `docs/` altında ve **bağlayıcı**: `gdd.md` (ana belge),
 
 ## 2. NEREDE DURUYORUZ
 
-**~35.200 satır Python. 23 test paketi de yeşil.**
+**~37.000 satır Python. 26 test paketi de yeşil — ve artık 97 saniyede.**
 
 Oynanabilir akış:
 `intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)** →
 **Bölüm 2 (İlk İniş)** → **Bölüm 3 (Meşale Mahzeni)** → **Bölüm 4 (Kayıt
-Odası)** → **Bölüm 5 (Sular)** → **Bölüm 6 (ARDO)** → bölüm sonu ekranı
-→ ana menü` (her bölümün arasında bölüm sonu özet ekranı var)
+Odası)** → **Bölüm 5 (Sular)** → **Bölüm 6 (ARDO)** → **Bölüm 7 (Dar
+Geçit)** → bölüm sonu ekranı → ana menü`
 
-Bölüm 6'nın sonu ana menüye dönüyor çünkü **Bölüm 7 henüz yok** — bilinçli
-bir uç. **Katman 1 (Çürüyenler, B1–B6) böylece tamamlandı.**
+Bölüm 7'nin sonu ana menüye dönüyor çünkü **Bölüm 8 henüz yok** — bilinçli
+bir uç. **Katman 1 (Çürüyenler, B1–B6) tamamlandı; Katman 2 (Lanetli
+Muhafızlar, B7–B13) başladı.**
+
+### Açılış artık 0,4 saniye (30.08.2026)
+
+Arda oyunun geç açıldığını söyledi. Ölçüldü: `pygame.joystick.init()` bu
+makinede **40,30 saniye** sürüyor ve sıfır kol buluyor (NGENUITY/HyperX
+kaynaklı bir sürücü sorunu, kodla ilgisi yok). Yedi SDL ipucu denendi,
+etkisiz; ayrı iş parçacığına almak imkânsız (ölçüldü: ana iş parçacığı 40
+saniyede **tek döngü turu** attı, GIL bırakılmıyor).
+
+Çözüm tasarımsal ve Arda **B seçeneğini** seçti: kol desteği bir **ayar**,
+varsayılanı kapalı. `Game.__init__` artık `pygame.init()` çağırmıyor
+(`display.init()` + `font.init()`). Kolu olan oyuncu ayarı bir kez açıyor.
+`tests/test_settings.py` varsayılanın kapalı kalmasını koruyor.
+
+Aynı düzeltme test paketini de kurtardı: 21 paket `pygame.init()` çağırıp
+o 40 saniyeyi ayrı ayrı ödüyordu. **14+ dakika → 97 saniye.** Bu arada
+`test_combat` sessizce kırık çıktı (ortasında `pygame.quit()` vardı) —
+kırıklığı 14 dakikanın arkasında görünmüyordu.
 
 ### Görev listesi (eski `GOREVLER.md`'den)
 
@@ -70,6 +89,9 @@ bir uç. **Katman 1 (Çürüyenler, B1–B6) böylece tamamlandı.**
 | 17 | **İz Sürme** — Ardo'nun karşı mekaniği | ✅ (29.08.2026) |
 | 18 | **Portre sistemi + sprite oranları** | ✅ (29.08.2026) |
 | 19 | **Bölüm 6 — ARDO** (yoldaş, plakalar, BOSS 1) | ✅ (29.08.2026) |
+| 20 | **Oyun kolu ayarı** — açılış 40,7 sn → 0,4 sn | ✅ (30.08.2026) |
+| 21 | **Sinematik sahneleme katmanı** (`staging.py`) | ✅ (30.08.2026) |
+| 22 | **Bölüm 7 — Dar Geçit** (girth, çark, **el**) | ✅ (30.08.2026) |
 
 **Bölüm 4 "Kayıt Odası"** (`docs/yapi.md` B4): yetenek ağacı sistemi
 (`src/systems/skilltree.py` — 3 dal × 4 düğüm) + ağaç ekranı
@@ -500,6 +522,88 @@ maske IoU'su; ölçülen en dar çift **rey/ardo %25.3**.
 
 ---
 
+### Bölüm 7 "Dar Geçit" — Katman 2'nin ilk bölümü (30.08.2026)
+
+`docs/yapi.md` B7. Beş oda: Kapı Önü → Çarkhane → **El** → Geçit → Çıkış.
+
+**Kanon `girth`'e bağlı, oynanan karaktere değil.** Çatlaktan her zaman
+Rey geçiyor (girth 10 ≤ açıklık 12), Ardo hiçbir zaman (15 > 12). Bu iki
+farklı oynanış üretiyor ve ikincisi tematik olarak daha da doğru:
+
+* **Rey oynanırken** — sen geçiyorsun, çarkı sen çeviriyorsun.
+* **Ardo oynanırken** — sen geçemiyorsun. Yoldaşı (Rey) çatlağa
+  **gönderiyorsun** (`Companion.hold`, Bölüm 6'nın plaka emriyle aynı
+  tuş), çarkı o çeviriyor, kapıyı sana o açıyor. Bölüm 6'da kurtaran
+  taraftın; burada bekleyen taraf.
+
+Uçurum ne atlanarak ne tırmanarak geçiliyor — **sayılar hesaplandı, tahmin
+edilmedi**: karşı duvar 4 tile (`MAX_JUMP_HEIGHT_TILES` = 3), yatay
+açıklık 6 tile (`MAX_JUMP_GAP_TILES` = 4). Çukura düşmek kilitlemiyor:
+sol tarafta basamaklar var. `tests/test_chapter07.py` üçünü de ölçüyor.
+
+`tools/reachability.py`'ye eklendi. Kapı **açık**, çukur **dolu** hâlde
+doğrulanıyor (Bölüm 6'nın köşe duvarıyla aynı gerekçe). Çukuru `ignore`'a
+atmak yerine doldurmak bilinçli: ignore edilseydi ötesindeki iki oda da
+doğrulama dışında kalırdı.
+
+*Not:* kapı ilk sürümde tek sütun açılıyordu — duvar üç tile kalın olduğu
+için açılınca duvarın içinde bir çukur oluşuyordu ve kimse geçemiyordu.
+
+### Sinematik sahneleme katmanı (30.08.2026)
+
+Arda: *"Daha fazla sinematik ara sahne koyalım. Animasyonlu ve efektli
+sahneler."*
+
+Ortaya çıkan asıl eksik şuydu: **bugüne kadarki ara sahnelerde tek bir
+karakter çizilmemişti.** Bölüm 3'ün "Mor" sahnesi büyüyen bir daire,
+"İniş" küçülen bir daire. Oysa 20 karakterin 12 animasyon durumu zaten
+üretilmiş ve `Animator.render()` yön/flaş/deformasyon/siluet/tint/alfa'yı
+zaten destekliyor.
+
+`src/scenes/staging.py` o boşluğu dolduruyor. `StoryScene`'in `Panel`
+diline bir `Cue` katmanı ekliyor — kim, ne zaman, ne yapıyor:
+
+    Panel(90, "el", cues=(
+        Cue("above", state="idle", face=-1),
+        Cue("below", move_to=(222.0, GROUND_Y), move_frames=40, state="jump"),
+    ))
+
+Getirdikleri: gerçek sprite'lı aktörler, yumuşatılmış hareket, parçacık,
+eklemeli ışık, kenar ışığı (`rim_light`), vinyet, ekran flaşı, zemin
+gölgesi, **tam sayı sinematik büyütmesi** (yakın planda 2×; 32 piksellik
+figür 480×270'lik bir karede duygusal an için küçük kalıyordu).
+
+Bölüm 7 bunu dört sahnede kullanıyor: **Mühür** (bölüm açılışı, Katman
+2'nin ilk görüntüsü), **Sığmıyor** (yoldaş çatlağa giremiyor — tek kelime
+yok), **Yalnız** (vinyet kapanıyor), **El** ★.
+
+**"El" sahnesinde tek replik yok** — `docs/yapi.md`'nin açık talimatı
+(*"Balon yok — sadece bir saniye fazla tutulan el"*). Anlam sürede:
+eller birleştikten sonra sahne 60 kare daha bekliyor (`HOLD_TOO_LONG`).
+Test bu iki şartı da koruyor. Müzik `Raze` (Arda: *"çok nadir duygusal
+kısımlar için"*) — bütün oyunda bir kez çalan parça.
+
+*Üç kez düşülen tuzak, üçüncüsü burada:* vinyet önce `set_alpha()` ile
+yazıldı. `BLEND_RGB_SUB`/`ADD` **alfayı yok sayar** (`glow.py`'nin kendi
+başlığında yazıyor) — karartma her zaman tam güçteydi ve iki sahne
+simsiyah çıktı. Şiddet artık renk ölçekleyerek veriliyor.
+
+### Rey'in "sakalı" (30.08.2026)
+
+Arda: *"Rey yaptığın gölgelendirmeden dolayı sakallı gibi duruyor."*
+Haklıydı ve **iki ayrı yerde** aynı hata vardı:
+
+* `spritegen.py` — çene gölgesi çenenin tam **ortasına**, ağzın altına
+  konuyordu; bu ölçekte bir sakal lekesinin durduğu tek yer orası.
+  Gölge silinmedi, çenenin karanlık yanına taşındı ve bir adım açıldı.
+* `portrait.py` — çene altı ve sağ çene kaması `step=0` ile
+  boyanıyordu. `skin_tan`'ın 0. basamağı `earth_dark`, yani **saç rengi
+  ailesi**. Göz onu gölge diye değil sakal diye okuyor. En koyu basamak
+  bir piksellik kontura çekildi.
+
+Ardo'nun sert çenesi etkilenmedi: onunki `stubble=1` + `face_shadow=1`
+ile ayrıca çiziliyor.
+
 ### Kalkanlı — Katman 2'nin ilk AI'ı (29.08.2026)
 
 `src/entities/enemies/shieldbearer.py`. B5'te **tek örnekle** tanıtıldı
@@ -555,6 +659,16 @@ Sırası gelmediği için değil, **gözden kaçmasın** diye:
    eklenmedi; `CLAUDE.md` §3 sırası gelmemiş içeriği yasakladığı için
    eşitliğin yapısal olması şarttı.
 4. **Ardo'nun Bölüm 1'deki motivasyonu yazılmadı** (bkz. §3 madde 7).
+
+4b. **Tuş yeniden atama arayüzü yok.** `CLAUDE.md` §10 zorunlu tutuyor;
+   `settings.py` `bindings` değerini tutuyor ama onu değiştiren bir ekran
+   yok. Arda 30.08.2026'da kol ayarını seçerken *"Tuşları falan da
+   ayarlara getiririz"* dedi — sırası geldi.
+
+4c. **Bölüm 1-6'nın ara sahneleri hâlâ eski dilde.** `staging.py` artık
+   var ama yalnızca Bölüm 7 kullanıyor; Bölüm 2/3'ün sinematikleri hâlâ
+   renkli daireler. Geriye dönük çevirmek ucuz (`Panel` zaten ortak) ve
+   oyunun ilk yarısını belirgin biçimde iyileştirir.
 5. **Boss kapısı + anahtar (24.08.2026)** — `src/world/keydoor.py`.
    Bölüm 2 ve 3'ün arena çıkışı kilitli, boss ölünce anahtar düşüyor.
    Aynı yapı sonraki boss odalarında da kullanılmalı; Bölüm 2/3'e

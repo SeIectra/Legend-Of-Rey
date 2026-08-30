@@ -92,6 +92,15 @@ class Panel:
     # Prolog bir konusma, o yuzden `ReyPrologue.wait_for_input = True`.
     wait_for_input: bool | None = None
 
+    # Sahneleme talimatlari - kim ne yapiyor. `StagedScene` okuyor
+    # (`src/scenes/staging.py`); duz `StoryScene` gormezden geliyor.
+    #
+    # Tur ipucu bilerek gevsek: `Cue` staging.py'de tanimli ve staging.py
+    # buradan tureyen bir sinif iceriyor. Sikı tur ipucu dairesel import
+    # yaratirdi; `Panel` sahneleme bilmeden de calismali - Bolum 1-6'nin
+    # butun ara sahneleri cue'suz.
+    cues: tuple = ()
+
     @property
     def dialogue_lines(self) -> tuple[Line, ...]:
         if self.lines:
