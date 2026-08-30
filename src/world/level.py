@@ -43,6 +43,18 @@ MARKERS: dict[str, str] = {
     "N": "candle_keeper",     # Mum Bekcisi - yalniz Bolum 3
     "k": "shieldbearer",      # Kalkanli - Katman 2, B5'te tek ornekle taniticiyor
     "m": "spearman",          # Mizrakli - Katman 2, B10'da geliyor
+    # Katman 2'nin son ikisi. B13'te birlikte geliyorlar cunku ikisi de
+    # "once beni hallet" diye bagiran dusmanlar - ve B13'un zaman
+    # kapisi tam olarak durmanin cezali oldugu oda.
+    "a": "archer",            # Okcu
+    "c": "commander",         # Komutan
+    # --- Bolum 13: zaman kapilari (`src/systems/timegate.py`) -----------
+    "L": "lever",             # Kol - kapiyi acar
+    # Surgunun ASILI durdugu satir. Kapi buradan zemine kadar iniyor,
+    # yani harita tek karakterle bir sutunu tarif ediyor.
+    "T": "timegate",
+    "F": "brazier",           # Mangal - B13 arenasinin isik ekonomisi
+    "Z": "gaoler",            # Zindanci - BOSS 2
 }
 
 

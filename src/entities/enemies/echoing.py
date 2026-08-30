@@ -61,7 +61,12 @@ class Echoing(Shambler):
     recover_frames = ECHOING_RECOVER_FRAMES
     damage = ECHOING_DAMAGE
     body_colour = "echo_dark"
-    silhouette_scale = 1.0
+    # NOT: burada bir `silhouette_scale = 1.0` alani vardi ve
+    # `Enemy.silhouette_scale()` **metodunu** goelgeliyordu. Sonuc:
+    # `enemy_render` onu cagirinca `TypeError`, yani dusman ekrana
+    # girdigi an oyun cokuyordu - ve cokmeseydi bile tell sirasindaki
+    # siluet sismesi olurdu, ki o `CLAUDE.md` 10'un renk korlugu
+    # garantisi: *"tehlike asla sadece renkle anlatilmaz"*.
 
     def __init__(self, scene, x: float, y: float) -> None:
         super().__init__(scene, x, y)
@@ -121,7 +126,11 @@ class Echoing(Shambler):
             return
         ox, oy = offset
         x, y, life = self.false_hint
-        pulse = 0.45 + 0.55 * math.sin(self.frames * 0.09)
+        # **Taban genligi asmamali.** `0.45 + 0.55*sin` araligi
+        # -0.10..1.00 - yani nabzin dibinde carpan NEGATIF oluyor ve
+        # `surface.fill` "invalid color" diye patliyor. Parlaklik bir
+        # carpan oldugu icin taban >= genlik olmak zorunda.
+        pulse = 0.55 + 0.45 * math.sin(self.frames * 0.09)
         fade = min(1.0, life / 30.0)
         colour = tuple(int(c * pulse * fade)
                        for c in palette.color("echo_bright"))

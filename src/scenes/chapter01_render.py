@@ -43,7 +43,7 @@ def draw_sword(scene, surface: pygame.Surface, offset) -> None:
     # Kilic: dikey namlu + capraz balcak.
     surface.fill(palette.color("stone_light"), (x, y - 9, 1, 14))
     surface.fill(palette.color("bone"), (x, y - 9, 1, 3))
-    surface.fill(palette.color("brass" if False else "gold"),
+    surface.fill(palette.color("gold"),
                  (x - 3, y + 2, 7, 1))
     surface.fill(palette.color("earth_dark"), (x, y + 3, 1, 3))
 
@@ -78,7 +78,7 @@ def draw_necklace(scene, surface: pygame.Surface, offset) -> None:
     # Zincir: iki yana acilan kisa kollar. Donusu genislikle veriyoruz -
     # bu olcekte gercek rotasyon bulanik piksel demek.
     span = max(1, int(round(2 + abs(spin) * 2)))
-    surface.fill(palette.color("brass" if False else "gold"),
+    surface.fill(palette.color("gold"),
                  (x - span, y - 2, span * 2 + 1, 1))
     # Tas: tek piksel, paletin en parlak altini.
     surface.fill(palette.color("gold"), (x, y - 1, 1, 2))

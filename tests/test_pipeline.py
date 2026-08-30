@@ -10,6 +10,7 @@ Calistir:
 from __future__ import annotations
 
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -53,7 +54,42 @@ def make_test_image(path: Path) -> None:
     save(from_arrays(rgb, alpha), path)
 
 
+def test_color_names_are_colors() -> None:
+    """`palette.color()` bir RENK adiyla mi cagriliyor - yoksa ZINCIR mi?
+
+    Bu proje tarihindeki en tekrarli hata. Palet iki ayri isim uzayi
+    tutuyor:
+
+        COLORS        gercek renkler   "gold", "ember", "stone_dark"
+        SHADE_CHAINS  golge zincirleri "brass", "steel", "rot"
+
+    Zincir adlari sprite tanimlarinda gecerli (`armor="steel"`) ama
+    `palette.color()` onlari **tanimaz** - `PaletteError` firlatir. Ve
+    hata yalnizca o cizim yolu calisinca ortaya cikiyor, yani bir
+    odaya girene kadar gizli kaliyor.
+
+    Dorduncu tekrardan sonra elle dikkat etmenin yetmedigi kabul
+    edildi (30.08.2026, `brass` Bolum 13'un kolunda). Kaynak
+    taraniyor: ucuz, ve bir daha asla oynayarak kesfedilmiyor.
+    """
+    print("\n--- palette.color() adlari ---")
+    bad: list[str] = []
+    for path in (ROOT / "src").rglob("*.py"):
+        source = path.read_text(encoding="utf-8")
+        for match in re.finditer(r'palette\.color\(\s*"([a-z_]+)"', source):
+            name = match.group(1)
+            if name in palette.COLORS:
+                continue
+            kind = ("ZINCIR - sprite tanimlarinda gecerli, burada degil"
+                    if name in palette.SHADE_CHAINS else "BILINMEYEN")
+            line = source[:match.start()].count("\n") + 1
+            bad.append(f"{path.relative_to(ROOT)}:{line} {name!r} ({kind})")
+    check(not bad, "her palette.color() cagrisi gercek bir RENK",
+          "; ".join(bad) if bad else f"{len(palette.COLORS)} renk")
+
+
 def main() -> int:
+    test_color_names_are_colors()
     WORK.mkdir(parents=True, exist_ok=True)
     source = WORK / "test_sprite.png"
     make_test_image(source)

@@ -442,7 +442,7 @@ görülebilir); Katman 2 ve 3 **hiçbir bölüme yerleştirilmedi** —
 | Katman | Bölümler | Öğrettiği | Düşmanlar | Durum |
 |---|---|---|---|---|
 | **1 — Çürüyenler** | B1–B6 | combo **kurmayı** | Sürüklenen, Tırmanan, Şişmek | ✅ **tamamlandı** — B6 finali dahil |
-| **2 — Lanetli Muhafızlar** | B7–B13 | combo'yu **kırmayı** | Kalkanlı, Mızraklı, Okçu, Komutan | ✅ **dördü de tamam** (30.08.2026) |
+| **2 — Lanetli Muhafızlar** | B7–B13 | combo'yu **kırmayı** | Kalkanlı, Mızraklı, Okçu, Komutan | ✅ dördü de tamam, **dördü de yerleşti** (B13) |
 | **3 — Yankı'nın Çocukları** | B14–B18 | yardımcının ihaneti | Sessiz, Yankılayan, Bölünen | ✅ **üçü de tamam** (30.08.2026) |
 
 **On düşman AI'ının onu da yazıldı.** Katman 2'nin dördü aynı cümleyi
@@ -647,6 +647,95 @@ Yapılan mini-boss'lar: Şişmiş Olan (B2), Sönmüş Olan (B3).
 Kalan üçü (B13, B14, B18) sırası gelmedi.
 
 ---
+
+### Bölüm 13 "Cemo" — BOSS 2 ve zaman kapıları (30.08.2026)
+
+B12 atlandı, B13 önce yazıldı: yeni mekanik + BOSS 2 orada, B12 ise
+nefes bölümü (`docs/yapi.md`: *"sıfır dövüş kodu ister"*). Zincirleme
+B12 gelince kurulur — `main.py`'de not düşülü.
+
+**Zaman kapıları** (`src/systems/timegate.py`). On iki bölümdür doğru
+olan cümleyi bozuyor: *odayı temizle, sonra geç.* Kol çevriliyor, sürgü
+iniyor, yoldaki her düşman **zaman** demek. Odalara konan iki düşman
+bu yüzden Okçu ve Komutan — ikisi de "önce beni hallet" diye bağıran
+düşmanlar, ve ikisinin de doğru cevabı burada hayır.
+
+Sayaç **HUD'da değil, kapının kendisi**: sürgü indikçe boşluk azalıyor,
+oyuncunun boyundan kısalınca geçiş kapanıyor. Kapı açıkken bile
+görünüyor (tavan yuvasına çekilmiş halde) — ilk sürümde görünmüyordu
+ve oyuncu nereye koşacağını bilmiyordu; ekran görüntüsü gösterdi.
+
+**Süreler tahmin değil ölçüm.** Ölçüt: en yavaş karakterin (Ardo,
+1.8 px/kare) koldan kapıya düz koşu süresi, ve pencerenin ondan en az
+1.35 kat uzun olması. İlk yerleşimde Oda 6 **0.71x** çıktı — yani
+kusursuz oynayan biri bile geçemezdi. `tests/test_chapter13.py` her
+çalışmada yeniden ölçüyor. Zorluk sayacın küçüklüğünden değil
+**mesafeden** geliyor: tile başına düşen süre 21.8 → 18.7 → 14.0 →
+12.5.
+
+**BOSS 2 "Zindancı"** (`src/entities/bosses/gaoler.py`, 64×80 —
+oyunun en büyük sprite'ı). Çürümüş Olan Katman 1'in sınavıydı; bu
+Katman 2'nin, çünkü Katman 2 burada bitiyor:
+
+    Faz 0  GARDİYAN  Kalkanlı   YÖN      önden geçmez
+    Faz 1  ZİNCİR    Mızraklı   MESAFE   menzilinin dışından
+                     Okçu       ZAMAN    uçan anahtarlar
+    Faz 2  ZİNDAN    Komutan    SAYI     çağırıyor + fener kırılıyor
+
+**Feneri** tek imzası: arena karanlık, o taşıyor. Yani alışıldık boss
+ritmi tersine dönüyor — uzaklaşırsan görmüyorsun. Her fazda bir kademe
+soluyor, faz 2'de kırılıyor. Ardından mangallar (B3'ün ışık sistemi,
+`docs/bolum-03.md`: *"ışıkla arena kontrolü → B13"*) tek kaynak.
+
+Karanlık **tell'i gizlemiyor** (`CLAUDE.md` §7 bağlayıcı): gözleri bir
+ışık kaynağı ve tell'de büyüyor. Karanlık konumu gizler, niyeti değil.
+Oyuncunun kendi ışığı **kolye** — kendini ve kılıç menzilini görüyor,
+boss'u değil. İlk sürümde bu yoktu ve arena oynanamayacak kadar
+karanlıktı; yine ekran görüntüsü gösterdi.
+
+Rey'in Yankısı bu fazda doğal avantaj ama **kodda hiçbir istisna yok**:
+`echo_view.draw_reveal` zaten düşmanları çiziyor. Asimetri yazılmadı,
+var olan sistemlerden düştü.
+
+**Dört ara sahne** (`chapter13_cinematics.py`), kafes sahnesi
+`skippable=False` — B3'ün "Mor" sahnesinden sonra bunu yapan ikinci
+sahne. Gerekçe aynı: geçen şey bilgi değil **kayıp**.
+
+### Beş gizli hata — hepsi tek bir eksik test yüzünden (30.08.2026)
+
+Zindancı'nın feneri `self.frames` okuyordu ve `Enemy`de öyle bir alan
+yoktu. Onu kovalarken ortaya beş ayrı hata çıktı ve **beşi de canlı
+içerikte duruyordu**:
+
+1. **`Enemy.draw` yoktu.** Mızraklı/Okçu/Komutan doğrudan `Enemy`den
+   türüyor ve `Actor.draw` soyut. **Bölüm 11 gerçekten çöküyordu** —
+   salondaki Mızraklı kameraya girdiği an `NotImplementedError`.
+2. **`draw_extra`'yı hiçbir şey çağırmıyordu.** Komutan'ın sancağı,
+   Okçu'nun yay gerilimi, Sessiz'in gözleri, Yankılayan'ın sahte
+   işareti — hepsi ölü kod. Üçü tell'in kendisiydi, biri bir düşmanın
+   **bütün mekaniği**.
+3. **Altı düşman `silhouette_scale()` metodunu bir float ile
+   gölgeliyordu.** Yani tell'deki siluet şişmesi — `CLAUDE.md` §10'un
+   renk körlüğü garantisi — ölüydü, ve çizim `TypeError` veriyordu.
+4. **Yankılayan'ın nabzı negatife düşüyordu** (`0.45 + 0.55*sin`),
+   `surface.fill` "invalid color" atıyordu.
+5. **`palette.color("brass")`** — zincir/renk tuzağına dördüncü kez
+   düşüldü.
+
+Ortak sebep: **testler hiç çizim çağırmıyordu.** Davranış yeşildi,
+görüntü çökük. Üç kalıcı önlem yazıldı:
+
+  * `tests/test_enemies.py` her düşmanın `draw`/`draw_extra`sını
+    90 kare + tell boyunca çalıştırıyor, ve `silhouette_scale`ın
+    metod olduğunu **ve tell'de gerçekten şiştiğini** ölçüyor.
+  * `tests/test_pipeline.py` bütün `palette.color("...")` çağrılarını
+    tarıyor — zincir adı geçerse kırılıyor.
+  * `tests/test_audio.py`'nin deseni genişletildi: `tell_sound = "x"`
+    gibi boşluklu atamalar görünmüyordu, uydurma `shield_clang` tam
+    o delikten geçmişti.
+
+Ders şu: bir düşmanın sözleşmesi yalnızca ne yaptığı değil, **ekranda
+görünebildiği** de.
 
 ## 9. AÇIK KALANLAR
 

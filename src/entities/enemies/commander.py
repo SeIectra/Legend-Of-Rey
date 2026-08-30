@@ -68,7 +68,12 @@ class Commander(Enemy):
     # `palette.color()` onu tanimaz - projede bu tuzaga uc kez
     # dusuldu (`steel`, `brass`).
     body_colour = "ember"
-    silhouette_scale = 1.05
+    # NOT: burada bir `silhouette_scale = 1.0` alani vardi ve
+    # `Enemy.silhouette_scale()` **metodunu** goelgeliyordu. Sonuc:
+    # `enemy_render` onu cagirinca `TypeError`, yani dusman ekrana
+    # girdigi an oyun cokuyordu - ve cokmeseydi bile tell sirasindaki
+    # siluet sismesi olurdu, ki o `CLAUDE.md` 10'un renk korlugu
+    # garantisi: *"tehlike asla sadece renkle anlatilmaz"*.
 
     # Cagirdigi tip. Sinif adi degil **yol**: bolum kendi listesinden
     # baska bir tip verebilsin diye (`summon_path`).

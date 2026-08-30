@@ -52,6 +52,15 @@ SCENES = {
     "bolum10-ayrilik": ("src.scenes.chapter10_cinematics", "PartingCinematic"),
     "bolum10-yalan": ("src.scenes.chapter10_cinematics", "LieCinematic"),
     "bolum11": ("src.scenes.chapter11", "Chapter11Scene"),
+    # Bolum 12 ("Mektup", nefes bolumu) henuz yok - B13 once yazildi
+    # cunku yeni mekanik + BOSS 2 orada. Zincirleme B12 gelince kurulur.
+    "bolum13": ("src.scenes.chapter13", "Chapter13Scene"),
+    # B13'un dort ara sahnesi ayri ayri acilabilsin - sahneleme
+    # ayarlamak icin bolumu bastan oynamak gerekmesin.
+    "bolum13-kafes": ("src.scenes.chapter13_cinematics", "CageCinematic"),
+    "bolum13-isaret": ("src.scenes.chapter13_cinematics", "MarkCinematic"),
+    "bolum13-zindanci": ("src.scenes.chapter13_cinematics", "GaolerCinematic"),
+    "bolum13-kapi": ("src.scenes.chapter13_cinematics", "GateCinematic"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }

@@ -69,7 +69,12 @@ class Spearman(Enemy):
     recover_frames = SPEARMAN_RECOVER_FRAMES
     damage = SPEARMAN_DAMAGE
     body_colour = "stone"
-    silhouette_scale = 1.0
+    # NOT: burada bir `silhouette_scale = 1.0` alani vardi ve
+    # `Enemy.silhouette_scale()` **metodunu** goelgeliyordu. Sonuc:
+    # `enemy_render` onu cagirinca `TypeError`, yani dusman ekrana
+    # girdigi an oyun cokuyordu - ve cokmeseydi bile tell sirasindaki
+    # siluet sismesi olurdu, ki o `CLAUDE.md` 10'un renk korlugu
+    # garantisi: *"tehlike asla sadece renkle anlatilmaz"*.
 
     def __init__(self, scene, x: float, y: float) -> None:
         super().__init__(scene, x, y)

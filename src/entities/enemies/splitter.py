@@ -60,7 +60,12 @@ class Splitter(Shambler):
     recover_frames = SPLITTER_RECOVER_FRAMES
     damage = SPLITTER_DAMAGE
     body_colour = "bile"
-    silhouette_scale = 1.0
+    # NOT: burada bir `silhouette_scale = 1.0` alani vardi ve
+    # `Enemy.silhouette_scale()` **metodunu** goelgeliyordu. Sonuc:
+    # `enemy_render` onu cagirinca `TypeError`, yani dusman ekrana
+    # girdigi an oyun cokuyordu - ve cokmeseydi bile tell sirasindaki
+    # siluet sismesi olurdu, ki o `CLAUDE.md` 10'un renk korlugu
+    # garantisi: *"tehlike asla sadece renkle anlatilmaz"*.
 
     def __init__(self, scene, x: float, y: float,
                  generation: int = 0) -> None:
@@ -73,7 +78,12 @@ class Splitter(Shambler):
         self.max_health = max(6, int(SPLITTER_HEALTH * scale))
         self.health = self.max_health
         self.damage = max(3, int(SPLITTER_DAMAGE * scale))
-        self.silhouette_scale = max(0.55, 1.0 - generation * 0.2)
+        # Nesil kucultmesi ARTIK BURADA DEGIL: bu satir
+        # `Enemy.silhouette_scale()` metodunu bir float ile eziyordu
+        # ve parcalar ciziminde cokuyordu. Boyut zaten can/hasar
+        # olceginden okunuyor; siluet metodu tell'e ait ve oyle
+        # kalmali.
+        self.shrink = max(0.55, 1.0 - generation * 0.2)
 
     @property
     def can_split(self) -> bool:

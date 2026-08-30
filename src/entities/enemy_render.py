@@ -40,11 +40,13 @@ def draw_enemy(enemy, surface: pygame.Surface,
     if enemy.scene.game.box_mode:
         _draw_box(enemy, surface, rect)
         _draw_tell_marker(enemy, surface, rect)
+        enemy.draw_extra(surface, offset)
         return
 
     animator = getattr(enemy, "animator", None)
     if animator is None:
         _draw_box(enemy, surface, rect)
+        enemy.draw_extra(surface, offset)
         return
 
     squash = _combined_squash(enemy)
@@ -68,6 +70,19 @@ def draw_enemy(enemy, surface: pygame.Surface,
         int(enemy.body.bottom - foot) - oy))
 
     _draw_tell_marker(enemy, surface, rect)
+    # Dusmana ozel ekler - govdenin USTUNE.
+    #
+    # Bu cagri **yoktu** ve kimse fark etmemisti: Komutan'in sancagi,
+    # Okcu'nun yay gerilimi, Sessiz'in pusudaki gozleri, Yankilayan'in
+    # sahte isareti ve Zindanci'nin feneri - besi de yazilmis, besi de
+    # olu koddu. Uc tanesi yalnizca sus degildi, **tell'in kendisiydi**
+    # (`CLAUDE.md` 7: her saldiri 14 kare onceden okunabilir olmali),
+    # biri ise bir dusmanin butun mekanigi (sahte ipucu).
+    #
+    # Uc dalin ucunde de cagriliyor - kutu modu ve animatoru olmayan
+    # dusman dahil. Yalnizca "normal" dala koymak, hata ayiklama
+    # modunda tell'i gizlerdi.
+    enemy.draw_extra(surface, offset)
 
 
 def _combined_squash(enemy) -> tuple[float, float]:

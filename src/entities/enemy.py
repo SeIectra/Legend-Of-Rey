@@ -101,6 +101,16 @@ class Enemy(Actor):
         super().__init__(scene, x, y)
         self.state = EnemyState.IDLE
         self.state_frames = 0
+        # Dogumdan beri gecen kare - **durumdan bagimsiz**.
+        # `state_frames` her durum degisiminde sifirlaniyor, yani
+        # titresim/nabiz gibi SUREKLI gorseller icin kullanilamaz:
+        # dusman saldirmaya baslayinca fener birden ziplardi.
+        #
+        # Iki dosya bu sayacin varligini zaten varsayiyordu
+        # (`echoing.py` sahte isaret parildamasi, `gaoler.py` fener) ve
+        # ikisi de `draw_extra` cagrilir cagrilmaz cokuyordu. Testler
+        # cizimi hic cagirmadigi icin sessizce duruyordu.
+        self.frames = 0
         self.aware = False
         self.orbit_side = 1              # Oyuncunun hangi yaninda bekliyor
         self.orbit_slot = 0.0            # Yorunge icindeki yeri
@@ -162,11 +172,43 @@ class Enemy(Actor):
             on_died(self)
 
     # --- Dongu --------------------------------------------------------------
+    def draw(self, surface, offset) -> None:
+        """Her dusman cizilebilir - **varsayilan burada.**
+
+        `Actor.draw` soyut (`NotImplementedError`). Cizim uc yerde ayri
+        ayri yazilmisti: `Shambler`, `Boss` ve iki mini-boss. Dogrudan
+        `Enemy`den tureyen uc dusman - Mizrakli, Okcu, Komutan -
+        hicbirine girmiyordu ve **ekrana girdikleri an oyunu
+        cokutuyorlardi.**
+
+        Bolum 11 bunu canli tasiyordu: salonda bir Mizrakli var ve
+        kamera onu gordugu an `NotImplementedError`. Davranis testleri
+        yesildi cunku hicbiri cizim cagirmiyordu; 30.08.2026'da
+        `tests/test_enemies.py` her dusmanin cizimini calistirmaya
+        baslayinca ortaya cikti.
+
+        Alt siniflarda kalan ayni tanimlar zararsiz - ama artik
+        gerekli degil.
+        """
+        from src.entities.enemy_render import draw_enemy
+        draw_enemy(self, surface, offset)
+
+    def draw_extra(self, surface, offset) -> None:
+        """Govdenin ustune cizilen dusmana ozel ekler. Varsayilan: yok.
+
+        `enemy_render.draw_enemy` her dusmanda cagiriyor. Kanca burada
+        **acikca** tanimli, cunku alt siniflarin yarisinda vardi
+        yarisinda yoktu ve cagiran taraf `getattr` ile yoklamak
+        zorunda kalirdi - yazim hatasi olan bir `draw_extar` sessizce
+        hicbir sey yapardi.
+        """
+
     def update(self) -> None:
         if self.dead:
             self.remove = True
             return
 
+        self.frames += 1
         self.state_frames += 1
         self._update_awareness()
         self._update_reachability()

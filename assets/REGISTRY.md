@@ -29,14 +29,15 @@ Spec'ler: `src/art/animation.py :: CHARACTERS`
 | `shambler` | 40x36 | 31 | 50 | Katman 1 - Suruklenen |
 | `climber` | 44x34 | 28 | 50 | Katman 1 - Tirmanan |
 | `bloated` | 44x40 | 34 | 50 | Katman 1 - Sismek |
-| `rotted_one` | 64x56 | 48 | 50 | - |
+| `rotted_one` | 64x56 | 48 | 50 | **BOSS 1** - Curumus Olan (B6) |
+| `gaoler` | 64x80 | 64 | 50 | **BOSS 2** - Zindanci (B13). Oyunun en buyuk sprite'i |
 | `shieldbearer` | 44x40 | 34 | 50 | Katman 2 - Kalkanli (AI VAR, B5'te tanitiliyor) |
-| `spearman` | 56x40 | 34 | 50 | Katman 2 - Mizrakli (sanat var, AI yok) |
-| `archer` | 48x40 | 34 | 50 | Katman 2 - Okcu (sanat var, AI yok) |
-| `commander` | 52x48 | 41 | 50 | Katman 2 - Komutan (sanat var, AI yok) |
-| `silent` | 44x40 | 34 | 50 | Katman 3 - Sessiz (sanat var, AI yok) |
-| `echoing` | 48x42 | 36 | 50 | Katman 3 - Yankilayan (sanat var, AI yok) |
-| `splitter` | 48x42 | 36 | 50 | Katman 3 - Bolunen (sanat var, AI yok) |
+| `spearman` | 56x40 | 34 | 50 | Katman 2 - Mizrakli (AI VAR, B11+B13) |
+| `archer` | 48x40 | 34 | 50 | Katman 2 - Okcu (AI VAR, **B13'te yerlesti**) |
+| `commander` | 52x48 | 41 | 50 | Katman 2 - Komutan (AI VAR, **B13'te yerlesti**) |
+| `silent` | 44x40 | 34 | 50 | Katman 3 - Sessiz (AI VAR) |
+| `echoing` | 48x42 | 36 | 50 | Katman 3 - Yankilayan (AI VAR) |
+| `splitter` | 48x42 | 36 | 50 | Katman 3 - Bolunen (AI VAR) |
 
 **Animasyon durumlari (kare sayisi):** attack1 (5) · attack2 (5) · attack3 (5) · death (6) · dodge (2) · fall (4) · hurt (2) · idle (6) · jump (1) · land (3) · run (8) · turn (3)
 

@@ -661,6 +661,70 @@ VILLAGER_SPEC = CharSpec(
 )
 
 
+# --- BOSS 2: Zindanci (Bolum 13) --------------------------------------------
+# `docs/asset-listesi.md`: *"2 - Zindanci | B13 | 64x80"* - oyunun en
+# buyuk sprite'i. Curumus Olan 64x56'ydi; buyume kasitli, cunku ikisi
+# ayni odada olmasa bile ayni hafizada yarisiyor.
+#
+# ## Silueti Curumus Olan'in TAM ZITTI olmali
+#
+# BOSS 1 bir hayvan: cokuk (`hunch=2.2`), pencelı, kuyruklu, ortadan
+# genis. Zindanci bir **adam**: dimdik, zirhli, omuzdan genis, kukuletali.
+# Tek renge indirildiginde ilki "yerde surunen sey", ikincisi "ayakta
+# duran sey" okunuyor - iki boss'u karistirmanin yolu yok.
+#
+# Bu ayrim anlatiyi da tasiyor. Katman 1 curumeydi (hastalik, kaza).
+# Katman 2 **kasit**: bu zindani biri isletiyor, ve o biri Cemo'yu
+# kafeste tutuyor. Bir canavar degil bir gorevli.
+#
+# ## Feneri burada YOK
+#
+# Fener sprite'a girmedi, `Gaoler.draw_extra` ciziyor. Sebep: fener
+# dovus boyunca **degisiyor** (parlak -> catlak -> kirik) ve bir
+# sprite karesine cakilirsa faz gecisi gorunmez olurdu. Sprite govdeyi
+# anlatir, durumu degil.
+GAOLER_SPEC = CharSpec(
+    name="gaoler",
+    cell_width=64, cell_height=80, foot_y=64,
+    # Kafa kucuk, omuz cok genis: yetiskin oranin abartilmis hali.
+    # `head_radius*2 = 8.4`, boy ~46 -> oran 5.5, chibi'nin cok uzagi.
+    head_radius=4.2, torso_height=14.0, torso_width=12.0,
+    thigh=8.0, shin=8.0, upper_arm=8.0, fore_arm=7.5,
+    limb_width=4.4, shoulder_width=17.0, neck=1.0,
+    # Demir ve tas - Katman 2'nin askeri dili, Curuyenler'in
+    # pacavrasindan bir bakista ayrilir.
+    #
+    # Ilk deneme `cloth="leather"` + `cape=True` idi ve ekranda TURUNCU
+    # BIR PANO cikti: pelerin genis bir dikdortgen olarak cizilince
+    # siluet "kutu + iki bacak" oluyordu, yani `docs/asset-plani.md`
+    # 4'un siluet testinden kaliyordu. Pelerin kalkti, yerine uzun
+    # etek (`hem`) geldi - artik siluet dimdik bir SUTUN, ve Curumus
+    # Olan'in cokuk-genis govdesiyle karistirilmasi imkansiz.
+    skin="skin_tan", hair="shadow", cloth="rock",
+    cloth_dark="shadow", armor="steel", accent="brass",
+    hood=True,              # Yuzu gorunmuyor - gozler disinda
+    cape=False,
+    shoulder_pads=True,
+    shoulder_chain="steel",
+    # Uzun palto: bacaklari yutuyor. Bir gorevlinin uniformasi.
+    hem=13.0, hem_length=13.0,
+    # Balta SILUET ICIN secildi, hasar icin degil: saldiri pozunda
+    # sapiyla birlikte govdenin disina cikan tek parca o. Duz bir
+    # sutunun neye niyetlendigi ancak boyle okunuyor
+    # (`docs/asset-plani.md`: *"silahin siluetten disari tasmasi tam
+    # olarak bunun icin"*). Kilic ve mizrak da denendi; balta agirligi
+    # en iyi tasiyan oldu.
+    #
+    # Zincir, anahtar demeti ve FENER sprite'ta YOK - `draw_extra`
+    # ciziyor, cunku ucu de dovus boyunca degisiyor.
+    weapon="axe", weapon_chain="steel",
+    glow_eyes=210,          # Karanlikta once gozleri gorunur
+    brow_tilt=-2,
+    claws=0.0, spikes=0, tail=0.0, hunch=0.0,
+    crest=0.0,
+)
+
+
 CHARACTERS: dict[str, CharSpec] = {
     # Oynanabilirler
     "rey": REY_SPEC,
@@ -680,6 +744,8 @@ CHARACTERS: dict[str, CharSpec] = {
     # SANAT hazir; hicbir bolume YERLESTIRILMEDI (CLAUDE.md 3: ileri bolum
     # icerigi sirasi gelmeden yazilmaz). Dovus test odasindan gorulebilir.
     "rotted_one": ROTTED_ONE_SPEC,
+    # BOSS 2 - Bolum 13'un arenasinda, Katman 2'nin finali.
+    "gaoler": GAOLER_SPEC,
     "shieldbearer": SHIELDBEARER_SPEC,
     "spearman": SPEARMAN_SPEC,
     "archer": ARCHER_SPEC,

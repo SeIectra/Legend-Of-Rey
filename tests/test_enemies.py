@@ -312,6 +312,62 @@ def test_layer3_distinct() -> None:
           "bolunme yalnizca Bolunen'de")
 
 
+# --- 7. Cizim gercekten calisiyor mu -----------------------------------------
+def test_draw_extra_runs() -> None:
+    """Her dusmanin `draw_extra`si cagrilabiliyor mu.
+
+    Bu test bir hatadan dogdu. `Echoing.draw_extra` `self.frames`
+    okuyordu ama `Enemy`de oyle bir alan **yoktu** - yani sahte isaret
+    ekrana gelir gelmez oyun cokerdi. Butun davranis testleri yesildi
+    cunku hicbiri CIZIM cagirmiyordu.
+
+    Ders: bir dusmanin sozlesmesi yalnizca ne yaptigi degil, ekranda
+    gorunebildigi de. Ozel cizimi olan her dusman buraya girer.
+    """
+    print("\n--- cizim ---")
+    game = Game()
+    try:
+        scene = arena(game)
+        surface = pygame.Surface((480, 270))
+        specimens = (
+            ("Okcu", Archer), ("Komutan", Commander), ("Sessiz", Silent),
+            ("Yankilayan", Echoing), ("Bolunen", Splitter),
+        )
+        for name, cls in specimens:
+            enemy = cls(scene, 200.0, FEET_Y)
+            scene.enemies.append(enemy)
+            enemy.aware = True
+            # Ozel cizimlerin cogu bir durum bekliyor (sancak, sahte
+            # isaret, yay gerilimi) - once birkac kare yasat.
+            for _ in range(90):
+                enemy.update()
+                enemy.draw(surface, (0, 0))
+                enemy.draw_extra(surface, (0, 0))
+            check(True, f"{name}: 90 kare cizim cokmeden calisiyor")
+            # Tell sirasinda da: gorsellerin cogu tam orada devreye
+            # giriyor ve tam orada patlar.
+            enemy._set_state(EnemyState.TELL)
+            for _ in range(20):
+                enemy.update()
+                enemy.draw_extra(surface, (0, 0))
+            check(True, f"{name}: tell sirasinda cizim calisiyor")
+
+            # **Renk korlugu sozlesmesi** (`CLAUDE.md` 10): tehlike
+            # asla yalnizca renkle anlatilmaz - tell sirasinda siluet
+            # de degisir. Alti dusman bu metodu bir `float` alaniyla
+            # gölgelemişti, yani sekil kanali sessizce olmustu.
+            check(callable(type(enemy).silhouette_scale),
+                  f"{name}: silhouette_scale bir METOD (float degil)")
+            enemy._set_state(EnemyState.TELL)
+            enemy.state_frames = max(1, enemy.tell_frames - 2)
+            wide, tall = enemy.silhouette_scale()
+            check(tall > 1.0,
+                  f"{name}: tell'de siluet SISIYOR - sekil kanali canli",
+                  f"{wide:.2f}x{tall:.2f}")
+    finally:
+        game.quit()
+
+
 def main() -> int:
     print("=== KATMAN 2 ve 3 DUSMANLARI ===")
     test_archer()
@@ -320,6 +376,7 @@ def main() -> int:
     test_echoing()
     test_splitter()
     test_layer3_distinct()
+    test_draw_extra_runs()
 
     print("\n=== SONUC ===")
     if failures:

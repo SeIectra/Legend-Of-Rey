@@ -55,7 +55,12 @@ class Silent(Shambler):
     recover_frames = SILENT_RECOVER_FRAMES
     damage = SILENT_DAMAGE
     body_colour = "ink_soft"
-    silhouette_scale = 0.95
+    # NOT: burada bir `silhouette_scale = 1.0` alani vardi ve
+    # `Enemy.silhouette_scale()` **metodunu** goelgeliyordu. Sonuc:
+    # `enemy_render` onu cagirinca `TypeError`, yani dusman ekrana
+    # girdigi an oyun cokuyordu - ve cokmeseydi bile tell sirasindaki
+    # siluet sismesi olurdu, ki o `CLAUDE.md` 10'un renk korlugu
+    # garantisi: *"tehlike asla sadece renkle anlatilmaz"*.
 
     # **Katman 3'un ilk ihaneti.** Gerekce modul basliginda.
     echo_visible = False

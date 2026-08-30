@@ -60,9 +60,13 @@ PLANNED: frozenset[str] = frozenset({
     "amb_water", "bloated_idle", "climber_cling", "echo_loop",
     "echo_silent", "echo_sonar", "enemy_stagger",
     "intro_hum", "journey_cellar", "journey_night", "journey_wind",
-    "ledge_grab", "necklace_conflict", "necklace_warm", "shambler_attack",
+    "ledge_grab", "shambler_attack",
     "shambler_idle", "step_gravel", "step_water",
 })
+# `necklace_warm` ve `necklace_conflict` 30.08.2026'da listeden CIKTI:
+# Bolum 13'un ara sahneleri ikisini de caliyor (kafes goruldugunde
+# kolye isiniyor, bos kapida catisiyor). Aylardir bekleyen iki ses
+# nihayet ait olduklari ana kavustu.
 
 failures: list[str] = []
 
@@ -91,9 +95,14 @@ def called() -> dict[str, set[str]]:
     yakalamak istiyoruz.
     """
     found: dict[str, set[str]] = {}
+    # `\w*sound\s*=` bilerek genis: `sound="x"` (Cue alani),
+    # `tell_sound = "x"` ve `death_sound = "x"` (dusman sinif alanlari)
+    # hepsi ayni desene giriyor. Ilk surum yalnizca `sound="` ariyordu
+    # ve **esitligin etrafindaki bosluklar yuzunden** sinif alanlarini
+    # hic gormuyordu - Zindanci'nin uydurma `shield_clang`'i tam bu
+    # delikten gecti (30.08.2026).
     patterns = (re.compile(r'play_sound\(\s*"([a-z0-9_]+)"'),
-                re.compile(r'sound=\s*"([a-z0-9_]+)"'),
-                re.compile(r'footstep_sound\s*=\s*"([a-z0-9_]+)"'))
+                re.compile(r'\w*sound\s*=\s*"([a-z0-9_]+)"'))
     for path in (ROOT / "src").rglob("*.py"):
         if path.parent.name == "audio":
             continue            # tanimin kendisi, cagri degil

@@ -383,6 +383,29 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
         rows11[row_index][chapter11.HALL_DOOR_TILE] = "."
     rooms.append(("bolum 11 - ayna salonu", ["".join(r) for r in rows11],
                   (spawn11.tile_x, spawn11.tile_y + 1), set()))
+
+    # Bolum 13: zaman kapilari haritada ZATEN acik duruyor (`T` yalnizca
+    # surgunun asili satirini isaretliyor, zemin orada bos). Yani burada
+    # elle bir duzenleme gerekmiyor - Bolum 11'in aksine. Gerekce
+    # `src/world/rooms/chapter13.py` basliginda: dogrulama oda
+    # geometrisini olcmeli, bulmacanin o anki durumunu degil.
+    #
+    # Arena muhru de ayni: `chapter13.py` calisirken kapatiyor, harita
+    # acik tutuyor.
+    #
+    # **Cemo'nun ust ledge'i bilerek erisilemez.** Zemine 6 tile
+    # yukarida, ziplama zarfi 3 - bolumun tamami "ulasamiyorsun"
+    # uzerine kurulu (`docs/yapi.md` B13: *"ulasamadan tasinir"*).
+    # Erisilebilir olsaydi ara sahne yalan soylerdi.
+    from src.world.rooms import chapter13
+    spawn13 = chapter13.LEVEL.first("player")
+    cemo13 = chapter13.LEVEL.first("cemo")
+    # Nokta = **zemin tile'i**, isaretin durdugu satir degil (dogum da
+    # `tile_y + 1` veriliyor). Cemo `tile_y=6`'da duruyor, bastigi
+    # ledge 7'de.
+    ledge = {(x, cemo13.tile_y + 1) for x in range(13, 22)}
+    rooms.append(("bolum 13 - cemo", chapter13.LEVEL.terrain_rows,
+                  (spawn13.tile_x, spawn13.tile_y + 1), ledge))
     return rooms
 
 

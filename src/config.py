@@ -781,3 +781,138 @@ PLATE_STUN_FRAMES: Final[int] = 150
 # Olum vurusunun hitstop'u (12 kare), sarsintisi ve parcaciklari bitsin
 # diye bekliyor. Aninda acilirsa oyuncu neyle oldugunu goremiyor.
 DEATH_SCREEN_DELAY: Final[int] = 48
+
+
+# --- ZAMAN KAPILARI (Bolum 13) ------------------------------------------------
+# `docs/yapi.md` mekanik 8: *"Kolu cevir, X saniyede kos - **doversek
+# degil kacarak**."* Bu son cumle mekanigin tamami: on iki bolumdur
+# "once temizle, sonra gec" ogrenen oyuncuya, durmanin CEZALI oldugu
+# ilk oda.
+#
+# Sayac gorunur ama **HUD'da degil**: kapi bir surgu ve zaman gectikce
+# asagi iniyor. Yani kalan sure = kalan bosluk yuksekligi (CLAUDE.md 9,
+# "diegetik tercih et"). Bir cubuk cizmek hem daha kolay hem daha kotu
+# olurdu - oyuncunun gozu koridorda olmali, kosede degil.
+#
+# Surgu yukaridan indigi icin surenin son diliminde bosluk oyuncunun
+# boyundan (2 tile) kisa kaliyor ve gecis fiilen kapaniyor.
+# **Kullanilabilir sure nominalin %80'i** - 5 tile'lik surguda gecis
+# `progress < 0.80` iken mumkun. (Ilk yorumda %60 yaziyordu; olculunce
+# %80 cikti, `tests/test_chapter13.py` bunu her calisisinda dogruluyor.)
+#
+# Degerler TAHMIN DEGIL, olculdu. Olcut: en yavas karakterin (Ardo,
+# 1.8 px/kare) koldan kapiya duz kosu suresi, ve kullanilabilir
+# pencerenin ondan **en az 1.35 kat** uzun olmasi. Kalan pay
+# hizlanmaya (~8 kare), yoldaki dusmana ve kusursuz olmayan oynayisa.
+TIMEGATE_TEACH_FRAMES: Final[int] = 300   # ogretme - 11 tile, pay 2.45x
+TIMEGATE_FRAMES: Final[int] = 210         # standart - 9/12 tile, 2.10/1.58x
+# Zincir odasi. Sayi en BUYUK ama pencere en DAR - cunku tek sayac iki
+# kapiyi birden tasiyor (16 tile). Tile basina dusen sure bolumun en
+# azi: 12.5 kare/tile (kol 21.8, okcu 18.7, komutan 14.0). Zorluk
+# sayacin kucuklugunden degil **mesafeden** geliyor.
+TIMEGATE_CHAIN_FRAMES: Final[int] = 250   # cifte kapi - 16 tile, pay 1.41x
+# Son bu kadar karede surgu kirmizi yanip soneriyor. Ses de burada
+# degisiyor: iki kanal, cunku renk tek basina yeterli degil
+# (CLAUDE.md 10).
+TIMEGATE_WARN_FRAMES: Final[int] = 60
+# Kolu cevirmek icin bu kadar yakin olmak gerek (piksel). Ayna
+# menzili (26) ile ayni: ayni jest, ayni his.
+LEVER_REACH: Final[float] = 26.0
+# Kol cevrildikten sonra bu kadar kare yeniden cevrilemez. Amac
+# yanlislikla iki kez basmayi engellemek - **kilitlemek degil**:
+# oyuncu her zaman geri donup yeniden cevirebilmeli (yumusak kilit
+# yasak, bkz. DEVIR.md).
+LEVER_COOLDOWN: Final[int] = 24
+# Surgu kapanirken altinda kalan oyuncu **ezilmiyor**. Ceza olum
+# degil kaybedilen zaman: en yakin bosluga itiliyor. Bir zaman
+# bulmacasinin cezasi zaman olmali.
+TIMEGATE_EJECT_PUSH: Final[float] = 2.2
+
+
+# --- BOSS 2: Zindanci (Bolum 13) ---------------------------------------------
+# `docs/gdd.md` 8 tablosu: *"2 | B13 | Cemo kovalamacasi"*.
+# `docs/asset-listesi.md`: *"2 - Zindanci | B13 | 64x80"*.
+#
+# Curumus Olan (BOSS 1) uc fazinda Katman 1'in uc dusmanini geri
+# getiriyordu. Zindanci ayni sinavi Katman 2 icin yapiyor - cunku
+# Katman 2 burada BITIYOR:
+#
+#     Faz 0  GARDIYAN  Kalkanli'nin izi  -> YON     (onden gecilmez)
+#     Faz 1  ZINCIR    Mizrakli + Okcu   -> MESAFE + ZAMAN
+#     Faz 2  ZINDAN    Komutan'in izi    -> SAYI    (+ karanlik)
+GAOLER_HEALTH: Final[int] = 260
+GAOLER_POISE: Final[int] = 7             # Katman 2'nin en dayaniklisi
+GAOLER_SPEED: Final[float] = 0.34
+GAOLER_CONTACT_RANGE: Final[float] = 56.0
+
+# Fenerin isik yaricapi. Arena karanlik; **fener tek guvenilir isik**,
+# yani "uzak dur ve tell'i oku" alisildik boss ritmi burada tersine
+# doniyor: uzaklik = korluk. Her fazda bir kademe soluyor.
+GAOLER_LANTERN_RADIUS: Final[float] = 84.0
+GAOLER_LANTERN_DIM: Final[float] = 52.0   # faz 1 - fener catliyor
+# Faz 2'de fener kiriliyor: 0. Arena mangallarla aydinlatiliyor.
+GAOLER_BRAZIER_COUNT: Final[int] = 3
+
+# Karanlikta bile tell OKUNUR olmali (CLAUDE.md 7: en az 14 kare).
+# Cozum gozler: fener sonse de gozleri yaniyor, ve tell sirasinda
+# tehlike rengine donuyor. Yani karanlik konumu gizliyor, **niyeti
+# degil** - bir boss'un adil olmasi bu ayrimla saglaniyor.
+GAOLER_EYE_GLOW: Final[int] = 210
+
+# Hamleler. Her fazin biri ONCEKI bir Katman 2 dusmanini animsatiyor.
+GAOLER_SWING_DAMAGE: Final[int] = 14
+GAOLER_SWING_REACH: Final[int] = 30
+GAOLER_SLAM_DAMAGE: Final[int] = 20
+GAOLER_SLAM_REACH: Final[int] = 40
+# Zincir: Mizrakli'nin dersi boss olcusunde - senin menzilinin cok
+# disindan geliyor (oyuncu kilici ~16).
+GAOLER_CHAIN_DAMAGE: Final[int] = 16
+GAOLER_CHAIN_REACH: Final[int] = 62
+# Anahtar demeti: Okcu'nun dersi. Mermi altyapisi Okcu icin
+# yazilmisti (`Hitbox.velocity`) - burada ikinci kez kullaniliyor,
+# yani sinir dogru yerdeymis.
+GAOLER_KEYS_DAMAGE: Final[int] = 11
+GAOLER_KEYS_SPEED: Final[float] = 2.6
+GAOLER_KEYS_LIFE: Final[int] = 100
+# Cagirma: Komutan'in dersi. Cagirdigi sey **Katman 1** - bu
+# zindanda cürüyüp kalmis mahkumlar. Katman 2 muhafiz cagirmak
+# daha "askeri" olurdu ama daha az anlamli.
+GAOLER_CALL_COUNT: Final[int] = 2
+GAOLER_CALL_LIMIT: Final[int] = 6
+# Mangali sondurme - faz 2'nin isik ekonomisi. Oyuncu yakiyor, o
+# sonduruyor.
+#
+# **Zincir menzili kadar** (62): sondurme gorunur bir hareket olmali,
+# yani boss mangala uzanmali. 40 denendi ve arenada hicbir mangal o
+# kadar yakin degildi - hamle her seferinde bosa gidiyordu, yani
+# oyuncu bir tell goruyor ve hicbir sey olmuyordu. Bos bir tell,
+# olmayan bir tell'den kotudur: oyuncuya sistemi yanlis ogretir.
+GAOLER_SNUFF_RANGE: Final[float] = 64.0
+
+# Onden gelen vurus faz 0'da GECMIYOR (Kalkanli'nin dersi). Kalkanli
+# gibi "yon" cozumu: arkasina gec. Toparlanma sirasinda gardi dusuyor
+# - yani onden de vurulabildigi bir pencere var.
+GAOLER_GUARD_PUSHBACK: Final[float] = 2.4
+
+
+# --- Bolum 13 arenasinin isik ekonomisi --------------------------------------
+# Ilk denemede arena OYNANAMAYACAK kadar karanlikti: oyuncunun kendi
+# isigi yoktu, yani Zindanci'nin fenerinden uzaktayken kendini bile
+# goremiyordu. Ekran goruntusu bunu tek bakista gosterdi.
+#
+# Cozum bir "parlaklik ayari" degil - iki ISIK KAYNAGI, ikisi de
+# diegetik ve ikisi de oyunun var olan dilinden:
+#
+#   * Kolye. `CLAUDE.md` 9 zaten *"kolye pusulasi boyundaki sprite
+#     parildamasiyla anlatilir"* diyor. Burada o parilti bir isik
+#     oluyor: kendini ve kilic menzilini goruyorsun, **boss'u degil**.
+#     Yani karanlik hala bir soru; yalnizca haksiz degil.
+#   * Zindanci'nin gozleri. Fener kirildiktan sonra govdesi kayboluyor
+#     ama gozleri karanligi deliyor - ve tell sirasinda buyuyor.
+#     `CLAUDE.md` 7 baglayici: her saldiri 14 kare onceden okunabilir.
+#     Karanlik konumu gizler, NIYETI degil.
+NECKLACE_LIGHT_RADIUS: Final[float] = 34.0
+# Gozler bostayken kucuk bir leke, tell'de iki kati - buyume "geliyor"
+# demenin isik tarafindaki karsiligi.
+GAOLER_EYE_LIGHT_RADIUS: Final[float] = 20.0
+GAOLER_EYE_TELL_RADIUS: Final[float] = 44.0
