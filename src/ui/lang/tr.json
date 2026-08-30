@@ -237,7 +237,13 @@
         "ch07_rey_alone": "Öbür taraftayım. Sesler hâlâ benimle... ama o değil.",
         "ch07_ardo_alone": "Geçti. Bu sefer bekleyen benim.",
         "ch07_rey_together": "Yine yanımda.",
-        "ch07_ardo_together": "Beraber daha hızlı gideriz."
+        "ch07_ardo_together": "Beraber daha hızlı gideriz.",
+        "ch06_meet_ardo_first": "Üçü de arkandaydı. Arkanı hiç kollamıyorsun.",
+        "ch06_meet_rey_who": "Sen kimsin?",
+        "ch06_meet_ardo_name": "Ardo. Ve buraya kadar inen tek şey ben değilim.",
+        "ch06_meet_rey_first": "Üçü de arkandaydı. Bir tanesini duymadın bile.",
+        "ch06_meet_ardo_who": "Sen kimsin?",
+        "ch06_meet_rey_name": "Rey. Kardeşimi arıyorum — ve kafamdaki sesler senin burada olduğunu biliyordu."
     },
     "combat": {
         "counter": "KARŞI VURUŞ",
@@ -395,7 +401,6 @@
         "chosen": "{name} kuşanıldı"
     },
     "chapter06": {
-        "rescued": "Biri yukarıdan indi",
         "plate_hint": "Plaka basılı kaldı — ikisi birden gerek",
         "gate_open": "Kapı açıldı",
         "seal_hint": "Vuruşlar işlemiyor. Plakalar…",

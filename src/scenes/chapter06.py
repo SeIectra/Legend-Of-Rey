@@ -72,10 +72,6 @@ RESCUE_MUSIC_FRAMES = 600
 # ~1.3 saniye: kosarak yetismesine yeter, oyuncuyu bekletmez.
 SEAL_GRACE_FRAMES = 80
 
-# Soru isareti balonunun sureleri (kare).
-QUESTION_RISE = 20
-QUESTION_HOLD = 100
-
 # Yoldasa "su plakaya bas" emri bu tusla veriliyor. Etkilesim tusu -
 # oyuncu zaten vana/sandik icin onu kullaniyor, yeni bir tus ogrenmiyor.
 ORDER_KEY = Action.INTERACT
@@ -107,7 +103,6 @@ class Chapter06Scene(PlayScene):
         self.companion: Companion | None = None
         self.rescued = False
         self.corner_frames = 0
-        self.question_frames = 0
 
         # Kose duvari - sinematik bitince aciliyor.
         for row in CORNER_WALL_ROWS:
@@ -212,8 +207,6 @@ class Chapter06Scene(PlayScene):
         self._update_chests()
         self._check_exit()
 
-        if self.question_frames > 0:
-            self.question_frames -= 1
 
     # --- Kurtarma ani -------------------------------------------------------
     def _update_rescue(self) -> None:
@@ -256,14 +249,24 @@ class Chapter06Scene(PlayScene):
                              speed=(1.2, 3.4))
         self.game.play_sound("hit_kill")
 
-        # Bakisma + soru isareti. Kelime YOK.
-        self.question_frames = QUESTION_RISE + QUESTION_HOLD
         self.player.facing = 1
         self.companion.facing = -1
 
         # Kose duvari aciliyor - kurtarilmanin somut karsiligi.
         self._open_corner()
-        self.show_toast(t("chapter06.rescued"), frames=180)
+
+        # **Havali giris sahnesi.** `docs/gdd.md` 10 bunu bastan
+        # istiyordu ama kodda yoktu: kurtaris tek karede oluyor, oyuncu
+        # hicbir seyi goremiyordu. Sahne `push` ile aciliyor, yani bu
+        # sahne altta dondurulmus halde bekliyor ve kapaninca oyun
+        # kaldigi yerden suruyor.
+        #
+        # Soru isareti balonu artik SAHNENIN icinde ciziliyor
+        # (`chapter06_cinematics.draw_stage_foreground`); buradaki
+        # `question_frames` yolu kaldirildi - ayni seyi iki yerde
+        # cizmek ikisinin ayrisması demekti.
+        from src.scenes.chapter06_cinematics import ArdoEntranceCinematic
+        self.scenes.push(ArdoEntranceCinematic, character=self.character)
 
     def _open_corner(self) -> None:
         for row in CORNER_WALL_ROWS:
@@ -515,7 +518,6 @@ class Chapter06Scene(PlayScene):
         if self.companion is not None:
             self.companion.draw(surface, offset)
         self._draw_seal(surface, offset)
-        self._draw_question(surface, offset)
 
     def _draw_seal(self, surface: pygame.Surface, offset) -> None:
         """Muhur halkasi - "simdi vurulmaz" bilgisinin SEKIL kanali.
@@ -538,24 +540,3 @@ class Chapter06Scene(PlayScene):
             y = cy + int(round(math.sin(angle) * radius * 0.7))
             surface.fill(palette.color("bone"), (x, y, 2, 2))
 
-    def _draw_question(self, surface: pygame.Surface, offset) -> None:
-        """Soru isareti balonu - `docs/gdd.md` 11'in B6 satiri.
-
-        Kelime yok. Iki yabanci karsilasiyor ve tek "diyalog" bu.
-        """
-        if self.question_frames <= 0 or self.companion is None:
-            return
-        ox, oy = offset
-        # **Iki karakterin ARASINDA**, birinin uzerinde degil. Soru
-        # isareti kimin sorusu degil, aralarindaki sey - ilk surumde
-        # oyuncunun tepesinde duruyordu ve "oyuncu sasirdi" gibi
-        # okunuyordu, oysa `docs/gdd.md` 11'in tarif ettigi sey bir
-        # **bakisma**.
-        total = QUESTION_RISE + QUESTION_HOLD
-        elapsed = total - self.question_frames
-        lift = 12 + int(min(QUESTION_RISE, elapsed) * 0.5)
-        mid_x = (self.player.body.center_x + self.companion.body.center_x) * 0.5
-        top_y = min(self.player.body.y, self.companion.body.y)
-        from src.ui import text as uitext
-        uitext.draw(surface, "?", int(mid_x) - ox, int(top_y) - oy - lift,
-                    palette.color("bone"), align="center", outline=True)

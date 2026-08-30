@@ -237,7 +237,13 @@
         "ch07_rey_alone": "I'm on the other side. The voices are still with me... but he isn't.",
         "ch07_ardo_alone": "She's through. This time I'm the one waiting.",
         "ch07_rey_together": "Beside me again.",
-        "ch07_ardo_together": "We move faster together."
+        "ch07_ardo_together": "We move faster together.",
+        "ch06_meet_ardo_first": "All three were behind you. You never watch your back.",
+        "ch06_meet_rey_who": "Who are you?",
+        "ch06_meet_ardo_name": "Ardo. And I'm not the only thing that came down this far.",
+        "ch06_meet_rey_first": "All three were behind you. You didn't even hear one of them.",
+        "ch06_meet_ardo_who": "Who are you?",
+        "ch06_meet_rey_name": "Rey. I'm looking for my brother — and the voices knew you'd be here."
     },
     "combat": {
         "counter": "COUNTER",
@@ -395,7 +401,6 @@
         "chosen": "{name} equipped"
     },
     "chapter06": {
-        "rescued": "Someone dropped from above",
         "plate_hint": "The plate stayed down — both are needed",
         "gate_open": "The gate opened",
         "seal_hint": "The blows do nothing. The plates…",

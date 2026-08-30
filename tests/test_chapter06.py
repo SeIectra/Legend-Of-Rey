@@ -125,8 +125,16 @@ def main() -> int:
     check(all(not scene.tilemap.is_solid(CORNER_WALL_TILE, row)
               for row in CORNER_WALL_ROWS),
           "duvar acildi - kurtarilmanin somut karsiligi var")
-    check(scene.question_frames > 0,
-          "soru isareti balonu - `docs/gdd.md` 11'in B6 satiri")
+    # Soru isareti artik SAHNENIN icinde ciziliyor (30.08.2026): giris
+    # bir sinematik oldu ve balonu iki yerde cizmek ikisinin ayrismasi
+    # demekti. Burada sahnenin acildigi dogrulaniyor; balonun kendisi
+    # `test_entrance()`'ta.
+    game.scenes._flush()
+    from src.scenes.chapter06_cinematics import ArdoEntranceCinematic
+    check(isinstance(game.scenes.current, ArdoEntranceCinematic),
+          "giris sinematigi aciliyor - `docs/gdd.md` 10 'havali giris'")
+    game.scenes.pop()
+    game.scenes._flush()
 
     companion = scene.companion
 
@@ -241,15 +249,86 @@ def main() -> int:
 
     game.shutdown()
 
+    test_entrance()
+
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")
         for item in failures:
             print(f"  - {item}")
         return 1
-    print("Bolum 6: yoldas kanona uygun, plakalar beraberlik istiyor, "
-          "boss atlanamiyor.")
+    print("Bolum 6: havali giris konusuyor, yoldas kanona uygun, "
+          "plakalar beraberlik istiyor, boss atlanamiyor.")
     return 0
+
+
+def test_entrance() -> None:
+    """"Havali giris" - `docs/gdd.md` 10'un bastan istedigi sahne.
+
+    Belgede vardi, kodda yoktu: kurtaris tek karede oluyordu ve oyuncu
+    hicbir seyi goremiyordu (Arda, 30.08.2026: *"bahsettigim havali
+    giris hic olmadi ve karakter tanitilmadi"*).
+
+    Korunan kurallar:
+      * Kurtaris **sahne aciyor** - artik tek kare degil
+      * Roller kanondan: girisi SECMEDIGIN karakter yapiyor
+      * Sahnede **replik var** - Arda'nin acik istegi, ve bir soru
+        isareti kimin geldigini soylemiyor
+      * Carpma karesinde hitstop var (`CLAUDE.md` 7'nin dili)
+    """
+    print("\n--- havali giris ---")
+    from src.scenes.chapter06_cinematics import (
+        ArdoEntranceCinematic, LANDING_FREEZE,
+    )
+    for played, saviour in (("rey", "ardo"), ("ardo", "rey")):
+        game = Game()
+        try:
+            game.scenes.set_root(Chapter06Scene, transition=False,
+                                 character=played)
+            game.scenes._flush()
+            scene = game.scenes.current
+            scene._rescue()
+            game.scenes._flush()
+            top = game.scenes.current
+            check(isinstance(top, ArdoEntranceCinematic),
+                  f"{played}: kurtaris sinematik aciyor",
+                  type(top).__name__)
+            if not isinstance(top, ArdoEntranceCinematic):
+                continue
+
+            actor = top.actor("saviour")
+            check(actor is not None and actor.animator.character == saviour,
+                  f"{played} oynanirken girisi {saviour} yapiyor")
+            check(top.actor("cornered").animator.character == played,
+                  f"{played}: kosede oyuncu var")
+            check(sum(1 for n in top.actor_order if n.startswith("creature"))
+                  == 3, "uc yaratik sahnede")
+
+            spoken = [p for p in top.panels if p.dialogue_lines]
+            check(len(spoken) == 3, "uc replikli tanisma",
+                  f"{len(spoken)} panel")
+            speakers = {line.speaker for p in spoken
+                        for line in p.dialogue_lines}
+            check(speakers == {"rey", "ardo"},
+                  "iki karakter de konusuyor", str(sorted(speakers)))
+
+            landing = next(p for p in top.panels if p.name == "carpma")
+            freeze = max(c.freeze for c in landing.cues)
+            check(freeze == LANDING_FREEZE, "carpmada hitstop var",
+                  f"{freeze} kare")
+
+            # Sahne gercekten oynuyor ve ciziyor mu?
+            for _ in range(140):
+                game.input.begin_frame()
+                game.input.end_frame()
+                game.scenes.update()
+                game.frame += 1
+            game.canvas.fill((0, 0, 0))
+            top.draw(game.canvas)
+            painted = pygame.transform.average_color(game.canvas)[:3] != (0, 0, 0)
+            check(painted, f"{played}: sahne ekrana ciziliyor")
+        finally:
+            game.shutdown()
 
 
 raise SystemExit(main())

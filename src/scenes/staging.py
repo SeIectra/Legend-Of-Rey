@@ -64,6 +64,34 @@ from src.config import INTERNAL_HEIGHT, INTERNAL_WIDTH
 from src.scenes.cinematic import smoothstep
 from src.scenes.story import Panel, StoryScene
 
+def ease_in(t_value: float) -> float:
+    """Hizlanan hareket. **Dusus icin.**
+
+    `smoothstep` hem hizlanip hem yavasliyor; bir dusus icin yanlis -
+    karakter yere yaklasirken yavasliyor ve carpma gucunu kaybediyor.
+    Yer cekimi yavaslamaz.
+    """
+    t_value = max(0.0, min(1.0, t_value))
+    return t_value * t_value
+
+
+def ease_out(t_value: float) -> float:
+    """Yavaslayan hareket - bir yere varmak, durmak."""
+    t_value = max(0.0, min(1.0, t_value))
+    return 1.0 - (1.0 - t_value) ** 2
+
+
+def ease_linear(t_value: float) -> float:
+    return max(0.0, min(1.0, t_value))
+
+
+EASINGS = {
+    "in": ease_in,
+    "out": ease_out,
+    "inout": smoothstep,
+    "linear": ease_linear,
+}
+
 # Zemin golgesi (CLAUDE.md 6: "karakterin altinda 1 elips").
 SHADOW_WIDTH = 18
 SHADOW_HEIGHT = 5
@@ -115,6 +143,9 @@ class Cue:
     face: int | None = None
     move_to: tuple[float, float] | None = None
     move_frames: int = 0            # 0 = isinla
+    # Hareketin egrisi: "in" hizlanan (dusus), "out" yavaslayan (varis),
+    # "inout" ikisi de (varsayilan), "linear" duz.
+    move_ease: str = "inout"
     delay: int = 0
     alpha: int | None = None
     silhouette: bool | None = None
@@ -124,6 +155,11 @@ class Cue:
     burst_count: int = 12
     flash: float = 0.0              # 0..1 ekran flasi
     shake: float = 0.0              # ek sarsinti
+    # **Hitstop.** Sahne bu kadar kare tamamen donuyor: aktorler,
+    # parcaciklar, panel sayaci - hepsi. `CLAUDE.md` 7 dovuste zaten
+    # bunu zorunlu tutuyor (normal 3, bitirici 7, olduruccu 12 kare);
+    # sinematikte de ayni is: bir carpmanin AGIRLIGI durustan okunuyor.
+    freeze: int = 0
     sound: str = ""
 
 
@@ -146,9 +182,11 @@ class StageActor:
         self._to: tuple[float, float] = (self.x, self.y)
         self._move_frames = 0
         self._moved = 0
+        self._ease = smoothstep
 
     # --- Talimatlar ---------------------------------------------------------
-    def move_to(self, x: float, y: float, frames: int) -> None:
+    def move_to(self, x: float, y: float, frames: int,
+                ease: str = "inout") -> None:
         if frames <= 0:
             self.x, self.y = float(x), float(y)
             self._move_frames = 0
@@ -157,6 +195,7 @@ class StageActor:
         self._to = (float(x), float(y))
         self._move_frames = frames
         self._moved = 0
+        self._ease = EASINGS.get(ease, smoothstep)
 
     @property
     def moving(self) -> bool:
@@ -167,7 +206,7 @@ class StageActor:
         if not self.moving:
             return
         self._moved += 1
-        ratio = smoothstep(self._moved / max(1, self._move_frames))
+        ratio = self._ease(self._moved / max(1, self._move_frames))
         self.x = self._from[0] + (self._to[0] - self._from[0]) * ratio
         self.y = self._from[1] + (self._to[1] - self._from[1]) * ratio
 
@@ -254,6 +293,7 @@ class StagedScene(StoryScene):
         self.lights: list[tuple[int, int, int, palette.RGB, float]] = []
         self.flash_strength = 0.0
         self.extra_shake = 0.0
+        self.freeze_frames = 0
         self._pending: list[tuple[int, Cue]] = []
         super().on_enter(**kwargs)
 
@@ -299,6 +339,8 @@ class StagedScene(StoryScene):
             self.flash(cue.flash)
         if cue.shake > 0.0:
             self.extra_shake = max(self.extra_shake, cue.shake)
+        if cue.freeze > 0:
+            self.freeze_frames = max(self.freeze_frames, cue.freeze)
         if cue.sound:
             self.game.play_sound(cue.sound)
 
@@ -314,12 +356,22 @@ class StagedScene(StoryScene):
         if cue.visible is not None:
             actor.visible = cue.visible
         if cue.move_to is not None:
-            actor.move_to(cue.move_to[0], cue.move_to[1], cue.move_frames)
+            actor.move_to(cue.move_to[0], cue.move_to[1], cue.move_frames,
+                          cue.move_ease)
         if cue.burst:
             self.burst(actor.x, actor.y - 8, cue.burst, cue.burst_count)
 
     # --- Dongu --------------------------------------------------------------
     def update_cinematic(self) -> None:
+        # **Hitstop: her sey durur.** Aktor, parcacik, panel sayaci.
+        # Yalnizca sarsinti ve flas sonmeye devam ediyor - donmus bir
+        # karede titreyen ekran, carpmanin gucunu tasiyan sey.
+        if self.freeze_frames > 0:
+            self.freeze_frames -= 1
+            self.flash_strength = max(0.0, self.flash_strength
+                                      - 1.0 / FLASH_DECAY_FRAMES)
+            self.shake_seed += 1.0
+            return
         super().update_cinematic()
         self._run_due()
         for actor in self.actors.values():
