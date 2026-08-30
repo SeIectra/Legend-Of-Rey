@@ -443,7 +443,7 @@ görülebilir); Katman 2 ve 3 **hiçbir bölüme yerleştirilmedi** —
 |---|---|---|---|---|
 | **1 — Çürüyenler** | B1–B6 | combo **kurmayı** | Sürüklenen, Tırmanan, Şişmek | ✅ **tamamlandı** — B6 finali dahil |
 | **2 — Lanetli Muhafızlar** | B7–B13 | combo'yu **kırmayı** | Kalkanlı, Mızraklı, Okçu, Komutan | ✅ dördü de tamam, **dördü de yerleşti** (B13) |
-| **3 — Yankı'nın Çocukları** | B14–B18 | yardımcının ihaneti | Sessiz, Yankılayan, Bölünen | ✅ **üçü de tamam** (30.08.2026) |
+| **3 — Yankı'nın Çocukları** | B14–B18 | yardımcının ihaneti | Sessiz, Yankılayan, Bölünen | ✅ üçü de tamam, **üçü de yerleşti** (B14) |
 
 **On düşman AI'ının onu da yazıldı.** Katman 2'nin dördü aynı cümleyi
 dört ayrı dilbilgisiyle soruyor — Kalkanlı *yönle*, Mızraklı *mesafeyle*,
@@ -802,6 +802,60 @@ Zincirleme kapandı: **B11 → B12 → B13.**
 `docs/asset-listesi.md` ikisi de **BOSS 2 "Zindancı"** diyor. Satır
 bayattı (mini-boss'lar B2 ve B3'te zaten geçti) — düzeltildi ve neden
 düzeltildiği yazıldı.
+
+### Bölüm 14 "Yankı'nın Kaynağı" — twist, BOSS 3, Katman 3 açılışı (30.08.2026)
+
+`docs/yapi.md` B14: *"Rey anlar: Yankı lanet değil, aşağıdaki şeyin
+sesi. Hep yardım ediyordu çünkü onu çağırıyordu."*
+*Mekanik:* **Yankı tersine döner — açtığında düşmanlar da seni görür.**
+
+**Bölümün işi bir refleksi kırmak.** On üç bölümdür oyuncunun eli o
+tuşa gidiyor. Oda 1–2 bunu **son kez** doğruluyor; ara sahneden sonra
+aynı tuş odanın tamamını uyandırıyor. Baştan kırmak yerine önce son
+kez öğretmek: refleksin taze olması gerek ki ihanet hissedilsin.
+
+**İhanet bölümde yaşamıyor.** Bayrak `SaveData.flags["sense_betrayed"]`,
+mekanizma `PlayScene._update_betrayal`. Yani **B15–B18 hiçbir şey
+yazmadan devralıyor** — "her bölüm bir satır eklemek zorunda" bu
+projede üç kez hatanın şekliydi (kılıç verme, boss barı, yetenek geri
+yükleme). Kısa bir gecikme var (24 kare): bir an bakmak ile açık
+tutmak aynı şey olmamalı.
+
+Ardo kapsam dışı değil: İz Sürme'yi açmak da ele veriyor. Aynı kural,
+başka kurgu — onun twist'i *"sesler benim değil"* değil, **"izler
+benim için bırakılmış"**.
+
+**BOSS 3 "Kaynak"** (96×96, oyunun en büyük sprite'ı). Çürümüş Olan
+Katman 1'in sınavıydı, Zindancı Katman 2'nin. Bu Katman 3'ün — ama bir
+farkla: **onlar onun çocukları.** Öteki iki boss katmanını özetliyordu;
+bu, katmanını **doğuruyor**.
+
+Tezi iki satır taşıyor:
+
+    Source.echo_visible = False    gerçeğini Yankı GÖSTERMİYOR
+    Mimic.echo_visible  = True     yalanını GÖSTERİYOR
+
+Yani Yankı'yı açan oyuncu ekranda siluetler görüyor ve hepsi yalan;
+gerçeğini yalnızca gözüyle bulabiliyor. **Araç bozuk değil, senin
+değil.** Ekran görüntüsüyle doğrulandı (`build/b14_tez.png`).
+
+Oyuncuya dürüst bir işaret borçluyduk: suretler yarı saydam
+(`render_alpha`, `Enemy`e genel alan olarak eklendi) **ve** titreşimli
+— `CLAUDE.md` §10, bir şey asla tek kanalla anlatılmaz. Gerçek olanın
+ayrıca yerde bir halkası var: süzülüyor ama odaya bağlı.
+
+**Katman 3 burada açıldı.** Sessiz, Yankılayan ve Bölünen — üçü de
+aylardır sanat+AI olarak hazırdı, ilk kez yerleştirildi. Her biri
+kendi odasında ve sıra anlamlı: aracın eksiği → yalanı → oyuncunun
+kendi becerisi.
+
+Boss **ölmüyor, düşüyor**. `docs/yapi.md` B18 o şeyi finalde geri
+getiriyor; burada yenilen bir suret. Bu ayrım bölümün sonunu bir zafer
+değil bir **bilgi** yapıyor ve B15'in ("Yankı'yı kapalı oyna") sebebi
+oluyor.
+
+Zincirleme: **B13 → B14.** `docs/gdd.md` §7'ye Katman 3'ün sahneye
+çıktığı not düşüldü.
 
 ## 9. AÇIK KALANLAR
 

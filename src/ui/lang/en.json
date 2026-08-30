@@ -356,7 +356,31 @@
     "ch12_after_few": "Next time I'll slow down.",
     "ch12_after_few_ardo": "Next time I'll look.",
     "ch12_echo_deeper": "You're going down. Good. I'm down there too.",
-    "ch12_trace_deeper": "The tracks end here. What comes next is mine."
+    "ch12_trace_deeper": "The tracks end here. What comes next is mine.",
+    "ch14_rey_empty": "The room looks empty. It doesn't feel empty.",
+    "ch14_ardo_empty": "No tracks at all. No tracks is also a track.",
+    "ch14_rey_turned": "They turned the moment I opened it. Did they look at me?",
+    "ch14_ardo_turned": "They looked back when I looked. Tracking goes both ways.",
+    "ch14_rey_split": "It multiplies as I hit it. The better I am, the worse it gets.",
+    "ch14_ardo_split": "My blade isn't working — it's helping.",
+    "ch14_cine_open": "Something's there. Let me ask.",
+    "ch14_cine_open_ardo": "Someone stood here. Let me read it.",
+    "ch14_echo_answer": "I AM HERE. I WAS ALWAYS HERE.",
+    "ch14_trace_answer": "The tracks are fresh. And they don't go one way — someone came back.",
+    "ch14_cine_back": "That voice... it isn't coming from inside my head.",
+    "ch14_cine_back_ardo": "These tracks were left for me. From the start.",
+    "ch14_cine_accept": "You weren't helping me. You were calling me.",
+    "ch14_cine_accept_ardo": "I wasn't following. I was being called.",
+    "ch14_echo_arena": "You came. It took you so long.",
+    "ch14_trace_arena": "Every track ends here. Nobody walked back out.",
+    "ch14_rey_arena": "Where is my brother?",
+    "ch14_ardo_arena": "Leave him out of it. If you're talking, talk to me.",
+    "ch14_rey_quiet": "Is that it?",
+    "ch14_ardo_quiet": "That was too easy.",
+    "ch14_echo_again": "That was me. But I am not that.",
+    "ch14_trace_again": "The tracks still go down. What I beat was standing still.",
+    "ch14_rey_decide": "Then I stop listening to you.",
+    "ch14_ardo_decide": "Then I stop looking. I'll find it myself."
   },
   "combat": {
     "counter": "COUNTER",
@@ -397,7 +421,8 @@
     "parting": "The Parting",
     "mirror_hall": "The Hall of Mirrors",
     "cemo": "Cemo",
-    "letter": "The Letter"
+    "letter": "The Letter",
+    "source": "The Source of the Echo"
   },
   "chapter_end": {
     "heading": "CHAPTER COMPLETE",
@@ -448,7 +473,8 @@
     "extinguished_one": "THE EXTINGUISHED ONE",
     "unknown": "NAMELESS",
     "rotted_one": "THE ROTTED ONE",
-    "gaoler": "THE GAOLER"
+    "gaoler": "THE GAOLER",
+    "source": "THE SOURCE"
   },
   "charm": {
     "bloody_whet": "BLOODY WHET  -  +15% damage at 5+ combo",
@@ -605,5 +631,11 @@
   },
   "chapter12": {
     "descend": "The rig is descending. Slow down and you'll see."
+  },
+  "chapter14": {
+    "silent": "The Echo doesn't show it. Use your eyes.",
+    "betrayed": "The Echo opens both ways now.",
+    "heard": "They heard you.",
+    "not_dead": "It fell. It didn't die."
   }
 }

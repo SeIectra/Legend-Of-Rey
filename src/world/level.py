@@ -55,6 +55,12 @@ MARKERS: dict[str, str] = {
     "T": "timegate",
     "F": "brazier",           # Mangal - B13 arenasinin isik ekonomisi
     "Z": "gaoler",            # Zindanci - BOSS 2
+    # --- Katman 3: Yanki'nin Cocuklari. Ucu de B14'te sahneye cikiyor,
+    # her biri kendi odasinda (`docs/gdd.md` 7).
+    "n": "silent",            # Sessiz - Yanki onu gostermez
+    "y": "echoing",           # Yankilayan - sahte ipucu verir
+    "p": "splitter",          # Bolunen - vurunca ikiye ayrilir
+    "O": "source",            # Kaynak - BOSS 3, ucunun de atasi
 }
 
 

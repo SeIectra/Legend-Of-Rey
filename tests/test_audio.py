@@ -57,7 +57,7 @@ SFX_FILES = ("sfx.py", "sfx_combat.py", "sfx_enemies.py", "sfx_ui.py",
 # Bu liste bir "yapilacaklar"; kisaldikca ses tasarimi tamamlaniyor.
 PLANNED: frozenset[str] = frozenset({
     "amb_cellar", "amb_deep", "amb_torch", "amb_village_night",
-    "amb_water", "bloated_idle", "climber_cling", "echo_loop",
+    "amb_water", "bloated_idle", "climber_cling",
     "echo_silent", "echo_sonar", "enemy_stagger",
     "intro_hum", "journey_cellar", "journey_night", "journey_wind",
     "shambler_attack",
@@ -67,7 +67,8 @@ PLANNED: frozenset[str] = frozenset({
 # Bolum 13'un ara sahneleri ikisini de caliyor (kafes goruldugunde
 # kolye isiniyor, bos kapida catisiyor). Aylardir bekleyen iki ses
 # nihayet ait olduklari ana kavustu. `ledge_grab` de 31.08.2026'da
-# cikti: Bolum 12'de kafese binerken caliyor.
+# cikti: Bolum 12'de kafese binerken caliyor. `echo_loop` de -
+# Bolum 14'un arena girisinde, Kaynak karanliktan cikmadan once.
 
 failures: list[str] = []
 

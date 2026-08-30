@@ -356,7 +356,31 @@
     "ch12_after_few": "Bir dahakine yavaşlarım.",
     "ch12_after_few_ardo": "Bir dahakine bakarım.",
     "ch12_echo_deeper": "Aşağı iniyorsun. Güzel. Ben de aşağıdayım.",
-    "ch12_trace_deeper": "İzler burada bitiyor. Bundan sonrası benim."
+    "ch12_trace_deeper": "İzler burada bitiyor. Bundan sonrası benim.",
+    "ch14_rey_empty": "Oda boş görünüyor. Ama boş hissettirmiyor.",
+    "ch14_ardo_empty": "Hiç iz yok. Hiç iz olmaması da bir iz.",
+    "ch14_rey_turned": "Açtığım an başlarını çevirdiler. Bana mı baktılar?",
+    "ch14_ardo_turned": "Baktığım an bana baktılar. İz sürmek iki taraflıymış.",
+    "ch14_rey_split": "Vurdukça çoğalıyor. Ne kadar iyiysem o kadar kötü.",
+    "ch14_ardo_split": "Kılıcım işe yaramıyor — işi kolaylaştırıyor.",
+    "ch14_cine_open": "Bir şey var. Sorayım.",
+    "ch14_cine_open_ardo": "Burada biri durmuş. İzi okuyayım.",
+    "ch14_echo_answer": "BURADAYIM. HEP BURADAYDIM.",
+    "ch14_trace_answer": "İzler taze. Ve tek yöne gitmiyorlar — biri geri gelmiş.",
+    "ch14_cine_back": "Bu ses... kafamın içinden gelmiyor.",
+    "ch14_cine_back_ardo": "Bu izler benim için bırakılmış. Baştan beri.",
+    "ch14_cine_accept": "Bana yardım etmiyordun. Beni çağırıyordun.",
+    "ch14_cine_accept_ardo": "Takip etmiyordum. Çağrılıyordum.",
+    "ch14_echo_arena": "Geldin. Ne kadar da uzun sürdü.",
+    "ch14_trace_arena": "Bütün izler burada bitiyor. Kimse buradan çıkmamış.",
+    "ch14_rey_arena": "Kardeşim nerede?",
+    "ch14_ardo_arena": "Onu bırak. Konuşacaksan benimle konuş.",
+    "ch14_rey_quiet": "Bitti mi?",
+    "ch14_ardo_quiet": "Fazla kolay oldu.",
+    "ch14_echo_again": "O bendim. Ama ben o değilim.",
+    "ch14_trace_again": "İzler hâlâ aşağı gidiyor. Yendiğim şey duruyordu.",
+    "ch14_rey_decide": "Öyleyse seni dinlemeyi bırakıyorum.",
+    "ch14_ardo_decide": "Öyleyse artık bakmayacağım. Kendim bulurum."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",
@@ -397,7 +421,8 @@
     "parting": "Ayrılık",
     "mirror_hall": "Ayna Salonu",
     "cemo": "Cemo",
-    "letter": "Mektup"
+    "letter": "Mektup",
+    "source": "Yankı'nın Kaynağı"
   },
   "chapter_end": {
     "heading": "BÖLÜM TAMAMLANDI",
@@ -448,7 +473,8 @@
     "extinguished_one": "SÖNMÜŞ OLAN",
     "unknown": "İSİMSİZ",
     "rotted_one": "ÇÜRÜMÜŞ OLAN",
-    "gaoler": "ZİNDANCI"
+    "gaoler": "ZİNDANCI",
+    "source": "KAYNAK"
   },
   "charm": {
     "bloody_whet": "KANLI BİLEME  ·  5+ combo'da hasar %15 artar",
@@ -605,5 +631,11 @@
   },
   "chapter12": {
     "descend": "Kafes iniyor. Yavaşlarsan görürsün."
+  },
+  "chapter14": {
+    "silent": "Yankı onu göstermiyor. Gözünle bak.",
+    "betrayed": "Yankı artık iki tarafa da açık.",
+    "heard": "Seni duydular.",
+    "not_dead": "Düştü. Ama ölmedi."
   }
 }

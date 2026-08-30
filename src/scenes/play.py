@@ -20,6 +20,7 @@ from src.art.particles import ParticleField
 from src.combat.attack_token import AttackTokenManager
 from src.combat.hitbox import HitboxManager, Team
 from src.config import (
+    SENSE_BETRAYAL_DELAY, SENSE_BETRAYAL_RANGE,
     COMBO_THRESHOLD_HIGH, COMBO_THRESHOLD_MID, DEATH_SCREEN_DELAY,
     HARD_LAND_AIR_FRAMES,
     INTERNAL_WIDTH, NECKLACE_BEAT_MIN_WARMTH, TILE_SIZE,
@@ -100,6 +101,15 @@ class PlayScene(Scene):
         self.tokens = AttackTokenManager()
         self.camera = Camera()
         self.save_data, _ = read_save()
+
+        # **Yanki'nin tersine donmesi** (`docs/yapi.md` B14). Bayrak
+        # kayittan geliyor, yani B15-B18 hicbir sey yazmadan
+        # devraliyor. Gerekce `config.py`de: "her bolum bir satir
+        # eklemek zorunda" bu projede uc kez hatanin sekli oldu.
+        self.sense_betrayed = bool(
+            self.save_data is not None
+            and self.save_data.flags.get("sense_betrayed"))
+        self._sense_open_frames = 0
         self.hud = HUD(self.game)
 
         # Yanki yalnizca Rey'de. Ardo'da `None` kalir ve kod her yerde
@@ -461,6 +471,61 @@ class PlayScene(Scene):
         fade = COMBAT_FADE_IN_MS if context != "explore" else None
         self.game.music.play(context, fade_ms=fade)
 
+    def sense_open(self) -> bool:
+        """Oyuncunun duyusu (Yanki ya da Iz Surme) su an acik mi.
+
+        Iki sistem de ayni `active` sozlesmesini tasiyor, o yuzden
+        cagiran taraf "hangi karakter?" diye sormuyor - `EchoState` ve
+        `TrackingState` ayni desenle yazildiginin karsiligi burada
+        toplaniyor.
+        """
+        if self.echo is not None:
+            return self.echo.active
+        if self.tracking is not None:
+            return self.tracking.active
+        return False
+
+    def _update_betrayal(self) -> None:
+        """Duyuyu acmak seni **ele veriyor** - B14'ten sonra kalici.
+
+        `docs/yapi.md` B14: *"Yanki tersine doner - actiginda dusmanlar
+        da seni gorur."*
+
+        On uc bolumdur refleks suydu: emin degilsen Yanki'yi ac. Bu
+        bayraktan sonra ayni tus odanin tamamini uyandiriyor. Arac
+        degismedi, **sozlesme degisti**.
+
+        Kisa bir gecikme var (`SENSE_BETRAYAL_DELAY`): bir an bakmak
+        ile acik tutmak ayni sey olmamali, yoksa yanlislikla dokunan
+        oyuncu cezalandirilir ve mekanik bir tuzaga doner.
+
+        Ardo'da ayni kural, baska kurgu: onun twist'i "sesler benim
+        degil" degil, **"izler benim icin birakilmis"**.
+        """
+        if not self.sense_betrayed:
+            self._sense_open_frames = 0
+            return
+        if not self.sense_open():
+            self._sense_open_frames = 0
+            return
+        self._sense_open_frames += 1
+        if self._sense_open_frames < SENSE_BETRAYAL_DELAY:
+            return
+        body = self.player.body
+        for enemy in self.enemies:
+            if enemy.dead or enemy.aware:
+                continue
+            dx = enemy.body.center_x - body.center_x
+            dy = enemy.body.center_y - body.center_y
+            if dx * dx + dy * dy > SENSE_BETRAYAL_RANGE ** 2:
+                continue
+            enemy.aware = True
+            self.on_betrayal_wake(enemy)
+
+    def on_betrayal_wake(self, enemy) -> None:
+        """Bir dusman **duyu yuzunden** uyandi. Bolum kendi dilinde
+        gosterebilsin diye kanca; varsayilan sessiz."""
+
     def _update_traces(self) -> None:
         """Dunya iz birakiyor - oyuncu ve dusmanlarin ayak izleri.
 
@@ -529,6 +594,7 @@ class PlayScene(Scene):
                            grounded=self.player.body.grounded)
 
         self._update_traces()
+        self._update_betrayal()
         if self.echo is not None:
             self.echo.update(self.echo_held())
             self._update_echo_audio()

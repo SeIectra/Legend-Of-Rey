@@ -725,6 +725,50 @@ GAOLER_SPEC = CharSpec(
 )
 
 
+# --- BOSS 3: Kaynak (Bolum 14) ----------------------------------------------
+# `docs/asset-listesi.md`: *"3 - Yanki Kaynagi | B14 | 96x96"* - oyunun
+# en buyuk sprite'i, Zindanci'nin (64x80) bir kademe ustunde.
+#
+# ## Bu bir CANAVAR degil, bir SES
+#
+# Iki boss da katmanlarinin en buyuk dusmaniydi: Curumus Olan bir
+# hayvan (cokuk, kuyruklu), Zindanci bir adam (dimdik, zirhli). Kaynak
+# ucuncu bir sey olmali - **ne hayvan ne insan**. Silueti ikisinden de
+# ayrilmali, yoksa "daha buyuk bir zindanci" okunur.
+#
+# Cozum oran: **kafa kocaman, govde ince, uzuvlar upuzun.** Ses
+# cikaran sey buyuk, tasiyan sey zayif. Uzun sac ve pelerin siluetin
+# kenarlarini bulaniklastiriyor - keskin bir hatti yok, cunku bir
+# sesin hatti olmaz.
+#
+# Renk: `arcane` (Yanki'nin camgobegi/moru). On uc bolumdur oyuncunun
+# YARDIM rengi olarak ogrendigi ton, ilk kez bir dusmanin uzerinde.
+# Twist'i tek bir renk tasiyor - metin degil.
+SOURCE_SPEC = CharSpec(
+    name="source",
+    cell_width=96, cell_height=96, foot_y=76,
+    # Kafa/boy orani kasitli olarak BOZUK: 4.4 kurali oynanabilir
+    # karakterler icin (`tests/test_sprites.py`). Bu sey insan degil
+    # ve oyle gorunmemeli.
+    # Olculdu: bes varyant denendi, Zindanci'yle siluet ortusmesi
+    # (IoU) en dusuk olan secildi - 0.73'ten 0.67'ye. Kazandiran sey
+    # **kol acikligi**: iki boss da uzun bir sutun, ama bunun kollari
+    # govdesinden genis. Silueti "duran bir adam" degil "acilan bir
+    # sey" okutuyor.
+    head_radius=11.0, torso_height=15.0, torso_width=9.0,
+    thigh=11.0, shin=11.0, upper_arm=17.0, fore_arm=17.0,
+    limb_width=3.0, shoulder_width=16.0, neck=3.0,
+    skin="arcane", hair="arcane", cloth="shadow",
+    cloth_dark="shadow", armor="arcane", accent="arcane",
+    long_hair=True, hair_length=20.0, cape=True,
+    glow_eyes=255,          # Karanlikta once - ve yalnizca - gozleri
+    brow_tilt=0,            # Ifadesiz. Ofke insani bir sey olurdu.
+    weapon="none",
+    claws=9.0, claw_chain="arcane",
+    spikes=0, tail=0.0, hunch=0.0,
+)
+
+
 CHARACTERS: dict[str, CharSpec] = {
     # Oynanabilirler
     "rey": REY_SPEC,
@@ -750,7 +794,9 @@ CHARACTERS: dict[str, CharSpec] = {
     "spearman": SPEARMAN_SPEC,
     "archer": ARCHER_SPEC,
     "commander": COMMANDER_SPEC,
-    # Katman 3 - Yanki'nin Cocuklari (B14-B18) - ayni not
+    # Katman 3 - Yanki'nin Cocuklari (B14-B18)
+    # BOSS 3 - onlarin atasi. B14'un arenasinda.
+    "source": SOURCE_SPEC,
     "silent": SILENT_SPEC,
     "echoing": ECHOING_SPEC,
     "splitter": SPLITTER_SPEC,

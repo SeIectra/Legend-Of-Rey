@@ -58,7 +58,11 @@ def draw_enemy(enemy, surface: pygame.Surface,
         silhouette_mode=enemy.scene.game.silhouette_mode,
         tint_colour=colour,
         tint_strength=strength,
-        alpha=max(0, min(255, int(255 * (1.0 - fade)))),
+        # `render_alpha` dusmana ait (sahte suret yari saydam),
+        # `fade` sahneye ait (Iz Surme acikken yasayanlar soluyor).
+        # Ikisi CARPILIYOR: biri otekinin yerine gecmemeli.
+        alpha=max(0, min(255, int(255 * (1.0 - fade)
+                                  * getattr(enemy, "render_alpha", 1.0)))),
     )
     if image is None:
         _draw_box(enemy, surface, rect)

@@ -84,6 +84,10 @@ Katman geçişleri keskin değil — sızarak karışır.
 - **Komutan** — takviye çağırır, kalabalık yönetimi
 
 ### Katman 3 · Derin Zindan (B14–B18) — Yankı'nın Çocukları
+> **B14'te sahneye çıktı (30.08.2026).** Üçü de yerleştirildi — her biri
+> kendi odasında, sırası anlamlı: önce aracın **eksiği** (Sessiz), sonra
+> **yalanı** (Yankılayan), en sonda oyuncunun kendi **becerisi** (Bölünen).
+> Üçünün atası aynı bölümün arenasında: BOSS 3 **Kaynak**.
 *Soru: yardımcı sisteminin ihanetiyle yüzleş*
 - **Sessiz** — Yankı onu göstermez
 - **Yankılayan** — sesini taklit eder, sahte ipucu verir

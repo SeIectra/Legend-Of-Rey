@@ -81,6 +81,12 @@ class Enemy(Actor):
     # kontrolu yapmakti - gorunum katmaninin dusman tiplerini bilmesi
     # yanlis yonde bir bagimlilik olurdu.
     echo_visible: bool = True
+
+    # Cizim saydamligi (0..1). Varsayilan tam opak. Bolum 14'un sahte
+    # suretleri bunu dusuruyor: **gozle bakinca yari saydam, Yanki'da
+    # kati.** Oyuncuya durust bir isaret borcluyuz - yalan bir bilmece
+    # olmali, zar atmak degil.
+    render_alpha: float = 1.0
     # Ses (Gorev 10) - alt sinif kendi tipine gore ezer. Bos dize = ek ses
     # calinmasin (orn. Sismek zaten patlama sesiyle olur, ustune binmesin).
     tell_sound: str = "enemy_tell"

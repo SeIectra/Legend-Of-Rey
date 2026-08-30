@@ -426,6 +426,14 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
     ledge = {(x, cemo13.tile_y + 1) for x in range(13, 22)}
     rooms.append(("bolum 13 - cemo", chapter13.LEVEL.terrain_rows,
                   (spawn13.tile_x, spawn13.tile_y + 1), ledge))
+
+    # Bolum 14: arena muhru `chapter14.py` calisirken kapaniyor,
+    # harita acik duruyor - Bolum 13 ile ayni gerekce. Baska hicbir
+    # senaryolu gecis yok, yani duz bir dogrulama.
+    from src.world.rooms import chapter14
+    spawn14 = chapter14.LEVEL.first("player")
+    rooms.append(("bolum 14 - kaynak", chapter14.LEVEL.terrain_rows,
+                  (spawn14.tile_x, spawn14.tile_y + 1), set()))
     return rooms
 
 

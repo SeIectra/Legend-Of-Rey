@@ -64,6 +64,12 @@ SCENES = {
     "bolum13-isaret": ("src.scenes.chapter13_cinematics", "MarkCinematic"),
     "bolum13-zindanci": ("src.scenes.chapter13_cinematics", "GaolerCinematic"),
     "bolum13-kapi": ("src.scenes.chapter13_cinematics", "GateCinematic"),
+    # Bolum 14 "Yanki'nin Kaynagi" - twist + BOSS 3. Katman 3 burada
+    # basliyor ve Yanki tersine doner.
+    "bolum14": ("src.scenes.chapter14", "Chapter14Scene"),
+    "bolum14-kaynak": ("src.scenes.chapter14_cinematics", "SourceCinematic"),
+    "bolum14-arena": ("src.scenes.chapter14_cinematics", "ArenaCinematic"),
+    "bolum14-olmedi": ("src.scenes.chapter14_cinematics", "AfterCinematic"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }

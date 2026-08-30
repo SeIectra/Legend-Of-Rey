@@ -967,3 +967,67 @@ RIG_WIDTH_TILES: Final[int] = 5
 # Bir isaret bu kadar yakinken ve kafes bu hizin altindayken okunuyor.
 MARK_READ_RANGE: Final[float] = 30.0
 MARK_READ_SPEED: Final[float] = 0.55
+
+
+# --- YANKI'NIN TERSINE DONMESI (Bolum 14'ten sonra KALICI) -------------------
+# `docs/yapi.md` B14: *"Rey anlar: Yanki lanet degil, asagidaki seyin
+# sesi. Hep yardim ediyordu cunku onu cagiriyordu."*
+# *Mekanik:* **Yanki tersine doner - actiginda dusmanlar da seni gorur.**
+#
+# On uc bolumdur refleks suydu: emin degilsen Yanki'yi ac. Bu bolumden
+# sonra ayni tus seni ELE VERIYOR. Arac degismedi, **sozlesme degisti** -
+# ve bu, bir sayiyi buyutmekten cok daha keskin bir zorluk artisi.
+#
+# Bayrak `SaveData.flags["sense_betrayed"]`de duruyor ve `PlayScene`
+# okuyor, yani B15-B18 hicbir sey yazmadan devraliyor. "Her bolum bir
+# satir eklemek zorunda" bu projede uc kez hatanin sekli oldu
+# (kilic verme, boss bari, yetenek geri yukleme).
+#
+# Ardo'da ayni kural, baska kurgu: Iz Surme'yi acmak da ele veriyor.
+# Onun twist'i "sesler benim degil" degil, **"izler benim icin
+# birakilmis"** - ayni cumle, onun dilinde.
+SENSE_BETRAYAL_RANGE: Final[float] = 240.0
+# Duyu acildiktan bu kadar kare sonra uyanma basliyor. Anlik olsaydi
+# yanlislikla dokunan oyuncu cezalandirilirdi; bu pencere "acik
+# tutmak" ile "bir an bakmak" arasindaki farki koruyor.
+SENSE_BETRAYAL_DELAY: Final[int] = 24
+
+
+# --- BOSS 3: Kaynak (Bolum 14) -----------------------------------------------
+# `docs/gdd.md` 8: *"3 | B14 | Yanki'nin kaynagi"*.
+# `docs/asset-listesi.md`: *"3 - Yanki Kaynagi | B14 | 96x96"* - oyunun
+# en buyuk sprite'i.
+#
+# Curumus Olan Katman 1'in sinaviydi, Zindanci Katman 2'nin. Kaynak
+# Katman 3'un **atasi**: uc fazi Yanki'nin Cocuklari'nin uc ihanetini
+# tasiyor, cunku onlar zaten onun cocuklari.
+#
+#     Faz 0  SESSIZ'in izi      Yanki onu GOSTERMIYOR
+#     Faz 1  YANKILAYAN'in izi  sahte suretler cikariyor
+#     Faz 2  BOLUNEN'in izi     gercekten bolunuyor
+SOURCE_HEALTH: Final[int] = 300
+SOURCE_POISE: Final[int] = 8
+SOURCE_SPEED: Final[float] = 0.28
+SOURCE_CONTACT_RANGE: Final[float] = 70.0
+
+# Feryat: yonsuz ses dalgasi. Kacinmayla degil **uzaklasarak** gecilir -
+# Curumus Olan'in radyal patlamasiyla ayni ders, boss olcusunde.
+SOURCE_WAIL_DAMAGE: Final[int] = 18
+SOURCE_WAIL_REACH: Final[int] = 58
+# Uzanma: uzun kol. Mizrakli'nin dersi degil - bu bir SES, duvardan
+# geciyor. Menzil uzun ama tell de uzun.
+SOURCE_REACH_DAMAGE: Final[int] = 15
+SOURCE_REACH_LENGTH: Final[int] = 74
+SOURCE_CRUSH_DAMAGE: Final[int] = 24
+SOURCE_CRUSH_REACH: Final[int] = 46
+
+# Sahte suretler. **Yanki onlari GOSTERIYOR, gercegini gostermiyor** -
+# bolumun tezi tek satirda: arac bozuk degil, SENIN DEGIL.
+SOURCE_MIMIC_COUNT: Final[int] = 2
+SOURCE_MIMIC_HEALTH: Final[int] = 1        # tek vurusla dagiliyor
+SOURCE_MIMIC_LIFE: Final[int] = 300        # kendiliginden de soluyor
+SOURCE_MIMIC_RANGE: Final[float] = 90.0
+# Faz 2'de gercekten bolunuyor: cagirdiklari Yankilayan - kendi
+# cocuklari.
+SOURCE_SPLIT_COUNT: Final[int] = 2
+SOURCE_SPLIT_LIMIT: Final[int] = 4
