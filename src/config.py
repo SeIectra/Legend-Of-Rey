@@ -576,6 +576,28 @@ SHIELDBEARER_TURN_TELL_FRAMES: Final[int] = 10
 # ceza hasar degil, ritmini kaybetmek.
 SHIELDBEARER_BLOCK_PUSHBACK: Final[float] = 1.9
 
+# --- Mizrakli (Katman 2, Bolum 10) -------------------------------------------
+# Kalkanli **yonle** soruyordu (arkaya gec); Mizrakli **mesafeyle**:
+# senin menzilinin disindan vuruyor. Ayni ders, baska bir fizik sorusu.
+SPEARMAN_HEALTH: Final[int] = 42         # Kalkanli'dan az - zirhi yok
+SPEARMAN_POISE: Final[int] = 2           # Kolay sendeliyor: iceri giren kazaniyor
+SPEARMAN_SPEED: Final[float] = 0.44
+SPEARMAN_DAMAGE: Final[int] = 9
+# **Uzun** menzil - oyuncunun kilic menzili ~16. Fark mekanigin kendisi.
+SPEARMAN_REACH: Final[int] = 34
+# Bundan yakinsa geri adim atiyor. Menzilin yarisindan biraz fazla:
+# oyuncu "girdim" hissini yasayacak kadar yaklasabilmeli.
+SPEARMAN_MIN_RANGE: Final[int] = 22
+SPEARMAN_BACKSTEP_SPEED: Final[float] = 0.62
+# Tell uzun: uzun menzilli bir saldiri **okunabilir** olmali, yoksa
+# oyuncu neden vuruldugunu anlamiyor (CLAUDE.md 7: en az 14 kare).
+SPEARMAN_TELL_FRAMES: Final[int] = 22
+SPEARMAN_ACTIVE_FRAMES: Final[int] = 6
+# Toparlanma penceresi: iceri giren oyuncunun iki vurus yapacagi sure.
+SPEARMAN_RECOVER_FRAMES: Final[int] = 34
+# Ceza can degil **mesafe**: kapatmak icin harcadigin yolu geri veriyorsun.
+SPEARMAN_PUSHBACK: Final[float] = 3.4
+
 
 # --- IZ SURME (Ardo'nun karsi mekanigi, src/systems/tracking.py) -------------
 # `docs/derinlestirme.md` 2.4: *"Rey gelecegi/gizliyi duyar, Ardo gecmisi

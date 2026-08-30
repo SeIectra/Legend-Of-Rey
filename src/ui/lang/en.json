@@ -265,7 +265,33 @@
         "ch09_trust_offer_ardo": "You can't make that jump. Use my hands as a step — I'll lift you.",
         "ch09_trust_offer_rey": "You can't make that jump. Use my hands as a step — I'll lift you.",
         "ch09_trust_accept_rey": "All right. You won't let go, will you?",
-        "ch09_trust_accept_ardo": "All right. Hold tight."
+        "ch09_trust_accept_ardo": "All right. Hold tight.",
+        "ch10_part_ardo": "The path splits. I'll take the left, you take the right.",
+        "ch10_part_rey": "The path splits. I'll take the left, you take the right.",
+        "ch10_part_look_rey": "...All right.",
+        "ch10_part_look_ardo": "...All right.",
+        "ch10_echo_rises": "He's gone. You hear me more clearly now, don't you?",
+        "ch10_trace_rises": "Her trail goes left. Mine turns right.",
+        "ch10_rey_alone": "Alone. The voices are louder than they've ever been.",
+        "ch10_ardo_alone": "Alone. Familiar — but it doesn't sit right any more.",
+        "ch10_rey_after": "I won't take the way that voice points to again.",
+        "ch10_ardo_after": "Trails don't lie. But someone can leave one.",
+        "ch10_echo_lure": "Up there. The way is clear — trust me, it always was.",
+        "ch10_trace_lure": "The trail points up. Fresh, clear, inviting.",
+        "ch10_echo_ignored": "...Down there? Fine. Have it your way.",
+        "ch10_trace_ignored": "That trail is too clean. Nobody walks that neatly.",
+        "ch10_lie_sprung": "The floor was rotten. I couldn't have known.",
+        "ch10_lie_sprung_react": "Couldn't you? You see through stone.",
+        "ch10_lie_survived": "See? You made it. I'm never wrong.",
+        "ch10_lie_survived_react": "The floor gave way. It nearly took me with it.",
+        "ch10_lie_ignored": "You didn't listen. You took the long way and tired yourself.",
+        "ch10_lie_ignored_react": "But I got here. On my own feet.",
+        "ch10_lie_neutral": "Here you are. How you got here doesn't matter.",
+        "ch10_lie_neutral_react": "It does to me.",
+        "ch10_trace_sprung": "A false trail. Someone faked a walk here — and cut the floor.",
+        "ch10_trace_survived": "The floor gave way. That trail was left there for a reason.",
+        "ch10_trace_ignored_after": "I read it right. That trail was too clean.",
+        "ch10_trace_neutral": "Another trail. I look at all of them twice now."
     },
     "combat": {
         "counter": "COUNTER",
@@ -302,7 +328,8 @@
         "ardo": "ARDO",
         "narrow_pass": "The Narrow Pass",
         "fireside": "The Fireside",
-        "bell_tower": "The Bell Tower"
+        "bell_tower": "The Bell Tower",
+        "parting": "The Parting"
     },
     "chapter_end": {
         "heading": "CHAPTER COMPLETE",
@@ -491,5 +518,9 @@
         "first_boost": "Up — you climb together",
         "wrong_order": "Wrong order. The bells fell silent — check the fresco.",
         "solved": "Three bells, right order. The door is open."
+    },
+    "chapter10": {
+        "creak": "The floor is creaking...",
+        "trap": "The floor gave way"
     }
 }

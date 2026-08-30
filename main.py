@@ -48,6 +48,9 @@ SCENES = {
     "bolum8-fisilti": ("src.scenes.chapter08_cinematics", "WhisperCinematic"),
     "bolum9": ("src.scenes.chapter09", "Chapter09Scene"),
     "bolum9-guven": ("src.scenes.chapter09_cinematics", "TrustCinematic"),
+    "bolum10": ("src.scenes.chapter10", "Chapter10Scene"),
+    "bolum10-ayrilik": ("src.scenes.chapter10_cinematics", "PartingCinematic"),
+    "bolum10-yalan": ("src.scenes.chapter10_cinematics", "LieCinematic"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }

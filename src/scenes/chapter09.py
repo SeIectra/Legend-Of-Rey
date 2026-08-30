@@ -314,8 +314,15 @@ class Chapter09Scene(PlayScene):
             data.playtime_frames += self.frames
             data.secrets_found += result.secrets_found
             data.flags["boost"] = True
-        # Bolum 10 henuz yok - ozet ekrani kapaninca ana menuye donuluyor.
-        self.scenes.push(ChapterEndScene, result=result)
+        # Bolum 10'a baglaniyor.
+        character = self.character
+
+        def _continue() -> None:
+            from src.scenes.chapter10 import Chapter10Scene
+            self.scenes.set_root(Chapter10Scene, character=character)
+
+        self.scenes.push(ChapterEndScene, result=result,
+                         on_continue=_continue)
 
     # --- Kancalar -----------------------------------------------------------
     def after_restart(self, room: str) -> None:

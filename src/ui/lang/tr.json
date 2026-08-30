@@ -265,7 +265,33 @@
         "ch09_trust_offer_ardo": "Buradan atlayamazsın. Elimi basamak yap — seni ben kaldırırım.",
         "ch09_trust_offer_rey": "Buradan atlayamazsın. Elimi basamak yap — seni ben kaldırırım.",
         "ch09_trust_accept_rey": "Tamam. Bırakmazsın, değil mi?",
-        "ch09_trust_accept_ardo": "Tamam. Sıkı tut."
+        "ch09_trust_accept_ardo": "Tamam. Sıkı tut.",
+        "ch10_part_ardo": "Yol ikiye ayrılıyor. Ben soldan bakarım, sen sağdan.",
+        "ch10_part_rey": "Yol ikiye ayrılıyor. Ben soldan bakarım, sen sağdan.",
+        "ch10_part_look_rey": "...Tamam.",
+        "ch10_part_look_ardo": "...Tamam.",
+        "ch10_echo_rises": "Gitti. Şimdi daha net duyuyorsun, değil mi?",
+        "ch10_trace_rises": "İzi soldan gidiyor. Benimki sağa dönüyor.",
+        "ch10_rey_alone": "Yalnızım. Sesler her zamankinden yüksek.",
+        "ch10_ardo_alone": "Yalnız. Tanıdık bir şey — ama artık rahatsız edici.",
+        "ch10_rey_after": "Bir daha o sesin gösterdiği yerden gitmeyeceğim.",
+        "ch10_ardo_after": "İzler yalan söylemez. Ama biri onları bırakabilir.",
+        "ch10_echo_lure": "Yukarıdan. Yol açık — güven bana, hep açtım.",
+        "ch10_trace_lure": "İz yukarıyı gösteriyor. Taze, net, davetkâr.",
+        "ch10_echo_ignored": "...Aşağıdan mı? Peki. Nasıl istersen.",
+        "ch10_trace_ignored": "İz fazla temiz. Kimse bu kadar düzgün yürümez.",
+        "ch10_lie_sprung": "Zemin çürüktü. Bunu bilemezdim.",
+        "ch10_lie_sprung_react": "Bilemez miydin? Sen bu taşın altını görüyorsun.",
+        "ch10_lie_survived": "Gördün mü? Geçtin işte. Ben yanılmam.",
+        "ch10_lie_survived_react": "Zemin çöktü. Az kalsın altında kalıyordum.",
+        "ch10_lie_ignored": "Beni dinlemedin. Uzun yoldan geldin ve yoruldun.",
+        "ch10_lie_ignored_react": "Ama geldim. Kendi ayaklarımla.",
+        "ch10_lie_neutral": "Buradasın işte. Nasıl geldiğin önemli değil.",
+        "ch10_lie_neutral_react": "Bana öyle gelmiyor.",
+        "ch10_trace_sprung": "Sahte iz. Biri buraya yürümüş gibi yapmış — ve zemini oymuş.",
+        "ch10_trace_survived": "Zemin çöktü. O iz oraya bir sebeple bırakılmış.",
+        "ch10_trace_ignored_after": "Doğru okumuşum. İz fazla temizdi.",
+        "ch10_trace_neutral": "Bir iz daha. Ama artık hepsine iki kez bakıyorum."
     },
     "combat": {
         "counter": "KARŞI VURUŞ",
@@ -302,7 +328,8 @@
         "ardo": "ARDO",
         "narrow_pass": "Dar Geçit",
         "fireside": "Ateş Başı",
-        "bell_tower": "Çan Kulesi"
+        "bell_tower": "Çan Kulesi",
+        "parting": "Ayrılık"
     },
     "chapter_end": {
         "heading": "BÖLÜM TAMAMLANDI",
@@ -491,5 +518,9 @@
         "first_boost": "Yukarı — birlikte çıkılıyor",
         "wrong_order": "Yanlış sıra. Çanlar sustu — freske bak.",
         "solved": "Üç çan, doğru sıra. Kapı açıldı."
+    },
+    "chapter10": {
+        "creak": "Zemin gıcırdıyor...",
+        "trap": "Zemin çöktü"
     }
 }

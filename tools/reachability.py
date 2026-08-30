@@ -358,6 +358,20 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
             rows9[floor_row + drop][middle] = "#"
     rooms.append(("bolum 9 - can kulesi", ["".join(r) for r in rows9],
                   (spawn9.tile_x, spawn9.tile_y + 1), set()))
+
+    # Bolum 10: hicbir gecici duzenleme yok. Iki yol da tasarim geregi
+    # **yuruyerek** gecilebilir olmali - yalan bir kilit degil bir
+    # secim. Dogrulama bunu sinamanin en dogrudan yolu: bir yol
+    # gercekten kapaliysa oyuncu ceza degil cikmaz yasar.
+    #
+    # Tuzak sonrasi da onemli: zemin coktukten sonra dusen oyuncu
+    # asagidan devam edebilmeli. Burasi tuzak KAPALI haliyle
+    # dogrulaniyor cunku tuzak yalnizca zemin **kaldiriyor** - acilan
+    # her sey zaten erisilebilir kaliyor.
+    from src.world.rooms import chapter10
+    spawn10 = chapter10.LEVEL.first("player")
+    rooms.append(("bolum 10 - ayrilik", chapter10.LEVEL.terrain_rows,
+                  (spawn10.tile_x, spawn10.tile_y + 1), set()))
     return rooms
 
 

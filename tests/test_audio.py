@@ -48,13 +48,17 @@ SFX_FILES = ("sfx.py", "sfx_combat.py", "sfx_enemies.py", "sfx_ui.py",
 #   step_gravel  Bolum 9+ zeminleri (su an tas ve toprak var)
 #   step_water   su sesi `water.py`e baglanmadi
 #   echo_loop    Yanki acikken surekli calacak katman
+#
+# Liste kisaliyor: `echo_reveal` Bolum 10'da (Yanki'nin yalani)
+# kullanildi ve listeden dustu - testin ucuncu kontrolu bunu
+# yakaladi.
 #   *_idle       dusman bosta sesleri - `Enemy` bunlari hic calmiyor
 #
 # Bu liste bir "yapilacaklar"; kisaldikca ses tasarimi tamamlaniyor.
 PLANNED: frozenset[str] = frozenset({
     "amb_cellar", "amb_deep", "amb_torch", "amb_village_night",
     "amb_water", "bloated_idle", "climber_cling", "echo_loop",
-    "echo_reveal", "echo_silent", "echo_sonar", "enemy_stagger",
+    "echo_silent", "echo_sonar", "enemy_stagger",
     "intro_hum", "journey_cellar", "journey_night", "journey_wind",
     "ledge_grab", "necklace_conflict", "necklace_warm", "shambler_attack",
     "shambler_idle", "step_gravel", "step_water",
