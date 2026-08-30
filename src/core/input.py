@@ -38,6 +38,11 @@ class Action(Enum):
     # ve yoldasin yaninda bir sandik varsa hangisinin olacagi belirsiz
     # olurdu.
     COMPANION_WAIT = auto()
+    # Yanki Rezonansi - sesi silah olarak kullanmak (B8'de ogreniliyor).
+    # `ECHO_ASK`'e binmiyor: ikisi de "sesini kullan" ama biri soru
+    # soruyor oteki nesne kiriyor. B9'un can bulmacasinda cani calmak
+    # isterken soru sormak kotu olurdu.
+    RESONATE = auto()
     PAUSE = auto()
     CONFIRM = auto()
     CANCEL = auto()
@@ -64,6 +69,7 @@ DEFAULT_KEYBOARD: dict[Action, tuple[int, ...]] = {
     Action.ECHO_ASK: (pygame.K_f,),
     Action.INTERACT: (pygame.K_e,),
     Action.COMPANION_WAIT: (pygame.K_u,),
+    Action.RESONATE: (pygame.K_g,),
     Action.PAUSE: (pygame.K_ESCAPE,),
     Action.CONFIRM: (pygame.K_RETURN, pygame.K_SPACE, pygame.K_e),
     Action.CANCEL: (pygame.K_ESCAPE, pygame.K_BACKSPACE),
@@ -82,6 +88,10 @@ DEFAULT_GAMEPAD: dict[Action, tuple[int, ...]] = {
     Action.ECHO_ASK: (3,),      # Y
     Action.INTERACT: (0,),
     Action.COMPANION_WAIT: (6,),    # Back
+    # `RESONATE` icin **varsayilan kol dugmesi yok**: standart bir
+    # kolda sekiz dugme var ve sekizi de dolu (0-7). Bos bir dugme
+    # uydurmak yerine bosluk birakiliyor - kolla oynayan oyuncu
+    # Ayarlar > Tuslar'dan istedigini atayabiliyor.
     Action.PAUSE: (7,),         # Start
     Action.CONFIRM: (0,),
     Action.CANCEL: (1,),

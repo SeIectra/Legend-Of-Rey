@@ -87,8 +87,10 @@ class Chapter04Scene(PlayScene):
         # Bolum 3'ten geliyoruz: kilic ve kacinma elde. Burada dovus yok
         # ama yetenekler kaybolmus gibi gorunmesin - oyuncu tuslara
         # basarsa karsiligini bulmali.
-        self.player.grant(abilities.SWORD)
-        self.player.grant(abilities.DODGE)
+        # Kilic/kacinma artik `PlayScene._grant_baseline` uzerinden -
+        # bolum numarasindan turuyor. Elle veren satirlar burada ve
+        # Bolum 4'te vardi; 5, 6 ve 7 unutmustu ve oyuncu o
+        # bolumlerde yumrukla dolasiyordu.
 
         self.chests = [Chest(spot.x, spot.feet_y, gold=CHAPTER4_CHEST_GOLD)
                        for spot in LEVEL.of("chest")]

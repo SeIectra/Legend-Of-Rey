@@ -97,8 +97,10 @@ class Chapter03Scene(PlayScene):
         spawn = LEVEL.first("player")
         self.player = self.make_player(spawn.x, spawn.feet_y)
         # Bolum 2'den geliyoruz: kilic ve kacinma elde.
-        self.player.grant(abilities.SWORD)
-        self.player.grant(abilities.DODGE)
+        # Kilic/kacinma artik `PlayScene._grant_baseline` uzerinden -
+        # bolum numarasindan turuyor. Elle veren satirlar burada ve
+        # Bolum 4'te vardi; 5, 6 ve 7 unutmustu ve oyuncu o
+        # bolumlerde yumrukla dolasiyordu.
         # `amb_torch` donguluk sesi kaldirildi - bkz. chapter01.py ayni
         # tarihli not (Arda: sentezlenmis surekli sesler rahatsiz edici).
 

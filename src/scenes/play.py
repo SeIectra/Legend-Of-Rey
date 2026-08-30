@@ -178,6 +178,35 @@ class PlayScene(Scene):
         """
         for ability in getattr(self.save_data, "abilities", ()) or ():
             self.player.grant(ability)
+        self._grant_baseline()
+
+    def _grant_baseline(self) -> None:
+        """Bu bolume gelmis bir oyuncunun **mutlaka** sahip oldugu seyler.
+
+        Iki isi birden yapiyor:
+
+        1. **Eski kayitlari onariyor.** `abilities` alani bir donem hic
+           yazilmiyordu (bkz. `_restore_abilities`), yani 30.08 oncesi
+           her kayit bos. Yalnizca kayittan okusaydik o kayitlar
+           duzelmezdi - Arda'nin *"Bolum 6'da hala kilicim yoktu"*
+           bildirimi tam olarak buydu.
+
+        2. **Yeni bolumlerin unutmasini onluyor.** Bolum 3 ve 4 bunu
+           `setup()` icinde elle yapiyordu; 5, 6 ve 7 yapmayi unutmustu
+           ve kimse fark etmedi. Her bolume bir satir eklemek, birini
+           unutmanin yoluydu - nitekim ucu unutulmus.
+
+        Taban **bolum numarasindan** turuyor: oraya gelebilmis olmak o
+        yetenege sahip olmayi gerektiriyor.
+        """
+        if self.chapter_number <= 1:
+            return                      # B1 hikayenin kendisi - eli bos baslar
+        self.player.grant(abilities.SWORD)
+        if self.chapter_number >= 3:
+            self.player.grant(abilities.DODGE)
+            # Yanki gormesi Rey'e ait; Ardo'nun karsiligi Iz Surme.
+            if self.character != "ardo":
+                self.player.grant(abilities.ECHO_SIGHT)
 
     def _persist_abilities(self) -> None:
         """Oyuncunun yeteneklerini kayda yazar.
@@ -189,6 +218,26 @@ class PlayScene(Scene):
             return
         known = set(getattr(self.save_data, "abilities", ()) or ())
         self.save_data.abilities = sorted(known | set(self.player.abilities))
+
+    def _update_inventory_hint(self) -> None:
+        """Gercek bir **secimi** olan oyuncuya envanteri ogret.
+
+        Kosul "birden fazla silah" degil, "Bolum 2'nin odulu var mi":
+        yumruk + kilic de iki silah ama bir secim degil - kilic her
+        acidan daha iyi ve kimse yumruga donmez. Ipucu Bolum 1'de
+        cikiyordu ve orada tamamen anlamsizdi (test yakaladi).
+
+        Hancer/Balta ise gercek bir tercih (`src/ui/weapon_choice.py`):
+        hizli ve zayif mi, yavas ve agir mi.
+        """
+        if self.save_data is None:
+            return
+        from src.combat import weapons
+        from src.ui.equipment import owned
+        choices = owned(self.save_data)
+        if weapons.DAGGER not in choices and weapons.AXE not in choices:
+            return
+        self.hint_once("hint_inventory", "hint.inventory", Action.NEXT_TAB)
 
     def _sync_abilities(self) -> None:
         """Yetenek sayisi degistiyse kayda yaz.
@@ -445,6 +494,7 @@ class PlayScene(Scene):
         self._update_music()
         self.player.update()
         self._sync_abilities()
+        self._update_inventory_hint()
         self._update_companion_order()
         self._update_death()
         self._update_checkpoint()
@@ -548,6 +598,33 @@ class PlayScene(Scene):
         Alt sinif burada o durumlari geri kuruyor.
         """
 
+    # --- Ipuclari -----------------------------------------------------------
+    def hint_once(self, flag: str, message_key: str, action: Action,
+                  frames: int = 210) -> None:
+        """Bir tusu **bir kez** ogretir ve kayda isaretler.
+
+        Arda (30.08.2026): *"Tab ile envanter acacagimi ve U ile komut
+        verecegimin hint'i yok."* Iki yeni tus eklendi ve ikisi de
+        oyuncuya hic soylenmedi - bir tus varsa ama kimse bilmiyorsa
+        yok demektir.
+
+        **Tus adi tablodan okunuyor, sabit yazilmiyor.** Tuslar artik
+        yeniden atanabilir (`src/systems/bindings.py`); "Tab" diye
+        yazsaydik tusu degistiren oyuncuya yalan soylerdik.
+
+        Bir kez: `SaveData.flags`'e yaziliyor. Her odada tekrarlanan bir
+        ipucu ogut olur.
+        """
+        data = self.save_data
+        if data is None or data.flags.get(flag):
+            return
+        data.flags[flag] = True
+        from src.systems import bindings as binds
+        table = binds.read(self.game.settings)
+        self.show_toast(t(message_key,
+                          key=binds.labels_for(table, action)),
+                        frames=frames)
+
     # --- Yoldas komutu ------------------------------------------------------
     def _update_companion_order(self) -> None:
         """"Burada bekle / pesimden gel" - tek tus, iki durum.
@@ -558,6 +635,9 @@ class PlayScene(Scene):
         companion = getattr(self, "companion", None)
         if companion is None or self.player.dead:
             return
+        # Yoldas ilk kez yanindayken komutu ogret.
+        self.hint_once("hint_companion", "hint.companion_wait",
+                       Action.COMPANION_WAIT)
         if not self.game.input.pressed(Action.COMPANION_WAIT):
             return
         if companion.hold_x is None:

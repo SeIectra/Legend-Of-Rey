@@ -446,10 +446,15 @@
         "reset_done": "Tuşlar varsayılana döndü",
         "err_reserved": "ESC değiştirilemez — menüden çıkış ona bağlı",
         "err_last_key": "Bu tuş başka bir eylemin tek tuşu",
-        "companion_wait": "Yoldaş: bekle"
+        "companion_wait": "Yoldaş: bekle",
+        "resonate": "Rezonans"
     },
     "companion": {
         "waiting": "Burada bekliyor",
         "following": "Peşinden geliyor"
+    },
+    "hint": {
+        "inventory": "[{key}] envanter — silah değiştir",
+        "companion_wait": "[{key}] yoldaşa: burada bekle"
     }
 }

@@ -446,10 +446,15 @@
         "reset_done": "Controls restored to defaults",
         "err_reserved": "ESC can't be reassigned — it's how you leave menus",
         "err_last_key": "That's another action's only key",
-        "companion_wait": "Companion: wait"
+        "companion_wait": "Companion: wait",
+        "resonate": "Resonance"
     },
     "companion": {
         "waiting": "Waiting here",
         "following": "Following you"
+    },
+    "hint": {
+        "inventory": "[{key}] inventory — switch weapon",
+        "companion_wait": "[{key}] tell them to wait here"
     }
 }
