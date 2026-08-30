@@ -30,6 +30,8 @@ from src.art import palette
 from src.config import INTERNAL_HEIGHT, INTERNAL_WIDTH
 from src.core.input import Action
 from src.core.scene import Scene
+from src.systems import bindings as binds
+from src.systems.bindings import Binding, ResetBindings
 from src.systems.settings import Option, Slider, TABS
 from src.ui import text
 from src.ui.font_data import GLYPH_HEIGHT
@@ -44,6 +46,17 @@ VALUE_X = 244
 BAR_WIDTH = 70
 ROW_START_Y = 30           # Sekme seridinin altinda birakilan bosluk
 
+# Tus sekmesi IKI SUTUN. On bir tus + "varsayilanlara don" = on iki satir;
+# tek sutunda panele sigmiyordu (yer var: 10 satir). Kaydirma eklemek
+# yerine iki sutun: tus listesi zaten boyle okunuyor ve hicbir satir
+# gorunmez olmuyor.
+CONTROL_ROWS = 6
+CONTROL_COLUMN_WIDTH = (PANEL_WIDTH - 16) // 2
+# Yakalama sirasinda "bir tusa bas" kutusu.
+CAPTURE_BOX = (200, 54)
+# Hata mesaji bu kadar kare duruyor (~3 saniye).
+ERROR_FRAMES = 180
+
 
 class SettingsScene(Scene):
     blocks_update = True
@@ -55,6 +68,11 @@ class SettingsScene(Scene):
                            PANEL_X + 8, PANEL_Y + 8, PANEL_WIDTH - 16)
         self.row = 0
         self.mouse_visible = False
+        # Yakalama kipi: bir tus satiri secildi ve oyuncunun tusa
+        # basmasi bekleniyor. `None` = normal gezinme.
+        self.capturing: Binding | None = None
+        self.capture_error = ""
+        self.error_frames = 0
 
     # --- Sorgular -----------------------------------------------------------
     @property
@@ -69,19 +87,78 @@ class SettingsScene(Scene):
         return pygame.Rect(PANEL_X, PANEL_Y, PANEL_WIDTH,
                            INTERNAL_HEIGHT - PANEL_Y * 2)
 
+    @property
+    def controls_tab(self) -> bool:
+        return TABS[self.tabs.index][0] == "settings.tab_controls"
+
     def _row_rect(self, index: int) -> pygame.Rect:
         rect = self._panel_rect()
+        if self.controls_tab:
+            # Once birinci sutun yukaridan asagi, sonra ikinci: yukari/asagi
+            # bir sutunu geziyor, sag/sol sutun degistiriyor.
+            column, row = divmod(index, CONTROL_ROWS)
+            x = rect.x + 4 + column * CONTROL_COLUMN_WIDTH
+            y = rect.y + ROW_START_Y + row * ROW_HEIGHT
+            return pygame.Rect(x, y - 2, CONTROL_COLUMN_WIDTH - 4,
+                               ROW_HEIGHT - 2)
         y = rect.y + ROW_START_Y + index * ROW_HEIGHT
         return pygame.Rect(rect.x + 4, y - 2, rect.width - 8, ROW_HEIGHT - 2)
 
     # --- Girdi --------------------------------------------------------------
     def handle_event(self, event: pygame.event.Event) -> None:
+        if self.capturing is not None:
+            self._capture_event(event)
+            return
         if event.type == pygame.KEYDOWN and self.game.input.pressed(Action.CANCEL):
             self._close()
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             self._click()
 
+    def _capture_event(self, event: pygame.event.Event) -> None:
+        """Yakalama sirasindaki HAM olay.
+
+        Burada `Action` kullanilmiyor, ham tus kodu okunuyor - amac zaten
+        aksiyonlarin altindaki katmani degistirmek. `pressed(CONFIRM)`
+        dinlenseydi oyuncu Enter'i Enter'a baglayamazdi.
+        """
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                self._end_capture()             # ESC: vazgec
+                self.game.play_sound("ui_back")
+                return
+            self._commit_capture(event.key, gamepad=False)
+        elif event.type == pygame.JOYBUTTONDOWN:
+            self._commit_capture(event.button, gamepad=True)
+
+    def _commit_capture(self, code: int, gamepad: bool) -> None:
+        entry = self.capturing
+        if entry is None:
+            return
+        error = binds.assign(self.settings, entry.action, code, gamepad)
+        if error:
+            self.capture_error = t(error)
+            self.error_frames = ERROR_FRAMES
+            self.game.play_sound("ui_back")
+            return                              # Kutu acik kaliyor, tekrar dene
+        self._end_capture()
+        self.game.play_sound("ui_tick")
+
+    def _begin_capture(self, entry: Binding) -> None:
+        self.capturing = entry
+        self.capture_error = ""
+        self.error_frames = 0
+        self.game.play_sound("ui_tick")
+
+    def _end_capture(self) -> None:
+        self.capturing = None
+        self.capture_error = ""
+        self.error_frames = 0
+
     def update(self) -> None:
+        self.error_frames = max(0, self.error_frames - 1)
+        if self.capturing is not None:
+            # Yakalarken gezinme YOK: yon tuslari da atanabilir olmali.
+            return
         inp = self.game.input
 
         if inp.pressed(Action.UP):
@@ -92,7 +169,15 @@ class SettingsScene(Scene):
         if inp.pressed(Action.NEXT_TAB):
             self._switch_tab(1)
 
-        if inp.pressed(Action.LEFT):
+        if self.controls_tab:
+            # Tus satirinin "degeri" yok; sag/sol burada SUTUN degistiriyor.
+            if inp.pressed(Action.LEFT):
+                self._move_column(-1)
+            elif inp.pressed(Action.RIGHT):
+                self._move_column(1)
+            elif inp.pressed(Action.CONFIRM):
+                self._adjust(1)
+        elif inp.pressed(Action.LEFT):
             self._adjust(-1)
         elif inp.pressed(Action.RIGHT):
             self._adjust(1)
@@ -154,6 +239,12 @@ class SettingsScene(Scene):
             self.row = new_row
             self.game.play_sound("ui_tick")
 
+    def _move_column(self, direction: int) -> None:
+        target = self.row + direction * CONTROL_ROWS
+        if 0 <= target < len(self.entries):
+            self.row = target
+            self.game.play_sound("ui_tick")
+
     def _switch_tab(self, direction: int) -> None:
         self.tabs.move(direction)
         self.row = 0
@@ -161,6 +252,15 @@ class SettingsScene(Scene):
 
     def _adjust(self, direction: int) -> None:
         entry = self.current
+        if isinstance(entry, Binding):
+            self._begin_capture(entry)
+            return
+        if isinstance(entry, ResetBindings):
+            binds.reset(self.settings)
+            self.game.play_sound("ui_back")
+            self.capture_error = t("controls.reset_done")
+            self.error_frames = ERROR_FRAMES
+            return
         if isinstance(entry, Option):
             self._warn_if_slow(entry, direction)
             self.settings.cycle(entry, direction)
@@ -219,10 +319,31 @@ class SettingsScene(Scene):
         self._draw_tab_strip(surface, rect)
         self._draw_rows(surface, rect)
         self._draw_note(surface, rect)
+        self._draw_error(surface, rect)
 
-        text.draw(surface, t("settings.controls"),
+        # Ipucu sekmeye gore: tus sekmesinde sag/sol "degistir" degil
+        # **sutun** degistiriyor ve degisiklik CONFIRM ile basliyor.
+        # Tek bir ipucu yazmak oyuncuya yanlis tusu ogretirdi.
+        hint = ("settings.controls_binding" if self.controls_tab
+                else "settings.controls")
+        text.draw(surface, t(hint),
                   INTERNAL_WIDTH // 2, INTERNAL_HEIGHT - 16,
                   color=palette.role("ui_text_dim"), align="center")
+        # Yakalama kutusu EN USTTE: modal oldugu goruntuden de anlasilmali.
+        self._draw_capture_box(surface)
+
+    def _draw_error(self, surface: pygame.Surface,
+                    panel_rect: pygame.Rect) -> None:
+        """Catisma / sifirlama bildirimi.
+
+        Notun yerine degil **ustune** ciziliyor ve kendiliginden soluyor:
+        kalici bir uyari sonraki oyuncuya "bir sey bozuk" der.
+        """
+        if self.error_frames <= 0 or not self.capture_error:
+            return
+        text.draw(surface, self.capture_error, panel_rect.centerx,
+                  panel_rect.bottom - GLYPH_HEIGHT * 2 - 8,
+                  color=palette.color("danger_bright"), align="center")
 
     def _draw_tab_strip(self, surface: pygame.Surface,
                         panel_rect: pygame.Rect) -> None:
@@ -236,23 +357,26 @@ class SettingsScene(Scene):
                          (strip.left, strip.bottom), (strip.right, strip.bottom))
 
     def _draw_rows(self, surface: pygame.Surface, panel_rect: pygame.Rect) -> None:
-        y = panel_rect.y + ROW_START_Y
         for index, entry in enumerate(self.entries):
             selected = index == self.row
             colour = (palette.role("ui_text") if selected
                       else palette.role("ui_text_dim"))
+            # Satirin yeri **tek kaynaktan**: `_row_rect`. Cizim kendi
+            # `y`'sini sayiyordu; tek sutunda ikisi ayni sonucu veriyordu
+            # ama tus sekmesi iki sutunlu ve orada butun satirlar ust uste
+            # binerdi - fare vurusu ise dogru yerde olurdu.
+            row_rect = self._row_rect(index)
+            y = row_rect.y + 2
 
             if selected:
-                highlight = self._row_rect(index)
-                surface.fill(palette.color("ink_soft"), highlight)
+                surface.fill(palette.color("ink_soft"), row_rect)
                 pygame.draw.rect(surface, palette.color("violet_bright"),
-                                 highlight, 1)
-                text.draw(surface, "▸", panel_rect.x + 8, y,
+                                 row_rect, 1)
+                text.draw(surface, "▸", row_rect.x + 4, y,
                           color=palette.color("violet_bright"))
 
-            text.draw(surface, entry.label, panel_rect.x + 20, y, color=colour)
+            text.draw(surface, entry.label, row_rect.x + 16, y, color=colour)
             self._draw_value(surface, entry, y, colour, selected)
-            y += ROW_HEIGHT
 
     def _draw_value(self, surface: pygame.Surface, entry, y: int,
                     colour, selected: bool) -> None:
@@ -261,6 +385,11 @@ class SettingsScene(Scene):
         Oklar yalnizca **secili satirda** gorunur - her zaman acik olsaydi
         gezinme oku ile "su an buradasin" isareti birbirine karisirdi.
         """
+        if isinstance(entry, ResetBindings):
+            return
+        if isinstance(entry, Binding):
+            self._draw_binding_value(surface, entry, y, colour, selected)
+            return
         if isinstance(entry, Option):
             value = self.settings.get(entry.key)
             label = entry.label_for(value)
@@ -279,6 +408,54 @@ class SettingsScene(Scene):
                       VALUE_X + BAR_WIDTH + 6, y, color=colour)
             if selected:
                 text.draw(surface, "<", VALUE_X - 8, y, color=colour)
+
+    def _draw_binding_value(self, surface: pygame.Surface, entry: Binding,
+                            y: int, colour, selected: bool) -> None:
+        """Atanmis tus - satirin SAG ucunda, sutun genisligine gore.
+
+        Sabit bir `VALUE_X` kullanilamiyor: iki sutun var ve ikincisi
+        ekranin sagina dusuyor.
+        """
+        rect = self._row_rect(self.entries.index(entry))
+        capturing = self.capturing is entry
+        table = binds.read(self.settings)
+        label = ("..." if capturing
+                 else binds.labels_for(table, entry.action))
+        bright = (palette.color("violet_bright") if capturing
+                  else palette.role("ui_text_bright") if selected else colour)
+        text.draw(surface, label, rect.right - 6, y, color=bright,
+                  align="right")
+
+    def _draw_capture_box(self, surface: pygame.Surface) -> None:
+        """"Bir tusa bas" kutusu.
+
+        Ekranin ortasinda ve **modal**: yakalama sirasinda gezinme kapali
+        oldugu icin oyuncunun neden hicbir seyin hareket etmedigini
+        anlamasi gerekiyor.
+        """
+        if self.capturing is None:
+            return
+        veil = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT), pygame.SRCALPHA)
+        veil.fill((*palette.color("void"), 180))
+        surface.blit(veil, (0, 0))
+
+        box = pygame.Rect(0, 0, *CAPTURE_BOX)
+        box.center = (INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2)
+        # **Once opak dolgu, sonra cerceve.** `panel()` yari saydam
+        # ciziyor ve arkadaki satirlar kutunun icinden okunuyordu -
+        # "bir tusa bas" yazisi baska bir satirin uzerine binmis gibi
+        # gorunuyordu.
+        surface.fill(palette.color("void"), box)
+        panel(surface, box)
+        text.draw(surface, self.capturing.label, box.centerx, box.y + 8,
+                  color=palette.role("ui_text_dim"), align="center")
+        text.draw(surface, t("controls.press_key"), box.centerx, box.y + 22,
+                  color=palette.color("violet_bright"), align="center")
+        # Ipucu kutunun ICINDE: disarida cizilince arkadaki satirlarin
+        # arasinda kayboluyordu.
+        text.draw(surface, t("controls.cancel_hint"), box.centerx,
+                  box.bottom - GLYPH_HEIGHT - 6,
+                  color=palette.role("ui_text_dim"), align="center")
 
     def _draw_note(self, surface: pygame.Surface,
                    panel_rect: pygame.Rect) -> None:

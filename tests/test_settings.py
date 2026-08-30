@@ -43,7 +43,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pygame  # noqa: E402
 
 from src.core.game import Game  # noqa: E402
-from src.systems.settings import ALL_ENTRIES, Option  # noqa: E402
+from src.core.input import DEFAULT_KEYBOARD, Action  # noqa: E402
+from src.systems import bindings as binds  # noqa: E402
+from src.systems.bindings import ResetBindings  # noqa: E402
+from src.systems.settings import ALL_ENTRIES, TABS, Option  # noqa: E402
 from src.ui.i18n import t  # noqa: E402
 from src.ui.settings_scene import SettingsScene  # noqa: E402
 
@@ -126,14 +129,115 @@ def main() -> int:
     finally:
         game.shutdown()
 
+    test_bindings()
+
     print("\n=== SONUC ===")
     if failures:
         print(f"{len(failures)} BASARISIZ:")
         for line in failures:
             print(f"  - {line}")
         return 1
-    print("Oyun kolu ayari saglam - acilis hizli kaliyor.")
+    print("Ayarlar saglam: acilis hizli, tuslar atanabiliyor.")
     return 0
+
+
+def test_bindings() -> None:
+    """Tus yeniden atama - `CLAUDE.md` 10'un zorunlu tuttugu ekran.
+
+    Korunan kurallar (gerekceler `src/systems/bindings.py`'de):
+      * ESC atanamaz - menuden cikis ona bagli
+      * Baska bir aksiyonun SON tusu calinamaz
+      * Atama canli girdi katmanina ANINDA gecer
+      * Sifirlama da canli katmana geciyor (bir donem gecmiyordu)
+    """
+    print("\n=== tus yeniden atama ===")
+    game = Game()
+    try:
+        game.scenes.push(SettingsScene)
+        game.scenes._flush()
+        scene = game.scenes.current
+        assert scene is not None
+
+        controls = next(i for i, (key, _) in enumerate(TABS)
+                        if key == "settings.tab_controls")
+        scene.tabs.index = controls
+        scene.row = 0
+        check("tus sekmesi var", scene.controls_tab)
+        check("on iki satir", len(scene.entries) == 12,
+              str(len(scene.entries)))
+
+        # Iki sutun: 0. ve 6. satir ayni yukseklikte, farkli x.
+        first, second = scene._row_rect(0), scene._row_rect(6)
+        check("iki sutun yan yana",
+              first.y == second.y and first.x < second.x,
+              f"{first.topleft} / {second.topleft}")
+
+        def row_for(action: Action) -> int:
+            return next(i for i, e in enumerate(scene.entries)
+                        if getattr(e, "action", None) is action)
+
+        def press(key: int) -> None:
+            scene._capture_event(pygame.event.Event(pygame.KEYDOWN, key=key))
+
+        # --- Normal atama ---
+        scene.row = row_for(Action.JUMP)
+        scene._adjust(1)
+        check("yakalama basliyor", scene.capturing is not None)
+        press(pygame.K_k)
+        table = binds.read(game.settings)
+        check("tus atandi", table[Action.JUMP] == (pygame.K_k,),
+              binds.labels_for(table, Action.JUMP))
+        check("yakalama kapandi", scene.capturing is None)
+        check("canli girdi katmani guncellendi",
+              game.input.keyboard[Action.JUMP] == (pygame.K_k,))
+        # K, Yanki'da da vardi (K/Q): oradan silinmis ama Q durmali.
+        check("catisan tus oteki aksiyondan alindi",
+              pygame.K_k not in table[Action.ECHO]
+              and pygame.K_q in table[Action.ECHO],
+              binds.labels_for(table, Action.ECHO))
+
+        # --- ESC reddi ---
+        scene.row = row_for(Action.ATTACK)
+        scene._adjust(1)
+        press(pygame.K_ESCAPE)
+        check("ESC yakalamayi IPTAL ediyor, atanmiyor",
+              scene.capturing is None
+              and pygame.K_ESCAPE not in binds.read(game.settings)[Action.ATTACK])
+
+        # --- Son tus calinamaz ---
+        # ECHO_ASK'in tek tusu F; onu baskasina vermeye calis.
+        scene.row = row_for(Action.INTERACT)
+        scene._adjust(1)
+        press(pygame.K_f)
+        table = binds.read(game.settings)
+        check("son tus calinamiyor",
+              bool(scene.capture_error) and table[Action.ECHO_ASK] == (pygame.K_f,),
+              scene.capture_error)
+        check("reddedilince kutu ACIK kaliyor", scene.capturing is not None)
+        scene._end_capture()
+
+        # --- Sifirlama ---
+        scene.row = len(scene.entries) - 1
+        check("son satir sifirlama",
+              isinstance(scene.current, ResetBindings))
+        scene._adjust(1)
+        table = binds.read(game.settings)
+        check("sifirlama varsayilani geri getirdi",
+              table[Action.JUMP] == DEFAULT_KEYBOARD[Action.JUMP],
+              binds.labels_for(table, Action.JUMP))
+        # Bir donem `apply_bindings` yalnizca uzerine yaziyordu ve
+        # sifirlama ancak oyun yeniden acilinca goruluyordu.
+        check("sifirlama CANLI katmana da gecti",
+              game.input.keyboard[Action.JUMP] == DEFAULT_KEYBOARD[Action.JUMP],
+              str(game.input.keyboard[Action.JUMP]))
+
+        # --- Uzun listeler tasmasin ---
+        long_label = binds.labels_for(binds.read(game.settings), Action.JUMP)
+        check("uzun tus listesi kisaltiliyor",
+              long_label.count("/") < len(DEFAULT_KEYBOARD[Action.JUMP]) - 1,
+              long_label)
+    finally:
+        game.shutdown()
 
 
 if __name__ == "__main__":

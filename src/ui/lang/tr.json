@@ -128,7 +128,9 @@
         "postfx_note": "Kenar karartması ve bölüm renk tonu. Kapatınca sahne düz görünür.",
         "gamepad": "Oyun kolu",
         "gamepad_note": "Kapalıyken açılış anında. Açarken kol taraması uzun sürebilir.",
-        "gamepad_scanning": "Oyun kolu aranıyor..."
+        "gamepad_scanning": "Oyun kolu aranıyor...",
+        "tab_controls": "Tuşlar",
+        "controls_binding": "[▴▾] gez   [◂▸] sütun   [Enter] ata   [Esc] kapat"
     },
     "ability": {
         "sword": "KILIÇ  ·  J ile saldır",
@@ -418,5 +420,25 @@
         "order_hint": "Omuzların sığmıyor — ona işaret et",
         "door_open": "Kapı açıldı",
         "gap_blocked": "Bu aralıktan geçemezsin"
+    },
+    "controls": {
+        "left": "Sol",
+        "right": "Sağ",
+        "up": "Yukarı",
+        "down": "Aşağı",
+        "jump": "Zıpla",
+        "attack": "Saldır",
+        "dodge": "Kaçın",
+        "echo": "Yankı",
+        "echo_ask": "Yankı'ya sor",
+        "interact": "Etkileşim",
+        "pause": "Duraklat",
+        "reset": "Varsayılanlara dön",
+        "reset_note": "Klavye ve oyun kolu atamalarının ikisi de sıfırlanır.",
+        "press_key": "BİR TUŞA BAS",
+        "cancel_hint": "ESC ile vazgeç",
+        "reset_done": "Tuşlar varsayılana döndü",
+        "err_reserved": "ESC değiştirilemez — menüden çıkış ona bağlı",
+        "err_last_key": "Bu tuş başka bir eylemin tek tuşu"
     }
 }

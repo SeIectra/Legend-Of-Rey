@@ -112,7 +112,8 @@ class Game:
         # temizler ve bir sonraki cizimde yeniden uretilirler.
         palette.set_mode(self.settings.get("colorblind", "none"))
 
-        self.input = InputManager(self.settings.get("bindings"))
+        self.input = InputManager(self.settings.get("bindings"),
+                                  self.settings.get("pad_bindings"))
         # Kayitli kol ayarini uygula. **Acilis yolunda 40 saniye demek** -
         # ama oyuncu bunu bilerek acti ve kolunu kullanmak istiyor. Kapali
         # (varsayilan) ise hicbir bedel yok.
@@ -287,6 +288,8 @@ class Game:
             self._create_window()
         elif key == "bindings" and isinstance(value, dict):
             self.input.apply_bindings(value)
+        elif key == "pad_bindings" and isinstance(value, dict):
+            self.input.apply_bindings(value, gamepad=True)
         elif key == "language" and isinstance(value, str):
             self._apply_language(value)
         elif key == "colorblind" and isinstance(value, str):

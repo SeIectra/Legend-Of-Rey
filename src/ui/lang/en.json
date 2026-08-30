@@ -128,7 +128,9 @@
         "postfx_note": "Edge darkening and per-chapter colour tone. Off shows the raw scene.",
         "gamepad": "Gamepad",
         "gamepad_note": "Off starts instantly. Turning it on scans for pads; can be slow.",
-        "gamepad_scanning": "Looking for a controller..."
+        "gamepad_scanning": "Looking for a controller...",
+        "tab_controls": "Controls",
+        "controls_binding": "[▴▾] move   [◂▸] column   [Enter] bind   [Esc] close"
     },
     "ability": {
         "sword": "SWORD  ·  attack with J",
@@ -418,5 +420,25 @@
         "order_hint": "Your shoulders won't fit — signal to them",
         "door_open": "The door is open",
         "gap_blocked": "You can't fit through this gap"
+    },
+    "controls": {
+        "left": "Left",
+        "right": "Right",
+        "up": "Up",
+        "down": "Down",
+        "jump": "Jump",
+        "attack": "Attack",
+        "dodge": "Dodge",
+        "echo": "Echo",
+        "echo_ask": "Ask the Echo",
+        "interact": "Interact",
+        "pause": "Pause",
+        "reset": "Restore defaults",
+        "reset_note": "Resets both keyboard and gamepad bindings.",
+        "press_key": "PRESS A KEY",
+        "cancel_hint": "ESC to cancel",
+        "reset_done": "Controls restored to defaults",
+        "err_reserved": "ESC can't be reassigned — it's how you leave menus",
+        "err_last_key": "That's another action's only key"
     }
 }

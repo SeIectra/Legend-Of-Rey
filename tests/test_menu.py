@@ -113,7 +113,15 @@ def main() -> int:
     # --- 2. Ayarlar ---------------------------------------------------------
     print("\n--- ayarlar ---")
     settings = Settings()
-    check(len(TABS) == 3, "uc sekme", ", ".join(t[0] for t in TABS))
+    # Dort sekme: Goruntu, Ses, Oynanis, **Tuslar**. Sonuncusu
+    # 30.08.2026'da eklendi (`CLAUDE.md` 10'un bastan zorunlu tuttugu tus
+    # yeniden atama). Sayiyi degil **hangi sekmeler oldugunu** sinamak
+    # daha bilgilendirici: bir sekme yanlislikla dusetse sayi yine
+    # tutabilir.
+    tab_keys = [key for key, _ in TABS]
+    check(tab_keys == ["settings.tab_display", "settings.tab_audio",
+                       "settings.tab_gameplay", "settings.tab_controls"],
+          "dort sekme, dogru sirada", ", ".join(tab_keys))
 
     shake_option = next(o for o in DISPLAY_OPTIONS
                         if getattr(o, "key", "") == "screen_shake")

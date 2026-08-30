@@ -99,13 +99,16 @@ GAMEPAD_LABELS: dict[int, str] = {
 
 
 class InputManager:
-    def __init__(self, bindings: dict[str, list[int]] | None = None) -> None:
+    def __init__(self, bindings: dict[str, list[int]] | None = None,
+                 pad_bindings: dict[str, list[int]] | None = None) -> None:
         # Tuple, set degil: ilk eleman "birincil" tus sayilir ve arayuzde
         # oyuncuya o gosterilir.
         self.keyboard = {a: tuple(k) for a, k in DEFAULT_KEYBOARD.items()}
         self.gamepad = {a: tuple(b) for a, b in DEFAULT_GAMEPAD.items()}
         if bindings:
             self.apply_bindings(bindings)
+        if pad_bindings:
+            self.apply_bindings(pad_bindings, gamepad=True)
 
         self._held: set[Action] = set()
         self._pressed: set[Action] = set()
@@ -123,13 +126,32 @@ class InputManager:
         self.gamepad_enabled = False
 
     # --- Kurulum ------------------------------------------------------------
-    def apply_bindings(self, bindings: dict[str, list[int]]) -> None:
+    def apply_bindings(self, bindings: dict[str, list[int]],
+                       gamepad: bool = False) -> None:
+        """Atamalari uygular. **Once varsayilanlara doner, sonra bindirir.**
+
+        Bir donem yalnizca uzerine yaziyordu ve iki sessiz hata veriyordu:
+
+          * "varsayilanlara don" canli oyuna yansimiyordu (bos sozluk
+            hicbir seyi geri almiyor, eski atama yerinde kaliyordu)
+          * kayit yalnizca DEGISEN aksiyonlari tutuyor
+            (`bindings._write`), yani bir tus varsayilanina donunce
+            sozlukten dusuyor - ve dusen sey geri yuklenmiyordu
+
+        Ikisi de ancak oyunu kapatip acinca duzeliyordu.
+        """
+        table = DEFAULT_GAMEPAD if gamepad else DEFAULT_KEYBOARD
+        target = {action: tuple(codes) for action, codes in table.items()}
         for name, keys in bindings.items():
             try:
                 action = Action[name]
             except KeyError:
                 continue        # Eski surumden kalan bilinmeyen aksiyon
-            self.keyboard[action] = tuple(keys)
+            target[action] = tuple(keys)
+        if gamepad:
+            self.gamepad = target
+        else:
+            self.keyboard = target
 
     def _init_joysticks(self) -> None:
         """Bagli kollari acar. Alt sistem hazir degilse **hicbir sey yapmaz**.

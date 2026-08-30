@@ -149,10 +149,18 @@ GAMEPLAY_OPTIONS: tuple[Option | Slider, ...] = (
            note_key="settings.gamepad_note"),
 )
 
+# Tus atama sekmesi: girdileri `Binding` / `ResetBindings` - `Option` ya
+# da `Slider` degil. Ayarlar ekrani uc turu de tanıyor.
+#
+# Ayri dosyada (`src/systems/bindings.py`) cunku tus atamanin kendi
+# kurallari var: catisma, ayrilmis tuslar, son tusu koruma. Gerekce orada.
+from src.systems.bindings import CONTROL_ENTRIES        # noqa: E402
+
 TABS: tuple[tuple[str, tuple], ...] = (
     ("settings.tab_display", DISPLAY_OPTIONS),
     ("settings.tab_audio", AUDIO_OPTIONS),
     ("settings.tab_gameplay", GAMEPLAY_OPTIONS),
+    ("settings.tab_controls", CONTROL_ENTRIES),
 )
 
 ALL_ENTRIES: tuple = DISPLAY_OPTIONS + AUDIO_OPTIONS + GAMEPLAY_OPTIONS
