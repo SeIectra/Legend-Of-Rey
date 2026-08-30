@@ -118,8 +118,9 @@ class InputManager:
         self.mouse_moved = False
 
         self.joysticks: list[pygame.joystick.Joystick] = []
-        self._joystick_ready = False
-        self._begin_joystick_init()
+        # Kol destegi **acilista kurulmuyor** - ayardan aciliyor
+        # (`set_gamepad_enabled`). Gerekce orada yazili.
+        self.gamepad_enabled = False
 
     # --- Kurulum ------------------------------------------------------------
     def apply_bindings(self, bindings: dict[str, list[int]]) -> None:
@@ -149,40 +150,33 @@ class InputManager:
             except pygame.error:
                 pass
 
-    def _begin_joystick_init(self) -> None:
-        """Joystick alt sistemini **arka planda** acar.
+    def set_gamepad_enabled(self, enabled: bool) -> None:
+        """Kol destegini acar/kapatir. Ayar degisince cagriliyor.
 
-        Oyun klavye ve fareyle aninda basliyor; kol destegi tarama
-        bitince katiliyor. Bu makinede tarama 40 saniye suruyor ve
-        oyuncuyu o kadar bekletmenin hicbir karsiligi yok.
+        **Acmak BLOKLAR.** `pygame.joystick.init()` bu makinede 40.3
+        saniye suruyor ve bunu kacinmanin yolu yok:
 
-        Thread yalnizca `pygame.joystick.init()` cagiriyor - `Joystick`
-        NESNELERI ana is parcaciginda uretiliyor (`poll_ready`). SDL'in
-        nesne yasam dongusunu is parcaciklari arasinda gezdirmek
-        gereksiz bir risk; alt sistem acilisi ise guvenli.
+          * yedi SDL ayari denendi (HIDAPI, RAWINPUT, WGI, DIRECTINPUT,
+            XINPUT, THREAD) - hicbiri sureyi degistirmedi,
+          * arka plan is parcacigi da ise yaramadi: cagri **GIL'i
+            birakmiyor**, 40 saniyede ana is parcacigi 1 tur donebildi.
+
+        O yuzden cozum teknik degil **tasarimsal**: oyuncu istedigi zaman
+        oduyor. Ayar varsayilan kapali; acan bir kez bekliyor ve o
+        oturumda kolu calisiyor.
+
+        Ayarlar ekrani bu cagridan ONCE "kol araniyor" yazisini ciziyor
+        (`settings_scene`), yoksa donma bir hata gibi gorunurdu.
         """
-        import threading
-
-        def _work() -> None:
+        self.gamepad_enabled = bool(enabled)
+        if not enabled:
+            self.joysticks = []
+            return
+        if not pygame.joystick.get_init():
             try:
                 pygame.joystick.init()
             except pygame.error:
-                pass
-            self._joystick_ready = True
-
-        self._joystick_ready = False
-        thread = threading.Thread(target=_work, daemon=True,
-                                  name="joystick-init")
-        thread.start()
-
-    def poll_ready(self) -> None:
-        """Arka plan taramasi bittiyse kollari topla. Her kare cagriliyor.
-
-        Bir kez calisiyor: `_joystick_ready` tuketiliyor.
-        """
-        if not getattr(self, "_joystick_ready", False):
-            return
-        self._joystick_ready = False
+                return
         self._init_joysticks()
 
     def rebind(self, action: Action, keys: tuple[int, ...]) -> None:
@@ -215,8 +209,6 @@ class InputManager:
     # --- Kare dongusu -------------------------------------------------------
     def begin_frame(self) -> None:
         """Her karenin basinda: edge kumelerini temizle, tamponu eskit."""
-        # Arka plan joystick taramasi bittiyse kollari topla (bir kez).
-        self.poll_ready()
         self._pressed.clear()
         self._released.clear()
         self.mouse_moved = False
@@ -247,7 +239,11 @@ class InputManager:
             self.mouse_moved = True
             self.last_device = "mouse"
         elif event.type in (pygame.JOYDEVICEADDED, pygame.JOYDEVICEREMOVED):
-            self._init_joysticks()
+            # Yalnizca destek acikken: kapaliyken alt sistem zaten
+            # kurulmadigi icin bu olaylar hic gelmiyor, ama gelirse de
+            # 40 saniyelik taramayi tetiklememeli.
+            if self.gamepad_enabled:
+                self._init_joysticks()
 
     def _dispatch(self, table: dict[Action, tuple[int, ...]], code: int,
                   pressed: bool) -> None:

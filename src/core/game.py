@@ -113,6 +113,11 @@ class Game:
         palette.set_mode(self.settings.get("colorblind", "none"))
 
         self.input = InputManager(self.settings.get("bindings"))
+        # Kayitli kol ayarini uygula. **Acilis yolunda 40 saniye demek** -
+        # ama oyuncu bunu bilerek acti ve kolunu kullanmak istiyor. Kapali
+        # (varsayilan) ise hicbir bedel yok.
+        if self.settings.get("gamepad", False):
+            self.input.set_gamepad_enabled(True)
         self.scenes = SceneManager(self)
 
         self.running = False
@@ -274,7 +279,11 @@ class Game:
 
     def _on_setting_changed(self, key: str, value: object) -> None:
         """Ayar degisince aninda uygula - 'Kaydet' butonu yok."""
-        if key in ("fullscreen", "scale", "vsync"):
+        if key == "gamepad":
+            # Acmak 40 saniye blokluyor (bkz. `InputState`). Ayarlar
+            # ekrani bu cagridan once uyari yazisini ciziyor.
+            self.input.set_gamepad_enabled(bool(value))
+        elif key in ("fullscreen", "scale", "vsync"):
             self._create_window()
         elif key == "bindings" and isinstance(value, dict):
             self.input.apply_bindings(value)
@@ -446,7 +455,18 @@ class Game:
         if self.debug_overlay:
             self._draw_debug()
         self._draw_cursor()
+        self.present()
 
+    def present(self) -> None:
+        """Tuvali ekrana olcekleyip **basar**.
+
+        `_render`'dan ayri duruyor cunku bazen normal dongu disinda bir
+        kare gostermek gerekiyor: uzun surecek bir isten (kol taramasi)
+        hemen once. Dongu o sirada donmus oluyor; bu cagri olmadan
+        oyuncu ekranin cakildigini sanir.
+        """
+        if self.screen is None:
+            return
         self.screen.fill((0, 0, 0))
         if self.viewport.size == self.canvas.get_size():
             self.screen.blit(self.canvas, self.viewport.topleft)

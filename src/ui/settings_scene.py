@@ -162,11 +162,40 @@ class SettingsScene(Scene):
     def _adjust(self, direction: int) -> None:
         entry = self.current
         if isinstance(entry, Option):
+            self._warn_if_slow(entry, direction)
             self.settings.cycle(entry, direction)
         else:
             self.settings.adjust(entry, direction)
         self.game.play_sound("ui_slider" if isinstance(entry, Slider)
                              else "ui_tick")
+
+    def _warn_if_slow(self, entry: Option, direction: int) -> None:
+        """Uzun surecek bir ayar acilmadan ONCE ekrana yazi bas.
+
+        Kol taramasi bu makinede 40 saniye suruyor ve `settings.cycle`
+        onu **hemen** tetikliyor. Yazi sonra cizilseydi oyuncu 40 saniye
+        donmus bir ekrana bakardi ve oyunun cocktugunu sanardi - nitekim
+        acilista tam olarak oyle goruniyordu.
+
+        Bu yuzden kare burada elle ciziliyor ve ekrana **basiliyor**;
+        blokli cagri ondan sonra geliyor.
+        """
+        if entry.key != "gamepad":
+            return
+        index = entry.index_of(self.settings.get(entry.key))
+        turning_on = entry.values[(index + direction) % len(entry.values)]
+        if not turning_on:
+            return
+
+        surface = self.game.canvas
+        self.draw(surface)
+        box = pygame.Rect(0, 0, 260, 34)
+        box.center = (INTERNAL_WIDTH // 2, INTERNAL_HEIGHT // 2)
+        panel(surface, box)
+        text.draw(surface, t("settings.gamepad_scanning"),
+                  INTERNAL_WIDTH // 2, box.y + 12,
+                  color=palette.color("gold"), align="center")
+        self.game.present()
 
     def _close(self) -> None:
         self.game.play_sound("ui_back")

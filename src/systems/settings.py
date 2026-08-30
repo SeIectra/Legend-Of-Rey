@@ -131,6 +131,22 @@ GAMEPLAY_OPTIONS: tuple[Option | Slider, ...] = (
            ("common.off", "common.on")),
     Option("rumble", "settings.rumble", (True, False),
            ("common.on", "common.off")),
+    # **Gamepad varsayilan KAPALI** ve bu bir tercih degil bir zorunluluk.
+    #
+    # `pygame.joystick.init()` bu makinede **40.3 saniye** suruyor ve
+    # sonunda sifir kol buluyor (olculdu). Sebep sistemde: SDL'in cihaz
+    # taramasi bozuk bir surucude takilip zaman asimina dusuyor. Yedi ayri
+    # SDL ayari denendi (HIDAPI, RAWINPUT, WGI, DIRECTINPUT, XINPUT,
+    # THREAD), hicbiri degistirmedi; arka plan is parcacigi da ise
+    # yaramadi cunku cagri GIL'i birakmiyor (40 saniyede ana is parcacigi
+    # 1 tur donebildi).
+    #
+    # Yani tarama **kacinilmaz olarak** oyunu dondurur. Kolu olmayan
+    # oyuncunun bunu odemesi icin hicbir sebep yok; kolu olan bir kez
+    # aciyor ve o oturumda odiyor.
+    Option("gamepad", "settings.gamepad", (False, True),
+           ("common.off", "common.on"),
+           note_key="settings.gamepad_note"),
 )
 
 TABS: tuple[tuple[str, tuple], ...] = (
