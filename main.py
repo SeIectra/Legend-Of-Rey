@@ -46,6 +46,8 @@ SCENES = {
     "bolum8": ("src.scenes.chapter08", "Chapter08Scene"),
     "bolum8-ates": ("src.scenes.chapter08_cinematics", "FiresideCinematic"),
     "bolum8-fisilti": ("src.scenes.chapter08_cinematics", "WhisperCinematic"),
+    "bolum9": ("src.scenes.chapter09", "Chapter09Scene"),
+    "bolum9-guven": ("src.scenes.chapter09_cinematics", "TrustCinematic"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }

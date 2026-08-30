@@ -257,7 +257,15 @@
         "ch08_rey_learn": "That crystal... it's humming. Like it's waiting for something.",
         "ch08_ardo_learn": "The crystal holds sound. It breaks at the right pitch.",
         "ch08_rey_gate": "The way's blocked. And I can't reach the lever.",
-        "ch08_ardo_gate": "The latch is behind the wall. Our hands won't reach — our voice will."
+        "ch08_ardo_gate": "The latch is behind the wall. Our hands won't reach — our voice will.",
+        "ch09_rey_tower": "A tower... and it's hollow. Three bells hanging up there.",
+        "ch09_ardo_tower": "A bell tower. The top has fallen in — and there were never any stairs.",
+        "ch09_rey_top": "The fresco was right. That was the order.",
+        "ch09_ardo_top": "The door recognised the sound. Right order.",
+        "ch09_trust_offer_ardo": "You can't make that jump. Use my hands as a step — I'll lift you.",
+        "ch09_trust_offer_rey": "You can't make that jump. Use my hands as a step — I'll lift you.",
+        "ch09_trust_accept_rey": "All right. You won't let go, will you?",
+        "ch09_trust_accept_ardo": "All right. Hold tight."
     },
     "combat": {
         "counter": "COUNTER",
@@ -293,7 +301,8 @@
         "waters": "The Waters",
         "ardo": "ARDO",
         "narrow_pass": "The Narrow Pass",
-        "fireside": "The Fireside"
+        "fireside": "The Fireside",
+        "bell_tower": "The Bell Tower"
     },
     "chapter_end": {
         "heading": "CHAPTER COMPLETE",
@@ -471,10 +480,16 @@
     "hint": {
         "inventory": "[{key}] inventory — switch weapon",
         "companion_wait": "[{key}] tell them to wait here",
-        "resonance": "[{key}] resonance — break it with sound"
+        "resonance": "[{key}] resonance — break it with sound",
+        "boost": "[{key}] beside them: they'll launch you"
     },
     "chapter08": {
         "first_crystal": "Crystal shattered — sound is a weapon",
         "latch": "The latch gave way"
+    },
+    "chapter09": {
+        "first_boost": "Up — you climb together",
+        "wrong_order": "Wrong order. The bells fell silent — check the fresco.",
+        "solved": "Three bells, right order. The door is open."
     }
 }

@@ -257,7 +257,15 @@
         "ch08_rey_learn": "Şu kristal... titriyor. Sanki bir şey bekliyor.",
         "ch08_ardo_learn": "Kristal ses tutuyor. Doğru perdede kırılır.",
         "ch08_rey_gate": "Yol kapalı. Ve kolun olduğu yere ulaşamıyorum.",
-        "ch08_ardo_gate": "Mandal duvarın ardında. Elimiz yetmez — sesimiz yeter."
+        "ch08_ardo_gate": "Mandal duvarın ardında. Elimiz yetmez — sesimiz yeter.",
+        "ch09_rey_tower": "Bir kule... ve içi boş. Yukarıda üç çan asılı.",
+        "ch09_ardo_tower": "Çan kulesi. Yukarısı çökmüş ama merdiven yok — hiç olmamış.",
+        "ch09_rey_top": "Fresk doğruydu. Sıra buymuş.",
+        "ch09_ardo_top": "Kapı sesi tanıdı. Doğru sıra.",
+        "ch09_trust_offer_ardo": "Buradan atlayamazsın. Elimi basamak yap — seni ben kaldırırım.",
+        "ch09_trust_offer_rey": "Buradan atlayamazsın. Elimi basamak yap — seni ben kaldırırım.",
+        "ch09_trust_accept_rey": "Tamam. Bırakmazsın, değil mi?",
+        "ch09_trust_accept_ardo": "Tamam. Sıkı tut."
     },
     "combat": {
         "counter": "KARŞI VURUŞ",
@@ -293,7 +301,8 @@
         "waters": "Sular",
         "ardo": "ARDO",
         "narrow_pass": "Dar Geçit",
-        "fireside": "Ateş Başı"
+        "fireside": "Ateş Başı",
+        "bell_tower": "Çan Kulesi"
     },
     "chapter_end": {
         "heading": "BÖLÜM TAMAMLANDI",
@@ -471,10 +480,16 @@
     "hint": {
         "inventory": "[{key}] envanter — silah değiştir",
         "companion_wait": "[{key}] yoldaşa: burada bekle",
-        "resonance": "[{key}] rezonans — sesle kır"
+        "resonance": "[{key}] rezonans — sesle kır",
+        "boost": "[{key}] yoldaşın yanında: seni fırlatır"
     },
     "chapter08": {
         "first_crystal": "Kristal kırıldı — ses bir silah",
         "latch": "Mandal açıldı"
+    },
+    "chapter09": {
+        "first_boost": "Yukarı — birlikte çıkılıyor",
+        "wrong_order": "Yanlış sıra. Çanlar sustu — freske bak.",
+        "solved": "Üç çan, doğru sıra. Kapı açıldı."
     }
 }

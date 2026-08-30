@@ -4,11 +4,17 @@
 kapiyi ac."* Ucu de burada tek bir tabandan turuyor - `ResonantObject`
 yalnizca "vuruldum" diyor, ne oldugu alt sinifin isi.
 
-**Can (`Bell`) burada yok** ve bu bilincli: `CLAUDE.md` 3 sirasi
-gelmemis bolum icerigini yasakliyor. Can, B9'un ("Can Kulesi") sira
-bulmacasinin parcasi ve o bulmaca yazilmadan bir `Bell` sinifi yazmak
-tahmin uzerine kurmak olurdu. Taban hazir; sirasi gelince B9 buradan
-turer.
+Uc nesne, uc farkli is:
+
+    Crystal  kiriliyor ve **yok oluyor** - yolu aciyor
+    Latch    ulasilamaz bir yerde, kapiyi aciyor
+    Bell     caliyor ve **yerinde kaliyor** - sirasi hatirlaniyor
+
+`Bell` Bolum 8'de bilerek yazilmamisti: `CLAUDE.md` 3 sirasi gelmemis
+bolum icerigini yasakliyor ve B9'un sira bulmacasi tasarlanmadan bir
+can sinifi yazmak tahmin uzerine kurmak olurdu. Sirasi geldi
+(30.08.2026) ve taban sinif oldugu gibi ise yaradi - dogru sinir
+oradaymis.
 
 ## Neden `pickups.py`'ye eklenmedi
 
@@ -30,6 +36,8 @@ from src.config import TILE_SIZE
 SHATTER_FRAMES = 24
 # Mandalin acilma animasyonu.
 LATCH_FRAMES = 30
+# Canin calma suresi - sallanma ve ses bu kadar surer.
+RING_FRAMES = 46
 
 
 class ResonantObject:
@@ -160,3 +168,64 @@ class Latch(ResonantObject):
             surface.fill(palette.color("echo"), (left + 2, top, 2, 2))
             surface.fill(palette.color("echo"),
                          (left + TILE_SIZE - 4, top, 2, 2))
+
+
+class Bell(ResonantObject):
+    """Can - **calindigi SIRA hatirlaniyor.**
+
+    `docs/yapi.md` B9: *"Rezonans ile uc cani dogru sirada calmak. Sira
+    ipucu duvardaki freskte."*
+
+    Kristalden farki bir sey **yikmamasi**: kristal kirilip yok oluyor,
+    can caliyor ve yerinde duruyor. Yanlis sira geldiginde hepsi
+    sifirlaniyor ve yeniden calinabiliyor - bir bulmaca geri
+    alinabilir olmali, yoksa oyuncu bolumu bastan oynamak zorunda
+    kalir.
+
+    Taban sinif Bolum 8'de (`Crystal`, `Latch`) yazilmisti; can o zaman
+    **bilerek** yazilmadi: `CLAUDE.md` 3 sirasi gelmemis bolum
+    icerigini yasakliyor ve bir sira bulmacasi tasarlanmadan `Bell`
+    yazmak tahmin uzerine kurmak olurdu. Sirasi geldi.
+    """
+
+    duration = RING_FRAMES
+
+    def __init__(self, tile_x: int, tile_y: int, index: int,
+                 height: int = 2) -> None:
+        super().__init__(tile_x, tile_y, 1, height)
+        # Freskteki numarasi - dogru sirayi bu belirliyor.
+        self.index = index
+
+    def reset(self) -> None:
+        """Yanlis sira - can yeniden calinabilir hale geliyor."""
+        self.triggered = False
+        self.frames = 0
+
+    def draw(self, surface: pygame.Surface, offset: tuple[int, int]) -> None:
+        ox, oy = offset
+        x = self.rect.x - ox
+        y = self.rect.y - oy
+        # Askı
+        surface.fill(palette.color("earth_dark"), (x + 6, y, 4, 3))
+        # Govde: asagi dogru genisleyen bir cerceve - siluet testi
+        # (`CLAUDE.md` 6) tek renkte "can" demeli, "kutu" degil.
+        swing = 0
+        if self.triggered and self.frames > 0:
+            # Calarken sallaniyor. Genlik sonuyor - bir can vurulup
+            # birakilir, surekli sallanmaz.
+            fade = self.frames / max(1, self.duration)
+            swing = int(math.sin(self.frames * 0.55) * 2 * fade)
+        # "gold"/"ember" birer RENK. `brass` bir golge ZINCIRI ve
+        # `palette.color()` onu tanimaz - projede bu tuzaga uc kez
+        # dusuldu (`steel`, `brass`).
+        tone = "gold" if self.triggered else "ember"
+        for row in range(3, self.rect.height - 2):
+            spread = min(5, row // 2)
+            surface.fill(palette.color(tone),
+                         (x + 5 - spread + swing, y + row,
+                          6 + spread * 2, 1))
+        surface.fill(palette.color("ink"),
+                    (x + 3 + swing, y + self.rect.height - 2, 10, 1))
+        # Tokmak
+        surface.fill(palette.color("earth_dark"),
+                     (x + 7 + swing, y + self.rect.height - 2, 2, 2))

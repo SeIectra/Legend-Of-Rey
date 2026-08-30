@@ -333,6 +333,31 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
         rows8[row_index][gate_x] = "."
     rooms.append(("bolum 8 - ates basi", ["".join(r) for r in rows8],
                   (spawn8.tile_x, spawn8.tile_y + 1), set()))
+
+    # Bolum 9: **dikey** kule ve katlar arasi 8 tile - ziplama 3.8.
+    # Yani kule tasarim geregi tek basina tirmanilamiyor; cikis
+    # `Action.INTERACT` ile yoldasin firlatmasi (`src/systems/boost.py`).
+    #
+    # BFS firlatmayi bilmiyor, o yuzden her gecidin ortasina **gecici
+    # bir basamak** konuyor. Ayni yaklasim Bolum 7'nin cukurunda da
+    # var: senaryolu/mekanikli gecisi varsay, geri kalan her seyi
+    # gercekten sina. Boylece kulede erisilemeyen bir cep ya da
+    # kilitlenme varsa yine yakalaniyor.
+    from src.world.rooms import chapter09
+    spawn9 = chapter09.LEVEL.first("player")
+    rows9 = [list(row) for row in chapter09.LEVEL.terrain_rows]
+    for row_index in chapter09.EXIT_DOOR_ROWS:
+        rows9[row_index][chapter09.EXIT_DOOR_COLUMN] = "."
+    for index, floor_row in enumerate(chapter09.FLOOR_ROWS[1:]):
+        left, right = chapter09.GAPS[index]
+        middle = (left + right) // 2
+        # **Iki** basamak: katlar arasi 8 tile ve tirmanma siniri 3
+        # (`MAX_JUMP_HEIGHT_TILES`), yani tek basamak yetmiyor - ilk
+        # denemede 72 nokta ulasilamaz cikti. Basamaklar 3'er arayla.
+        for drop in (5, 2):
+            rows9[floor_row + drop][middle] = "#"
+    rooms.append(("bolum 9 - can kulesi", ["".join(r) for r in rows9],
+                  (spawn9.tile_x, spawn9.tile_y + 1), set()))
     return rooms
 
 
