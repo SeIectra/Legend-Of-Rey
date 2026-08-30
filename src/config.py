@@ -1031,3 +1031,50 @@ SOURCE_MIMIC_RANGE: Final[float] = 90.0
 # cocuklari.
 SOURCE_SPLIT_COUNT: Final[int] = 2
 SOURCE_SPLIT_LIMIT: Final[int] = 4
+
+
+# --- SESSIZLIK / GURULTU (Bolum 15) ------------------------------------------
+# `docs/yapi.md` mekanik 9: *"Yanki kapali oynama; ses cikarirsan suru
+# uyanir."* Ve uygulama notu **yontemi de veriyor**: *"dusmanlara
+# `alert_level` float'i ekle, gurultu olaylariyla artir/azalt. Var olan
+# AI'ya eklenti, yeni sistem degil."* Aynen oyle yapildi.
+#
+# ## Bolum 14 bunu zaten kurdu
+#
+# B14'ten sonra duyuyu acmak dusmanlari uyandiriyor
+# (`sense_betrayed`). B15 *"Yanki'yi kapali oynamak zorundasin"*
+# diyor - yani bu bolum yeni bir kisit getirmiyor, bir onceki
+# bolumun sonucunu **oynatiyor**. Iki bolum tek bir yay.
+#
+# ## Sayilar bir CUMLE kuruyor
+#
+#     yurumek     duyulmuyor denecek kadar az   -> her zaman guvenli
+#     kosmak      birkac adimda uyandirir       -> acele bedelli
+#     inis/vurus  aninda uyandirir              -> dovus = basarisizlik
+#
+# Ucu birden `docs/yapi.md`nin *"kosarsan uyanirlar"* cumlesini
+# sayiya ceviriyor.
+NOISE_WALK: Final[float] = 0.06
+NOISE_RUN: Final[float] = 0.30
+NOISE_LAND: Final[float] = 0.85
+NOISE_ATTACK: Final[float] = 1.20      # tek vurus yeter - dovus cozum degil
+NOISE_DODGE: Final[float] = 0.34
+# Dunyadaki dikkat dagitici (can, gevsek tas). Oyuncudan UZAKTA
+# calindigi icin degeri yuksek olmali, yoksa suru yerinden kalkmaz.
+NOISE_CHIME: Final[float] = 1.50
+
+# Gurultunun duyuldugu yaricap (piksel). Uzaklikla dogrusal soluyor.
+NOISE_RANGE: Final[float] = 150.0
+# Uyaniklik her karede bu kadar soluyor. 0.010 -> ~1.7 saniyede
+# sifirlaniyor: oyuncu bir hata yapip **bekleyerek** duzeltebilmeli.
+# Affetmeyen bir gizlilik bolumu kaydet-yukle oyununa doner.
+ALERT_DECAY: Final[float] = 0.010
+# Bu esigin ustunde dusman uyaniyor ve bir daha uyumuyor.
+ALERT_WAKE: Final[float] = 1.0
+# Bu esigin ustunde henuz uyanmadi ama **kimildaniyor** - oyuncu
+# uyariyi gormeli. Sessiz bir esik oyuncuya haksiz gelir.
+ALERT_STIR: Final[float] = 0.45
+# Sesin geldigi yere bu kadar yaklasinca arastirma bitiyor.
+INVESTIGATE_REACH: Final[float] = 20.0
+# Arastirma en fazla bu kadar surer, sonra dusman yerine doner.
+INVESTIGATE_FRAMES: Final[int] = 260

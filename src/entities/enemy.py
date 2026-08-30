@@ -36,6 +36,8 @@ from enum import Enum, auto
 from src.art import palette
 from src.combat.hitbox import Hitbox, Team, melee_rect
 from src.config import (
+    ALERT_DECAY, ALERT_STIR, ALERT_WAKE, INVESTIGATE_FRAMES,
+    INVESTIGATE_REACH, NOISE_RANGE,
     ENEMY_APPROACH_SPEED, ENEMY_LOSE_RANGE, ENEMY_MIN_TELL_FRAMES,
     ENEMY_ORBIT_SPEED, ENEMY_SIGHT_RANGE, ORBIT_RADIUS_MAX, ORBIT_RADIUS_MIN,
     ORBIT_SLOT_WIDTH,
@@ -117,6 +119,19 @@ class Enemy(Actor):
         # ikisi de `draw_extra` cagrilir cagrilmaz cokuyordu. Testler
         # cizimi hic cagirmadigi icin sessizce duruyordu.
         self.frames = 0
+
+        # --- Sessizlik / gurultu (Bolum 15) -------------------------
+        # `docs/yapi.md` uygulama notu: *"dusmanlara `alert_level`
+        # float'i ekle, gurultu olaylariyla artir/azalt. **Var olan
+        # AI'ya eklenti, yeni sistem degil.**"* Aynen oyle: uc alan,
+        # bir metot, ve `_think`in "uyanik degilse" dalinda bir sart.
+        #
+        # Uyumayan bolumlerde hicbir maliyeti yok - `asleep` False
+        # kaldigi surece bu kod hic calismiyor.
+        self.asleep = False
+        self.alert_level = 0.0
+        self.heard_x: float | None = None
+        self.investigate_frames = 0
         self.aware = False
         self.orbit_side = 1              # Oyuncunun hangi yaninda bekliyor
         self.orbit_slot = 0.0            # Yorunge icindeki yeri
@@ -224,7 +239,92 @@ class Enemy(Actor):
         # ayarladiktan **sonra** cagrilmali.
         super().update()
 
+    # --- Gurultu (Bolum 15) --------------------------------------------
+    def hear(self, x: float, y: float, strength: float) -> bool:
+        """Bir gurultu duyuldu. Uyandiysa True doner.
+
+        Siddet uzaklikla **dogrusal** soluyor - ters kare degil.
+        Gercekci olan ikincisi ama oynanabilir olan birincisi: ters
+        karede ses ya her yerde duyuluyor ya hicbir yerde, ve oyuncu
+        "ne kadar yaklasabilirim" sorusunu hesaplayamiyor.
+        """
+        if self.dead or not self.asleep:
+            return False
+        dx = x - self.body.center_x
+        dy = y - self.body.center_y
+        distance = math.hypot(dx, dy)
+        if distance > NOISE_RANGE:
+            return False
+        self.alert_level += strength * (1.0 - distance / NOISE_RANGE)
+        # Ses nereden geldiyse oraya bakiyor - **dikkat dagitmanin**
+        # tamami bu satir. Oyuncu bir cani caliyor, suru oraya
+        # gidiyor, oyuncu obur taraftan geciyor.
+        self.heard_x = x
+        self.investigate_frames = INVESTIGATE_FRAMES
+        if self.alert_level >= ALERT_WAKE:
+            self.wake()
+            return True
+        return False
+
+    def wake(self) -> None:
+        """Uyandi - ve **bir daha uyumuyor.**
+
+        Surekli uyuyup uyanan bir suru bir bilmece degil bir kumar
+        olurdu: oyuncu ilerledigini olcemezdi. Ayni gerekce Sessiz'in
+        `roused` bayraginda da yazili.
+        """
+        self.asleep = False
+        self.aware = True
+        self.alert_level = ALERT_WAKE
+        on_wake = getattr(self.scene, "on_herd_wake", None)
+        if on_wake:
+            on_wake(self)
+
+    @property
+    def stirring(self) -> bool:
+        """Henuz uyanmadi ama kimildaniyor - oyuncu UYARIYI gormeli.
+
+        Sessiz bir esik haksiz olurdu: oyuncu neyin yaklastigini
+        bilmeden uyandirir. Bu bayrak cizim tarafinda okunuyor.
+        """
+        return self.asleep and self.alert_level >= ALERT_STIR
+
+    def _update_alert(self) -> None:
+        """Uyaniklik soluyor, arastirma sona eriyor.
+
+        Solma sart: affetmeyen bir gizlilik bolumu kaydet-yukle
+        oyununa doner. Oyuncu bir hata yapip **bekleyerek**
+        duzeltebilmeli.
+        """
+        self.alert_level = max(0.0, self.alert_level - ALERT_DECAY)
+        if self.investigate_frames > 0:
+            self.investigate_frames -= 1
+            if self.investigate_frames <= 0:
+                self.heard_x = None
+
+    def _investigate(self) -> None:
+        """Sesin geldigi yere dogru yuruyor. Varinca duruyor."""
+        if self.heard_x is None:
+            self.body.approach_vx(0.0, 0.2)
+            return
+        delta = self.heard_x - self.body.center_x
+        if abs(delta) <= INVESTIGATE_REACH:
+            self.heard_x = None
+            self.body.approach_vx(0.0, 0.3)
+            return
+        direction = 1.0 if delta > 0 else -1.0
+        self.facing = int(direction)
+        # Uykulu: normal hizin yarisi. Kosarak arastiran bir dusman
+        # "uyaniyor" degil "uyandi" gibi okunurdu.
+        self.body.approach_vx(direction * self.move_speed * 0.5, 0.2)
+
     def _update_awareness(self) -> None:
+        # **Uyuyan dusman gozle gormuyor** - yalnizca duyuyor. Gorus
+        # menzili isleseydi gizlilik bolumu imkansiz olurdu: oyuncu
+        # odaya girer girmez herkes uyanirdi.
+        if self.asleep:
+            self._update_alert()
+            return
         player = self.player
         if player is None or player.dead:
             self.aware = False
@@ -271,6 +371,13 @@ class Enemy(Actor):
             return
 
         if self._try_escape_unreachable():
+            return
+
+        if self.asleep:
+            # Uyuyor ya da sesin geldigi yere bakiyor. Saldiri durum
+            # makinesine hic girmiyor - "var olan AI'ya eklenti".
+            self._set_state(EnemyState.IDLE)
+            self._investigate()
             return
 
         if not self.aware:

@@ -53,6 +53,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import pygame
 
@@ -505,7 +506,12 @@ class StagedScene(StoryScene):
             return
 
         offset = self.stage_offset
-        self.draw_stage_background(surface, panel, progress, offset)
+        # Elle cizilmis panel varsa **prosedurel arka planin yerine**
+        # geciyor. Gerekce portrelerdekiyle ayni: kod uretimi taban,
+        # cizim ust. Dosya yoksa hicbir sey degismiyor, yani panelleri
+        # tek tek eklemek mumkun - hepsini birden bitirmek gerekmiyor.
+        if not self._blit_panel_art(surface, panel):
+            self.draw_stage_background(surface, panel, progress, offset)
         if self.motes is not None:
             self.motes.draw(surface)
         self._draw_lights(surface, offset)
@@ -666,6 +672,27 @@ class StagedScene(StoryScene):
         surface.scroll(ox, oy)
 
     # --- Alt sinif kancalari ------------------------------------------------
+    def _blit_panel_art(self, surface: pygame.Surface,
+                        panel: Panel) -> bool:
+        """`assets/panels/<sahne>_<panel>.png` varsa cizer.
+
+        Ad **sahne sinifindan ve panel adindan** turuyor, elle
+        eslestirme tablosu yok: bir tablo tutmak "dosya var ama tablo
+        unutuldu" hatasini davet ederdi ve o hata sessiz olurdu.
+
+            SourceCinematic + "cevap"  ->  source_cevap.png
+
+        480x270 bekleniyor (ic cozunurluk). Baska boyut da ciziliyor
+        ama olcegi kayar - `tools/import_art.py --tur panel` dogru
+        boyutu zaten veriyor.
+        """
+        name = f"{panel_prefix(type(self))}_{panel.name}"
+        art = panel_art(name)
+        if art is None:
+            return False
+        surface.blit(art, (0, 0))
+        return True
+
     def draw_stage_background(self, surface: pygame.Surface, panel: Panel,
                               progress: float,
                               offset: tuple[int, int]) -> None:
@@ -683,3 +710,60 @@ class StagedScene(StoryScene):
         return super().debug_lines() + [
             f"aktor {len(self.actors)}  parcacik {self.particles.alive_count}"
             f"  isik {len(self.lights)}"]
+
+
+# =============================================================================
+# Elle cizilmis paneller
+# =============================================================================
+PANEL_DIR = Path(__file__).resolve().parents[2] / "assets" / "panels"
+
+_panel_cache: dict[str, pygame.Surface | None] = {}
+
+
+def _panel_key(class_name: str) -> str:
+    """`SourceCinematic` -> `source`. Sinif adindan dosya onekine."""
+    name = class_name.removesuffix("Cinematic")
+    out: list[str] = []
+    for index, char in enumerate(name):
+        if char.isupper() and index:
+            out.append("_")
+        out.append(char.lower())
+    return "".join(out)
+
+
+def panel_prefix(cls: type) -> str:
+    """Panel dosyalarinin oneki: `<bolum>_<sahne>`.
+
+    **Bolum numarasi sart.** Ilk surum yalnizca sinif adini
+    kullaniyordu ve iki bolumde ayni adli sahne var:
+    `chapter02.DescentCinematic` ile `chapter03.DescentCinematic`.
+    Ikisi de `descent_*` uretiyordu - bugun panel adlari cakismiyor
+    ama biri "giris" adinda bir panel eklediginde oteki bolumun
+    gorseli **sessizce** oraya da girerdi.
+
+    Sessiz cakismalar bu projede pahaliya ogrenildi (dil anahtarlari,
+    ses adlari, `draw_extra`). Onek modulden turuyor: tahmin
+    edilebilir ve carpisamaz.
+    """
+    module = cls.__module__.rsplit(".", 1)[-1]
+    chapter = module.replace("_cinematics", "")
+    return f"{chapter}_{_panel_key(cls.__name__)}"
+
+
+def panel_art(name: str) -> pygame.Surface | None:
+    """Panel gorseli - yoksa None (ve bir daha diske bakilmaz)."""
+    if name in _panel_cache:
+        return _panel_cache[name]
+    path = PANEL_DIR / f"{name}.png"
+    image: pygame.Surface | None = None
+    if path.exists():
+        try:
+            image = pygame.image.load(str(path)).convert()
+        except pygame.error:
+            image = None
+    _panel_cache[name] = image
+    return image
+
+
+def clear_panel_cache() -> None:
+    _panel_cache.clear()

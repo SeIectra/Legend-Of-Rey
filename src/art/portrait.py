@@ -61,9 +61,11 @@ sag yanak, cene alti ve burnun sag kanadi golgede.
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from pathlib import Path
 
 import pygame
 
+from src.art import palette
 from src.art.forge import Canvas
 
 # Portre tuvali. 64x96 Arda'nin verdigi olcu.
@@ -267,26 +269,139 @@ def _draw_head(canvas: Canvas, spec: PortraitSpec) -> None:
         canvas.px(ear_x, BROW + 2, skin, 0)
 
 
-def _apply_face_shadow(canvas: Canvas, spec: PortraitSpec) -> None:
-    """Yuzun sag yarisini karartir - "yuzun bir kismi golgede".
+def _shade_skin(canvas: Canvas, spec: PortraitSpec, x0: int, x1: int,
+                y: int, delta: int) -> None:
+    """Yalnizca TEN pikselleri bir basamak koyultur/aciklastirir.
 
-    Basamagi **dusurerek** calisiyor, ustune koyu piksel basarak degil:
-    golge "yuzun uzerine surulmus gri" degil "isik almayan ten" gibi
-    okunuyor. Sinir da dik degil egik - dikey bir cizgi yuzu ikiye
-    bolerdi.
+    Zincir kontrolu sart: sac, goz ve dudak pikselleri de bu
+    dikdortgenlerin icinde kaliyor ve onlari kaydirmak yuzu bozar -
+    ilk surumde kaslar aciliyor ve karakter saskin gorunuyordu.
     """
-    if spec.face_shadow <= 0:
-        return
     skin_id = Canvas._chain_id(spec.skin)
-    for y in range(CROWN, CHIN + 1):
-        half = _half_width(spec, y)
-        if half < 0.5:
+    for x in range(int(x0), int(x1) + 1):
+        if not canvas.in_bounds(x, y):
             continue
-        edge = FACE_CX + half * 0.30 - (y - CROWN) * 0.06
-        for x in range(int(edge), int(round(FACE_CX + half)) + 1):
-            if canvas.chain[y, x] == skin_id:
-                canvas.step[y, x] = max(
-                    0, int(canvas.step[y, x]) - spec.face_shadow)
+        if canvas.chain[y, x] != skin_id:
+            continue
+        canvas.step[y, x] = max(0, min(3, int(canvas.step[y, x]) + delta))
+
+
+def _apply_face_planes(canvas: Canvas, spec: PortraitSpec) -> None:
+    """Yuzun **anatomik** isik/golge duzlemleri.
+
+    ## Neden yeniden yazildi
+
+    Onceki surum (`_apply_face_shadow`) yuzun sag yarisini toptan bir
+    basamak koyultuyordu. Sonuc ekranda "yuzun yarisi karanlik" gibi
+    okunuyordu - ve daha kotusu, `_draw_head`in dort basamakla kurdugu
+    formu **siliyordu**: elmacik vurgusu, sakak cukuru, cene alti,
+    hepsi ayni tona iniyordu.
+
+    Arda 31.08.2026'da referans getirdi ve istenen sey listeydi:
+    *"Yuzde kemik yapisi: elmacik, burun koprusu, cene hatti"*,
+    *"Isik yonu net, yuz formu okunuyor"*.
+
+    Golge artik bir **yari** degil, adlandirilmis kucuk sekiller
+    toplami. Her biri gercek bir anatomik duzlem:
+
+        sakak         kafatasi ile elmacik arasi ceker
+        goz cukuru    kasin altinda, gozun ustunde
+        elmacik alti  cikintinin ALTI - yuze hacim veren tek sey
+        burun yani    sirtin sagi koyu, solu acik
+        burun kanadi  kanatlarin altinda kucuk koyu nokta
+        dudak alti    alt dudagin golgesi - agzi hacimli yapan
+        cene alti     boyuna dusen
+
+    ## Neden bu kadar kucuk parcalar
+
+    Yuzde bir sey "genel olarak koyu" degildir; her golge bir kemigin
+    ya da bir bosluğun sonucudur. Genis lekeler yuzu duzlestirir cunku
+    hicbir sey **anlatmazlar**. Ayni gerekce dosya basliginda `shade()`
+    icin de yazili: yuzdeki her piksel bir ANLAM tasir, bir egim degil.
+    """
+    force = max(1, spec.face_shadow)   # Ardo'da 1'den buyuk: sert kontrast
+    cheek = spec.cheek_width
+    jaw = spec.jaw_width
+    skull = spec.skull_width
+
+    # --- Sakaklar: kafatasi ile elmacik arasindaki cekilme -------------
+    for y in range(HAIRLINE + 1, BROW + 2):
+        half = _half_width(spec, y)
+        _shade_skin(canvas, spec, FACE_CX + half * 0.55, FACE_CX + half,
+                    y, -force)
+        _shade_skin(canvas, spec, FACE_CX - half, FACE_CX - half * 0.72,
+                    y, -1)
+
+    # --- Alin isigi: sol-ust, isigin geldigi yer ------------------------
+    for k in range(3):
+        y = HAIRLINE + 1 + k
+        _shade_skin(canvas, spec, FACE_CX - skull * 0.34 + k,
+                    FACE_CX - skull * 0.05 + k, y, +1)
+
+    # --- Goz cukuru: kasin altinda gozun ustunde -----------------------
+    # Gozu bir **delige** oturtan sey. Onsuz gozler yuzeye yapistirilmis
+    # gibi duruyor.
+    for side in (-1, 1):
+        inner = FACE_CX + side * spec.eye_gap
+        outer = inner + side * (spec.eye_width + 1)
+        lo, hi = sorted((inner, outer))
+        for k in range(2):
+            _shade_skin(canvas, spec, lo, hi,
+                        EYE + spec.eye_drop - 2 - k,
+                        -force if side > 0 else -1)
+
+    # --- ★ Elmacik ALTI: yuze hacim veren tek golge ---------------------
+    # Cikintinin kendisi `_draw_head`te aydinlik; burasi onun ALTI ve
+    # asagi-ice dogru egik - agiz kosesine dogru kaybolur. Duz yatay
+    # olsaydi "yanakta bant" gibi okunurdu.
+    for k in range(4):
+        y = CHEEK + 1 + k
+        inset = k * 1.2
+        _shade_skin(canvas, spec, FACE_CX + cheek * 0.20 + inset,
+                    FACE_CX + cheek * 0.50 - k * 0.5, y, -force)
+        # Sol taraf isik aliyor, o yuzden yalnizca bir basamak.
+        _shade_skin(canvas, spec, FACE_CX - cheek * 0.50 + k * 0.5,
+                    FACE_CX - cheek * 0.26 - inset * 0.4, y, -1)
+
+    # --- Burun: koprunun iki yani ayri duzlem ---------------------------
+    # Referansin *"burun koprusu ve ucu ayrimi onemli"* maddesi.
+    bridge_top = EYE + spec.eye_drop - 1
+    for y in range(bridge_top, NOSE_BASE):
+        _shade_skin(canvas, spec, FACE_CX - spec.nose_width * 0.5 - 1,
+                    FACE_CX - 1, y, +1)          # sirtin solu: isik
+        _shade_skin(canvas, spec, FACE_CX + 1,
+                    FACE_CX + spec.nose_width * 0.5 + 1, y, -force)
+    # Kanat golgeleri - burnun tabanini yuzden ayiran sey.
+    _shade_skin(canvas, spec, FACE_CX - spec.nose_width - 1,
+                FACE_CX - spec.nose_width, NOSE_BASE, -1)
+    _shade_skin(canvas, spec, FACE_CX + spec.nose_width,
+                FACE_CX + spec.nose_width + 1, NOSE_BASE, -force)
+
+    # --- Dudak alti: agzi hacimli yapan --------------------------------
+    _shade_skin(canvas, spec, FACE_CX - spec.mouth_width * 0.28,
+                FACE_CX + spec.mouth_width * 0.34,
+                MOUTH + spec.lip_fullness + 1, -force)
+
+    # --- Cene hatti ve alti ---------------------------------------------
+    # `docs` disi bir uyari: burasi bir zamanlar `step=0` ile
+    # boyaniyordu ve Rey **sakalli** gorunuyordu (Arda, 30.08.2026).
+    # `_draw_head` o dersi ogrendi; burada da bir basamaktan fazla
+    # inilmiyor.
+    for y in range(JAW, CHIN + 1):
+        half = _half_width(spec, y)
+        _shade_skin(canvas, spec, FACE_CX + half * 0.35, FACE_CX + half,
+                    y, -1)
+    # Cenenin ucu isik aliyor - yuzu one cikaran son vurgu.
+    _shade_skin(canvas, spec, FACE_CX - spec.chin_width * 0.30,
+                FACE_CX + spec.chin_width * 0.10, CHIN - 1, +1)
+
+    # --- Cok hafif genel yon ---------------------------------------------
+    # Isigin sol-ustten geldigi hala okunmali ama yuzu **ikiye
+    # bolmemeli**: yalnizca en dis serit, tek basamak.
+    for y in range(BROW, JAW):
+        half = _half_width(spec, y)
+        _shade_skin(canvas, spec, FACE_CX + half * 0.80, FACE_CX + half,
+                    y, -1)
 
 
 # =============================================================================
@@ -724,7 +839,7 @@ def draw_portrait(spec: PortraitSpec) -> Canvas:
     _draw_hair_back(canvas, spec)
     _draw_body(canvas, spec)
     _draw_head(canvas, spec)
-    _apply_face_shadow(canvas, spec)
+    _apply_face_planes(canvas, spec)
 
     _draw_brows(canvas, spec)
     _draw_eyes(canvas, spec)
@@ -807,21 +922,93 @@ PORTRAITS: dict[str, PortraitSpec] = {
 _cache: dict[str, pygame.Surface] = {}
 
 
-def portrait(name: str) -> pygame.Surface | None:
-    """Adi verilen portreyi doner. Bir kez uretilir, sonra onbellekten.
+# Elle cizilmis portrelerin arandigi yer. Dosya varsa **prosedurel
+# uretimin yerine gecer**.
+HAND_DRAWN_DIR = Path(__file__).resolve().parents[2] / "assets" / "portraits"
 
-    `CLAUDE.md` 4: sprite'lar baslangicta **bir kez** uretilir, her karede
-    yeniden degil.
+# Palet disi piksel bulununca bir kez uyar - her karede degil.
+_warned: set[str] = set()
+
+
+def _load_hand_drawn(name: str) -> pygame.Surface | None:
+    """`assets/portraits/<ad>.png` varsa onu yukler.
+
+    ## Neden bir gecersiz kilma yolu var
+
+    Arda 31.08.2026'da referans getirdi ve prosedurel portrelerin
+    tavani gorundu: bir iskeletten turetilen yuz, elle cizilmis bir
+    yuzun tasidigi **niyeti** tasiyamiyor. Kas kaldirmak, dudak
+    kenarini kirmak, gozun icine ucuncu bir ton koymak - bunlar
+    kural degil karar.
+
+    O yuzden kod uretimi **taban** oldu, elle cizim **ust**: dosya
+    yoksa oyun calisiyor (hicbir sey bozulmuyor), dosya varsa daha
+    iyi gorunuyor. Bir portre cizilene kadar oteki karakterler
+    prosedurel kaliyor - hepsini birden bitirmek gerekmiyor.
+
+    `CLAUDE.md` 6 baglayici: *"Kaynagi ne olursa olsun - kod, elle
+    cizim, harici arac - her gorsel `tools/quantize.py` filtresinden
+    gecer."* Burada dosya **degistirilmiyor** ama palet disi renk
+    varsa uyariliyor: sessizce kabul etmek o kurali delerdi,
+    calisma zamaninda quantize etmek ise her acilista maliyet olurdu.
     """
-    if name in _cache:
-        return _cache[name]
+    path = HAND_DRAWN_DIR / f"{name}.png"
+    if not path.exists():
+        return None
+    try:
+        image = pygame.image.load(str(path)).convert_alpha()
+    except pygame.error:
+        return None
+
+    if image.get_size() != (WIDTH, HEIGHT) and name not in _warned:
+        _warned.add(name)
+        print(f"[portre] {path.name}: {image.get_size()} - beklenen "
+              f"{(WIDTH, HEIGHT)}. Oyun yine de kullaniyor ama olcek "
+              f"kayabilir.")
+
+    if name not in _warned:
+        off = _off_palette(image)
+        if off:
+            _warned.add(name)
+            print(f"[portre] {path.name}: {off} piksel palet disi. "
+                  f"Duzeltmek icin: python tools/quantize.py "
+                  f"assets/portraits/{name}.png")
+    return image
+
+
+def _off_palette(image: pygame.Surface) -> int:
+    """Kac piksel 37 rengin disinda. Sifir olmali."""
+    import numpy as np
+    rgb = pygame.surfarray.array3d(image)
+    alpha = pygame.surfarray.array_alpha(image)
+    allowed = {tuple(c) for c in palette.COLORS.values()}
+    solid = rgb[alpha > 8]
+    if solid.size == 0:
+        return 0
+    return sum(1 for c in solid if tuple(int(v) for v in c) not in allowed)
+
+
+def portrait(name: str) -> pygame.Surface | None:
+    """Bir karakterin portresi. Elle cizilmis varsa o, yoksa uretilmis.
+
+    Sonuc onbellege aliniyor; `clear_cache()` (palet/dil degisimi)
+    ikisini birden temizliyor.
+    """
+    cached = _cache.get(name)
+    if cached is not None:
+        return cached
+
+    drawn = _load_hand_drawn(name)
+    if drawn is not None:
+        _cache[name] = drawn
+        return drawn
+
     spec = PORTRAITS.get(name)
     if spec is None:
         return None
     surface = draw_portrait(spec).resolve()
     _cache[name] = surface
     return surface
-
 
 def clear_cache() -> None:
     _cache.clear()
