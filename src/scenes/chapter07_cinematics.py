@@ -327,8 +327,12 @@ class HandCinematic(_Chapter07Cinematic):
             Cue("below", state="idle", face=1),
             Cue("above", state="idle", face=-1),
         )),
+        # E2: **yuze kesme.** Sahnenin tamami iki kucuk figurdu; o bir
+        # saniyenin ne demek oldugu yuzden okunur. `docs/yapi.md` B7
+        # kelimeyi yasakliyor, bakisi yasaklamiyor.
+        Panel(46, "yuz", closeup="below", fade_in=8),
         # F: ayrilirlar. Kimse bir sey soylemiyor.
-        Panel(40, "birakma", cues=(
+        Panel(40, "birakma", fade_in=8, cues=(
             Cue("below", state="idle"),
             Cue("above", state="idle", face=1),
         )),

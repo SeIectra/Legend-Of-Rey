@@ -103,6 +103,19 @@ FLASH_DECAY_FRAMES = 8
 # Vinyet karartmasinin en koyu hali (0..255).
 VIGNETTE_MAX = 200
 
+# Yakin plan: portre bu kadar buyutuluyor (**tam sayi**, CLAUDE.md 4).
+CLOSEUP_SCALE = 3
+# Portrenin ust kismindan kirpilan piksel - yuz kadrajin ust yarisina
+# gelsin diye. Portrede kafa 40 piksel, govde altta ve gereksiz.
+CLOSEUP_HEAD_OFFSET = 9
+# Yakin plandaki kenar karartmasinin yaricapi ve siddeti.
+CLOSEUP_VIGNETTE = 165
+# Karartma **hafif**: 120 denendi ve yuzu yedi - portrenin kendi
+# renkleri zaten koyu, uzerine agir bir vinyet binince yalnizca
+# gozler seciliyordu. Amac dikkati toplamak, sahneyi karartmak
+# degil.
+CLOSEUP_DIM = 48
+
 # Atmosfer zerresi ust siniri. `ParticleField`den ayri: bunlar olay
 # degil **ortam** - dogmuyor, olmuyor, sadece suruklenip ekranin obur
 # ucundan geri giriyorlar. Parcacik butcesini (200) yemiyorlar.
@@ -179,6 +192,15 @@ class ActorSpec:
     # uzerinde gosterir. Bolum 2'nin dusus sahnesinde tam olarak oyle
     # gorunuyordu - Rey dusuyor ama altinda bir golge duruyordu.
     shadow: bool = True
+    # **Derinlik.** Kamera kaydiginda aktor bu oranda kaiyor:
+    #   1.0  on plan - kamerayla birebir
+    #   0.5  orta    - yarim hizda, daha uzakta gorunuyor
+    #   0.0  sonsuz  - hic kaymiyor (gokyuzu, uzaktaki dag)
+    #
+    # Parallaks derinligi **hareketten** dogar; tek karede goze
+    # gorunmez, kamera kayinca ortaya cikar. Bu yuzden sabit bir
+    # sahnede degeri yok ve varsayilani 1.0.
+    depth: float = 1.0
     # Sinematik buyutmesi - **tam sayi**, `smoothscale` YASAK
     # (CLAUDE.md 4/12: piksel art bulaniklasir).
     #
@@ -237,6 +259,7 @@ class StageActor:
         self.silhouette = spec.silhouette
         self.visible = spec.visible
         self.shadow = spec.shadow
+        self.depth = spec.depth
         self.scale = max(1, spec.scale)
         # Hareket: baslangic, hedef, sure, gecen kare.
         self._from: tuple[float, float] = (self.x, self.y)
@@ -290,7 +313,9 @@ class StageActor:
             image = pygame.transform.scale(
                 image, (image.get_width() * self.scale,
                         image.get_height() * self.scale))
-        ox, oy = offset
+        # Derinlik: kamera ofseti bu aktore ne kadar isliyor.
+        ox = int(round(offset[0] * self.depth))
+        oy = int(round(offset[1] * self.depth))
         # Konum **tam sayiya yuvarlanir** - ondalik ofset piksel art
         # dokusunu titretir (CLAUDE.md 9).
         x = int(round(self.x)) - ox - image.get_width() // 2
@@ -341,9 +366,14 @@ class StagedScene(StoryScene):
     ACTORS: tuple[ActorSpec, ...] = ()
     # Atmosfer zerreleri - `None` = yok. Alt sinif `MoteField` verir.
     motes: MoteField | None = None
-    # Sahne kamerasi: aktor konumlari **sahne koordinati**, ekranin degil.
-    # Kucuk sahnelerde ikisi ayni (ofset 0,0) ve hicbir sey degismiyor.
-    use_camera: bool = False
+    # Sahne kamerasi **acik**: `Panel.camera` verilirse kayiyor,
+    # verilmezse ofset (0,0) kaliyor ve hicbir sey degismiyor.
+    #
+    # `story.py` kamerayi bastan yazmisti ama `use_camera` False'ti ve
+    # hicbir sahne acmamisti - yani kaydirma kodu vardi, hic
+    # calismamisti. `DEVIR.md`'nin kendi dersi: *"yazilip hic
+    # calistirilmayan kod hatasiz gorunur, hatasiz degildir."*
+    use_camera: bool = True
     vignette: float = 0.0           # 0 = yok, 1 = en koyu
 
     # --- Kurulum ------------------------------------------------------------
@@ -465,6 +495,15 @@ class StagedScene(StoryScene):
 
     def draw_panel(self, surface: pygame.Surface, panel: Panel,
                    progress: float) -> None:
+        # **Yakin plan panelin yerine gecer**, uzerine binmez: bir
+        # yakin plan bir KESME'dir. Arkada sahne durup one bir yuz
+        # konsaydi iki goruntu ayni anda yarisirdi.
+        if getattr(panel, "closeup", ""):
+            self._draw_closeup(surface, panel)
+            self._draw_flash(surface)
+            self._draw_fade(surface, panel)
+            return
+
         offset = self.stage_offset
         self.draw_stage_background(surface, panel, progress, offset)
         if self.motes is not None:
@@ -477,6 +516,83 @@ class StagedScene(StoryScene):
             self._draw_vignette(surface)
         self._draw_flash(surface)
         self._draw_extra_shake(surface)
+        self._draw_fade(surface, panel)
+
+    # --- Yakin plan ---------------------------------------------------------
+    def _draw_closeup(self, surface: pygame.Surface, panel: Panel) -> None:
+        """Ekrani aktorun **portresi** kapliyor.
+
+        Oyunun en iyi yuz sanati (`src/art/portrait.py`, kafa 40
+        piksel) diyalog kutusunun kosesinde 1x cizilen kucuk bir
+        resimdi ve baska hicbir yerde kullanilmiyordu. Duygusal bir
+        beat'te yuze kesmek sinemanin en temel cumlesi.
+
+        **Buyutme tam sayi** (`CLAUDE.md` 4/12): 3x. Ara degerler
+        piksel arti bozar; 3x'te 64x96'lik portre 192x288 oluyor,
+        yani kadraji dolduruyor ve kafa ekranin yarisini kapliyor.
+        """
+        from src.art import portrait as portrait_art
+        actor = self.actors.get(panel.closeup)
+        name = actor.animator.character if actor is not None else panel.closeup
+        # `rey_armed`/`ardo_axe` gibi varyantlarin portresi yok - taban
+        # ada dusuluyor. Olmasaydi yakin plan bos ekran olurdu.
+        image = portrait_art.portrait(name) or portrait_art.portrait(
+            name.split("_")[0])
+        surface.fill(palette.color("ink"))
+        if image is None:
+            return
+        scale = CLOSEUP_SCALE
+        big = pygame.transform.scale(
+            image, (image.get_width() * scale, image.get_height() * scale))
+        x = INTERNAL_WIDTH // 2 - big.get_width() // 2
+        # Yuz kadrajin **ust yarisinda**: portrenin alt kismi govde ve
+        # onu gostermenin bir anlami yok. Bas hizasi ucte bire geliyor.
+        y = -CLOSEUP_HEAD_OFFSET * scale
+        surface.blit(big, (x, y))
+        # Kenarlarda karanlik: dikkat yuze toplaniyor.
+        #
+        # Perde **gri doldurulup** ortasi haleyle siliniyor. Ilk surumde
+        # siyah doldurulup haleyle silinmisti - siyahtan cikarmak yine
+        # siyah veriyor, yani vinyet hicbir sey yapmiyordu. `glow.py`'nin
+        # basligindaki kuralin dorduncu tekrari: eklemeli/cikarmali
+        # harmanlamada siddet **renkle** ayarlanir.
+        level = CLOSEUP_DIM
+        veil = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT))
+        veil.fill((level, level, level))
+        # Vinyetin merkezi **yuz**, ekranin ortasi degil: kafa kadrajin
+        # ust yarisinda duruyor ve ekran merkezine odaklanan bir vinyet
+        # tam da yuzu karartiyordu.
+        face_y = big.get_height() // 4
+        hole = radial_glow(CLOSEUP_VIGNETTE, (level, level, level), peak=1.0)
+        veil.blit(hole, (INTERNAL_WIDTH // 2 - CLOSEUP_VIGNETTE,
+                         face_y - CLOSEUP_VIGNETTE),
+                  special_flags=pygame.BLEND_RGB_SUB)
+        surface.blit(veil.convert(), (0, 0), special_flags=pygame.BLEND_RGB_SUB)
+
+    # --- Gecisler -----------------------------------------------------------
+    def _draw_fade(self, surface: pygame.Surface, panel: Panel) -> None:
+        """Panel basinda siyahtan acilma, sonunda siyaha kapanma.
+
+        Siddet **renkle** veriliyor, alfayla degil - `BLEND_RGB_SUB`
+        alfayi yok sayiyor (`glow.py` basligi; proje bu tuzaga uc kez
+        dustu).
+        """
+        fade_in = getattr(panel, "fade_in", 0)
+        fade_out = getattr(panel, "fade_out", 0)
+        amount = 0.0
+        if fade_in > 0 and self.panel_frames < fade_in:
+            amount = 1.0 - self.panel_frames / fade_in
+        if fade_out > 0:
+            left = panel.frames - self.panel_frames
+            if 0 <= left < fade_out:
+                amount = max(amount, 1.0 - left / fade_out)
+        if amount <= 0.01:
+            return
+        level = int(255 * min(1.0, amount))
+        veil = pygame.Surface((INTERNAL_WIDTH, INTERNAL_HEIGHT))
+        veil.fill((level, level, level))
+        surface.blit(veil.convert(), (0, 0),
+                     special_flags=pygame.BLEND_RGB_SUB)
 
     def _draw_actors(self, surface: pygame.Surface,
                      offset: tuple[int, int]) -> None:

@@ -117,6 +117,10 @@ class ArdoEntranceCinematic(StagedScene):
         )),
         Panel(40, "soru"),
         Panel(40, "isim"),
+        # Tanisma bitti - **kim oldugu** yuzden okunsun. Bolum boyunca
+        # bu karakteri 32 piksellik bir figur olarak gorecegiz; bir kez
+        # yakindan gormek onu bir siluet olmaktan cikariyor.
+        Panel(44, "yuz", closeup="saviour", fade_in=10, fade_out=10),
     )
 
     def on_enter(self, character: str = "rey", **kwargs: object) -> None:

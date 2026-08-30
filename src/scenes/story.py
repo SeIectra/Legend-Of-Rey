@@ -101,6 +101,21 @@ class Panel:
     # butun ara sahneleri cue'suz.
     cues: tuple = ()
 
+    # **Yakin plan.** Aktorun adi verilirse panel boyunca ekrani onun
+    # PORTRESI kapliyor (`src/art/portrait.py` - 64x96, kafa 40 piksel).
+    #
+    # Neden: oyunun en iyi yuz sanati diyalog kutusunun kosesinde
+    # 1x cizilen kucuk bir resim olarak duruyordu ve baska hicbir yerde
+    # kullanilmiyordu. Duygusal bir beat'te yuze kesmek sinemanin en
+    # temel cumlesi - ve burada bedava, cunku sanat zaten var.
+    closeup: str = ""
+
+    # Panel basinda siyahtan acilma / sonunda siyaha kapanma (kare).
+    # 0 = sert kesme. Sert kesme ucuz degil, sadece FARKLI bir dil:
+    # bir dususte kesme dogru, bir sessizlik aninda kararma dogru.
+    fade_in: int = 0
+    fade_out: int = 0
+
     @property
     def dialogue_lines(self) -> tuple[Line, ...]:
         if self.lines:

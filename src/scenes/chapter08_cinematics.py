@@ -202,6 +202,10 @@ class WhisperCinematic(_FiresideBase):
         Panel(46, "tepki", cues=(
             Cue("player", state="hurt"),
         )),
+        # **Yuze kesme.** `docs/yapi.md` B8: *"Rey rahatsiz olur."*
+        # Rahatsizlik 32 piksellik bir siluetten okunmuyor; portrede
+        # goz, kas ve agiz var.
+        Panel(52, "yuz", closeup="player", fade_in=10, fade_out=12),
     )
 
     def build_actors(self) -> tuple[ActorSpec, ...]:
