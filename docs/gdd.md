@@ -119,6 +119,27 @@ Kural: **yeni mekanik + eski mekanik = yeni bulmaca**
 | 8 | Zaman kapıları | B13 |
 | 9 | Sessizlik / gürültü | B15 |
 | 10 | İkili kontrol | B17 |
+| 11 | **Sürülebilir düzenek** | B12 |
+
+> **11. madde 30.08.2026'da eklendi.** Arda sordu: *"jetpack, helikopter,
+> araba veya tank gibi sürülebilir bişey ekleyip bir bölümü de öyle
+> oynatmak istiyorum ama çok absürt mü kaçar?"*
+>
+> Dördü de reddedildi — sorun "araç" değil **çağ**: zindanda meşale,
+> zincir, kafes ve anahtar var; oraya bir tank koymak sürpriz değil
+> tutarsızlık olurdu. Ama istek doğruydu: oyun kendi döngüsünü zaten
+> dört kez bilerek kırıyor (B4/B8/B12 nefes, B15 gizlilik, B17 ikili
+> kontrol). Değişen tek şey araç oldu.
+>
+> Uygulaması: **Ardo'nun kuyuya kurduğu iniş kafesi** (B12). Tek
+> kontrol fren; duvarlardaki izler yalnızca yavaşken okunuyor. Ceza
+> yok, ölüm yok — değişen tek şey onun ne kadarını gördüğün. Araç bir
+> nefes bölümünü bozmuyor çünkü **onun bıraktığı bir şey**: binmek
+> zaten yakınlık.
+>
+> İkinci uygulaması için aday B14 sonrası: *Yankı seni taşıyor* —
+> jetpack'in dünya içindeki karşılığı. Uçmuyorsun, **çekiliyorsun**;
+> B14 twist'inin fiziksel hali. Sırası gelince karar verilecek.
 
 ## 10. BÖLÜM AKIŞI (Özet)
 

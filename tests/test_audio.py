@@ -60,13 +60,14 @@ PLANNED: frozenset[str] = frozenset({
     "amb_water", "bloated_idle", "climber_cling", "echo_loop",
     "echo_silent", "echo_sonar", "enemy_stagger",
     "intro_hum", "journey_cellar", "journey_night", "journey_wind",
-    "ledge_grab", "shambler_attack",
+    "shambler_attack",
     "shambler_idle", "step_gravel", "step_water",
 })
 # `necklace_warm` ve `necklace_conflict` 30.08.2026'da listeden CIKTI:
 # Bolum 13'un ara sahneleri ikisini de caliyor (kafes goruldugunde
 # kolye isiniyor, bos kapida catisiyor). Aylardir bekleyen iki ses
-# nihayet ait olduklari ana kavustu.
+# nihayet ait olduklari ana kavustu. `ledge_grab` de 31.08.2026'da
+# cikti: Bolum 12'de kafese binerken caliyor.
 
 failures: list[str] = []
 

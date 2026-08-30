@@ -1,7 +1,7 @@
 """Bolum 11 - "Ayna Salonu". Oynanabilir sahne.
 
-Oda verisi `src/world/rooms/chapter11.py`, ara sahne
-`src/scenes/chapter11_cinematics.py`.
+Oda verisi `src/world/rooms/chapter11.py`. **Ara sahnesi yok** -
+bolum kendi icinde anlatiyor (yalanin kendisi bir sahne).
 
 `docs/yapi.md` B11: *"Yalnizsin. Golge yaratiklar sadece isikta olur.
 Aynalari cevirerek isini yaratiklara yonlendir. **Yanki sana yalan
@@ -300,8 +300,11 @@ class Chapter11Scene(PlayScene):
             data.playtime_frames += self.frames
             data.best_combo = max(data.best_combo, self.player.combo.best)
             data.secrets_found += result.secrets_found
-        # Bolum 12 henuz yok - ozet ekrani kapaninca ana menuye donuluyor.
-        self.scenes.push(ChapterEndScene, result=result)
+        from src.scenes.chapter12 import Chapter12Scene
+        self.scenes.push(
+            ChapterEndScene, result=result,
+            on_continue=lambda: self.scenes.set_root(
+                Chapter12Scene, character=self.character))
 
     # --- Cizim --------------------------------------------------------------
     def draw_background(self, surface: pygame.Surface, offset) -> None:

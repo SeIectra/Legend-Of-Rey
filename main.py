@@ -52,8 +52,11 @@ SCENES = {
     "bolum10-ayrilik": ("src.scenes.chapter10_cinematics", "PartingCinematic"),
     "bolum10-yalan": ("src.scenes.chapter10_cinematics", "LieCinematic"),
     "bolum11": ("src.scenes.chapter11", "Chapter11Scene"),
-    # Bolum 12 ("Mektup", nefes bolumu) henuz yok - B13 once yazildi
-    # cunku yeni mekanik + BOSS 2 orada. Zincirleme B12 gelince kurulur.
+    # Bolum 12 "Mektup" - nefes bolumu + Ardo'nun inis duzenegi
+    # (mekanik havuzunun 11. maddesi).
+    "bolum12": ("src.scenes.chapter12", "Chapter12Scene"),
+    "bolum12-kamp": ("src.scenes.chapter12_cinematics", "CampCinematic"),
+    "bolum12-mektup": ("src.scenes.chapter12_cinematics", "LetterCinematic"),
     "bolum13": ("src.scenes.chapter13", "Chapter13Scene"),
     # B13'un dort ara sahnesi ayri ayri acilabilsin - sahneleme
     # ayarlamak icin bolumu bastan oynamak gerekmesin.

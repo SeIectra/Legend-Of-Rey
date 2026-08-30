@@ -322,7 +322,41 @@
     "ch13_rey_empty": "Empty. Empty again.",
     "ch13_ardo_empty": "Too late. Again.",
     "ch13_echo_deeper": "Below. It was always below. You're close to where you hear me now.",
-    "ch13_trace_deeper": "The tracks go down. This time they don't come back."
+    "ch13_trace_deeper": "The tracks go down. This time they don't come back.",
+    "ch12_mark_arrow": "An arrow. Right. He drew it for me.",
+    "ch12_mark_arrow_ardo": "A footprint. He stood here and looked both ways — he didn't know the road.",
+    "ch12_mark_cache": "Supplies. He split his share and left mine.",
+    "ch12_mark_cache_ardo": "He never touched the food I left. Missed it, or was ashamed to take it.",
+    "ch12_mark_camp": "He slept here. Kept the fire small — he didn't want to be seen.",
+    "ch12_mark_camp_ardo": "He didn't sleep here. Sat down, got up, sat down again.",
+    "ch12_mark_count": "Notches. He was counting the days.",
+    "ch12_mark_count_ardo": "Notches on the wall. His hand shook while he counted.",
+    "ch12_mark_pencil": "A broken piece of charcoal. It snapped while he was drawing.",
+    "ch12_mark_pencil_ardo": "Charcoal dust. He drew something, then tried to rub it out.",
+    "ch12_mark_figure": "That's... me. He drew me.",
+    "ch12_mark_figure_ardo": "He drew me. Rough, rushed — but he got the eyes right.",
+    "ch12_keeper": "You again. Your candles have burned down.",
+    "ch12_keeper_ardo": "One candle fewer every time I come down. What happens after the last one?",
+    "ch12_cine_fire": "The fire's out but the ash is still warm. He was here moments ago.",
+    "ch12_cine_fire_ardo": "The ash is warm. He waited for me and gave up.",
+    "ch12_cine_pack": "The pack is open. He split what was inside in two.",
+    "ch12_cine_pack_ardo": "He opened the pack, went through it, took nothing.",
+    "ch12_echo_rig": "This took time to build. He had no time to wait — but time to build.",
+    "ch12_trace_rig": "The rig is solid. He didn't rush it — so whoever came down wouldn't fall.",
+    "ch12_letter_all": "I saw all of it. He was writing to me the whole way down.",
+    "ch12_letter_all_ardo": "I saw all of it. Not once did he write that he was alone.",
+    "ch12_letter_some": "I saw some of it. The rest stayed up there.",
+    "ch12_letter_some_ardo": "I saw some of it. I came down too fast.",
+    "ch12_letter_few": "I came down too fast. I left things behind me.",
+    "ch12_letter_few_ardo": "I didn't look. I thought I had no time to look.",
+    "ch12_after_all": "We'll meet down there. He didn't promise — I did.",
+    "ch12_after_all_ardo": "We'll meet down there. This time I won't be late.",
+    "ch12_after_some": "I can't go back. Up there is closed now.",
+    "ch12_after_some_ardo": "No going back. Whatever's below is what there is.",
+    "ch12_after_few": "Next time I'll slow down.",
+    "ch12_after_few_ardo": "Next time I'll look.",
+    "ch12_echo_deeper": "You're going down. Good. I'm down there too.",
+    "ch12_trace_deeper": "The tracks end here. What comes next is mine."
   },
   "combat": {
     "counter": "COUNTER",
@@ -362,7 +396,8 @@
     "bell_tower": "The Bell Tower",
     "parting": "The Parting",
     "mirror_hall": "The Hall of Mirrors",
-    "cemo": "Cemo"
+    "cemo": "Cemo",
+    "letter": "The Letter"
   },
   "chapter_end": {
     "heading": "CHAPTER COMPLETE",
@@ -543,7 +578,8 @@
     "companion_wait": "[{key}] tell them to wait here",
     "resonance": "[{key}] resonance — break it with sound",
     "boost": "[{key}] beside them: they'll launch you",
-    "lever": "[{key}] pull the lever — the gate is timed"
+    "lever": "[{key}] pull the lever — the gate is timed",
+    "rig_brake": "[{key}] hold — the rig slows"
   },
   "chapter08": {
     "first_crystal": "Crystal shattered — sound is a weapon",
@@ -566,5 +602,8 @@
     "run": "RUN — the gate is falling",
     "dark": "The lantern broke. Light the braziers.",
     "gate_open": "The Gaoler has fallen. The gate is open."
+  },
+  "chapter12": {
+    "descend": "The rig is descending. Slow down and you'll see."
   }
 }

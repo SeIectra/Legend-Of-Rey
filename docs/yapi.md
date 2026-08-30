@@ -20,6 +20,7 @@ Her mekanik bir bölümde tanıtılır, sonraki bölümlerde birleşir. Kural: *
 | 8 | **Zaman kapıları** | B13 | Kolu çevir, X saniyede koş — dövüşerek değil kaçarak |
 | 9 | **Sessizlik** | B15 | Yankı kapalı oynama; ses çıkarırsan sürü uyanır |
 | 10 | **İkili kontrol** | B17 | Karakterler arası geçiş, biri kolu tutar biri geçer |
+| 11 | **Sürülebilir düzenek** | B12 | Ardo'nun iniş kafesi — fren tut, izleri oku (gerekçe: `gdd.md` §9) |
 
 ---
 
@@ -69,7 +70,8 @@ Her mekanik bir bölümde tanıtılır, sonraki bölümlerde birleşir. Kural: *
 *Romantik an:* Yokluğunda anlatılan yakınlık. Tek bir dövüş yok, sadece iz sürme.
 
 **B13 — Cemo.** Kafeste, canlı, sana bakıyor — ulaşamadan taşınır. Kaçmayı denemiş, muhafızı yaralamış, duvara işaret kazımış.
-*Mekanik:* **Zaman kapıları** — kovalamaca bölümü. İlk mini-boss.
+*Mekanik:* **Zaman kapıları** — kovalamaca bölümü. **BOSS 2 "Zindancı"**.
+*(Düzeltme 30.08.2026: burada "ilk mini-boss" yazıyordu; bayattı. Mini-boss'lar B2 ve B3'te zaten geçti, ve `gdd.md` §8 ile `asset-listesi.md` ikisi de B13 için BOSS 2 diyor.)*
 
 ### DÖNÜŞ
 

@@ -916,3 +916,54 @@ NECKLACE_LIGHT_RADIUS: Final[float] = 34.0
 # demenin isik tarafindaki karsiligi.
 GAOLER_EYE_LIGHT_RADIUS: Final[float] = 20.0
 GAOLER_EYE_TELL_RADIUS: Final[float] = 44.0
+
+
+# --- ARDO'NUN DUZENEGI (Bolum 12) --------------------------------------------
+# `docs/gdd.md` 9 mekanik havuzuna **11. madde**: sürülebilir düzenek.
+# Arda 30.08.2026'da onayladi (soru: *"jetpack, helikopter, araba veya
+# tank gibi surulebilir bisey"*). Dordu de reddedildi - teknoloji cagi
+# tutmuyor, zindanda mesale ve zincir var. Yerine dunyanin kendi
+# aracı: Ardo'nun kuyuya kurdugu karsi agirlikli iniş kafesi.
+#
+# ## Nefes bolumune araç KOYMAK onu bozmaz, tasir
+#
+# B12'nin isi `docs/gdd.md` 156: *"Ozlem - yoklugunda birakilmis
+# izler."* Bir araç normalde bunu bozardi (hizli gecersin, izleri
+# kacirirsin) - ama araç ONUN yaptigi bir sey oldugu icin binmek
+# zaten yakinlik. `docs/yapi.md` B12 kamp kalintilarindan ve
+# "senin icin birakilmis erzak"tan bahsediyor; duzenek de o
+# birakilanlardan biri.
+#
+# ## Mekanik: inersin, YAVASLAMAYI secersin
+#
+# Kafes kendi iniyor. Tek kontrol fren. Duvarlarda Ardo'nun
+# isaretleri var ve yalnizca **yavasken** okunuyor. Ceza yok, olum
+# yok, basarisizlik yok - degisen tek sey onun ne kadarini gordugun.
+# Bir nefes boluműnün puani beceri degil **yakinlik** olmali.
+#
+# Gerilim tek bir kuraldan geliyor: **yukari cikilmiyor.** Gectigin
+# isaret bir daha gelmiyor. Sifir kod, ve oyunun butun cumlesi.
+RIG_FALL_SPEED: Final[float] = 1.15       # serbest inis (piksel/kare)
+# Fren hizi **olculdu**, secilmedi. 0.22 ilk denemeydi ve tam frenli
+# bir inis 66 saniye suruyordu - bir nefes bolumu sabir sinavi degil.
+# Olcut: dikkatli oyuncu ile aceleci oyuncu arasindaki fark anlamli
+# olsun ama uzun olan sikici olmasin.
+#
+#     fren   serbest   tam frenli   gercekci (yalniz isaretlerde)
+#     0.22    13.0sn      66.7sn        51.3sn   <- sabir sinavi
+#     0.35    13.0sn      42.0sn        34.1sn
+#     0.45    13.0sn      32.7sn        27.5sn   <- SECILEN
+#
+# Ust sinir `MARK_READ_SPEED` (0.55): frenli halde isaretler MUTLAKA
+# okunabilmeli, yoksa mekanik kendi kendine yalan soyler.
+RIG_BRAKE_SPEED: Final[float] = 0.45      # fren basiliyken
+# Hizlanma/yavaslama yumusak olmali: ani duran bir kafes asansor
+# degil tuzak gibi hissettiriyordu.
+RIG_ACCEL: Final[float] = 0.045
+# Kafesin genisligi (tile). Oyuncu ustunde saga sola yuruyebiliyor -
+# isaretler iki duvarda da oldugu icin bu bir SECIM: hangi tarafa
+# bakiyorsun.
+RIG_WIDTH_TILES: Final[int] = 5
+# Bir isaret bu kadar yakinken ve kafes bu hizin altindayken okunuyor.
+MARK_READ_RANGE: Final[float] = 30.0
+MARK_READ_SPEED: Final[float] = 0.55

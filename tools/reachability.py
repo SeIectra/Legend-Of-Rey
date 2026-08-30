@@ -397,6 +397,26 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
     # yukarida, ziplama zarfi 3 - bolumun tamami "ulasamiyorsun"
     # uzerine kurulu (`docs/yapi.md` B13: *"ulasamadan tasinir"*).
     # Erisilebilir olsaydi ara sahne yalan soylerdi.
+    # Bolum 12: kuyunun icinde zemin YOK - orada yururek inilmiyor,
+    # Ardo'nun kafesiyle iniliyor (`src/world/rig.py`). BFS aracı
+    # bilmiyor, o yuzden kafesin gectigi sutuna **gecici basamaklar**
+    # konuyor: her uc tile'da bir. Ayni yaklasim Bolum 7'nin cukuru ve
+    # Bolum 9'un kulesinde de var - senaryolu/mekanikli gecisi varsay,
+    # geri kalan HER SEYI gercekten sina.
+    #
+    # Boylece dip odada erisilemeyen bir cep ya da kuyu agzinin
+    # tikanmasi yine yakalaniyor; nitekim ilk surumde dip zeminin
+    # altinda bir satirlik olu cep vardi.
+    from src.world.rooms import chapter12
+    spawn12 = chapter12.LEVEL.first("player")
+    rows12 = [list(row) for row in chapter12.LEVEL.terrain_rows]
+    for step_row in range(chapter12.SHAFT_TOP + 2,
+                          chapter12.SHAFT_BOTTOM, 3):
+        for dx in (-1, 0, 1):
+            rows12[step_row][chapter12.RIG_CENTER_TILE + dx] = "#"
+    rooms.append(("bolum 12 - mektup", ["".join(r) for r in rows12],
+                  (spawn12.tile_x, spawn12.tile_y + 1), set()))
+
     from src.world.rooms import chapter13
     spawn13 = chapter13.LEVEL.first("player")
     cemo13 = chapter13.LEVEL.first("cemo")

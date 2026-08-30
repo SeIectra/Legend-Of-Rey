@@ -737,6 +737,72 @@ görüntü çökük. Üç kalıcı önlem yazıldı:
 Ders şu: bir düşmanın sözleşmesi yalnızca ne yaptığı değil, **ekranda
 görünebildiği** de.
 
+### Bölüm 12 "Mektup" — nefes bölümü + **mekanik #11: sürülebilir düzenek** (30.08.2026)
+
+Arda sordu: *"jetpack, helikopter, araba veya tank gibi sürülebilir
+bişey ekleyip bir bölümü de öyle oynatmak istiyorum ama çok absürt mü
+kaçar?"*
+
+Cevap: dördü de absürt, ama sorun "araç" değil **çağ**. Zindanda
+meşale, zincir, kafes, anahtar var; oraya bir tank koymak sürpriz
+değil tutarsızlık olur. Ama istek doğruydu — oyun kendi döngüsünü
+zaten dört kez bilerek kırıyor. Değişen tek şey araç oldu:
+**Ardo'nun kuyuya kurduğu iniş kafesi.**
+
+`docs/gdd.md` §9 ve `docs/yapi.md` mekanik havuzuna 11. madde olarak
+**açıkça** eklendi (gerekçesi ve reddedilen dört seçenek dahil).
+
+**Neden bir nefes bölümüne araç konabiliyor.** İlk bakışta ters: araç
+hızlandırır, nefes bölümü yavaşlatır. Çözüm aracın **kime ait
+olduğunda** — `docs/yapi.md` B12 zaten *"kamp kalıntıları, senin için
+bırakılmış erzak"* diyor; düzenek de o bırakılanlardan biri. Onun
+yaptığı bir şeyin seni taşıması, "yoklukta yakınlık"ın en dolaysız
+hali.
+
+**Mekanik: tek kontrol, fren.** Kafes kendi iniyor. Duvarlarda altı iz
+var ve yalnızca yavaşken okunuyor; izler iki duvara dağılmış, yani
+kafes üstünde sağa sola yürümek bir **seçim**. Ceza yok, ölüm yok,
+başarısızlık yok — değişen tek şey onun ne kadarını gördüğün. Gerilim
+tek kuraldan: **yukarı çıkılmıyor.**
+
+Fren hızı ölçüldü, seçilmedi: 0.22 ile tam frenli iniş **66 saniye**
+sürüyordu. 0.45 seçildi — serbest 13 sn, gerçekçi oyun 27 sn, tam
+frenli 33 sn. Üst sınır `MARK_READ_SPEED`: frenli halde izler
+**mutlaka** okunabilmeli, yoksa mekanik kendi kendine yalan söyler.
+
+**Aynı bölüm, iki zıt mahremiyet** — ve bu var olan sistemlerden
+düştü:
+
+    Rey oynuyor   -> Ardo'nun BİLEREK bıraktıkları  (mektup)
+    Ardo oynuyor  -> Rey'in İSTEMEDEN bıraktıkları  (takip)
+
+Altı izin her biri için iki ayrı replik. İz Sürme zaten Ardo'da açık,
+işaretler zaten bölüm içeriği; tek satır özel kod yazılmadı.
+
+**Ekran görüntüsü iki kez tasarımı düzeltti.** İlki: `cave_backdrop`
+çağrılıyordu ve kuyunun içinde **gece göğü** görünüyordu — o arka plan
+yatay mağara için yazılmış. İkincisi: harita 15 tile genişti ve
+kamera haritanın dışını gösteriyordu, ekranın yarısı düz siyahtı.
+Harita 30'a çıkarıldı ve kuyu **kayanın içine oyuldu** — düzeltme
+görsel bir yama değil: kuyu artık boşlukta asılı değil, bir kütlenin
+içinde.
+
+**Hesaplanmış dil anahtarı tuzağına üçüncü kez düşüldü.** `key +
+"_ardo"` ile üretilen on iki replik `tests/test_lang.py` tarafından
+"ölü anahtar" diye raporlandı — hepsi kullanılıyordu ama tarayıcı
+hesaplanmış adı göremiyor. Hepsi düz dizeye çevrildi; `MARKS` artık
+iki anahtar taşıyor ve `LetterCinematic.VARIANTS` altı anahtarı açık
+tabloda tutuyor.
+
+Zincirleme kapandı: **B11 → B12 → B13.**
+
+### Belge çelişkisi düzeltildi (30.08.2026)
+
+`docs/yapi.md` B13 için *"ilk mini-boss"* diyordu; `docs/gdd.md` §8 ve
+`docs/asset-listesi.md` ikisi de **BOSS 2 "Zindancı"** diyor. Satır
+bayattı (mini-boss'lar B2 ve B3'te zaten geçti) — düzeltildi ve neden
+düzeltildiği yazıldı.
+
 ## 9. AÇIK KALANLAR
 
 Sırası gelmediği için değil, **gözden kaçmasın** diye:

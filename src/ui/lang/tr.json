@@ -322,7 +322,41 @@
     "ch13_rey_empty": "Boş. Yine boş.",
     "ch13_ardo_empty": "Geç kaldım. Yine.",
     "ch13_echo_deeper": "Aşağıda. Hep aşağıdaydı. Artık beni duyduğun yere yakınsın.",
-    "ch13_trace_deeper": "İzler aşağı iniyor. Bu sefer geri dönmüyorlar."
+    "ch13_trace_deeper": "İzler aşağı iniyor. Bu sefer geri dönmüyorlar.",
+    "ch12_mark_arrow": "Ok. Sağa. Benim için çizmiş.",
+    "ch12_mark_arrow_ardo": "Ayak izi. Burada durup iki yana bakmış — yolu bilmiyormuş.",
+    "ch12_mark_cache": "Erzak. Payını ayırmış, benimkini bırakmış.",
+    "ch12_mark_cache_ardo": "Bıraktığım erzağa dokunmamış. Ya bulmamış, ya almaya utanmış.",
+    "ch12_mark_camp": "Burada uyumuş. Ateşi küçük tutmuş — görülmek istememiş.",
+    "ch12_mark_camp_ardo": "Burada uyumamış. Oturmuş, kalkmış, tekrar oturmuş.",
+    "ch12_mark_count": "Çentikler. Günleri saymış.",
+    "ch12_mark_count_ardo": "Duvarda çentikler var. Sayarken elleri titremiş.",
+    "ch12_mark_pencil": "Kırık bir kömür ucu. Bir şey çizerken kırılmış.",
+    "ch12_mark_pencil_ardo": "Kömür tozu. Bir şey çizmiş, sonra silmeye çalışmış.",
+    "ch12_mark_figure": "Bu... ben'im. Beni çizmiş.",
+    "ch12_mark_figure_ardo": "Beni çizmiş. Kaba, acele — ama gözlerini doğru yapmış.",
+    "ch12_keeper": "Yine sen. Mumların iyice azalmış.",
+    "ch12_keeper_ardo": "Her indiğimde bir mum eksik. Sonuncusunda ne olacak?",
+    "ch12_cine_fire": "Ateş sönmüş ama küller hâlâ ılık. Az önce buradaymış.",
+    "ch12_cine_fire_ardo": "Küller ılık. Beni bekleyip vazgeçmiş.",
+    "ch12_cine_pack": "Denk açık. İçindekini ikiye bölmüş.",
+    "ch12_cine_pack_ardo": "Denği açmış, karıştırmış, hiçbir şey almamış.",
+    "ch12_echo_rig": "Bunu kurmak vakit almış. Seni bekleyecek vakti yokmuş — kuracak vakti varmış.",
+    "ch12_trace_rig": "Düzenek sağlam. Acele etmemiş — inen kişi düşmesin diye.",
+    "ch12_letter_all": "Hepsini gördüm. Baştan sona bana yazmış.",
+    "ch12_letter_all_ardo": "Hepsini gördüm. Yalnız olduğunu bir kere bile yazmamış.",
+    "ch12_letter_some": "Bir kısmını gördüm. Gerisi yukarıda kaldı.",
+    "ch12_letter_some_ardo": "Bir kısmını gördüm. Hızlı inmişim.",
+    "ch12_letter_few": "Çok hızlı indim. Arkamda bıraktığım şeyler vardı.",
+    "ch12_letter_few_ardo": "Bakmadım. Bakmak için zamanım yok sanmıştım.",
+    "ch12_after_all": "Aşağıda buluşacağız. Söz vermedi ama ben verdim.",
+    "ch12_after_all_ardo": "Aşağıda buluşacağız. Bu sefer geç kalmayacağım.",
+    "ch12_after_some": "Geri dönemem. Yukarısı artık kapalı.",
+    "ch12_after_some_ardo": "Geri dönmek yok. Aşağısı neyse odur.",
+    "ch12_after_few": "Bir dahakine yavaşlarım.",
+    "ch12_after_few_ardo": "Bir dahakine bakarım.",
+    "ch12_echo_deeper": "Aşağı iniyorsun. Güzel. Ben de aşağıdayım.",
+    "ch12_trace_deeper": "İzler burada bitiyor. Bundan sonrası benim."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",
@@ -362,7 +396,8 @@
     "bell_tower": "Çan Kulesi",
     "parting": "Ayrılık",
     "mirror_hall": "Ayna Salonu",
-    "cemo": "Cemo"
+    "cemo": "Cemo",
+    "letter": "Mektup"
   },
   "chapter_end": {
     "heading": "BÖLÜM TAMAMLANDI",
@@ -543,7 +578,8 @@
     "companion_wait": "[{key}] yoldaşa: burada bekle",
     "resonance": "[{key}] rezonans — sesle kır",
     "boost": "[{key}] yoldaşın yanında: seni fırlatır",
-    "lever": "[{key}] kolu çevir — kapı süreli açılır"
+    "lever": "[{key}] kolu çevir — kapı süreli açılır",
+    "rig_brake": "[{key}] basılı tut — kafes yavaşlar"
   },
   "chapter08": {
     "first_crystal": "Kristal kırıldı — ses bir silah",
@@ -566,5 +602,8 @@
     "run": "KOŞ — kapı iniyor",
     "dark": "Fener kırıldı. Mangalları yak.",
     "gate_open": "Zindancı düştü. Kapı açık."
+  },
+  "chapter12": {
+    "descend": "Kafes iniyor. Yavaşlarsan görürsün."
   }
 }
