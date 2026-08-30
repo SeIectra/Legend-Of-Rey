@@ -243,7 +243,7 @@ class Chapter08Scene(PlayScene):
                              ImpactWeight.FINISHER)
         self.particles.burst(crystal.rect.centerx, crystal.rect.centery,
                              18, path="echo", speed=(0.8, 2.6))
-        self.game.play_sound("wall_break")
+        self.game.play_sound("echo_wall")
         if crystal is self.teach_crystal:
             self.show_toast(t("chapter08.first_crystal"), frames=190)
 
@@ -280,7 +280,7 @@ class Chapter08Scene(PlayScene):
             chest.open()
             self.earned_gold += chest.gold
             self.secret_found = True
-            self.pickup_juice()
+            self.pickup_juice(gold=True)
 
     def _check_exit(self) -> None:
         exit_at = LEVEL.first("exit")

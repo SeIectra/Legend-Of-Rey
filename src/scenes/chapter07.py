@@ -362,7 +362,7 @@ class Chapter07Scene(PlayScene):
             chest.open()
             self.earned_gold += chest.gold
             self.secret_found = True
-            self.pickup_juice()
+            self.pickup_juice(gold=True)
 
     def _check_exit(self) -> None:
         exit_at = LEVEL.first("exit")

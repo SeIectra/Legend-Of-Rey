@@ -1112,8 +1112,14 @@ class PlayScene(Scene):
         self.show_toast(t(abilities.label_key(ability)), frames=180)
         self.pickup_juice()
 
-    def pickup_juice(self) -> None:
+    def pickup_juice(self, gold: bool = False) -> None:
         """Bir sey kazanmanin GORUNTUSU - yaziyi cagiran belirler.
+
+        `gold=True` altin sesini caliyor. Ses paketinde `gold_pickup`
+        vardi ama **hicbir yerden cagrilmiyordu**: sandiklar da altin
+        da genel `item_pickup` sesini kullaniyordu ve para sesi hic
+        duyulmuyordu. `tests/test_audio.py` bunu ilk calistirmasinda
+        buldu.
 
         `on_ability_gained`'dan ayrildi: anahtar, tilsim, silah gibi
         yetenek OLMAYAN kazanimlar da ayni parlama/parcacik/sesi
@@ -1126,7 +1132,7 @@ class PlayScene(Scene):
         self.particles.burst(self.player.body.center_x,
                              self.player.body.center_y, 14,
                              path="spark", speed=(0.6, 2.2))
-        self.game.play_sound("item_pickup")
+        self.game.play_sound("gold_pickup" if gold else "item_pickup")
 
     def _emit_particles(self, event: ImpactEvent) -> None:
         self.particles.burst(event.x, event.y, event.particle_count,

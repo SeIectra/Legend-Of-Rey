@@ -113,7 +113,7 @@ class FiresideCinematic(_FiresideBase):
         )),
         # D: sarma. Tek ses, tek parlama - dokunus.
         Panel(56, "sarma", cues=(
-            Cue("other", state="idle", sound="pickup",
+            Cue("other", state="idle", sound="item_pickup",
                 burst="spark", burst_count=10),
             Cue("player", flash=0.18),
         )),

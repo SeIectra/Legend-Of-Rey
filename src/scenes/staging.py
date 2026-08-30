@@ -23,7 +23,7 @@ Panel **ne oldugunu** soyluyordu; `Cue` **kimin ne yaptigini** soyluyor:
     Panel(90, "el", cues=(
         Cue("ardo", state="idle", face=-1),
         Cue("rey", move_to=(120, 150), move_frames=60, state="run"),
-        Cue("rey", delay=60, state="idle", sound="land"),
+        Cue("rey", delay=60, state="idle", sound="land_hard"),
     ))
 
 Neden veri, neden `if frame > 90:` degil: Bolum 3'un iki sinematigi elle

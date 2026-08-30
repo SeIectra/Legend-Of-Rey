@@ -312,7 +312,7 @@ class HandCinematic(_Chapter07Cinematic):
         )),
         # C: temas. Tek ses, tek flas, parcacik.
         Panel(30, "temas", cues=(
-            Cue("below", state="jump", sound="pickup",
+            Cue("below", state="jump", sound="item_pickup",
                 burst="echo", burst_count=16),
             Cue("below", flash=0.35),
         )),
