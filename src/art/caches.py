@@ -39,6 +39,7 @@ def invalidate_all() -> None:
     yani import maliyeti onemsiz.
     """
     from src.art import animator, portrait, postfx, tileset
+    from src.scenes import staging
     from src.ui import echo_view, text
 
     animator.clear_cache()
@@ -47,3 +48,9 @@ def invalidate_all() -> None:
     portrait.clear_cache()
     echo_view.clear_cache()
     text.clear_cache()
+    # Ara sahne panelleri de diskten gelen YUZEY: hem ekran bicimi
+    # hem renk korlugu modu degisiminde bayatliyor. Testin tarayicisi
+    # `src/scenes` altina bakmadigi icin bunu yakalayamadi - kural
+    # yine de gecerli (`CLAUDE.md`: guvence yorumda degil testte, ama
+    # test kapsami disi kalan yeri de biz kapatiriz).
+    staging.clear_panel_cache()

@@ -65,7 +65,7 @@ from pathlib import Path
 
 import pygame
 
-from src.art import palette
+from src.art import imported, palette
 from src.art.forge import Canvas
 
 # Portre tuvali. 64x96 Arda'nin verdigi olcu.
@@ -926,10 +926,6 @@ _cache: dict[str, pygame.Surface] = {}
 # uretimin yerine gecer**.
 HAND_DRAWN_DIR = Path(__file__).resolve().parents[2] / "assets" / "portraits"
 
-# Palet disi piksel bulununca bir kez uyar - her karede degil.
-_warned: set[str] = set()
-
-
 def _load_hand_drawn(name: str) -> pygame.Surface | None:
     """`assets/portraits/<ad>.png` varsa onu yukler.
 
@@ -938,54 +934,19 @@ def _load_hand_drawn(name: str) -> pygame.Surface | None:
     Arda 31.08.2026'da referans getirdi ve prosedurel portrelerin
     tavani gorundu: bir iskeletten turetilen yuz, elle cizilmis bir
     yuzun tasidigi **niyeti** tasiyamiyor. Kas kaldirmak, dudak
-    kenarini kirmak, gozun icine ucuncu bir ton koymak - bunlar
-    kural degil karar.
+    kenarini kirmak, gozun icine ucuncu bir ton koymak - bunlar kural
+    degil karar.
 
-    O yuzden kod uretimi **taban** oldu, elle cizim **ust**: dosya
-    yoksa oyun calisiyor (hicbir sey bozulmuyor), dosya varsa daha
-    iyi gorunuyor. Bir portre cizilene kadar oteki karakterler
-    prosedurel kaliyor - hepsini birden bitirmek gerekmiyor.
+    Kod uretimi **taban**, cizim **ust**: dosya yoksa oyun calisiyor,
+    dosya varsa daha iyi gorunuyor. Bir portre cizilene kadar oteki
+    karakterler prosedurel kaliyor.
 
-    `CLAUDE.md` 6 baglayici: *"Kaynagi ne olursa olsun - kod, elle
-    cizim, harici arac - her gorsel `tools/quantize.py` filtresinden
-    gecer."* Burada dosya **degistirilmiyor** ama palet disi renk
-    varsa uyariliyor: sessizce kabul etmek o kurali delerdi,
-    calisma zamaninda quantize etmek ise her acilista maliyet olurdu.
+    Yukleme, dogrulama ve renk korlugu remap'i `src/art/imported.py`de
+    - paneller de ayni yolu kullaniyor ve ikisinin ayrisması sessiz
+    bir erisilebilirlik acigi uretirdi.
     """
-    path = HAND_DRAWN_DIR / f"{name}.png"
-    if not path.exists():
-        return None
-    try:
-        image = pygame.image.load(str(path)).convert_alpha()
-    except pygame.error:
-        return None
-
-    if image.get_size() != (WIDTH, HEIGHT) and name not in _warned:
-        _warned.add(name)
-        print(f"[portre] {path.name}: {image.get_size()} - beklenen "
-              f"{(WIDTH, HEIGHT)}. Oyun yine de kullaniyor ama olcek "
-              f"kayabilir.")
-
-    if name not in _warned:
-        off = _off_palette(image)
-        if off:
-            _warned.add(name)
-            print(f"[portre] {path.name}: {off} piksel palet disi. "
-                  f"Duzeltmek icin: python tools/quantize.py "
-                  f"assets/portraits/{name}.png")
-    return image
-
-
-def _off_palette(image: pygame.Surface) -> int:
-    """Kac piksel 37 rengin disinda. Sifir olmali."""
-    import numpy as np
-    rgb = pygame.surfarray.array3d(image)
-    alpha = pygame.surfarray.array_alpha(image)
-    allowed = {tuple(c) for c in palette.COLORS.values()}
-    solid = rgb[alpha > 8]
-    if solid.size == 0:
-        return 0
-    return sum(1 for c in solid if tuple(int(v) for v in c) not in allowed)
+    return imported.load_art(HAND_DRAWN_DIR / f"{name}.png", name,
+                             expect=(WIDTH, HEIGHT))
 
 
 def portrait(name: str) -> pygame.Surface | None:
@@ -1010,5 +971,74 @@ def portrait(name: str) -> pygame.Surface | None:
     _cache[name] = surface
     return surface
 
+# Ucuncu gozun (prolog, `src/scenes/prologue.py`) tuvaldeki yeri.
+# Prosedurel portrede semadan geliyor: `FACE_CX` ve kas cizgisinin bir
+# ustu. Elle cizilmis portrede sema gecerli degil - o yuzden olculuyor.
+PROCEDURAL_EYE = (int(FACE_CX), BROW - 1)
+
+# Aydinlik ten kumesinin dikey medyanindan kasa kadar olan mesafe.
+# **Olculdu** (`build/goz_dy*.png`): 7'de isaret kasin uzerine,
+# 10'da kaslarin arasina - yani alna - dusuyor. Ucu de ayni sapmayi
+# verdigi icin tek sabit yetiyor.
+_BROW_LIFT = 10
+
+_eye_cache: dict[str, tuple[int, int]] = {}
+
+
+def eye_anchor(name: str) -> tuple[int, int]:
+    """Ucuncu gozun konumu - portre tuvalinde (x, y).
+
+    ## Neden olculuyor
+
+    Arda 31.08.2026'da AI ile uretilmis portreleri koydu ve prologdaki
+    ucuncu goz **saclarin arasinda** cikti. Sebep: konum
+    `(FACE_CX, BROW-1)` diye sabitti ve o sayilar prosedurel portrenin
+    semasindan geliyordu. Elle cizilmis bir yuzde kafa baska yerde,
+    baska buyuklukte.
+
+    Sabit bir sayiyi elle duzeltmek uc portre icin calisirdi ama
+    dorduncusunde yine kayardi. Onun yerine yuz **bulunuyor**:
+    aydinlik ten renkleri (`flesh_light`, `bone`) yalnizca isik alan
+    yuzeyde var, sacta ve kumasta yok. Kumenin yatay orta noktasi
+    yuzun ortasi, dikey medyani yanak hizasi; kas onun
+    `_BROW_LIFT` kadar ustunde.
+
+    Prosedurel portrede olcume hic girilmiyor - orada sema zaten
+    dogru cevabi biliyor.
+    """
+    if name in _eye_cache:
+        return _eye_cache[name]
+
+    image = _load_hand_drawn(name)
+    if image is None:
+        _eye_cache[name] = PROCEDURAL_EYE
+        return PROCEDURAL_EYE
+
+    import numpy as np
+    rgb = pygame.surfarray.array3d(image)
+    alpha = pygame.surfarray.array_alpha(image)
+    mask = np.zeros(alpha.shape, dtype=bool)
+    for tone in ("flesh_light", "bone"):
+        mask |= (rgb == np.array(palette.color(tone))).all(axis=-1)
+    mask &= alpha > 128
+    # Yalnizca UST YARI: govdedeki acik kumas ya da zirh parlamasi
+    # yuzun yerini kaydiriyordu (Ardo'nun omuzlugu tam boyle).
+    mask[:, image.get_height() // 2:] = False
+
+    xs, ys = np.where(mask)
+    if xs.size == 0:
+        _eye_cache[name] = PROCEDURAL_EYE
+        return PROCEDURAL_EYE
+
+    # Yatayda **kutu ortasi**, dikeyde medyan. Medyan yatayda isiga
+    # dogru kayiyordu (aydinlik piksellerin cogu sol yanakta).
+    x = int((int(xs.min()) + int(xs.max())) // 2)
+    y = max(0, int(np.median(ys)) - _BROW_LIFT)
+    _eye_cache[name] = (x, y)
+    return (x, y)
+
+
 def clear_cache() -> None:
     _cache.clear()
+    _eye_cache.clear()
+    imported.clear_warnings()

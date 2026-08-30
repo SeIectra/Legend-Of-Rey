@@ -754,13 +754,11 @@ def panel_art(name: str) -> pygame.Surface | None:
     """Panel gorseli - yoksa None (ve bir daha diske bakilmaz)."""
     if name in _panel_cache:
         return _panel_cache[name]
-    path = PANEL_DIR / f"{name}.png"
-    image: pygame.Surface | None = None
-    if path.exists():
-        try:
-            image = pygame.image.load(str(path)).convert()
-        except pygame.error:
-            image = None
+    from src.art import imported
+    from src.config import INTERNAL_HEIGHT, INTERNAL_WIDTH
+    image = imported.load_art(PANEL_DIR / f"{name}.png", name,
+                              expect=(INTERNAL_WIDTH, INTERNAL_HEIGHT),
+                              alpha=False)
     _panel_cache[name] = image
     return image
 

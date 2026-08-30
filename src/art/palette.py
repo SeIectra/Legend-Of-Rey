@@ -214,18 +214,51 @@ def path_color(name: str, life_ratio: float) -> RGB:
 
 
 # --- Yardimcilar ------------------------------------------------------------
+# Kroma (doygunluk) farkinin agirligi. Gerekce `nearest_name`de.
+# 1.0 **olculdu**: 0 altin lekesi birakiyor, 2.5 ve ustu sacta yesil
+# lekelenme basliyor (`build/kroma_taramasi.png`).
+CHROMA_WEIGHT = 1.0
+
+
 @lru_cache(maxsize=4096)
 def nearest_name(rgb: RGB) -> str:
     """Verilen renge en yakin palet rengi. quantize.py'nin cekirdegi.
 
-    Oklid mesafesi kullaniyoruz - algisal olarak mukemmel degil ama piksel
-    artta yeterli ve hizli. Onbellek sayesinde ayni renk bir kez hesaplanir.
+    ## Neden duz oklid yetmiyor
+
+    Oklid mesafesi **doygunlugu gormuyor**. Bu, cilt tonlarinda somut
+    bir hataya yol aciyor: parlak ten (232,200,168) ile `gold`
+    (255,198,96) arasindaki oklid mesafesi 75.6, `flesh_light` ile
+    75.5 - yani neredeyse ayni. Kaynaktaki en ufak sapma dengeyi
+    altina cevirivor.
+
+    Arda 31.08.2026'da AI ile uretilmis Rey portresini koydu ve
+    **yuzunun yarisinda altin sarisi bir leke** cikti: 26.309 piksel
+    `gold`a esleniyordu. Ekranda bir isik efekti gibi degil, bir bozuk
+    doku gibi duruyordu.
+
+    Cozum kroma cezasi: kaynak pikselin doygunlugu ile aday palet
+    renginin doygunlugu arasindaki fark da mesafeye giriyor. Ten
+    dusuk kromali, `gold` yuksek - artik karisamiyorlar.
+
+    Agirlik olculdu, secilmedi:
+
+        0.0   26309 piksel altin  <- leke
+        1.0       0               <- SECILEN, sacta yan etki yok
+        2.5       0               ama sac yesillenmeye basliyor
+        9.0       0               sac belirgin yesil
+
+    Piksel sanatinda "algisal olarak mukemmel" gerekmiyor; gereken,
+    **tonun ailesini degistirmemek**. Kroma tam olarak onu koruyor.
     """
     red, green, blue = rgb
+    chroma = max(rgb) - min(rgb)
     best_name = ORDERED_NAMES[0]
     best_distance = float("inf")
     for name, (pr, pg, pb) in zip(ORDERED_NAMES, ORDERED_COLORS):
-        distance = (red - pr) ** 2 + (green - pg) ** 2 + (blue - pb) ** 2
+        delta_chroma = chroma - (max(pr, pg, pb) - min(pr, pg, pb))
+        distance = ((red - pr) ** 2 + (green - pg) ** 2 + (blue - pb) ** 2
+                    + CHROMA_WEIGHT * delta_chroma ** 2)
         if distance < best_distance:
             best_distance = distance
             best_name = name

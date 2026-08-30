@@ -82,9 +82,12 @@ HOUSE_COUNT = 7
 # Sirtini donen koyluler.
 VILLAGER_COUNT = 5
 
-# Ucuncu gozun kaslar arasindaki yeri (portre tuvalinde).
-EYE_X = 31
-EYE_Y = 23
+# Ucuncu gozun yeri **portre modulunden** geliyor, burada sabit degil.
+#
+# Eskiden `EYE_X = 31, EYE_Y = 23` yaziyordu ve o sayilar prosedurel
+# portrenin semasindan (`FACE_CX`, `BROW`) turemisti. Arda elle
+# cizilmis portreleri koyunca goz **saclarin arasinda** cikti: sema
+# artik gecerli degildi. `portrait.eye_anchor()` yuzu bulup olcuyor.
 
 
 class ReyPrologue(StoryScene):
@@ -146,6 +149,9 @@ class ReyPrologue(StoryScene):
     def on_enter(self, character: str = "rey", **kwargs: object) -> None:
         super().on_enter(**kwargs)
         self.character = character
+        # Portre adi ayrica tutuluyor: ucuncu gozun yeri ondan
+        # olculuyor (`portrait.eye_anchor`).
+        self._portrait_name = "rey"
         self.portrait = portrait.portrait("rey")
         # **Rey.mp3** - Arda: "butun Yanki kisimlari icin REY KULLAN".
         # Prolog bastan sona Yanki'nin ne oldugunu anlatiyor; parcanin
@@ -263,8 +269,9 @@ class ReyPrologue(StoryScene):
         scale = 2
         origin = self._draw_portrait(surface, scale=scale)
 
-        eye_x = origin[0] + EYE_X * scale
-        eye_y = origin[1] + EYE_Y * scale
+        anchor_x, anchor_y = portrait.eye_anchor(self._portrait_name)
+        eye_x = origin[0] + anchor_x * scale
+        eye_y = origin[1] + anchor_y * scale
 
         # 0.0-0.35 nokta, 0.35-0.7 aciliyor, 0.7+ tam ve nabizli.
         if progress < 0.35:
@@ -298,8 +305,9 @@ class ReyPrologue(StoryScene):
         baska bir gorsel kullansaydi oyuncu bagi kurmazdi.
         """
         origin = self._draw_portrait(surface, scale=2)
-        eye_x = origin[0] + EYE_X * 2
-        eye_y = origin[1] + EYE_Y * 2
+        anchor_x, anchor_y = portrait.eye_anchor(self._portrait_name)
+        eye_x = origin[0] + anchor_x * 2
+        eye_y = origin[1] + anchor_y * 2
 
         glow = radial_glow(14, palette.color("violet_bright"), peak=0.9)
         surface.blit(glow, (eye_x - 14, eye_y - 14),
@@ -328,8 +336,9 @@ class ReyPrologue(StoryScene):
         kalici, kazanc gecici.
         """
         origin = self._draw_portrait(surface, scale=2)
-        eye_x = origin[0] + EYE_X * 2
-        eye_y = origin[1] + EYE_Y * 2
+        anchor_x, anchor_y = portrait.eye_anchor(self._portrait_name)
+        eye_x = origin[0] + anchor_x * 2
+        eye_y = origin[1] + anchor_y * 2
 
         # Goz soneyor - ama tamamen degil. Bir daha hic kapanmayacak.
         fade = max(0.15, 1.0 - progress)
@@ -452,6 +461,7 @@ class ArdoPrologue(ReyPrologue):
 
     def on_enter(self, character: str = "ardo", **kwargs: object) -> None:
         super().on_enter(character=character, **kwargs)
+        self._portrait_name = "ardo"
         self.portrait = portrait.portrait("ardo")
         # Yankisi yok - Yanki parcasi da yok. **Ardo.mp3**.
         self.game.music.play("companion")
