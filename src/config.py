@@ -599,6 +599,86 @@ SPEARMAN_RECOVER_FRAMES: Final[int] = 34
 SPEARMAN_PUSHBACK: Final[float] = 3.4
 
 
+# --- Okcu (Katman 2, "uzaktan bozar, once susturulmali") ---------------------
+# Tehdit oldugu YER degil oldugu AN: yakin dovusun ortasinda gelen bir
+# ok zinciri kiriyor. Kendisi zayif; cozum ona oncelik vermek.
+ARCHER_HEALTH: Final[int] = 30           # Katman 2'nin en kirilgani
+ARCHER_POISE: Final[int] = 1
+ARCHER_SPEED: Final[float] = 0.5
+ARCHER_DAMAGE: Final[int] = 6            # yakin dovuste - zayif
+ARCHER_REACH: Final[int] = 14
+# Atis menzili: neredeyse bir ekran. Uzaklik onun tek silahi.
+ARCHER_SHOT_RANGE: Final[int] = 150
+# Oyuncu bundan yakinsa **kaciyor** - "ona kos" cozumu calissin diye.
+ARCHER_FLEE_RANGE: Final[int] = 52
+ARCHER_FLEE_SPEED: Final[float] = 0.72
+ARCHER_TELL_FRAMES: Final[int] = 26      # yay geriliyor - uzun ve okunur
+ARCHER_ACTIVE_FRAMES: Final[int] = 4
+ARCHER_RECOVER_FRAMES: Final[int] = 30
+ARCHER_ARROW_SPEED: Final[float] = 3.6
+ARCHER_ARROW_DAMAGE: Final[int] = 8
+ARCHER_ARROW_LIFE: Final[int] = 90       # ~1.5 sn sonra dusuyor
+
+# --- Komutan (Katman 2, "takviye cagirir") -----------------------------------
+# Kendisi zayif, cagirdiklari degil. Ust sinir sart: sinirsiz olsaydi
+# zorluk beceriyle TERS orantili olurdu.
+COMMANDER_HEALTH: Final[int] = 46
+COMMANDER_POISE: Final[int] = 2          # kesilebilir olmali
+COMMANDER_SPEED: Final[float] = 0.34
+COMMANDER_DAMAGE: Final[int] = 8
+COMMANDER_REACH: Final[int] = 15
+# Cagirma menzili genis: oyuncuyla temas etmeden cagiriyor.
+COMMANDER_SUMMON_RANGE: Final[int] = 120
+COMMANDER_TELL_FRAMES: Final[int] = 34   # en uzun tell - kesilebilsin
+COMMANDER_ACTIVE_FRAMES: Final[int] = 6
+COMMANDER_RECOVER_FRAMES: Final[int] = 46
+COMMANDER_SUMMON_LIMIT: Final[int] = 3
+
+# --- Sessiz (Katman 3, "Yanki onu gostermez") --------------------------------
+# Yeni hamlesi yok; tek ozelligi Yanki'nin siluetinde bulunmamasi.
+SILENT_HEALTH: Final[int] = 34
+SILENT_POISE: Final[int] = 2
+SILENT_SPEED: Final[float] = 0.4
+SILENT_DAMAGE: Final[int] = 12           # pusu - vurusu agir
+SILENT_REACH: Final[int] = 14
+# Pusudan bu mesafede kalkiyor. Kisa: "pusu" olmasi icin oyuncunun
+# ona gercekten yaklasmis olmasi gerek.
+SILENT_AMBUSH_RANGE: Final[int] = 46
+SILENT_TELL_FRAMES: Final[int] = 16
+SILENT_ACTIVE_FRAMES: Final[int] = 5
+SILENT_RECOVER_FRAMES: Final[int] = 26
+
+# --- Yankilayan (Katman 3, "sahte ipucu verir") ------------------------------
+ECHOING_HEALTH: Final[int] = 38
+ECHOING_POISE: Final[int] = 2
+ECHOING_SPEED: Final[float] = 0.42
+ECHOING_DAMAGE: Final[int] = 9
+ECHOING_REACH: Final[int] = 15
+ECHOING_TELL_FRAMES: Final[int] = 18
+ECHOING_ACTIVE_FRAMES: Final[int] = 5
+ECHOING_RECOVER_FRAMES: Final[int] = 28
+# Sahte isaret kendisinin ARKASINA konuyor - oyuncu ona giderken
+# yanindan gecmek zorunda.
+ECHOING_HINT_RANGE: Final[int] = 70
+ECHOING_HINT_LIFE: Final[int] = 150      # ~2.5 sn
+
+# --- Bolunen (Katman 3, "vurunca ikiye ayrilir") -----------------------------
+# Ders "combo yapma" degil **"combo'yu bitir"**: bitirici vurus
+# bolmuyor. Aksi halde oyuncu dovusmekten kacinirdi.
+SPLITTER_HEALTH: Final[int] = 40
+SPLITTER_POISE: Final[int] = 1
+SPLITTER_SPEED: Final[float] = 0.46
+SPLITTER_DAMAGE: Final[int] = 8
+SPLITTER_REACH: Final[int] = 14
+SPLITTER_TELL_FRAMES: Final[int] = 16
+SPLITTER_ACTIVE_FRAMES: Final[int] = 5
+SPLITTER_RECOVER_FRAMES: Final[int] = 24
+# Kac kez bolunebilir. 2 = en fazla dort kucuk parca; ucuncu nesil tek
+# vurusla oluyor, yani kisa bir final.
+SPLITTER_GENERATIONS: Final[int] = 2
+SPLITTER_SPLIT_PUSH: Final[float] = 1.5
+
+
 # --- IZ SURME (Ardo'nun karsi mekanigi, src/systems/tracking.py) -------------
 # `docs/derinlestirme.md` 2.4: *"Rey gelecegi/gizliyi duyar, Ardo gecmisi
 # gorur."* Ayni tus, zit bilgi.

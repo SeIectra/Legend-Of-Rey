@@ -77,6 +77,10 @@ def draw_reveal(surface: pygame.Surface, offset: tuple[int, int],
         reach *= skilltree.echo_sight_scale(skills, player)
 
     for enemy in enemies:
+        # **Sessiz gorunmuyor.** Katman 3'un ilk sorusu: yardimci
+        # sistem her seyi gostermiyor.
+        if not getattr(enemy, "echo_visible", True):
+            continue
         distance = math.hypot(enemy.body.center_x - px,
                               enemy.body.center_y - py)
         if distance > reach:
@@ -150,6 +154,8 @@ def draw_sonar(surface: pygame.Surface, offset: tuple[int, int], echo,
     reach = radius + 8.0
     colour = palette.color("bone")
     for enemy in enemies:
+        if not getattr(enemy, "echo_visible", True):
+            continue                    # sonar da gostermiyor
         distance = math.hypot(enemy.body.center_x - player.body.center_x,
                               enemy.body.center_y - player.body.center_y)
         if distance <= reach:

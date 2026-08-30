@@ -145,6 +145,9 @@ class PlayScene(Scene):
 
         self.setup()
 
+        # Mermiler duvarda olsun: `setup()` tilemap'i kurdu.
+        self.hitboxes.tilemap = self.tilemap
+
         # Yetenek agacindan acilanlar oyuncuya biniyor. `setup()`'tan
         # SONRA: oyuncu orada yaratiliyor. Duz bonuslar (can, pencere,
         # sarj) burada bir kez uygulaniyor.

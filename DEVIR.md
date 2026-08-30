@@ -442,8 +442,19 @@ görülebilir); Katman 2 ve 3 **hiçbir bölüme yerleştirilmedi** —
 | Katman | Bölümler | Öğrettiği | Düşmanlar | Durum |
 |---|---|---|---|---|
 | **1 — Çürüyenler** | B1–B6 | combo **kurmayı** | Sürüklenen, Tırmanan, Şişmek | ✅ **tamamlandı** — B6 finali dahil |
-| **2 — Lanetli Muhafızlar** | B7–B13 | combo'yu **kırmayı** | Kalkanlı, Mızraklı, Okçu, Komutan | 🟡 **Kalkanlı'nın AI'ı var**; diğer üçünde sadece sanat |
-| **3 — Yankı'nın Çocukları** | B14–B18 | yardımcının ihaneti | Sessiz, Yankılayan, Bölünen | 🟡 sanat var, **AI yok** |
+| **2 — Lanetli Muhafızlar** | B7–B13 | combo'yu **kırmayı** | Kalkanlı, Mızraklı, Okçu, Komutan | ✅ **dördü de tamam** (30.08.2026) |
+| **3 — Yankı'nın Çocukları** | B14–B18 | yardımcının ihaneti | Sessiz, Yankılayan, Bölünen | ✅ **üçü de tamam** (30.08.2026) |
+
+**On düşman AI'ının onu da yazıldı.** Katman 2'nin dördü aynı cümleyi
+dört ayrı dilbilgisiyle soruyor — Kalkanlı *yönle*, Mızraklı *mesafeyle*,
+Okçu *zamanla*, Komutan *sayıyla*. Katman 3'ün üçü ise oyuncuya değil
+**yardımcı sistemin kendisine** saldırıyor: Sessiz onu eksiltiyor
+(Yankı göstermiyor), Yankılayan kirletiyor (sahte işaret), Bölünen
+oyuncunun kendi becerisini aleyhine çeviriyor (combo çoğaltıyor).
+
+Hiçbiri henüz bir bölüme **yerleştirilmedi** (Okçu/Komutan B13'e,
+Katman 3 B14+'a ait) — `CLAUDE.md` §3: sırası gelmemiş bölüm içeriği
+yazılmaz. Davranış hazır, yerleşim sırası gelince.
 
 ### Bölüm 6 "ARDO" — Katman 1'in finali (29.08.2026)
 
@@ -643,9 +654,10 @@ Sırası gelmediği için değil, **gözden kaçmasın** diye:
 
 1. **Işık sistemi yalnızca Bölüm 3'e bağlı.** B1'in yarığı ve B2'nin
    meşaleleri gerçek ışık vermiyor. (Faz C'nin yarım kalan parçası.)
-2. **Katman 2'de sadece Kalkanlı'nın AI'ı var** (Mızraklı/Okçu/Komutan
-   ve Katman 3'ün üçü: sanat var, AI yok). Bu dört bağımsız dosya
-   Ultracode'un asıl hedefi (§11).
+2. ~~Katman 2'de sadece Kalkanlı'nın AI'ı var~~ — **kapandı
+   (30.08.2026).** On AI'ın onu da yazıldı; `tests/test_enemies.py`
+   her birinin `docs/gdd.md` §7'deki cümlesini gerçekten yaptığını
+   ölçüyor. Kalan iş yerleştirme, davranış değil.
 3. ~~Ardo'nun oynanışı Rey'in aynısı~~ — **kapandı (29.08.2026).**
    `src/systems/tracking.py` + `src/ui/tracking_view.py`. Aynı tuş, zıt
    bilgi: Rey geleceği/gizliyi **duyar**, Ardo geçmişi **görür**. Eğri

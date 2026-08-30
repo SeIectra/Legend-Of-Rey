@@ -14,6 +14,7 @@ carpisma yapilmaz.
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Flag, auto
 
@@ -48,15 +49,41 @@ class Hitbox:
     pierce: bool = False                # Vurdugu hedefte yok olmasin mi
     follow: object = None               # Sahibini takip etsin mi
     offset: tuple[int, int] = (0, 0)
+    # **Mermi.** Sifirdan farkliysa kutu her karede bu kadar
+    # kayiyor. `follow` ile birlikte kullanilmaz: biri sahibine
+    # yapisik, oteki serbest.
+    #
+    # Okcu icin eklendi (`docs/gdd.md` 7: *"uzaktan bozar"*). Ayri bir
+    # `Projectile` sinifi yazmak yerine: bir ok zaten "belirli
+    # karelerde aktif bir hasar hacmi", yani tam olarak bir hitbox.
+    # Tek eksigi hareketti.
+    velocity: tuple[float, float] = (0.0, 0.0)
+    # Duvara girince yok olsun mu. `HitboxManager` tilemap'i biliyorsa
+    # uyguluyor; bilmiyorsa alan sessizce yok sayiliyor.
+    stop_on_solid: bool = False
 
     frames_alive: int = 0
     already_hit: set = field(default_factory=set)
     expired: bool = False
+    # Mermi hareketinin kesir birikimi - bkz. `update`.
+    _drift_x: float = 0.0
+    _drift_y: float = 0.0
 
     def update(self) -> None:
         self.frames_alive += 1
         if self.frames_alive >= self.active_frames:
             self.expired = True
+        vx, vy = self.velocity
+        if vx or vy:
+            # Konum **tam sayiya yuvarlanmadan** birikiyor olsaydi
+            # `pygame.Rect` her karede tabana yuvarlar ve yavas bir
+            # mermi hic ilerlemezdi. Birikim ayri tutuluyor.
+            self._drift_x += vx
+            self._drift_y += vy
+            step_x, self._drift_x = divmod_signed(self._drift_x)
+            step_y, self._drift_y = divmod_signed(self._drift_y)
+            self.rect.x += step_x
+            self.rect.y += step_y
         if self.follow is not None:
             body = getattr(self.follow, "body", None)
             if body is not None:
@@ -74,6 +101,17 @@ class Hitbox:
         return (dx, dy)
 
 
+def divmod_signed(value: float) -> tuple[int, float]:
+    """Tam kismi ve kalani ayirir - negatif degerlerde de dogru.
+
+    `int()` sifira dogru yuvarliyor, yani -0.6 icin 0 veriyor ve sola
+    giden bir mermi asla ilerlemiyor. `math.floor` ile ayirmak iki
+    yonde de tutarli.
+    """
+    step = math.floor(value)
+    return int(step), value - step
+
+
 @dataclass
 class DamageResult:
     hit: bool = False
@@ -88,6 +126,10 @@ class HitboxManager:
 
     def __init__(self, on_hit=None) -> None:
         self.boxes: list[Hitbox] = []
+        # Mermilerin duvarda olmesi icin. Sahne kuruyor; `None` ise
+        # `stop_on_solid` sessizce calismiyor (dovus test odasi gibi
+        # tilemap'siz baglamlar).
+        self.tilemap = None
         # Sahne bunu saglar; vurus degdiginde game feel'i tetikler.
         self._on_hit = on_hit
 
@@ -102,6 +144,10 @@ class HitboxManager:
         """Her hitbox'i ilerletir ve hedeflerle kesistirir."""
         for box in self.boxes:
             box.update()
+            if (box.stop_on_solid and self.tilemap is not None
+                    and self.tilemap.solid_overlap(box.rect)):
+                box.expired = True
+                continue
             for team, entities in targets_by_team.items():
                 if not (box.targets & team):
                     continue

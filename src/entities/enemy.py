@@ -73,6 +73,14 @@ class Enemy(Actor):
     contact_range: float = 18.0     # Bu mesafede saldiriya baslar
     sprite_name: str = "shambler"
     body_colour: str = "echo_dark"  # Kutu kipinde govde rengi (RENK adi, zincir degil)
+    # Yanki (ve Iz Surme) bu dusmani gosteriyor mu?
+    #
+    # `docs/gdd.md` 7, Katman 3: *"Sessiz - Yanki onu gostermez."*
+    # Bayrak burada cunku gizlenme dusmanin bir OZELLIGI; gorunum
+    # katmani yalnizca soruyor. Alternatif `echo_view` icinde tip
+    # kontrolu yapmakti - gorunum katmaninin dusman tiplerini bilmesi
+    # yanlis yonde bir bagimlilik olurdu.
+    echo_visible: bool = True
     # Ses (Gorev 10) - alt sinif kendi tipine gore ezer. Bos dize = ek ses
     # calinmasin (orn. Sismek zaten patlama sesiyle olur, ustune binmesin).
     tell_sound: str = "enemy_tell"
