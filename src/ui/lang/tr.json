@@ -304,7 +304,8 @@
         "purple_taken": "Alev ellerinde.",
         "pocket_open": "Gizli bir geçit açıldı",
         "trade_title": "MUM BEKÇİSİ",
-        "trade_owned": "alındı"
+        "trade_owned": "alındı",
+        "trade_exit": "[Esc] çık   [Enter] al"
     },
     "chapter04": {
         "gold_found": "{count} altın",
@@ -439,6 +440,11 @@
         "cancel_hint": "ESC ile vazgeç",
         "reset_done": "Tuşlar varsayılana döndü",
         "err_reserved": "ESC değiştirilemez — menüden çıkış ona bağlı",
-        "err_last_key": "Bu tuş başka bir eylemin tek tuşu"
+        "err_last_key": "Bu tuş başka bir eylemin tek tuşu",
+        "companion_wait": "Yoldaş: bekle"
+    },
+    "companion": {
+        "waiting": "Burada bekliyor",
+        "following": "Peşinden geliyor"
     }
 }

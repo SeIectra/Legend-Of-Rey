@@ -386,6 +386,25 @@ class Chapter07Scene(PlayScene):
         self.scenes.push(ChapterEndScene, result=result)
 
     # --- Kancalar -----------------------------------------------------------
+    def after_restart(self, room: str) -> None:
+        """Olumden sonra yoldas oyuncunun YANINDA basliyor.
+
+        Bolum 6'daki kadar agir bir sorun degil (buradaki yoldas
+        `setup()`'ta doguyor, yani kaybolmuyor) ama yeri yanlis
+        olabiliyordu: `setup()` onu bolumun BASINA koyuyor ve oyuncu
+        catlagin otesindeki bir odada olduyse yoldas duvarin ardinda,
+        ulasilamaz bir yerde kaliyordu.
+
+        Catlaktan sonraki odalarda kapi zaten aciliyor, yani yoldasin
+        oraya yurumesinin bir engeli yok - onu oyuncunun yanina koymak
+        yalnizca uzun ve sikici bir yuruyusu atliyor.
+        """
+        if self.companion is None or room in ("kapi_onu", "carkhane"):
+            return
+        self.companion.body.set_feet(self.player.body.center_x - 22,
+                                     self.player.body.feet[1])
+        self.companion.release()
+
     def on_companion_down(self, companion) -> None:
         self.particles.burst(companion.body.center_x, companion.body.center_y,
                              10, path="blood", speed=(0.8, 2.2))

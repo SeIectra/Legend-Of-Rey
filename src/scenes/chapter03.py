@@ -452,6 +452,12 @@ class Chapter03Scene(PlayScene):
             self.trading = True
             self.trade_index = 0
 
+    @property
+    def modal_active(self) -> bool:
+        """Ticaret ekrani aciksa ESC once ONU kapatiyor - duraklatmayi
+        degil. Gerekce `PlayScene.handle_event`'te."""
+        return self.trading
+
     def _update_trade(self) -> None:
         inp = self.game.input
         if inp.pressed(Action.UP):
@@ -697,7 +703,10 @@ class Chapter03Scene(PlayScene):
             self._draw_trade(surface)
 
     def _draw_trade(self, surface: pygame.Surface) -> None:
-        width, height = 180, 20 + len(TRADE_OFFERS) * 14
+        # Yukseklik bir satir fazla: en altta **cikis ipucu** var.
+        # Olmadigi surumde oyuncu ekranin nasil kapandigini bilmiyordu -
+        # ve ESC de calismadigi icin gercekten sikismis oluyordu.
+        width, height = 180, 34 + len(TRADE_OFFERS) * 14
         rect = pygame.Rect(INTERNAL_WIDTH // 2 - width // 2, 60, width, height)
         panel(surface, rect)
         text_ui.draw(surface, t("chapter03.trade_title"), rect.centerx, rect.y + 6,
@@ -711,8 +720,14 @@ class Chapter03Scene(PlayScene):
                 colour = palette.role("ui_text_dim")
             label = t(offer.label_key)
             value = t("chapter03.trade_owned") if bought else str(offer.cost)
+            if i == self.trade_index and not bought:
+                text_ui.draw(surface, "▸", rect.x + 4, y,
+                             color=palette.color("violet_bright"))
             text_ui.draw(surface, label, rect.x + 10, y, color=colour)
             text_ui.draw(surface, value, rect.right - 10, y, color=colour, align="right")
+        text_ui.draw(surface, t("chapter03.trade_exit"), rect.centerx,
+                     rect.bottom - 11, color=palette.role("ui_text_dim"),
+                     align="center")
 
     def debug_lines(self) -> list[str]:
         torch_state = self.torch.state if self.torch else "yok"

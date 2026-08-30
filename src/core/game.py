@@ -97,6 +97,22 @@ class Game:
         # aciliyor; joystick arka planda (`InputState`).
         pygame.display.init()
         pygame.font.init()
+        # **Ses alt sistemi elle aciliyor** ve bu satiri unutmak butun
+        # oyunun sesini kesti (Arda, 30.08.2026: *"main.py ile
+        # calistirdigimda oyunun seslerini duyamiyorum"*).
+        #
+        # `synth.init_mixer()` yalnizca `pre_init` yapiyor - formati
+        # secer, alt sistemi ACMAZ. Acan sey `pygame.init()` idi ve o
+        # cagri joystick yuzunden kaldirildi. Yukaridaki olcum
+        # tablosunda "mixer.init 0.00 sn" yaziyor; olcup eklemeyi
+        # atlamisim.
+        #
+        # Ses cihazi olmayan bir makinede oyun **calismaya devam
+        # etmeli**: mixer acilamazsa `AudioMixer` sessiz calisiyor.
+        try:
+            pygame.mixer.init()
+        except pygame.error as exc:
+            print(f"[ses] mixer acilamadi, sessiz devam: {exc}")
         self.settings = settings or Settings()
         self.settings.on_change(self._on_setting_changed)
         # Gorev 10: gercek kaydedilmis ses yok, dalga formlari koddan

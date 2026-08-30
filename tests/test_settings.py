@@ -48,7 +48,7 @@ from src.systems import bindings as binds  # noqa: E402
 from src.systems.bindings import ResetBindings  # noqa: E402
 from src.systems.settings import ALL_ENTRIES, TABS, Option  # noqa: E402
 from src.ui.i18n import t  # noqa: E402
-from src.ui.settings_scene import SettingsScene  # noqa: E402
+from src.ui.settings_scene import CONTROL_ROWS, SettingsScene  # noqa: E402
 
 failures: list[str] = []
 
@@ -163,11 +163,15 @@ def test_bindings() -> None:
         scene.tabs.index = controls
         scene.row = 0
         check("tus sekmesi var", scene.controls_tab)
-        check("on iki satir", len(scene.entries) == 12,
-              str(len(scene.entries)))
+        # Sayi sabit yazilmiyor: her yeni aksiyon (ornegin
+        # `COMPANION_WAIT`) listeyi uzatiyor. Onemli olan **hepsinin
+        # panele sigmasi** - kaydirma yok, gorunmeyen satir olmamali.
+        check("butun satirlar iki sutuna sigiyor",
+              len(scene.entries) <= CONTROL_ROWS * 2,
+              f"{len(scene.entries)} satir / {CONTROL_ROWS * 2} yuva")
 
-        # Iki sutun: 0. ve 6. satir ayni yukseklikte, farkli x.
-        first, second = scene._row_rect(0), scene._row_rect(6)
+        # Iki sutun: ilk satir ile ikinci sutunun ilki ayni yukseklikte.
+        first, second = scene._row_rect(0), scene._row_rect(CONTROL_ROWS)
         check("iki sutun yan yana",
               first.y == second.y and first.x < second.x,
               f"{first.topleft} / {second.topleft}")

@@ -149,12 +149,61 @@ class PlayScene(Scene):
         # SONRA: oyuncu orada yaratiliyor. Duz bonuslar (can, pencere,
         # sarj) burada bir kez uygulaniyor.
         if self.save_data is not None:
+            self._restore_abilities()
             self.player.apply_skills(getattr(self.save_data, "skills", ()))
             self._equip_saved_weapon()
 
         self.camera.set_bounds(self.tilemap.bounds)
         self.decals = DecalField(*self.tilemap.bounds.size)
         self.camera.snap_to(self.player.body.center_x, self.player.body.center_y)
+
+    def _restore_abilities(self) -> None:
+        """Kazanilmis yetenekleri kayittan geri yukler.
+
+        **Bu yoktu ve oyunun yarisini sessizce bozuyordu.** Arda
+        (30.08.2026): *"Ardo karakterinin geldigi bolumde yine silahimiz
+        yok."* Sebep sanildigi gibi silah degil, yetenekti:
+
+        `SaveData.abilities` alani vardi ama **hicbir yer ona yazmiyor,
+        hicbir yer geri yuklemiyordu.** Rey `REY_STARTING = frozenset()`
+        ile basliyor, kilici Bolum 1'de `grant()` ile aliyor - ve o
+        yalnizca bellekte. Bolum 2'den sonraki her bolumde Rey:
+
+            kilic YOK  -  yumrukla dovusuyor
+            kacinma YOK - `Action.DODGE` hicbir sey yapmiyor
+            Yanki YOK   - bolumun anlati araci calismiyor
+
+        Ucu de sessiz: hata vermiyor, sadece eksik. `_persist_abilities`
+        yazma tarafi.
+        """
+        for ability in getattr(self.save_data, "abilities", ()) or ():
+            self.player.grant(ability)
+
+    def _persist_abilities(self) -> None:
+        """Oyuncunun yeteneklerini kayda yazar.
+
+        Sirali degil **kumeleyerek**: bir bolumde kazanilan sonrakinde
+        kaybolmasin.
+        """
+        if self.save_data is None:
+            return
+        known = set(getattr(self.save_data, "abilities", ()) or ())
+        self.save_data.abilities = sorted(known | set(self.player.abilities))
+
+    def _sync_abilities(self) -> None:
+        """Yetenek sayisi degistiyse kayda yaz.
+
+        Her bolume "burada da kaydet" satiri eklemek yerine tek yerde:
+        bir bolum unutursa sessizce kaybolurdu ve bu tam olarak bir kez
+        yasandi - `SaveData.abilities` alani vardi, kimse yazmiyordu.
+
+        Maliyeti kare basina bir tamsayi karsilastirmasi. Kayit diske
+        burada yazilmiyor; `pause`/`death`/bolum sonu zaten yaziyor.
+        """
+        count = len(self.player.abilities)
+        if count != getattr(self, "_ability_count", -1):
+            self._ability_count = count
+            self._persist_abilities()
 
     def _equip_saved_weapon(self) -> None:
         """Kayittaki silahi kusandirir - Bolum 2'deki secim burada tasiniyor.
@@ -165,6 +214,11 @@ class PlayScene(Scene):
         Kosul olmasaydi kayitsiz/varsayilan "sword" degeri Bolum 1'de
         yumrukla baslayan Rey'e kilic verirdi ve o bolumun butun anlati
         ani ("kilici buluyor") bozulurdu.
+
+        Kilic artik `_restore_abilities` uzerinden geliyor: yetenek
+        kazanildiysa `grant(SWORD)` zaten kusandiriyor. Burasi hala
+        yalnizca Hancer/Balta ile ilgileniyor - o ikisi bir yetenek
+        degil bir **secim**.
         """
         from src.combat import weapons
         key = getattr(self.save_data, "weapon", "")
@@ -196,9 +250,39 @@ class PlayScene(Scene):
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type != pygame.KEYDOWN:
             return
+        # **Bolume ait bir bindirme aciksa ESC once ONU kapatir.**
+        #
+        # Arda (30.08.2026): *"Mum Bekcisi ile bir seyler almaya
+        # girdigimizde hicbir sey almadan cikamiyoruz."* Sebep buydu:
+        # ticaret ekrani ESC'yi dinliyordu ama ESC buraya once ugrayip
+        # duraklatma menusunu aciyordu. Menuyu kapatinca ticaret hala
+        # acik, ESC yine menuyu aciyor - sonsuz dongu. Yalnizca
+        # Backspace (`Action.CANCEL`'in oteki tusu) ise yariyordu ve onu
+        # kimse tahmin edemez.
+        #
+        # Cozum tek yerde: sahne "su an modal bir sey aciyim" diyebiliyor
+        # ve duraklatma o tusu calmiyor.
+        if self.modal_active:
+            return
         if self.game.input.pressed(Action.PAUSE):
             from src.ui.pause import PauseScene
             self.scenes.push(PauseScene, save_data=self.save_data)
+            return
+        # Envanter **dogrudan** Tab ile. Arda (30.08.2026): *"r veya tab
+        # tusuyla envanterimiz falan acilsa da gorsek."*
+        #
+        # Ekran zaten vardi (`src/ui/equipment.py`) ama yalnizca
+        # duraklatma menusunun icinden aciliyordu - yani oyuncunun once
+        # onu orada bulmasi gerekiyordu. Silahini merak eden biri ESC'ye
+        # basip menu okumak istemiyor.
+        #
+        # R kullanilmadi: o, olum ekraninda "yeniden dene" ve iki islevli
+        # bir tus kazayla yeniden baslatma riski demek.
+        if self.game.input.pressed(Action.NEXT_TAB) and not self.player.dead:
+            from src.ui.equipment import EquipmentScene
+            self.game.play_sound("ui_tick")
+            self.scenes.push(EquipmentScene, save_data=self.save_data,
+                             player=self.player)
             return
         if event.key == pygame.K_r and self.player.dead:
             self.restart()
@@ -261,6 +345,8 @@ class PlayScene(Scene):
         spawn_room = getattr(self, "_spawn_room", None)
         if spawn_room is not None:
             spawn_room(room)
+        # Sahne icinde KAZANILMIS durumlar geri kuruluyor (yoldas gibi).
+        self.after_restart(room)
         self.camera.snap_to(self.player.body.center_x,
                             self.player.body.center_y)
 
@@ -358,6 +444,8 @@ class PlayScene(Scene):
     def update(self) -> None:
         self._update_music()
         self.player.update()
+        self._sync_abilities()
+        self._update_companion_order()
         self._update_death()
         self._update_checkpoint()
         self.tokens.update()
@@ -436,6 +524,49 @@ class PlayScene(Scene):
 
     def update_scene(self) -> None:
         """Alt sinifa ait kare islemleri (tetikleyiciler, anlatim)."""
+
+    @property
+    def modal_active(self) -> bool:
+        """Bolume ait bir bindirme acik mi (ticaret, secim, bulmaca)?
+
+        Aciksa duraklatma ve envanter tuslari **calismiyor** - o an
+        ekrandaki sey kendi tuslarini kullaniyor. Alt sinif ezip kendi
+        durumunu doner (`Chapter03Scene`: `self.trading`).
+        """
+        return False
+
+    def after_restart(self, room: str) -> None:
+        """Olumden sonra sahne kuruldu ve oyuncu odasina kondu.
+
+        `setup()` her seyi sifirdan kuruyor - dogru ve kasitli - ama
+        sahne icinde **kazanilmis** durumlar var: Bolum 6'da yoldas
+        `setup()`'ta `None`, ancak "kose"de kurtarilinca dogar. Olum
+        arenada gerceklestiginde o an bir daha hic gelmiyordu ve boss
+        yalniz doguluyordu (Arda, 30.08.2026: *"oldukten sonra o boss
+        fight ta hic dogmuyor"*).
+
+        Alt sinif burada o durumlari geri kuruyor.
+        """
+
+    # --- Yoldas komutu ------------------------------------------------------
+    def _update_companion_order(self) -> None:
+        """"Burada bekle / pesimden gel" - tek tus, iki durum.
+
+        Yoldasi olan her bolumde calisiyor: `self.companion` varsa
+        yeter, bolume ozel kod gerekmiyor.
+        """
+        companion = getattr(self, "companion", None)
+        if companion is None or self.player.dead:
+            return
+        if not self.game.input.pressed(Action.COMPANION_WAIT):
+            return
+        if companion.hold_x is None:
+            companion.hold(companion.body.center_x)
+            self.show_toast(t("companion.waiting"), frames=110)
+        else:
+            companion.release()
+            self.show_toast(t("companion.following"), frames=110)
+        self.game.play_sound("ui_tick")
 
     @property
     def has_echo(self) -> bool:

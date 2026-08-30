@@ -68,6 +68,10 @@ RESCUE_DELAY = 90
 # Kurtarma parcasi (Ardo.mp3) bu kadar kare kilitli kaliyor - an
 # gecene kadar dovus muzigi devralmasin. ~10 saniye.
 RESCUE_MUSIC_FRAMES = 600
+# Kapi kapanmadan once yoldasin arenaya girmesi icin taninan sure.
+# ~1.3 saniye: kosarak yetismesine yeter, oyuncuyu bekletmez.
+SEAL_GRACE_FRAMES = 80
+
 # Soru isareti balonunun sureleri (kare).
 QUESTION_RISE = 20
 QUESTION_HOLD = 100
@@ -125,6 +129,7 @@ class Chapter06Scene(PlayScene):
         self.arena_sealed = False
         self.plate_hinted = False
         self.seal_hinted = False
+        self.seal_wait = 0        # yoldas arenaya girsin diye beklenen kare
 
         self.chests = [Chest(spot.x, spot.feet_y, gold=CHEST_GOLD, secret=True)
                        for spot in LEVEL.of("chest")]
@@ -352,10 +357,54 @@ class Chapter06Scene(PlayScene):
         self._finish_boss()
 
     def _seal_arena(self) -> None:
+        """Arena kapisi kapaniyor - **yoldas da iceride.**
+
+        Arda (30.08.2026): *"Boss fight'a Ardo giremiyor, duvarin
+        arkasinda kaliyor."* Sebep: muhur yalnizca OYUNCUNUN konumuna
+        bakiyordu. Yoldas takip ettigi icin her zaman biraz geride ve
+        kapi tam onunde kapaniyordu - yani bolumun butun anlamini
+        tasiyan "birlikte dovusme" sahnesi yalniz oynaniyordu.
+
+        Cozum ısınlamak degil **iceri almak**: kapi kapanmadan once
+        yoldasa arena icinde bir nokta emrediliyor ve gercekten
+        varmasi bekleniyor (`SEAL_GRACE_FRAMES`). Bekleme bitmisse ve
+        hala disaridaysa o zaman konuluyor - dovussuz bir boss odasi,
+        goze batan bir isinlanmadan daha kotu.
+        """
+        inside_x = (ARENA_DOOR_TILE + 4) * TILE_SIZE
+        if self.companion is not None:
+            if self.companion.body.x < (ARENA_DOOR_TILE + 1) * TILE_SIZE:
+                self.companion.hold(float(inside_x))
+                self.seal_wait += 1
+                if self.seal_wait < SEAL_GRACE_FRAMES:
+                    return                  # Henuz kapatma, geliyor
+                self.companion.body.set_feet(float(inside_x),
+                                             self.player.body.feet[1])
+            self.companion.release()
+
         self.arena_sealed = True
         for row in ARENA_DOOR_ROWS:
             self.tilemap.set_tile(ARENA_DOOR_TILE, row, SOLID)
         self.game.play_sound("rift_close")
+
+    def after_restart(self, room: str) -> None:
+        """Olumden sonra yoldas geri geliyor.
+
+        `setup()` `self.companion = None` yapiyor ve yoldas yalnizca
+        "kose" odasindaki kurtarma sahnesinde doguyor. Arenada olen
+        oyuncu icin o sahne bir daha hic gerceklesmiyordu: boss yalniz
+        doguluyordu ve bolum aslinda gecilemez hale geliyordu (Arda:
+        *"oldukten sonra o boss fight ta hic dogmuyor"*).
+
+        Kurtarma sahnesi TEKRARLANMIYOR - o bir kez yasanan bir andir.
+        Yalnizca yoldas, oyuncunun yaninda, sessizce geri kuruluyor.
+        """
+        if room == "kose" or self.companion is not None:
+            return
+        self.companion = Companion(self, self.player.body.center_x - 24,
+                                   self.player.body.feet[1],
+                                   self.companion_key)
+        self.rescued = True
 
     def _finish_boss(self) -> None:
         self.boss_defeated = True

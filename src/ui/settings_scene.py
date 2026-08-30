@@ -50,7 +50,7 @@ ROW_START_Y = 30           # Sekme seridinin altinda birakilan bosluk
 # tek sutunda panele sigmiyordu (yer var: 10 satir). Kaydirma eklemek
 # yerine iki sutun: tus listesi zaten boyle okunuyor ve hicbir satir
 # gorunmez olmuyor.
-CONTROL_ROWS = 6
+CONTROL_ROWS = 7
 CONTROL_COLUMN_WIDTH = (PANEL_WIDTH - 16) // 2
 # Yakalama sirasinda "bir tusa bas" kutusu.
 CAPTURE_BOX = (200, 54)

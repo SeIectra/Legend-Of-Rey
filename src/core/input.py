@@ -32,6 +32,12 @@ class Action(Enum):
     ECHO = auto()           # Yanki - basili tutulur
     ECHO_ASK = auto()       # Yanki'ya soru sor
     INTERACT = auto()
+    # Yoldasa "burada bekle / pesimden gel" komutu. Arda (30.08.2026):
+    # *"Bir tusa bastigimizda orada bekleyecegi bir komut ekleyelim."*
+    # INTERACT'e binmiyor: o zaten plaka/vana/sandik icin kullaniliyor
+    # ve yoldasin yaninda bir sandik varsa hangisinin olacagi belirsiz
+    # olurdu.
+    COMPANION_WAIT = auto()
     PAUSE = auto()
     CONFIRM = auto()
     CANCEL = auto()
@@ -57,6 +63,7 @@ DEFAULT_KEYBOARD: dict[Action, tuple[int, ...]] = {
     Action.ECHO: (pygame.K_k, pygame.K_q),
     Action.ECHO_ASK: (pygame.K_f,),
     Action.INTERACT: (pygame.K_e,),
+    Action.COMPANION_WAIT: (pygame.K_u,),
     Action.PAUSE: (pygame.K_ESCAPE,),
     Action.CONFIRM: (pygame.K_RETURN, pygame.K_SPACE, pygame.K_e),
     Action.CANCEL: (pygame.K_ESCAPE, pygame.K_BACKSPACE),
@@ -74,6 +81,7 @@ DEFAULT_GAMEPAD: dict[Action, tuple[int, ...]] = {
     Action.ECHO: (4,),          # LB
     Action.ECHO_ASK: (3,),      # Y
     Action.INTERACT: (0,),
+    Action.COMPANION_WAIT: (6,),    # Back
     Action.PAUSE: (7,),         # Start
     Action.CONFIRM: (0,),
     Action.CANCEL: (1,),
