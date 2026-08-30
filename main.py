@@ -43,6 +43,9 @@ SCENES = {
     # isteyen "bolum7-muhur".
     "bolum7-muhur": ("src.scenes.chapter07_cinematics", "SealCinematic"),
     "bolum7-el": ("src.scenes.chapter07_cinematics", "HandCinematic"),
+    "bolum8": ("src.scenes.chapter08", "Chapter08Scene"),
+    "bolum8-ates": ("src.scenes.chapter08_cinematics", "FiresideCinematic"),
+    "bolum8-fisilti": ("src.scenes.chapter08_cinematics", "WhisperCinematic"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }

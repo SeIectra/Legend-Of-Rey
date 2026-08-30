@@ -314,6 +314,25 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
             rows7[row_index][column] = "#"
     rooms.append(("bolum 7 - dar gecit", ["".join(r) for r in rows7],
                   (spawn7.tile_x, spawn7.tile_y + 1), set()))
+
+    # Bolum 8: iki engel de **sesle** aciliyor (`Action.RESONATE`) ve
+    # BFS ses bilmiyor - yalnizca yurumeyi biliyor. Ikisi de acik
+    # halde dogrulaniyor, Bolum 6'nin kose duvari ve Bolum 7'nin
+    # kapisiyla ayni gerekce.
+    #
+    # Mandal odasi bilerek **erisilemez** kaliyor: mekanigin butun
+    # noktasi oraya yuruyememek. `ignore` ile disarida birakiliyor -
+    # doldurmak yanlis olurdu, orasi bir gecis degil bir hedef.
+    from src.world.rooms import chapter08
+    spawn8 = chapter08.LEVEL.first("player")
+    rows8 = [list(row) for row in chapter08.LEVEL.terrain_rows]
+    for row_index in chapter08.LATCH_DOOR_ROWS:
+        rows8[row_index][chapter08.LATCH_DOOR_TILE] = "."
+    gate_x, gate_y = chapter08.GATE_CRYSTAL_TILE
+    for row_index in range(gate_y, gate_y + chapter08.GATE_CRYSTAL_HEIGHT):
+        rows8[row_index][gate_x] = "."
+    rooms.append(("bolum 8 - ates basi", ["".join(r) for r in rows8],
+                  (spawn8.tile_x, spawn8.tile_y + 1), set()))
     return rooms
 
 

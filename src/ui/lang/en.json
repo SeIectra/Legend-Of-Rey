@@ -243,7 +243,21 @@
         "ch06_meet_ardo_name": "Ardo. And I'm not the only thing that came down this far.",
         "ch06_meet_rey_first": "All three were behind you. You didn't even hear one of them.",
         "ch06_meet_ardo_who": "Who are you?",
-        "ch06_meet_rey_name": "Rey. I'm looking for my brother — and the voices knew you'd be here."
+        "ch06_meet_rey_name": "Rey. I'm looking for my brother — and the voices knew you'd be here.",
+        "ch08_fire_ardo_wound": "My shoulder. Caught a rock on the way down — it's nothing.",
+        "ch08_fire_rey_wound": "My shoulder. Caught a rock on the way down — it's nothing.",
+        "ch08_fire_rey_necklace": "Cemo gave me this. So the dark would think twice.",
+        "ch08_fire_ardo_necklace": "There's no one waiting up there. That made coming down easy.",
+        "ch08_fire_ardo_teach": "Not shouting. You find the stone's own pitch.",
+        "ch08_fire_rey_learn": "The voices in my head already knew that. They never told me.",
+        "ch08_echo_ardo": "He was called down too... but the thing calling him isn't the one you hear.",
+        "ch08_echo_rey_react": "Be quiet. I didn't ask you about him.",
+        "ch08_trace_ardo": "There's a second trail behind hers. Not following — waiting.",
+        "ch08_trace_ardo_react": "I won't tell her. Not yet.",
+        "ch08_rey_learn": "That crystal... it's humming. Like it's waiting for something.",
+        "ch08_ardo_learn": "The crystal holds sound. It breaks at the right pitch.",
+        "ch08_rey_gate": "The way's blocked. And I can't reach the lever.",
+        "ch08_ardo_gate": "The latch is behind the wall. Our hands won't reach — our voice will."
     },
     "combat": {
         "counter": "COUNTER",
@@ -278,7 +292,8 @@
         "record_room": "The Record Room",
         "waters": "The Waters",
         "ardo": "ARDO",
-        "narrow_pass": "The Narrow Pass"
+        "narrow_pass": "The Narrow Pass",
+        "fireside": "The Fireside"
     },
     "chapter_end": {
         "heading": "CHAPTER COMPLETE",
@@ -455,6 +470,11 @@
     },
     "hint": {
         "inventory": "[{key}] inventory — switch weapon",
-        "companion_wait": "[{key}] tell them to wait here"
+        "companion_wait": "[{key}] tell them to wait here",
+        "resonance": "[{key}] resonance — break it with sound"
+    },
+    "chapter08": {
+        "first_crystal": "Crystal shattered — sound is a weapon",
+        "latch": "The latch gave way"
     }
 }

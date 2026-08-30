@@ -243,7 +243,21 @@
         "ch06_meet_ardo_name": "Ardo. Ve buraya kadar inen tek şey ben değilim.",
         "ch06_meet_rey_first": "Üçü de arkandaydı. Bir tanesini duymadın bile.",
         "ch06_meet_ardo_who": "Sen kimsin?",
-        "ch06_meet_rey_name": "Rey. Kardeşimi arıyorum — ve kafamdaki sesler senin burada olduğunu biliyordu."
+        "ch06_meet_rey_name": "Rey. Kardeşimi arıyorum — ve kafamdaki sesler senin burada olduğunu biliyordu.",
+        "ch08_fire_ardo_wound": "Omzum. Düşerken taşa çarpmışım — önemli değil.",
+        "ch08_fire_rey_wound": "Omzum. Düşerken taşa çarpmışım — önemli değil.",
+        "ch08_fire_rey_necklace": "Cemo bunu bana verdi. Karanlık yaklaşırken iki kez düşünsün diye.",
+        "ch08_fire_ardo_necklace": "Yukarıda bekleyen kimse yok. Bu yüzden aşağı inmek kolay oldu.",
+        "ch08_fire_ardo_teach": "Bağırmak değil. Taşın kendi perdesini bulacaksın.",
+        "ch08_fire_rey_learn": "Kafamdaki sesler bunu zaten biliyordu. Bana hiç söylemediler.",
+        "ch08_echo_ardo": "O da bizim gibi çağrıldı... ama onu çağıran şey senin duyduğun değil.",
+        "ch08_echo_rey_react": "Kes sesini. Onun hakkında konuşmanı istemedim.",
+        "ch08_trace_ardo": "İzinin arkasında ikinci bir iz var. Takip etmiyor — bekliyor.",
+        "ch08_trace_ardo_react": "Bunu ona söylemeyeceğim. Henüz değil.",
+        "ch08_rey_learn": "Şu kristal... titriyor. Sanki bir şey bekliyor.",
+        "ch08_ardo_learn": "Kristal ses tutuyor. Doğru perdede kırılır.",
+        "ch08_rey_gate": "Yol kapalı. Ve kolun olduğu yere ulaşamıyorum.",
+        "ch08_ardo_gate": "Mandal duvarın ardında. Elimiz yetmez — sesimiz yeter."
     },
     "combat": {
         "counter": "KARŞI VURUŞ",
@@ -278,7 +292,8 @@
         "record_room": "Kayıt Odası",
         "waters": "Sular",
         "ardo": "ARDO",
-        "narrow_pass": "Dar Geçit"
+        "narrow_pass": "Dar Geçit",
+        "fireside": "Ateş Başı"
     },
     "chapter_end": {
         "heading": "BÖLÜM TAMAMLANDI",
@@ -455,6 +470,11 @@
     },
     "hint": {
         "inventory": "[{key}] envanter — silah değiştir",
-        "companion_wait": "[{key}] yoldaşa: burada bekle"
+        "companion_wait": "[{key}] yoldaşa: burada bekle",
+        "resonance": "[{key}] rezonans — sesle kır"
+    },
+    "chapter08": {
+        "first_crystal": "Kristal kırıldı — ses bir silah",
+        "latch": "Mandal açıldı"
     }
 }

@@ -48,6 +48,40 @@ ARDO_STARTING: Final[frozenset[str]] = frozenset({SWORD, DODGE})
 # Rey hicbir seyle baslamiyor - koy kizi.
 REY_STARTING: Final[frozenset[str]] = frozenset()
 
+# **Yalnizca Rey'e ait** yetenekler. Ardo'nun Yanki'si yok
+# (`docs/gdd.md` 3, kanon); onun karsiligi Iz Surme.
+#
+# Kayit tek dosya ve ayni kayitla iki karakter de oynanabiliyor, yani
+# Rey'in kazandigi `echo_sight` orada duruyor. Geri yuklerken
+# suzulmezse Ardo oynanisinda Yanki aciliyordu - sessiz bir kanon
+# ihlali (`tests/test_chapter01.py` yakaladi).
+ECHO_SET: Final[frozenset[str]] = frozenset({ECHO_SIGHT, ECHO_ASK})
+
+# Bir yetenegin **anlati icinde ilk kez verildigi** bolum.
+#
+# Kayittan geri yukleme bu tabloyu okuyor: bir yetenek tanitildigi
+# bolumden ONCE (ve o bolumun kendisinde) geri yuklenmiyor. Sebep
+# somut: ilerlemis bir kayitla Bolum 1'i tekrar oynayan oyuncuya kilici
+# basta vermek "kilici buluyor" anini cope atar; Bolum 2'nin Yanki
+# odasina Yanki Gorusu ile girmek de o odayi anlamsizlastirir.
+#
+# Ikisi de gercekten oldu ve `tests/test_weapon_choice.py` ile
+# `tests/test_chapter02.py` yakaladi.
+#
+# Bolum o yetenegi zaten kendi akisinda veriyor - tablo yalnizca
+# "erken verme" diyor, "hic verme" demiyor.
+INTRODUCED_IN: Final[dict[str, int]] = {
+    SWORD: 1,           # B1: koyde bulunuyor
+    DODGE: 2,           # B2: ilk inis
+    ECHO_SIGHT: 2,      # B2: Yanki odasi
+    ECHO_ASK: 3,        # B3: karanlikta soru sormak
+}
+
+
+def restorable(ability: str, chapter: int) -> bool:
+    """Bu yetenek bu bolumde kayittan geri yuklenebilir mi?"""
+    return chapter > INTRODUCED_IN.get(ability, 0)
+
 
 def starting_set(character: str) -> set[str]:
     return set(ARDO_STARTING if character == "ardo" else REY_STARTING)

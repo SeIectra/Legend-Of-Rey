@@ -177,6 +177,15 @@ class PlayScene(Scene):
         yazma tarafi.
         """
         for ability in getattr(self.save_data, "abilities", ()) or ():
+            # Yanki yetenekleri Rey'e ait; Ardo'nun karsiligi Iz Surme.
+            # Kayit tek dosya ve ayni kayitla iki karakter de
+            # oynanabiliyor, yani Rey'in `echo_sight`i orada duruyor.
+            if self.character == "ardo" and ability in abilities.ECHO_SET:
+                continue
+            # **Tanitildigi bolumden once geri yuklenmiyor.** Gerekce
+            # `abilities.INTRODUCED_IN` tablosunda.
+            if not abilities.restorable(ability, self.chapter_number):
+                continue
             self.player.grant(ability)
         self._grant_baseline()
 
