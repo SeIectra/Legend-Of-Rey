@@ -372,6 +372,17 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
     spawn10 = chapter10.LEVEL.first("player")
     rooms.append(("bolum 10 - ayrilik", chapter10.LEVEL.terrain_rows,
                   (spawn10.tile_x, spawn10.tile_y + 1), set()))
+
+    # Bolum 11: salonun cikis kapisi bulmaca cozulunce aciliyor
+    # (`chapter11.py` `_solve`). BFS isini bilmiyor - kapi ACIK halde
+    # dogrulaniyor, Bolum 7/8/9 ile ayni gerekce.
+    from src.world.rooms import chapter11
+    spawn11 = chapter11.LEVEL.first("player")
+    rows11 = [list(row) for row in chapter11.LEVEL.terrain_rows]
+    for row_index in chapter11.HALL_DOOR_ROWS:
+        rows11[row_index][chapter11.HALL_DOOR_TILE] = "."
+    rooms.append(("bolum 11 - ayna salonu", ["".join(r) for r in rows11],
+                  (spawn11.tile_x, spawn11.tile_y + 1), set()))
     return rooms
 
 

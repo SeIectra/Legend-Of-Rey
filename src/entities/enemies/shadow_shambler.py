@@ -33,6 +33,11 @@ class ShadowShambler(Shambler):
     sprite_name = "shambler"
     body_colour = "violet_dark"
 
+    def __init__(self, scene, x: float, y: float) -> None:
+        super().__init__(scene, x, y)
+        # Karanlikta kac kez bosa vuruldu - sahne bunu okuyor.
+        self.shrugged_off = 0
+
     @property
     def _in_light(self) -> bool:
         light = getattr(self.scene, "light", None)
@@ -45,6 +50,12 @@ class ShadowShambler(Shambler):
             # Karanlikta zirhli degil - **dokunulmaz**. Hasar hic islenmez,
             # sendeleme de yok; oyuncu bunun bir "direnc" degil bir "kural"
             # oldugunu vurustan hemen anlamali.
+            #
+            # `shrugged_off` sahnenin okudugu isaret: "oyuncu vurdu ve
+            # hicbir sey olmadi". Bolum 11 bunu bir kez gorunce kurali
+            # yaziyla da soyluyor - ders vurustan geliyor, yazi yalnizca
+            # "oyun mu bozuk" sorusunu onluyor.
+            self.shrugged_off += 1
             return DamageResult(hit=False)
         return super().take_damage(box, direction)
 

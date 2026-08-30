@@ -291,7 +291,15 @@
         "ch10_trace_sprung": "A false trail. Someone faked a walk here — and cut the floor.",
         "ch10_trace_survived": "The floor gave way. That trail was left there for a reason.",
         "ch10_trace_ignored_after": "I read it right. That trail was too clean.",
-        "ch10_trace_neutral": "Another trail. I look at all of them twice now."
+        "ch10_trace_neutral": "Another trail. I look at all of them twice now.",
+        "ch11_rey_hall": "Mirrors... and I'm not in any of them.",
+        "ch11_ardo_hall": "A hall of mirrors. Everyone who came through left a trail — none of them left.",
+        "ch11_rey_mirror": "The light turns off the mirror. I can rotate it.",
+        "ch11_ardo_mirror": "The mirror turns. I can send the light where I want.",
+        "ch11_echo_lie": "The middle one is wrong. Turn it — that's what breaks the chain.",
+        "ch11_trace_lie": "Fresh fingerprints on the middle mirror. Someone turned it at the last moment.",
+        "ch11_rey_doubt": "That's what you said last time, too.",
+        "ch11_ardo_doubt": "A fresh trail doesn't mean a true one."
     },
     "combat": {
         "counter": "COUNTER",
@@ -329,7 +337,8 @@
         "narrow_pass": "The Narrow Pass",
         "fireside": "The Fireside",
         "bell_tower": "The Bell Tower",
-        "parting": "The Parting"
+        "parting": "The Parting",
+        "mirror_hall": "The Hall of Mirrors"
     },
     "chapter_end": {
         "heading": "CHAPTER COMPLETE",
@@ -522,5 +531,9 @@
     "chapter10": {
         "creak": "The floor is creaking...",
         "trap": "The floor gave way"
+    },
+    "chapter11": {
+        "rule": "You can't touch it in the dark — pull it into the light",
+        "solved": "The beam found its mark. The door is open."
     }
 }

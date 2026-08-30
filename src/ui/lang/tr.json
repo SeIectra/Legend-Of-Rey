@@ -291,7 +291,15 @@
         "ch10_trace_sprung": "Sahte iz. Biri buraya yürümüş gibi yapmış — ve zemini oymuş.",
         "ch10_trace_survived": "Zemin çöktü. O iz oraya bir sebeple bırakılmış.",
         "ch10_trace_ignored_after": "Doğru okumuşum. İz fazla temizdi.",
-        "ch10_trace_neutral": "Bir iz daha. Ama artık hepsine iki kez bakıyorum."
+        "ch10_trace_neutral": "Bir iz daha. Ama artık hepsine iki kez bakıyorum.",
+        "ch11_rey_hall": "Aynalar... ve içlerinde ben yokum.",
+        "ch11_ardo_hall": "Ayna salonu. Buradan geçen herkesin izi var — ama hiçbiri çıkmamış.",
+        "ch11_rey_mirror": "Işık aynadan dönüyor. Onu çevirebilirim.",
+        "ch11_ardo_mirror": "Ayna dönüyor. Işığı istediğim yere gönderebilirim.",
+        "ch11_echo_lie": "Ortadaki yanlış duruyor. Onu çevir — zinciri o bozuyor.",
+        "ch11_trace_lie": "Ortadaki aynada taze parmak izi. Biri onu son anda çevirmiş.",
+        "ch11_rey_doubt": "Geçen sefer de böyle söylemiştin.",
+        "ch11_ardo_doubt": "Bir izin taze olması doğru olduğu anlamına gelmiyor."
     },
     "combat": {
         "counter": "KARŞI VURUŞ",
@@ -329,7 +337,8 @@
         "narrow_pass": "Dar Geçit",
         "fireside": "Ateş Başı",
         "bell_tower": "Çan Kulesi",
-        "parting": "Ayrılık"
+        "parting": "Ayrılık",
+        "mirror_hall": "Ayna Salonu"
     },
     "chapter_end": {
         "heading": "BÖLÜM TAMAMLANDI",
@@ -522,5 +531,9 @@
     "chapter10": {
         "creak": "Zemin gıcırdıyor...",
         "trap": "Zemin çöktü"
+    },
+    "chapter11": {
+        "rule": "Karanlıkta ona dokunamıyorsun — ışığa çek",
+        "solved": "Işın yerine ulaştı. Kapı açıldı."
     }
 }

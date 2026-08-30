@@ -51,6 +51,7 @@ SCENES = {
     "bolum10": ("src.scenes.chapter10", "Chapter10Scene"),
     "bolum10-ayrilik": ("src.scenes.chapter10_cinematics", "PartingCinematic"),
     "bolum10-yalan": ("src.scenes.chapter10_cinematics", "LieCinematic"),
+    "bolum11": ("src.scenes.chapter11", "Chapter11Scene"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }

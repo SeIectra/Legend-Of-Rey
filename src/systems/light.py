@@ -42,6 +42,16 @@ class LightState:
     def remove_static(self, key: str) -> None:
         self._static.pop(key, None)
 
+    def remove_prefix(self, prefix: str) -> None:
+        """Adi bu onekle baslayan butun kaynaklari siler.
+
+        Bolum 11'in isini yol boyunca **onlarca** kaynak yaziyor
+        (`beam.apply_light`) ve her karede yeniden iziyor. Tek tek
+        silmek cagirana sozlugun ic yapisini bildirirdi.
+        """
+        for key in [k for k in self._static if k.startswith(prefix)]:
+            del self._static[key]
+
     def has_static(self, key: str) -> bool:
         return key in self._static
 

@@ -301,8 +301,15 @@ class Chapter10Scene(PlayScene):
             data.playtime_frames += self.frames
             data.best_combo = max(data.best_combo, self.player.combo.best)
             data.secrets_found += result.secrets_found
-        # Bolum 11 henuz yok - ozet ekrani kapaninca ana menuye donuluyor.
-        self.scenes.push(ChapterEndScene, result=result)
+        # Bolum 11'e baglaniyor.
+        character = self.character
+
+        def _continue() -> None:
+            from src.scenes.chapter11 import Chapter11Scene
+            self.scenes.set_root(Chapter11Scene, character=character)
+
+        self.scenes.push(ChapterEndScene, result=result,
+                         on_continue=_continue)
 
     # --- Cizim --------------------------------------------------------------
     def draw_background(self, surface: pygame.Surface, offset) -> None:
