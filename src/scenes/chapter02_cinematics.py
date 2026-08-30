@@ -19,6 +19,18 @@ Yarigin isigi kucule kucule tepeye gidiyor, toz zerreleri yukari
 suzuluyor. Dususu boyle anlatmak hem daha okunur (goz sabit bir noktada
 kaliyor) hem de "kontrol sende degil" hissini veriyor - ki prologun
 butun meselesi buydu.
+
+## Rey nihayet ekranda (30.08.2026)
+
+Yukaridaki paragraf *"Rey ekranda sabit"* diyordu ama **Rey hic
+cizilmiyordu.** Sahne bir isik, biraz toz ve gecen duvar
+cizgilerinden ibaretti; dusen kimse yoktu.
+
+Arda: *"Ara sahnelerin gorsel yazim bicimini yeni sahneleme katmani
+ile guncelle."* Sahne artik `StagedScene`: Rey gercek sprite'iyla,
+`fall` durumunda, carpmada `land` ve hitstop ile. Cizim iyi olan
+kismini (uzaklasan isik, hiz cizgileri, toz bulutu) aynen koruyor -
+eksik olan tek sey karakterdi.
 """
 from __future__ import annotations
 
@@ -29,7 +41,8 @@ import pygame
 from src.art import palette
 from src.art.glow import radial_glow
 from src.config import FPS, INTERNAL_HEIGHT, INTERNAL_WIDTH
-from src.scenes.story import Panel, StoryScene
+from src.scenes.staging import ActorSpec, Cue, MoteField, StagedScene
+from src.scenes.story import Panel
 from src.ui.dialogue import Line
 
 # Panel sureleri (kare). Toplam ~7 saniye - "nefes" icin yeterli, sabri
@@ -42,21 +55,48 @@ SETTLE_FRAMES = int(3.2 * FPS)
 DUST_COUNT = 34
 
 
-class DescentCinematic(StoryScene):
+class DescentCinematic(StagedScene):
     """Bolum 1 -> Bolum 2 gecisi: yariktan asagi dusus."""
 
     background = "void"
 
+    # Rey ekranin ortasinda, biraz ust yarida: altinda inecegi yer
+    # gorunsun. Zemin `GROUND_Y`'de ve carpma orada oluyor.
+    FALL_X = INTERNAL_WIDTH * 0.5
+    FALL_Y = INTERNAL_HEIGHT * 0.46
+    GROUND_Y = INTERNAL_HEIGHT * 0.72
+
     PANELS = (
-        Panel(FALL_FRAMES, "dusus"),
-        Panel(IMPACT_FRAMES, "carpma", shake=3.0),
+        Panel(FALL_FRAMES, "dusus", cues=(
+            Cue("player", state="fall", face=1),
+        )),
+        # Carpma: `land` + hitstop + toz. `CLAUDE.md` 7'nin uclu senkronu -
+        # sarsinti, durus ve parcacik tek cagridan.
+        Panel(IMPACT_FRAMES, "carpma", shake=3.0, cues=(
+            Cue("player", state="land", freeze=7, shake=3.0,
+                burst="dust", burst_count=16, sound="land_hard"),
+        )),
         Panel(SETTLE_FRAMES, "dehliz",
-              lines=(Line("echo", "line.ch02_echo_fall"),)),
+              lines=(Line("echo", "line.ch02_echo_fall"),), cues=(
+                  Cue("player", state="idle", delay=20),
+              )),
     )
 
     def on_enter(self, character: str = "rey", **kwargs: object) -> None:
-        super().on_enter(**kwargs)
         self.character = character
+        self.ACTORS = (
+            # 2x: dusen bir govde 32 pikselde bir leke; sinematikte
+            # okunmali. Ayni gerekce Bolum 7'nin "El" sahnesinde.
+            # `shadow=False`: havada. Carpmada `ground()` geri aciyor.
+            ActorSpec("player", character, self.FALL_X, self.FALL_Y,
+                      facing=1, state="fall", scale=2, shadow=False),
+        )
+        # Toz artik ortak katmandan - `_draw_rising_dust`in yerini
+        # aliyor ama YALNIZCA dusus/dehliz icin; carpma bulutu kendi
+        # cizimi (o bir olay, ortam degil).
+        self.motes = MoteField(DUST_COUNT, drift=-1.4, sway=0.4,
+                               tone="stone_dark")
+        super().on_enter(**kwargs)
         # Toz: (x, baslangic_y, hiz, boyut). `random` yok - deterministik
         # dagilim, ayni sahne her acilista ayni (cave_backdrop deseni).
         self.dust = tuple(
@@ -70,8 +110,10 @@ class DescentCinematic(StoryScene):
         )
 
     # --- Cizim --------------------------------------------------------------
-    def draw_panel(self, surface: pygame.Surface, panel: Panel,
-                   progress: float) -> None:
+    def draw_stage_background(self, surface: pygame.Surface, panel: Panel,
+                              progress: float,
+                              offset: tuple[int, int]) -> None:
+        surface.fill(palette.color("void"))
         if panel.name == "dusus":
             self._draw_fall(surface, progress)
         elif panel.name == "carpma":
@@ -90,8 +132,6 @@ class DescentCinematic(StoryScene):
                                peak=0.55 * (1.0 - progress * 0.6))
             surface.blit(glow, (INTERNAL_WIDTH // 2 - radius, light_y - radius),
                          special_flags=pygame.BLEND_RGB_ADD)
-
-        self._draw_rising_dust(surface, speed_scale=1.0 + progress * 1.6)
 
         # Duvar cizgileri: yanlardan gecen dikey seritler. Hiz hissi
         # zerrelerden degil, gecen DUVARDAN geliyor.
@@ -143,19 +183,24 @@ class DescentCinematic(StoryScene):
             surface.blit(glow, (INTERNAL_WIDTH // 2 - beam, 30 - beam),
                          special_flags=pygame.BLEND_RGB_ADD)
 
-        self._draw_rising_dust(surface, speed_scale=0.22)
 
-    def _draw_rising_dust(self, surface: pygame.Surface,
-                          speed_scale: float) -> None:
-        tone = palette.color("stone_dark")
-        for x, start_y, speed, size in self.dust:
-            y = int(start_y - self.elapsed * speed * speed_scale) % INTERNAL_HEIGHT
-            surface.fill(tone, (x, y, size, size))
 
     # --- Akis ---------------------------------------------------------------
-    def on_panel_start(self, panel: Panel) -> None:
-        if panel.name == "carpma":
-            self.game.play_sound("land_hard")
+    def on_stage_panel(self, panel: Panel) -> None:
+        """Carpmada Rey **zemine** konuyor.
+
+        Dusus panelinde havada duruyor (dunya yukari kaciyor, o sabit);
+        carpma aninda ayaklari yere degmeli, yoksa toz bulutu onun
+        altindan degil ortasindan cikar.
+        """
+        actor = self.actor("player")
+        if actor is None:
+            return
+        if panel.name in ("carpma", "dehliz"):
+            actor.ground(self.GROUND_Y)
+        # Zerreler dehlizde neredeyse duruyor - dusus bitti.
+        if panel.name == "dehliz" and self.motes is not None:
+            self.motes.drift = -0.18
 
     def on_finished(self) -> None:
         from src.scenes.chapter02 import Chapter02Scene

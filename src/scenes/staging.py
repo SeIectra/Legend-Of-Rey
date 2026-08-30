@@ -103,6 +103,61 @@ FLASH_DECAY_FRAMES = 8
 # Vinyet karartmasinin en koyu hali (0..255).
 VIGNETTE_MAX = 200
 
+# Atmosfer zerresi ust siniri. `ParticleField`den ayri: bunlar olay
+# degil **ortam** - dogmuyor, olmuyor, sadece suruklenip ekranin obur
+# ucundan geri giriyorlar. Parcacik butcesini (200) yemiyorlar.
+MOTE_LIMIT = 48
+
+
+class MoteField:
+    """Suruklenen toz/kul zerreleri - sahnenin havasi.
+
+    Neden `ParticleField` degil: parcaciklar bir OLAYIN sonucu (vurus,
+    kirilma) ve oluyorlar. Bunlar bir MEKANIN ozelligi - magaranin
+    havasinda asili duran seyler. Omurleri yok, ekrandan cikinca obur
+    uctan giriyorlar.
+
+    Dagilim **deterministik**: `random` yok, indeksten turuyor. Ayni
+    sahne her acilista ayni gorunuyor - `cave_backdrop`'un ve
+    `chapter02_cinematics`'in zaten kullandigi desen. Bir ara sahnenin
+    her oynanista farkli gorunmesi bir ozellik degil, bir kaza olurdu.
+    """
+
+    __slots__ = ("count", "drift", "sway", "tone", "cells", "frame")
+
+    def __init__(self, count: int = 30, drift: float = -0.35,
+                 sway: float = 0.6, tone: str = "stone_dark") -> None:
+        self.count = min(count, MOTE_LIMIT)
+        self.drift = drift          # dikey hiz (- yukari)
+        self.sway = sway            # yatay salinim genligi
+        self.tone = tone
+        self.frame = 0
+        self.cells = tuple(
+            (
+                (index * 137 + 41) % INTERNAL_WIDTH,
+                (index * 89 + 17) % INTERNAL_HEIGHT,
+                0.55 + (index % 5) * 0.22,      # hiz carpani
+                1 + (index % 4) // 3,           # boyut (cogu 1 piksel)
+                index * 0.7,                    # salinim fazi
+            )
+            for index in range(self.count)
+        )
+
+    def update(self) -> None:
+        self.frame += 1
+
+    def draw(self, surface: pygame.Surface, alpha: float = 1.0) -> None:
+        if alpha <= 0.02:
+            return
+        colour = tuple(int(c * min(1.0, alpha))
+                       for c in palette.color(self.tone))
+        for x, y, speed, size, phase in self.cells:
+            offset = self.frame * self.drift * speed
+            py = int(y + offset) % (INTERNAL_HEIGHT + 8) - 4
+            px = int(x + math.sin(self.frame * 0.02 + phase) * self.sway * 4)
+            px %= INTERNAL_WIDTH
+            surface.fill(colour, (px, py, size, size))
+
 
 @dataclass
 class ActorSpec:
@@ -119,6 +174,11 @@ class ActorSpec:
     # kimligin henuz belli olmadigi anlar icin (docs/yapi.md B6).
     silhouette: bool = False
     visible: bool = True
+    # Zemin golgesi. **Havadaki aktorde kapatilmali**: dusen bir
+    # karaktere temas golgesi cizmek onu havada degil bir yuzeyin
+    # uzerinde gosterir. Bolum 2'nin dusus sahnesinde tam olarak oyle
+    # gorunuyordu - Rey dusuyor ama altinda bir golge duruyordu.
+    shadow: bool = True
     # Sinematik buyutmesi - **tam sayi**, `smoothscale` YASAK
     # (CLAUDE.md 4/12: piksel art bulaniklasir).
     #
@@ -176,6 +236,7 @@ class StageActor:
         self.alpha = spec.alpha
         self.silhouette = spec.silhouette
         self.visible = spec.visible
+        self.shadow = spec.shadow
         self.scale = max(1, spec.scale)
         # Hareket: baslangic, hedef, sure, gecen kare.
         self._from: tuple[float, float] = (self.x, self.y)
@@ -185,6 +246,11 @@ class StageActor:
         self._ease = smoothstep
 
     # --- Talimatlar ---------------------------------------------------------
+    def ground(self, y: float) -> None:
+        """Aktoru zemine koyar ve golgesini geri acar."""
+        self.y = float(y)
+        self.shadow = True
+
     def move_to(self, x: float, y: float, frames: int,
                 ease: str = "inout") -> None:
         if frames <= 0:
@@ -230,7 +296,8 @@ class StageActor:
         x = int(round(self.x)) - ox - image.get_width() // 2
         y = int(round(self.y)) - oy - image.get_height()
 
-        self._draw_shadow(surface, ox, oy)
+        if self.shadow:
+            self._draw_shadow(surface, ox, oy)
         surface.blit(image, (x, y))
         if light is not None:
             self._draw_rim(surface, image, x, y, light)
@@ -272,6 +339,8 @@ class StagedScene(StoryScene):
     """
 
     ACTORS: tuple[ActorSpec, ...] = ()
+    # Atmosfer zerreleri - `None` = yok. Alt sinif `MoteField` verir.
+    motes: MoteField | None = None
     # Sahne kamerasi: aktor konumlari **sahne koordinati**, ekranin degil.
     # Kucuk sahnelerde ikisi ayni (ofset 0,0) ve hicbir sey degismiyor.
     use_camera: bool = False
@@ -294,6 +363,11 @@ class StagedScene(StoryScene):
         self.flash_strength = 0.0
         self.extra_shake = 0.0
         self.freeze_frames = 0
+        # Dikey/yatay kaydirma - dusus ve tirmanis sahneleri icin.
+        # Aktorler bunu **yasamiyor**: kaydirilan sey arka plan, yani
+        # hareket eden dunya. Ayni kural `cave_backdrop`'ta da var.
+        self.scroll = 0.0
+        self.scroll_speed = 0.0
         self._pending: list[tuple[int, Cue]] = []
         super().on_enter(**kwargs)
 
@@ -374,6 +448,9 @@ class StagedScene(StoryScene):
             return
         super().update_cinematic()
         self._run_due()
+        self.scroll += self.scroll_speed
+        if self.motes is not None:
+            self.motes.update()
         for actor in self.actors.values():
             actor.update()
         self.particles.update()
@@ -390,6 +467,8 @@ class StagedScene(StoryScene):
                    progress: float) -> None:
         offset = self.stage_offset
         self.draw_stage_background(surface, panel, progress, offset)
+        if self.motes is not None:
+            self.motes.draw(surface)
         self._draw_lights(surface, offset)
         self._draw_actors(surface, offset)
         self.particles.draw(surface, offset)

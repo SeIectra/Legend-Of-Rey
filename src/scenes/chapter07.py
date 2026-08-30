@@ -341,7 +341,15 @@ class Chapter07Scene(PlayScene):
         self.player.body.vx = 0.0
         self.player.body.vy = 0.0
         if self.companion is not None:
-            self.companion.body.x = float(hand_x + 22)
+            # **Bos yer aranarak.** Arda (30.08.2026): *"Bolum 7'de
+            # 'Ardo yine yanimda' kisminda Ardo duvarin icinde
+            # kaliyor."* Sabit `hand_x + 22` bazen karsi kenarin
+            # kaya blogunun icine dusuyordu ve `Companion` kendi
+            # kendini kurtarmiyor.
+            cx, cy = self.free_spot_near(hand_x + 22,
+                                         HAND_TILE[1] * TILE_SIZE,
+                                         self.companion.body)
+            self.companion.body.set_feet(cx, cy)
             self.companion.release()
 
     # --- Sandik ve cikis ----------------------------------------------------
@@ -408,8 +416,10 @@ class Chapter07Scene(PlayScene):
         """
         if self.companion is None or room in ("kapi_onu", "carkhane"):
             return
-        self.companion.body.set_feet(self.player.body.center_x - 22,
-                                     self.player.body.feet[1])
+        x, y = self.free_spot_near(self.player.body.center_x - 22,
+                                   self.player.body.feet[1],
+                                   self.companion.body)
+        self.companion.body.set_feet(x, y)
         self.companion.release()
 
     def on_companion_down(self, companion) -> None:

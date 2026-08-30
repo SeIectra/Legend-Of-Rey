@@ -795,6 +795,7 @@ class PlayScene(Scene):
         # adi her zeminde okunmali, ama Yanki acikken o da bulanir.
         if self.card is not None:
             self.card.draw(surface)
+        self._draw_boss_bar(surface)
         self.draw_overlay(surface)
 
         # Kromatik kayma en son: arayuz dahil her seyin uzerine. Yanki
@@ -807,6 +808,44 @@ class PlayScene(Scene):
     def draw_foreground(self, surface, offset) -> None: ...
 
     def draw_overlay(self, surface) -> None: ...
+
+    def _draw_boss_bar(self, surface) -> None:
+        """Boss can bari - **her bolumde, otomatik.**
+
+        `CLAUDE.md` 7: *"Dusman can bari yok. Sadece boss'larda bar
+        var."* Bar `Boss.draw_health_bar` icinde ama cagirmak her
+        bolumun kendi isiydi ve Bolum 6 unutmustu: BOSS 1'in cani hic
+        gorunmuyordu (Arda, 30.08.2026). `DEVIR.md` 21 bu tuzagi bir
+        kez zaten yakalamisti - "unutulmasin" demek yetmemis.
+
+        Artik burada: `self.boss` varsa ve yasiyorsa cizilir. Bolum
+        hicbir sey yapmiyor, dolayisiyla unutamiyor.
+        """
+        boss = getattr(self, "boss", None)
+        if boss is None or getattr(boss, "dead", True):
+            return
+        boss.draw_health_bar(surface)
+
+    def free_spot_near(self, x: float, y: float, body) -> tuple[float, float]:
+        """Verilen govde icin yakinda **bos** bir yer bulur.
+
+        Arda (30.08.2026): *"Oldukten sonra yeniden dene dedigimizde
+        Ardo duvarin icinde kaliyor."* `after_restart` yoldasi
+        oyuncunun 24 piksel soluna koyuyordu ve orasi bir duvar
+        sutunuysa icinde sikisiyordu - `Companion` kendi kendini
+        kurtarmiyor.
+
+        Once istenen yer, sonra iki yana artan mesafeler deneniyor.
+        Hicbiri olmazsa oyuncunun tam ustu (orasi kesin bos, oyuncu
+        orada duruyor).
+        """
+        probe = body.rect.copy()
+        for dx in (0, -14, 14, -28, 28, -44, 44, -60, 60):
+            probe.x = int(x + dx - probe.width * 0.5)
+            probe.y = int(y - probe.height)
+            if not self.tilemap.solid_overlap(probe):
+                return (x + dx, y)
+        return (self.player.body.center_x, self.player.body.feet[1])
 
     # --- Game feel kancalari ------------------------------------------------
     def on_hit(self, box, target, result, direction) -> None:

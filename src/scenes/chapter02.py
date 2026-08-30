@@ -570,13 +570,9 @@ class Chapter02Scene(PlayScene):
                          (rect.centerx - ox, rect.y - oy, 1, rect.height))
 
     def draw_overlay(self, surface: pygame.Surface) -> None:
-        # Boss bari **sahne** ciziyor, dusman kendi cizmiyor: bar ekranin
-        # ustunde sabit duruyor, dunyada degil. `Boss.draw_health_bar`
-        # bunu bekliyordu ama hicbir sahne cagirmiyordu - arena kapaniyor,
-        # bar hic gorunmuyordu. Normal dusmanlarda bar **yok** (CLAUDE.md
-        # 7): durum sendeleme ve renkle okunuyor, yalnizca boss'ta bar var.
-        if self.boss is not None and not self.boss.dead and self.arena_sealed:
-            self.boss.draw_health_bar(surface)
+        """Boss can bari artik `PlayScene._draw_boss_bar` icinde -
+        her bolumde otomatik. Buradaki kopya kaldirildi cunku Bolum 6
+        onu eklemeyi unutmustu ve BOSS 1'in cani hic gorunmedi."""
         if self.hush > 0.02:
             self._draw_hush(surface)
 

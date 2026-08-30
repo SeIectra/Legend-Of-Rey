@@ -226,7 +226,12 @@ class Chapter06Scene(PlayScene):
     def _rescue(self) -> None:
         self.rescued = True
         x = self.player.body.center_x + 26.0
-        self.companion = Companion(self, x, self.player.body.bottom - 40,
+        # Yoldas yukaridan duserken doguyor - `free_spot_near` yatayda
+        # bos bir sutun ariyor, dikeyde 40 piksel yukarida kaliyor.
+        spawn_x, _ = self.free_spot_near(x, self.player.body.feet[1],
+                                         self.player.body)
+        self.companion = Companion(self, spawn_x,
+                                   self.player.body.bottom - 40,
                                    self.companion_key)
         self.companion.body.vy = 6.0          # yukaridan duser
 
@@ -381,8 +386,10 @@ class Chapter06Scene(PlayScene):
                 self.seal_wait += 1
                 if self.seal_wait < SEAL_GRACE_FRAMES:
                     return                  # Henuz kapatma, geliyor
-                self.companion.body.set_feet(float(inside_x),
-                                             self.player.body.feet[1])
+                ix, iy = self.free_spot_near(float(inside_x),
+                                             self.player.body.feet[1],
+                                             self.companion.body)
+                self.companion.body.set_feet(ix, iy)
             self.companion.release()
 
         self.arena_sealed = True
@@ -404,9 +411,10 @@ class Chapter06Scene(PlayScene):
         """
         if room == "kose" or self.companion is not None:
             return
-        self.companion = Companion(self, self.player.body.center_x - 24,
+        x, y = self.free_spot_near(self.player.body.center_x - 24,
                                    self.player.body.feet[1],
-                                   self.companion_key)
+                                   self.player.body)
+        self.companion = Companion(self, x, y, self.companion_key)
         self.rescued = True
 
     def _finish_boss(self) -> None:

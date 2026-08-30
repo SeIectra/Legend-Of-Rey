@@ -166,7 +166,39 @@ class Companion(Actor):
 
         self._think()
         super().update()
+        self._unstick()
         self._animate()
+
+    def _unstick(self) -> None:
+        """Geometrinin icinde kaldiysa kendini disari cikarir.
+
+        Yoldasin yol bulmasi yok - oyuncuyu takip ederken bir kaya
+        blogunun ya da yukseltinin icine girebiliyor, ve girdiginde
+        orada kaliyor (Arda 30.08.2026: iki ayri bolumde bildirdi).
+
+        Sahne yerlestirmeleri artik `PlayScene.free_spot_near` ile bos
+        yer ariyor; bu onun **calisma zamani** karsiligi: yerlestirme
+        dogru olsa bile yurumek sirasinda sikisabilir.
+
+        Once yukari (en sik durum: bir yukseltinin icine yurumek),
+        sonra iki yana. Bulamazsa oyuncunun yanina isinlaniyor -
+        gorunur bir siçrama, ama sikisip kalmaktan iyidir.
+        """
+        tilemap = getattr(self.scene, "tilemap", None)
+        if tilemap is None or not tilemap.solid_overlap(self.body.rect):
+            return
+        start_x, start_y = self.body.x, self.body.y
+        for dy, dx in ((-8, 0), (-16, 0), (0, -10), (0, 10),
+                       (-24, 0), (0, -20), (0, 20)):
+            self.body.x, self.body.y = start_x + dx, start_y + dy
+            if not tilemap.solid_overlap(self.body.rect):
+                self.body.vx = self.body.vy = 0.0
+                return
+        player = self.player
+        if player is not None:
+            self.body.set_feet(player.body.center_x, player.body.feet[1])
+        else:
+            self.body.x, self.body.y = start_x, start_y
 
     def _think(self) -> None:
         if self.tell_frames > 0:

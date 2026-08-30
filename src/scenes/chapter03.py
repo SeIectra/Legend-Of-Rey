@@ -699,8 +699,9 @@ class Chapter03Scene(PlayScene):
         surface.blit(glow, (px - 28, py - 28), special_flags=pygame.BLEND_RGB_ADD)
 
     def draw_overlay(self, surface: pygame.Surface) -> None:
-        if self.boss is not None and not self.boss.dead and self.arena_sealed:
-            self.boss.draw_health_bar(surface)
+        """Boss can bari artik `PlayScene._draw_boss_bar` icinde -
+        her bolumde otomatik. Buradaki kopya kaldirildi cunku Bolum 6
+        onu eklemeyi unutmustu ve BOSS 1'in cani hic gorunmedi."""
         if self.trading:
             self._draw_trade(surface)
 

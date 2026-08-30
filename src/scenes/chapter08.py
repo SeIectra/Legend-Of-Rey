@@ -319,8 +319,10 @@ class Chapter08Scene(PlayScene):
             self.taught = True
             self.fireside_played = True
         if self.companion is not None and room != "ates":
-            self.companion.body.set_feet(self.player.body.center_x - 22,
-                                         self.player.body.feet[1])
+            x, y = self.free_spot_near(self.player.body.center_x - 22,
+                                       self.player.body.feet[1],
+                                       self.companion.body)
+            self.companion.body.set_feet(x, y)
             self.companion.release()
 
     def on_companion_attack(self, companion) -> None:
