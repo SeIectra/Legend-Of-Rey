@@ -368,6 +368,70 @@ def test_draw_extra_runs() -> None:
         game.quit()
 
 
+# --- 8. Her dusman GERCEKTEN saldirabiliyor mu -------------------------------
+def test_every_attack_spawns() -> None:
+    """`_spawn_attack()` cagrilabiliyor ve gecerli bir kutu uretiyor mu.
+
+    Bu test bir cokmeden dogdu. `Spearman._spawn_attack` `Hitbox`i
+    `team=` ve `frames=` ile kuruyordu; alanlarin adi `targets` ve
+    `active_frames`. Yani **Mizrakli ilk saldirisinda oyunu
+    cokutuyordu** - ve uc bolumde var (B10, B11, B13).
+
+    Otuz alti test paketi yesildi. Mizrakli'nin menzili, geri adimi ve
+    tell suresi hepsi olculuyordu; **vurusu hic uretilmiyordu.**
+
+    Bir dusmanin sozlesmesi neyi ne zaman yaptigi kadar, yaptigi seyin
+    **gecerli** olmasi da. Ozel bir saldirisi olan her dusman buraya
+    girer.
+    """
+    print("\n--- saldiri uretimi ---")
+    from src.entities.enemies.spearman import Spearman
+    from src.entities.enemies.shieldbearer import Shieldbearer
+    from src.combat.hitbox import Team
+
+    game = Game()
+    try:
+        scene = arena(game)
+        specimens = (
+            ("Okcu", Archer), ("Komutan", Commander), ("Sessiz", Silent),
+            ("Yankilayan", Echoing), ("Bolunen", Splitter),
+            ("Mizrakli", Spearman), ("Kalkanli", Shieldbearer),
+        )
+        for name, cls in specimens:
+            scene.enemies.clear()
+            scene.hitboxes.boxes.clear()
+            enemy = cls(scene, 300.0, FEET_Y)
+            scene.enemies.append(enemy)
+            enemy.aware = True
+            scene.player.body.set_feet(340.0, FEET_Y)
+            enemy.facing = 1
+            before = len(scene.enemies)
+            try:
+                enemy._spawn_attack()
+            except Exception as exc:  # noqa: BLE001
+                check(False, f"{name}: saldiri uretimi COKTU",
+                      f"{type(exc).__name__}: {exc}")
+                continue
+
+            boxes = scene.hitboxes.boxes
+            summoned = len(scene.enemies) > before
+            if not boxes and not summoned:
+                # Komutan hasar vermiyor, cagiriyor - o da gecerli.
+                check(True, f"{name}: kutu uretmiyor ama cokmuyor")
+                continue
+            if boxes:
+                box = boxes[-1]
+                check(box.targets is Team.PLAYER,
+                      f"{name}: kutu OYUNCUYU hedefliyor", str(box.targets))
+                check(box.owner is enemy, f"{name}: sahibi kendisi")
+                check(box.active_frames > 0,
+                      f"{name}: kutunun omru var", str(box.active_frames))
+            else:
+                check(True, f"{name}: cagirma yapti")
+    finally:
+        game.quit()
+
+
 def main() -> int:
     print("=== KATMAN 2 ve 3 DUSMANLARI ===")
     test_archer()
@@ -377,6 +441,7 @@ def main() -> int:
     test_splitter()
     test_layer3_distinct()
     test_draw_extra_runs()
+    test_every_attack_spawns()
 
     print("\n=== SONUC ===")
     if failures:

@@ -140,9 +140,15 @@ class Spearman(Enemy):
             rect.midleft = (int(self.body.center_x), int(self.body.center_y))
         else:
             rect.midright = (int(self.body.center_x), int(self.body.center_y))
+        # `targets` = **kimi vuruyor**, `team` diye bir alan yok.
+        # Burada `team=Team.ENEMY, frames=...` yaziyordu ve Mizrakli
+        # ilk saldirisinda oyunu cokutuyordu (`TypeError`). Uc bolumde
+        # var (B10, B11, B13) ve hicbir test onu **saldirtmamisti** -
+        # sinif yukleniyor, davranisi olculuyor, ama vurusu hic
+        # uretilmiyordu.
         self.scene.hitboxes.spawn(Hitbox(
-            rect=rect, team=Team.ENEMY, damage=self.damage,
-            owner=self, frames=self.active_frames,
+            rect=rect, targets=Team.PLAYER, damage=self.damage,
+            owner=self, active_frames=self.active_frames,
             knockback=SPEARMAN_PUSHBACK))
 
     # --- Cizim ---------------------------------------------------------------

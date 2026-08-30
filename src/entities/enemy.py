@@ -214,16 +214,6 @@ class Enemy(Actor):
         from src.entities.enemy_render import draw_enemy
         draw_enemy(self, surface, offset)
 
-    def draw_extra(self, surface, offset) -> None:
-        """Govdenin ustune cizilen dusmana ozel ekler. Varsayilan: yok.
-
-        `enemy_render.draw_enemy` her dusmanda cagiriyor. Kanca burada
-        **acikca** tanimli, cunku alt siniflarin yarisinda vardi
-        yarisinda yoktu ve cagiran taraf `getattr` ile yoklamak
-        zorunda kalirdi - yazim hatasi olan bir `draw_extar` sessizce
-        hicbir sey yapardi.
-        """
-
     def update(self) -> None:
         if self.dead:
             self.remove = True

@@ -177,3 +177,7 @@ assets/audio/music/*.mp3
 # Graphify bilgi grafi - koddan uretiliyor, depoya girmiyor.
 # `graphify extract . --code-only` ile yeniden kurulur.
 graphify-out/
+
+# PyInstaller ciktilari - tester surumu her seferinde yeniden uretiliyor
+build_pyi/
+dist/

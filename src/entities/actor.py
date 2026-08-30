@@ -284,5 +284,21 @@ class Actor:
         self.body.apply_gravity()
         self.body.move(self.scene.tilemap)
 
+    def draw_extra(self, surface, offset) -> None:
+        """Govdenin ustune cizilen varliga ozel ekler. Varsayilan: yok.
+
+        **`Enemy`de degil `Actor`de**, cunku `enemy_render.draw_enemy`
+        ortak bir cizici: `Enemy` de `Companion` da oradan geciyor ama
+        ikisi kardes, biri otekinin atasi degil.
+
+        Kanca once `Enemy`ye konmustu ve paketlenen surumde Bolum 9
+        **acilir acilmaz cokuyordu**: `Companion` `Actor`den turuyor,
+        `draw_extra`si yoktu. Kaynakta hicbir sey yanlis gorunmuyordu
+        cunku hicbir test yoldas cizmiyordu.
+
+        `getattr` ile yoklamak da olurdu ama yazim hatasi olan bir
+        `draw_extar` sessizce hicbir sey yapardi. Kanca acikca tanimli.
+        """
+
     def draw(self, surface: pygame.Surface, offset: tuple[int, int]) -> None:
         raise NotImplementedError
