@@ -52,8 +52,11 @@ from src.core.game import Game  # noqa: E402
 from src.scenes.chapter15 import Chapter15Scene  # noqa: E402
 from src.scenes.chapter15_cinematics import PassedCinematic  # noqa: E402
 from src.systems.save import SaveData, write_save  # noqa: E402
+from src.ui.chapter_end import (  # noqa: E402
+    ChapterEndScene, ChapterResult,
+)
 from src.world.rooms.chapter15 import (  # noqa: E402
-    DRIP_INTERVAL, LEVEL, ROOM_STARTS,
+    DRIP_INTERVAL, GHOST_BONUS, LEVEL, ROOM_STARTS,
 )
 
 failures: list[str] = []
@@ -157,6 +160,72 @@ def test_waking_is_not_a_loss() -> None:
 
 
 # --- 2. Gurultu mekanigi ------------------------------------------------------
+def test_ghost_reward_is_visible() -> None:
+    """Odul GORUNMELI - kazanan da kazanamayan da ogrenmeli.
+
+    `docs/yapi.md` B15 *"daha iyi odul verir"* diyor. Odul veriliyordu
+    ama ozet ekraninda yalnizca altin sayisi bir tik buyuk cikiyordu:
+    kazanan neden kazandigini, kazanamayan boyle bir sey oldugunu
+    ogrenemiyordu. Ekranin kendi gerekcesi bunun tersi
+    (`chapter_end.py`): *"'0/1 gizli alan' goren oyuncu bir daha gizli
+    alan arar."*
+    """
+    print("\n--- hayalet odulu gorunuyor ---")
+
+    kept = ChapterResult(chapter_key="chapter.silence", frames=60,
+                         best_combo=0, gold=100, secrets_found=1,
+                         secrets_total=1, ghost=True,
+                         ghost_bonus=GHOST_BONUS)
+    missed = ChapterResult(chapter_key="chapter.silence", frames=60,
+                           best_combo=0, gold=15, secrets_found=1,
+                           secrets_total=1, ghost=False,
+                           ghost_bonus=GHOST_BONUS)
+
+    # Sormamis bolum - eski ozetler bozulmamali.
+    silent = ChapterResult(chapter_key="chapter.village", frames=60,
+                           best_combo=0, gold=10, secrets_found=0,
+                           secrets_total=0)
+
+    game = Game()
+    try:
+        def rows(result):
+            scene = ChapterEndScene(game)
+            scene.on_enter(result=result)
+            return scene._rows()
+
+        def ghost_row(result):
+            for label, value, role in rows(result):
+                if label == "chapter_end.ghost":
+                    return value, role
+            return None, None
+
+        kept_value, kept_role = ghost_row(kept)
+        missed_value, missed_role = ghost_row(missed)
+        silent_value, _ = ghost_row(silent)
+
+        check(kept_value is not None, "kazaninca satir VAR")
+        check(missed_value is not None,
+              "kacirinca da satir VAR - yoksa oyuncu ogrenemez")
+        check(silent_value is None,
+              "sormamis bolumde satir HIC yok - eski ozetler bozulmadi")
+
+        check(str(GHOST_BONUS) in kept_value,
+              "kazanan odulun buyuklugunu goruyor", kept_value)
+        check(str(GHOST_BONUS) in missed_value,
+              "KACIRAN da odulun buyuklugunu goruyor - neyi kacirdigini bilsin",
+              missed_value)
+        check(kept_value != missed_value,
+              "iki durum METINCE ayriliyor - renk tek basina yeterli degil",
+              f"{kept_value!r} vs {missed_value!r}")
+
+        check(kept_role == "reward", "kazanan altin renginde", kept_role)
+        check(missed_role != "danger",
+              "kaciran KIRMIZI DEGIL - bolum 'ceza degil odul' diyor",
+              missed_role)
+    finally:
+        game.quit()
+
+
 def test_alert_decays() -> None:
     """Uyaniklik soluyor - hata bekleyerek duzeltilebilir."""
     print("\n--- uyaniklik soluyor ---")
@@ -419,6 +488,7 @@ def main() -> int:
     test_walk_is_silent()
     test_running_wakes()
     test_waking_is_not_a_loss()
+    test_ghost_reward_is_visible()
     test_alert_decays()
     test_wake_is_one_way()
     test_sleep_reads_in_silhouette()

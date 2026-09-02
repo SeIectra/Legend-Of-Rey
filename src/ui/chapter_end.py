@@ -59,6 +59,11 @@ class ChapterResult:
     # Bolum 3'un karari. `None` = bu bolumde hic sorulmadi (Bolum 1/2),
     # satir hic gorunmez - onceki bolumlerin ozet ekranini degistirmez.
     purple_flame_taken: bool | None = None
+    # Bolum 15'in olcusu: hic uyandirmadan, hic oldurmeden gecmek.
+    # `None` = bu bolum boyle bir sey sormadi. `ghost_bonus` odulun
+    # buyuklugu - kazanilmasa da gosteriliyor (asagi bkz.).
+    ghost: bool | None = None
+    ghost_bonus: int = 0
 
     @property
     def missed_secret(self) -> bool:
@@ -132,6 +137,29 @@ class ChapterEndScene(Scene):
             value_key = ("chapter_end.taken" if data.purple_flame_taken
                         else "chapter_end.left")
             rows.append(("chapter_end.purple_flame", t(value_key), "ui_text"))
+        # Sessiz gecis odulu - kazanilsa da kazanilmasa da **gorunur.**
+        #
+        # Odul zaten veriliyordu (`chapter15._end_chapter` altina ekliyor)
+        # ama ekranda yalnizca altin sayisi bir tik buyuk cikiyordu:
+        # kazanan neden kazandigini, kazanamayan boyle bir sey oldugunu
+        # ogrenemiyordu. Bu ekranin isi tam tersi - dosyanin basindaki
+        # gerekce: *"'0/1 gizli alan' goren oyuncu bir daha gizli alan
+        # arar."*
+        #
+        # Renk gizli alan satirinin TERSI: kacirilan kirmizi degil sonuk,
+        # kazanilan altin. Cunku `docs/yapi.md` B15 ve bolumun kendi
+        # tasarimi "ceza degil odul" diyor - uyandirmak bir kayip degil,
+        # sessizlik bir fazlalik. Kirmizi bunu cezaya cevirirdi.
+        # Kacirilan satirda bile **odulun buyuklugu yaziyor** (`0 / 85`),
+        # yoksa oyuncu neyi kacirdigini bilmezdi. Bicim gizli alan
+        # satirinin deyimi - bu ekranda zaten kurulu, yeni bir kelime
+        # gerekmiyor. Iki durum hem METINCE hem renkce ayriliyor
+        # (`CLAUDE.md` 10: tehlike/durum asla tek basina renkle degil).
+        if data.ghost is not None:
+            value = (f"+{data.ghost_bonus}" if data.ghost
+                     else f"0 / {data.ghost_bonus}")
+            rows.append(("chapter_end.ghost", value,
+                         "reward" if data.ghost else "ui_text"))
         return rows
 
     def visible_rows(self) -> int:
@@ -169,8 +197,14 @@ class ChapterEndScene(Scene):
         for index, (label, value, role) in enumerate(self._rows()):
             if index >= shown:
                 break
-            colour = (palette.color("danger_bright") if role == "danger"
-                      else palette.role("ui_text_dim"))
+            if role == "danger":
+                colour = palette.color("danger_bright")
+            elif role == "reward":
+                # Kazanilan bir fazlalik - kacirilan bir kayip degil.
+                # Altin, cunku odulun kendisi altin.
+                colour = palette.color("gold")
+            else:
+                colour = palette.role("ui_text_dim")
             text.draw(surface, t(label), rect.x + 18, y,
                       color=palette.role("ui_text_dim"))
             text.draw(surface, value, rect.right - 18, y,

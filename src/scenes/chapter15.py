@@ -53,7 +53,8 @@ from src.ui.i18n import t
 from src.world import cave_backdrop
 from src.world.pickups import Chest
 from src.world.rooms.chapter15 import (
-    CHEST_GOLD, DRIP_INTERVAL, FLOOR_TOP, LEVEL, ROOM_STARTS, SECRETS_TOTAL,
+    CHEST_GOLD, DRIP_INTERVAL, FLOOR_TOP, GHOST_BONUS, LEVEL, ROOM_STARTS,
+    SECRETS_TOTAL,
 )
 from src.world.tilemap import TileMap
 
@@ -352,10 +353,15 @@ class Chapter15Scene(PlayScene):
         sorduğunun cevabi.
         """
         self.game.play_sound("chapter_end")
+        ghost = self.ghost
         gold = self.earned_gold
-        if self.ghost:
-            gold += CHEST_GOLD
+        if ghost:
+            gold += GHOST_BONUS
             self.show_toast(t("chapter15.ghost"), frames=260)
+        # `ghost`/`ghost_bonus` ozet ekranina da gidiyor: odul yalnizca
+        # altin sayisina eklenseydi kazanan neden kazandigini,
+        # kazanamayan boyle bir sey oldugunu ogrenemezdi. Kacirilan
+        # satir da odulun buyuklugunu yaziyor.
         result = ChapterResult(
             chapter_key="chapter.silence",
             frames=self.frames,
@@ -363,6 +369,8 @@ class Chapter15Scene(PlayScene):
             gold=gold,
             secrets_found=1 if self.secret_found else 0,
             secrets_total=SECRETS_TOTAL,
+            ghost=ghost,
+            ghost_bonus=GHOST_BONUS,
         )
         data = self.save_data
         if data is not None:
@@ -370,7 +378,7 @@ class Chapter15Scene(PlayScene):
             data.chapter_name = "chapter.silence"
             data.playtime_frames += self.frames
             data.secrets_found += result.secrets_found
-            if self.ghost:
+            if ghost:
                 data.flags["ch15_ghost"] = True
         # Bolum 16 henuz yok - ozet ekrani kapaninca ana menuye donuluyor.
         self.scenes.push(ChapterEndScene, result=result)

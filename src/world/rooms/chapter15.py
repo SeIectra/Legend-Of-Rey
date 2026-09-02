@@ -179,4 +179,17 @@ ROOM_STARTS = (
 DRIP_INTERVAL = 240
 
 CHEST_GOLD = 85
+
+# Hic uyandirmadan, hic oldurmeden gecmenin odulu.
+#
+# `docs/yapi.md` B15: *"Tamamen dovussuz gecilebilir - ve daha iyi odul
+# verir."* Sandikla ayni buyuklukte, bilerek: bolumun gizli alani kadar
+# degerli oldugu soylenmis oluyor - ama bu odul aramakla degil
+# **kendini tutmakla** kazaniliyor.
+#
+# Kendi adi var cunku ozet ekraninda oyuncuya GOSTERILIYOR
+# (`chapter_end.ghost`). Once `CHEST_GOLD` odunc aliniyordu; iki sayi
+# ayni olsa da ayni sey degil, ve sandigin altini degisince odulun de
+# sessizce degismesi hata olurdu.
+GHOST_BONUS = 85
 SECRETS_TOTAL = 1
