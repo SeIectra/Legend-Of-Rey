@@ -441,6 +441,14 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
     spawn15 = chapter15.LEVEL.first("player")
     rooms.append(("bolum 15 - sessizlik", chapter15.LEVEL.terrain_rows,
                   (spawn15.tile_x, spawn15.tile_y + 1), set()))
+
+    # Bolum 16: yedi oda, duz koridor. Yoldas ve kaldirma mekanigi
+    # gecise etki etmiyor - harita tek basina gecilebilir olmali,
+    # yoksa yoldas dustugunde bolum kilitlenirdi.
+    from src.world.rooms import chapter16
+    spawn16 = chapter16.LEVEL.first("player")
+    rooms.append(("bolum 16 - sirt sirta", chapter16.LEVEL.terrain_rows,
+                  (spawn16.tile_x, spawn16.tile_y + 1), set()))
     return rooms
 
 

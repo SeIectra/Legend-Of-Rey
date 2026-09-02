@@ -74,6 +74,13 @@ SCENES = {
     # kurdu: duyuyu acmak suruyu uyandiriyor.
     "bolum15": ("src.scenes.chapter15", "Chapter15Scene"),
     "bolum15-gectin": ("src.scenes.chapter15_cinematics", "PassedCinematic"),
+    # Bolum 16 "Sirt Sirta" - en uzun team-up. Yoldas burada kendi
+    # kendine kalkmiyor; kaldirma mekanigi "bolum16-kaldir" sahnesinde
+    # ogretiliyor.
+    "bolum16": ("src.scenes.chapter16", "Chapter16Scene"),
+    "bolum16-donus": ("src.scenes.chapter16_cinematics", "ReturnCinematic"),
+    "bolum16-kaldir": ("src.scenes.chapter16_cinematics", "LiftCinematic"),
+    "bolum16-kalp": ("src.scenes.chapter16_cinematics", "HeartCinematic"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }

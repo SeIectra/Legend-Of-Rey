@@ -736,6 +736,46 @@ COMPANION_DOWN_FRAMES: Final[int] = 210
 # Emredilen noktaya bu kadar yaklasinca "durdu" sayiliyor.
 COMPANION_HOLD_TOLERANCE: Final[float] = 10.0
 
+# --- ASIST KOMBO (Bolum 16) --------------------------------------------------
+# `docs/yapi.md` B16: *"En uzun team-up. **Asist kombolar zirvede.**"*
+#
+# Oyuncu bitiriciyi vurdugunda yoldas beklemesini ATLAYIP ayni ana
+# katiliyor. Tek vurus degil, tek **an**: `CLAUDE.md` 7'nin "uclu
+# senkron" kurali (hitstop + sarsinti + parcacik tek yerden) burada
+# dorde cikiyor.
+#
+# Tell kisa: yoldas bir dusman degil, oyuncunun okumasi gereken bir
+# tehdit degil. Uzun tell asisti bitiriciden KOPARIR ve senkron hissi
+# giderdi - anin butun degeri ayni karede olmasi.
+COMPANION_ASSIST_TELL: Final[int] = 5
+# Asist hasari normalin iki kati. Yoldas hala oldurmuyor (oyuncunun
+# isi) ama bitiriciye katildiginda farki hissedilmeli - yoksa asist
+# yalnizca bir animasyon olurdu.
+COMPANION_ASSIST_DAMAGE: Final[int] = 14
+
+# --- KALDIRMA (Bolum 16, src/systems/rescue.py) ------------------------------
+# `docs/yapi.md` B16: *"Ama bu sefer **Rey de onu kurtarir.** Karsilikli."*
+# `docs/gdd.md` 11 romantik yay: *"B16 | Esitlik | Sen onu
+# kurtariyorsun."*
+#
+# B6'dan beri yoldas diz cokup KENDI KENDINE kalkiyordu ve oyuncu onun
+# icin hicbir sey yapmiyordu. B16 bunu tersine ceviriyor: orada yoldas
+# yalnizca sen kaldirirsan kalkiyor (`Companion.self_recovers = False`).
+#
+# Tutma suresi: bir dovusun ortasinda kipirdamadan durmak GERCEK bir
+# risk olmali - anin butun anlami bu. 48 kare (0,8 sn) oyuncunun iki
+# dusman arasinda bir bosluk aramasini gerektiriyor ama can sikici
+# degil. Kacinma toplam 18 kare, dusman tell'i en az 14 - yani tutma
+# suresi bir tell'den uzun: basladigin an guvendeysen bitirebiliyorsun.
+RESCUE_HOLD_FRAMES: Final[int] = 48
+# Bu mesafeden yakin olmali. Yoldas govdesi 12 piksel; 22 hem affedici
+# hem "yaninda duruyorsun" hissini koruyor.
+RESCUE_RANGE: Final[float] = 22.0
+# Kaldirinca donen can. Kendi kalkmasindan (max/2 = 45) FAZLA: senin
+# elinle kalkmak daha iyi olmali, yoksa kaldirmanin bir bedeli olur da
+# karsiligi olmazdi.
+RESCUE_HEALTH: Final[int] = 60
+
 # --- AGIRLIK PLAKASI (Bolum 6, src/world/plate.py) ---------------------------
 # `docs/gdd.md` 9 mekanik 4: *"Agirlik plakalari | B6 | Yaratik cesedini/
 # sandigi plakaya surukle"*, `docs/yapi.md`: *"ikisi ayri plakada durmali -

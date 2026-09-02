@@ -35,7 +35,7 @@ Tasarım paketi `docs/` altında ve **bağlayıcı**: `gdd.md` (ana belge),
 
 ## 2. NEREDE DURUYORUZ
 
-**57.703 satır Python. 39 test paketi de yeşil — 66 saniyede.**
+**60.033 satır Python. 40 test paketi de yeşil — 86 saniyede.**
 (02.09.2026'da ölçüldü.)
 
 Oynanabilir akış:
@@ -43,12 +43,12 @@ Oynanabilir akış:
 İniş** → **B3 Meşale Mahzeni** → **B4 Kayıt Odası** → **B5 Sular** →
 **B6 ARDO** → **B7 Dar Geçit** → **B8 Ateş Başı** → **B9 Can Kulesi** →
 **B10 Ayrılık** → **B11 Ayna Salonu** → **B12 Mektup** → **B13 Cemo** →
-**B14 Yankı'nın Kaynağı** → **B15 Sessizlik** → bölüm sonu ekranı → ana
-menü`
+**B14 Yankı'nın Kaynağı** → **B15 Sessizlik** → **B16 Sırt Sırta** →
+bölüm sonu ekranı → ana menü`
 
-**18 bölümün 15'i oynanabilir.** Kalan: B16 "Sırt Sırta", B17 "İkili
-Kule", B18 "Son". B15'in sonu ana menüye dönüyor çünkü B16 henüz yok —
-bilinçli bir uç, her bölümde aynı desen.
+**18 bölümün 16'sı oynanabilir.** Kalan: B17 "İkili Kule", B18 "Son".
+B16'nın sonu ana menüye dönüyor çünkü B17 henüz yok — bilinçli bir uç,
+her bölümde aynı desen.
 
 **Katman 1 (Çürüyenler, B1–B6) ve Katman 2 (Lanetli Muhafızlar, B7–B13)
 tamamlandı; Katman 3 (Yankı'nın Çocukları, B14–B18) başladı.**
@@ -927,6 +927,81 @@ sesi olarak değil **metronom** olarak. Ses doğru sesti, beklediği
 kullanım başkaymış.
 
 Zincirleme: **B14 → B15.**
+
+### Bölüm 16 "Sırt Sırta" — kaldırma, asist kombo, jest seçimi (02.09.2026)
+
+`docs/yapi.md` B16: *"Ardo geri döner, havalı giriş. Ama bu sefer **Rey
+de onu kurtarır.** Karşılıklı. Mekanik: En uzun team-up. Asist kombolar
+zirvede. Bölüm sonu: kalp balonu."*
+
+Yedi oda, 164 tile, 23 düşman (Katman 2 + Katman 3 birlikte — yeni
+düşman yok, **yoğunluk** var). Zorluk 6.
+
+#### Bölümün tezi tek satır
+
+`Companion.self_recovers = False`. B6'dan beri yoldaş diz çöküp **kendi
+kendine** kalkıyordu ve oyuncu onun için hiçbir şey yapmıyordu — B7'de
+Ardo Rey'i aralıktan çekti, B9'da yukarı fırlattı, B12'de yolu işaretleyen
+oydu. Oyuncu hep taşınan taraftı. Burada yoldaş **yalnızca sen
+kaldırırsan** kalkıyor (`src/systems/rescue.py`, basılı tut).
+
+Karar **örnekte** veriliyor, sınıfta değil: `Companion.self_recovers`
+sınıf düzeyinde `True` kalıyor. Değiştirilseydi B6-B15'te yoldaş ilk
+düşüşte yerde kalır ve ağırlık plakası bulmacası çözülemezdi.
+`test_chapter16.py` bunu ayrıca kontrol ediyor.
+
+#### Arda'nın iki kararı (02.09.2026)
+
+1. **Jest seçimi kurulsun.** `docs/derinlestirme.md` §3.3 onu tarif
+   ediyor ve dört andan biri olarak B16'yı adıyla anıyor — ama B7 ve B8
+   onsuz yazılmıştı. `src/ui/gesture.py` + `balloon.py`'ye üç yeni ikon.
+   B18 sistemi bedava alıyor.
+2. **Yoldaş kendi kalkamasın, ama bir sinematikle öğretilsin.** Bu benim
+   uyardığım riski kapattı: öğretilmemiş bir mekanik oyuncuyu bölümün
+   yarısında yoldaşsız bırakırdı. Üç sinematiğin ortadakinin tek işi bu.
+
+#### Üç sinematik, üçü de oynanan karaktere göre
+
+    kapi     DÖNÜŞ   yalnızlığı bitiriyor — kurtarılan sensin
+    dusus    KALDIR  mekaniği öğretiyor — kurtaran sensin
+    cikis    KALP    jest seçimi ve kapanış
+
+Fark bir palet değişimi değil: **Ardo ağır** (düşüşte toz, 4.2 sarsıntı,
+`land_hard`), **Rey hafif** (2.1 sarsıntı, ama kolyeden mor bir flaş).
+Aynı koreografi, iki farklı kütle.
+
+Kalp balonu **üç seçimde de** çıkıyor (`docs/yapi.md` bağlayıcı); değişen
+kimin gösterdiği: elini uzat → eller birleşiyor, başını salla → kalp
+ikisinin arasında, geri çekil → o yine gösteriyor ama sen bakmıyorsun.
+Yanlış cevap yok.
+
+#### Ekran görüntüsü üç hata daha yakaladı
+
+1. **Sahne yoldaşı hiç güncellemiyor ve çizmiyordu.** `PlayScene` bunu
+   yapmıyor — B6 ve B9 da aynı satırı kendi yazıyor. Yoldaş donmuş
+   duruyordu, yer çekimi bile işlemiyordu (`body.grounded` hep False) ve
+   bu yüzden kaldırma **hiçbir zaman** mümkün olmuyordu. Testler yakaladı.
+2. **Sinematik neredeyse tamamen siyahtı.** Çözüm karanlığı azaltmak
+   değil ona bir **kaynak** vermek oldu: duvar meşaleleri + `add_light`.
+   İlk denemede ışık havuzunu elle dikdörtgenlerle çizdim, ekran hatası
+   gibi okudu — sistem varken elle taklit etmek yanlıştı.
+3. **Diz çökmüş yoldaş dimdik duruyordu.** `_animate` `"hurt"`
+   oynatıyordu; o bir *irkilme* pozu. `"death"` ("yere yığılma") doğru
+   duruş — kurgu değil **duruş** adı. B15'teki uyuyan düşman hatasının
+   birebir aynı şekli: durum siluete girmiyordu.
+
+Ayrıca "nod" ikonu 7×7'de okunmayan bir kümeydi (çift aşağı çevron
+oldu) ve jest balonları yoldaşın kafasına biniyordu.
+
+#### `on_companion_attack` imzası KORUNDU
+
+Asist bayrağını kancaya ikinci parametre olarak eklemek doğal
+görünüyordu ama `on_companion_attack` B6/B7/B8/B9'da zaten tanımlı ve
+dördünü de tek bölümün özelliği için değiştirmek gerekirdi. Bayrak
+`Companion.last_swing_assisted`da duruyor. "Her bölüm bir satır eklemeli"
+bu projede bir hatanın şekli.
+
+Zincirleme: **B15 → B16.**
 
 ## 9. AÇIK KALANLAR
 

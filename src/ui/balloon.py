@@ -60,6 +60,44 @@ ICONS: dict[str, tuple[str, ...]] = {
         "..###..",
         "...#...",
     ),
+    # --- Jestler (`src/ui/gesture.py`, Bolum 16) ------------------------
+    # `docs/derinlestirme.md` 3.3: *"Bir anda uc ikon cikar (elini uzat /
+    # basini salla / geri cekil). Secimin iliskiyi sekillendirir."*
+    # Kelime yok, o yuzden ikonun kendisi okunabilir olmali - ucu de
+    # farkli SILUET (parmakli el, dikey ok, yatay ok), yalnizca farkli
+    # sekil degil (`CLAUDE.md` 10).
+    "hand": (
+        "#.#.#..",
+        "#######",
+        "#######",
+        ".#####.",
+        "..###..",
+        "...#...",
+        "...#...",
+    ),
+    # Cift asagi cevron - "asagi, asagi" yani basini sallamak. Ilk
+    # surum kucuk bir kafa dairesi + asagi ok idi ve 7x7'de okunmayan
+    # bir kumeye donusuyordu (render edilip bakildi). Bu haliyle hem
+    # okunuyor hem de oteki iki ikondan farkli siluet: el organik,
+    # geri cekilme YATAY bir ok, bu DIKEY bir hareket.
+    "nod": (
+        "#.....#",
+        ".#...#.",
+        "..#.#..",
+        "...#...",
+        "#.....#",
+        ".#...#.",
+        "..#.#..",
+    ),
+    "back": (
+        "...#...",
+        "..##...",
+        ".###...",
+        "#######",
+        ".###...",
+        "..##...",
+        "...#...",
+    ),
     "echo": (
         "...#...",
         "..#.#..",

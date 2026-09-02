@@ -56,9 +56,10 @@ from src.art.animation import CHARACTERS
 from src.art.animator import Animator
 from src.combat.hitbox import Hitbox, Team, melee_rect
 from src.config import (
-    COMPANION_ATTACK_COOLDOWN, COMPANION_ATTACK_RANGE, COMPANION_DAMAGE,
-    COMPANION_DOWN_FRAMES, COMPANION_HEALTH, COMPANION_HOLD_TOLERANCE,
-    COMPANION_LEASH, COMPANION_SPEED, COMPANION_TELL_FRAMES,
+    COMPANION_ASSIST_DAMAGE, COMPANION_ASSIST_TELL, COMPANION_ATTACK_COOLDOWN,
+    COMPANION_ATTACK_RANGE, COMPANION_DAMAGE, COMPANION_DOWN_FRAMES,
+    COMPANION_HEALTH, COMPANION_HOLD_TOLERANCE, COMPANION_LEASH,
+    COMPANION_SPEED, COMPANION_TELL_FRAMES,
 )
 from src.entities.actor import Actor
 
@@ -78,6 +79,18 @@ class Companion(Actor):
     body_width = 12
     body_height = 22
     max_health = COMPANION_HEALTH
+    # Diz cokunce kendi kendine kalkar mi.
+    #
+    # B6-B15 boyunca True ve oyle kalmali: o bolumlerde kaldirma
+    # mekanigi yok, False olsaydi yoldas ilk dususte bolumun geri
+    # kalaninda yerde kalirdi ve agirlik plakasi bulmacasi cozulemezdi.
+    #
+    # **Bolum 16 bunu False yapiyor** ve bolumun butun tezi bu:
+    # `docs/yapi.md` *"bu sefer Rey de onu kurtarir"*. Orada yoldas
+    # yalnizca oyuncu kaldirirsa kalkiyor (`src/systems/rescue.py`).
+    # Sahne bunu ornekte degistiriyor, sinifta degil - bir bolumun
+    # karari otekilere sizmasin.
+    self_recovers = True
     # Kutu kipinde govde rengi. **RENK adi, zincir degil** - "steel" bir
     # shade chain, palet rengi degil (bu tuzaga proje defalarca dustu).
     body_colour = "bone"
@@ -92,6 +105,11 @@ class Companion(Actor):
         self.down_frames = 0          # diz cokmus
         self.hold_x: float | None = None
         self._target = None
+        # Su anki savurma bir asist mi (Bolum 16). `_swing` bunu
+        # `last_swing_assisted`a tasiyor ki kanca imzasi degismeden
+        # sahne farki gorebilsin.
+        self._assisting = False
+        self.last_swing_assisted = False
 
     # --- Sorgular -----------------------------------------------------------
     @property
@@ -142,17 +160,41 @@ class Companion(Actor):
         self.down_frames = max(self.down_frames, COMPANION_DOWN_FRAMES)
 
     # --- Dongu --------------------------------------------------------------
+    def lift(self, health: int) -> None:
+        """Biri onu **kaldirdi**. Zamanla degil, elle.
+
+        `src/systems/rescue.py` cagiriyor. Kendi kalkmasindan tek farki
+        donen canin daha fazla olmasi - o karar cagiranin, burasi
+        yalnizca ayaga kaldiriyor.
+        """
+        if not self.downed:
+            return
+        self.down_frames = 0
+        self._stand(health)
+
+    def _stand(self, health: int) -> None:
+        """Ayaga kalkma - kendi kendine de, kaldirilinca da buradan.
+
+        Tek yerde: iki yol ayri yazilsaydi biri gunun birinde
+        `on_companion_up` cagirmayi unuturdu ve sahne yoldasin
+        kalktigini gormezdi.
+        """
+        # Kalkarken canin bir kismi geri geliyor - yoksa ayaga kalkip
+        # aninda tekrar diz cokerdi.
+        self.health = max(1, min(self.max_health, health))
+        on_up = getattr(self.scene, "on_companion_up", None)
+        if on_up:
+            on_up(self)
+
     def update(self) -> None:
         if self.down_frames > 0:
-            self.down_frames -= 1
+            # `self_recovers` False iken sayac **islemiyor**: yoldas
+            # yalnizca kaldirilinca kalkiyor (Bolum 16).
+            if self.self_recovers:
+                self.down_frames -= 1
+                if self.down_frames == 0:
+                    self._stand(self.max_health // 2)
             self.body.approach_vx(0.0, 0.4)
-            if self.down_frames == 0:
-                # Kalkarken canin bir kismi geri geliyor - yoksa ayaga
-                # kalkip aninda tekrar diz cokerdi.
-                self.health = max(1, self.max_health // 2)
-                on_up = getattr(self.scene, "on_companion_up", None)
-                if on_up:
-                    on_up(self)
             super().update()
             self._animate()
             return
@@ -267,17 +309,59 @@ class Companion(Actor):
         self.body.approach_vx(self.facing * COMPANION_SPEED, 0.25)
 
     # --- Saldiri ------------------------------------------------------------
-    def _begin_swing(self) -> None:
-        self.tell_frames = COMPANION_TELL_FRAMES
+    def assist(self) -> bool:
+        """Oyuncunun bitiricisine **katil** - beklemeyi atla.
+
+        `docs/yapi.md` B16: *"Asist kombolar zirvede."* Sahne bunu
+        oyuncunun bitirici vurusundan cagiriyor; yoldas o an
+        `COMPANION_ATTACK_COOLDOWN` beklemesini atliyor, kisa bir
+        tell'le savuruyor ve iki kat hasar veriyor.
+
+        **Yalnizca Bolum 16 cagiriyor.** Sinif her zaman yapabiliyor
+        ama B6-B15 sahnelerinden hicbiri cagirmiyor: bes bitmis
+        bolumun dovus hissini sessizce degistirmek dogru olmazdi
+        (`CLAUDE.md` 12: belgedeki sayilari sessizce degistirme).
+        Yeni bir mekanik geldigi bolumde geliyor.
+
+        Kosullar oynanistan: ayakta olmali, zaten savurmuyor olmali ve
+        menzilde bir hedefi olmali. Hedefsiz asist havayi keserdi.
+        """
+        if self.downed or self.tell_frames > 0:
+            return False
+        target = self._pick_target()
+        if target is None:
+            return False
+        delta = target.body.center_x - self.body.center_x
+        if abs(delta) > COMPANION_ATTACK_RANGE * 1.6:
+            return False
+        if abs(delta) > 2.0:
+            self.facing = 1 if delta > 0 else -1
+        self._assisting = True
+        self.attack_frames = 0
+        self._begin_swing(COMPANION_ASSIST_TELL)
+        return True
+
+    def _begin_swing(self, tell: int = COMPANION_TELL_FRAMES) -> None:
+        self.tell_frames = tell
         on_tell = getattr(self.scene, "on_companion_tell", None)
         if on_tell:
             on_tell(self)
 
     def _swing(self) -> None:
+        # Bayrak kancadan ONCE aliniyor ve `last_swing_assisted`da
+        # duruyor. Kanca imzasina ikinci bir parametre eklemek
+        # cazipti ama `on_companion_attack` dort bolumde zaten
+        # tanimli (B6, B7, B8, B9) ve hepsini tek bir bolumun
+        # ozelligi icin degistirmek gerekirdi - "her bolum bir satir
+        # eklemeli" bu projede bir hatanin sekli.
+        assisting = self._assisting
+        self._assisting = False
+        self.last_swing_assisted = assisting
         rect = melee_rect(self.body, self.facing, 16, 16)
         self.scene.hitboxes.spawn(Hitbox(
             rect=rect, owner=self, targets=Team.ENEMY,
-            damage=COMPANION_DAMAGE, active_frames=4, knockback=1.4,
+            damage=COMPANION_ASSIST_DAMAGE if assisting else COMPANION_DAMAGE,
+            active_frames=4, knockback=1.4,
         ))
         self.attack_frames = COMPANION_ATTACK_COOLDOWN
         on_swing = getattr(self.scene, "on_companion_attack", None)
@@ -287,7 +371,13 @@ class Companion(Actor):
     # --- Cizim --------------------------------------------------------------
     def _animate(self) -> None:
         if self.downed:
-            self.animator.play("hurt")
+            # **"death", "hurt" degil.** `_hurt` bir irkilme pozu -
+            # karakter ayakta kaliyor. Ekran goruntusunde diz cokmus
+            # yoldas dimdik duruyordu ve "yerde" oldugu hic
+            # okunmuyordu; Bolum 16'da butun mekanik bunu gormeye
+            # bagli. `_death` yigilma pozu (`animation.py`: "yere
+            # yigilma, govde basiklasir") - kurgu degil DURUS adi.
+            self.animator.play("death")
         elif self.tell_frames > 0:
             self.animator.play("attack1")
         elif abs(self.body.vx) > 0.08:

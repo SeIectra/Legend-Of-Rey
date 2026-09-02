@@ -396,7 +396,23 @@
     "ch15_rey_woke": "They heard me. But I got through.",
     "ch15_ardo_woke": "I made noise. They're still behind me.",
     "ch15_rey_woke_face": "Slower, next time.",
-    "ch15_ardo_woke_face": "Getting through isn't enough. It had to be quiet."
+    "ch15_ardo_woke_face": "Getting through isn't enough. It had to be quiet.",
+    "ch16_rey_many": "How many? I can't count them. Even the voices went quiet.",
+    "ch16_ardo_many": "Five at once. They won't come one at a time.",
+    "ch16_rey_corridor": "Long. But there are two of us now.",
+    "ch16_ardo_corridor": "Narrow and long. We both have to stay standing.",
+    "ch16_rey_back": "They're coming from both sides. I'm giving you my back.",
+    "ch16_ardo_back": "They've split in two. Put your back to mine.",
+    "ch16_rey_alone": "Wall behind me. Nobody's coming this time.",
+    "ch16_ardo_alone": "Cornered. My own fault.",
+    "ch16_rey_return_face": "You came. You didn't even ask.",
+    "ch16_ardo_return_face": "I left her behind. She didn't leave me.",
+    "ch16_rey_fell": "Down. This time they're not getting up alone.",
+    "ch16_ardo_fell": "She's down. I can't wait for her to rise.",
+    "ch16_rey_hold": "I'm reaching out. I won't let go until they take it.",
+    "ch16_ardo_hold": "Take her arm. Don't let go.",
+    "ch16_rey_stand": "It's over. We're both still standing.",
+    "ch16_ardo_stand": "All of them down. Not us."
   },
   "combat": {
     "counter": "COUNTER",
@@ -439,7 +455,8 @@
     "cemo": "Cemo",
     "letter": "The Letter",
     "source": "The Source of the Echo",
-    "silence": "Silence"
+    "silence": "Silence",
+    "backtoback": "Back to Back"
   },
   "chapter_end": {
     "heading": "CHAPTER COMPLETE",
@@ -625,7 +642,8 @@
     "lever": "[{key}] pull the lever — the gate is timed",
     "rig_brake": "[{key}] hold — the rig slows",
     "dialogue": "[{key}] continue",
-    "chime": "[{key}] resonance — ring a distant bell"
+    "chime": "[{key}] resonance — ring a distant bell",
+    "rescue": "Hold [{key}] — lift them up"
   },
   "chapter08": {
     "first_crystal": "Crystal shattered — sound is a weapon",
@@ -661,5 +679,8 @@
   "chapter15": {
     "walk": "Walk. They'll hear you if you run.",
     "ghost": "Nobody woke. Reward for silence."
+  },
+  "chapter16": {
+    "lifted": "You pulled them back up."
   }
 }

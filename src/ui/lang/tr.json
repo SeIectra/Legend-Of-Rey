@@ -396,7 +396,23 @@
     "ch15_rey_woke": "Duydular. Ama geçtim.",
     "ch15_ardo_woke": "Gürültü yaptım. Yine de arkamda kaldılar.",
     "ch15_rey_woke_face": "Bir dahakine daha yavaş.",
-    "ch15_ardo_woke_face": "Geçmek yetmez. Sessiz geçmek gerekiyormuş."
+    "ch15_ardo_woke_face": "Geçmek yetmez. Sessiz geçmek gerekiyormuş.",
+    "ch16_rey_many": "Kaç tane? Sayamıyorum. Sesler bile sustu.",
+    "ch16_ardo_many": "Beşi birden. Sırayla gelmeyecekler.",
+    "ch16_rey_corridor": "Uzun. Ama artık iki kişiyiz.",
+    "ch16_ardo_corridor": "Dar ve uzun. İkimiz de ayakta kalmalıyız.",
+    "ch16_rey_back": "İki yandan geliyorlar. Sırtımı sana veriyorum.",
+    "ch16_ardo_back": "İkiye bölündüler. Sırtını bana ver.",
+    "ch16_rey_alone": "Arkam duvar. Bu sefer kimse gelmeyecek.",
+    "ch16_ardo_alone": "Sıkıştım. Kendi hatam.",
+    "ch16_rey_return_face": "Geldin. Sormadan geldin.",
+    "ch16_ardo_return_face": "Onu geride bırakmıştım. O beni bırakmamış.",
+    "ch16_rey_fell": "Düştü. Bu sefer kendi kalkmıyor.",
+    "ch16_ardo_fell": "Yere indi. Kalkmasını bekleyemem.",
+    "ch16_rey_hold": "Elimi uzatıyorum. Tutana kadar bırakmayacağım.",
+    "ch16_ardo_hold": "Kolundan tut. Bırakma.",
+    "ch16_rey_stand": "Bitti. İkimiz de ayaktayız.",
+    "ch16_ardo_stand": "Hepsi yerde. İkimiz değiliz."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",
@@ -439,7 +455,8 @@
     "cemo": "Cemo",
     "letter": "Mektup",
     "source": "Yankı'nın Kaynağı",
-    "silence": "Sessizlik"
+    "silence": "Sessizlik",
+    "backtoback": "Sırt Sırta"
   },
   "chapter_end": {
     "heading": "BÖLÜM TAMAMLANDI",
@@ -625,7 +642,8 @@
     "lever": "[{key}] kolu çevir — kapı süreli açılır",
     "rig_brake": "[{key}] basılı tut — kafes yavaşlar",
     "dialogue": "[{key}] devam",
-    "chime": "[{key}] rezonans — uzaktaki çanı çal"
+    "chime": "[{key}] rezonans — uzaktaki çanı çal",
+    "rescue": "[{key}] basılı tut — onu kaldır"
   },
   "chapter08": {
     "first_crystal": "Kristal kırıldı — ses bir silah",
@@ -661,5 +679,8 @@
   "chapter15": {
     "walk": "Yürü. Koşarsan duyarlar.",
     "ghost": "Hiçbiri uyanmadı. Sessizlik ödülü."
+  },
+  "chapter16": {
+    "lifted": "Onu ayağa kaldırdın."
   }
 }
