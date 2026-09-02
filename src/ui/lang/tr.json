@@ -380,7 +380,9 @@
     "ch14_echo_again": "O bendim. Ama ben o değilim.",
     "ch14_trace_again": "İzler hâlâ aşağı gidiyor. Yendiğim şey duruyordu.",
     "ch14_rey_decide": "Öyleyse seni dinlemeyi bırakıyorum.",
-    "ch14_ardo_decide": "Öyleyse artık bakmayacağım. Kendim bulurum."
+    "ch14_ardo_decide": "Öyleyse artık bakmayacağım. Kendim bulurum.",
+    "ch09_echo_locked": "Kapı üç çan bekliyor. Hiçbiri çalmadı — aşağı in.",
+    "ch09_trace_locked": "Kapıda üç yuva var, üçü de boş. Çanlar aşağıda kaldı."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",

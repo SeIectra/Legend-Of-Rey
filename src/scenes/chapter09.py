@@ -111,6 +111,7 @@ class Chapter09Scene(PlayScene):
         self.finished = False
         self.trust_played = False
         self.wrong_hinted = False
+        self.top_hinted = False
 
         self._enter_floor(self._floor_at(self.player.body.feet[1]))
 
@@ -156,6 +157,7 @@ class Chapter09Scene(PlayScene):
         self._update_resonance()
         self._update_bells()
         self._update_chests()
+        self._update_top_hint()
         self._check_exit()
 
         if self.companion is not None:
@@ -225,6 +227,44 @@ class Chapter09Scene(PlayScene):
                                     self.player.body.center_y):
                 rey = self.character != "ardo"
                 self.game.play_sound("echo_open" if rey else "swing_light")
+
+    def _voice(self, echo_key: str, ardo_key: str):
+        """Rey'de Yanki, Ardo'da kendi okumasi.
+
+        Anahtarlar **duz dize** - f-string ile kurulani
+        `tests/test_lang.py` goremiyor.
+        """
+        from src.ui.dialogue import Line
+        if self.character == "ardo":
+            return Line("ardo", ardo_key)
+        return Line("echo", echo_key)
+
+    def _update_top_hint(self) -> None:
+        """Tepeye cozmeden cikan oyuncuya **bir kez** ne eksik oldugunu soyle.
+
+        Arda, canli oynanis (31.08.2026): *"9. bolumde en uste ciktiktan
+        sonra bisey yapamiyoruz."*
+
+        Hakliydi ve sebebi tasarimdaydi: canlar 1., 2. ve 3. katta,
+        cikis kapisi 4.'te, siranin ipucu ise **taban katta** (fresk).
+        Yani oyuncu yukari tirmanip kapali bir kapiyla karsilasiyor ve
+        elinde hicbir bilgi olmuyor - geri inmesi gerektigini bile
+        bilmiyor.
+
+        Yumusak kilit **degildi** (asagi dusmek serbest), ama bilgi
+        kilidiydi ve oyuncu icin farki yok.
+
+        Ses Yanki'nin (Ardo'da kendi okumasinin) - oyunun kurulu ipucu
+        kanali bu, ayri bir arayuz ogesi eklemek gerekmedi. Bir kez:
+        her tepeye ciktiginda tekrarlanan bir replik ogut olur.
+        """
+        if self.solved or self.top_hinted:
+            return
+        if self.floor != FLOOR_NAMES[-1]:
+            return
+        self.top_hinted = True
+        self.say(self._voice("line.ch09_echo_locked",
+                             "line.ch09_trace_locked"))
 
     def _update_bells(self) -> None:
         for bell in self.bells:
@@ -391,10 +431,25 @@ class Chapter09Scene(PlayScene):
         breath = 0.6 + 0.4 * math.sin(self.frames * 0.05)
         colour = tuple(int(c * breath) for c in palette.color("gold"))
         cy = top + height // 2
+
+        # Uc yuva: kac can calindi.
+        #
+        # Arda, canli oynanis (31.08.2026): *"9. bolumde en uste
+        # ciktiktan sonra bisey yapamiyoruz."* Bilgi zaten buradaydi
+        # ama **gorunmuyordu**: yanmamis yuvalar `stone_darkest` ile
+        # `stone_dark` kapinin uzerine ciziliyordu - iki komsu ton,
+        # 6x3 piksel. Oyuncu kapiya bakiyor ve duz bir tas goruyor.
+        #
+        # Artik her yuvanin oyulmus bir cercevesi var: **bos da olsa
+        # yuva oldugu belli.** Uc bos yuva "burada bir sey eksik"
+        # diyor; hicbir sey gorunmemesi "burasi duvar" diyor.
         for index, _ in enumerate(BELL_ORDER):
             lit = index < len(self.rung)
-            surface.fill(colour if lit else palette.color("stone_darkest"),
-                         (x + 5, cy - 6 + index * 5, 6, 3))
+            slot_y = cy - 7 + index * 5
+            surface.fill(palette.color("stone_darkest"),
+                         (x + 4, slot_y - 1, 8, 5))
+            surface.fill(colour if lit else palette.color("stone"),
+                         (x + 5, slot_y, 6, 3))
 
     def _draw_pulse(self, surface: pygame.Surface, offset) -> None:
         if not self.resonance.active:

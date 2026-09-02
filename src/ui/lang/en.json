@@ -380,7 +380,9 @@
     "ch14_echo_again": "That was me. But I am not that.",
     "ch14_trace_again": "The tracks still go down. What I beat was standing still.",
     "ch14_rey_decide": "Then I stop listening to you.",
-    "ch14_ardo_decide": "Then I stop looking. I'll find it myself."
+    "ch14_ardo_decide": "Then I stop looking. I'll find it myself.",
+    "ch09_echo_locked": "The door is waiting for three bells. None have rung — go back down.",
+    "ch09_trace_locked": "Three sockets in the door, all empty. The bells are below."
   },
   "combat": {
     "counter": "COUNTER",

@@ -70,6 +70,11 @@ class Chapter11Scene(PlayScene):
 
     chapter_number = 11
     chapter_name_key = "chapter.mirror_hall"
+    # **Kesif muzigi burada.** `docs/ekonomi-uretim.md` bu bolumu
+    # "bulmaca agirlikli" diye etiketliyor - dovus seyrek, yani
+    # muzigin degismesi nadir ve anlamli oluyor. Oteki bolumlerde
+    # varsayilan "combat" (gerekce `PlayScene.music_context`).
+    music_context = "explore"
     postfx_grade = "descent"
     ambience_preset = "dust"
 

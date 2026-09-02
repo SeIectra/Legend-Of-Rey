@@ -59,8 +59,6 @@ SHOCK_LOCK_FRAMES = 46   # Rey yerden kalkana kadar
 # Yoksa bir sonraki beat'in `_on_beat_start()`'i kuyrugu **aninda** degistirir
 # ve okunmamis bir replik (orn. "gift" beatindeki Rey'in tesekkuru) sessizce
 # kaybolur - Arda'nin "bunlar cok anlamsiz cumleler" geri bildiriminin
-# kaynagi buydu. Azami: sonsuza dek beklemez, sahne kilitlenmez.
-DIALOGUE_GRACE_FRAMES = 100
 
 # --- Kolyenin verilisi ------------------------------------------------------
 # Kolye bir donem hic EL DEGISTIRMIYORDU: Cemo'nun basinda bir ikon
@@ -270,12 +268,24 @@ class Chapter01Scene(PlayScene):
         length = PROLOGUE[self.beat_index][0]
         if self.beat_frames < length:
             return
-        # Sure doldu ama repligi (varsa) henuz bitmediyse DIALOGUE_GRACE_
-        # FRAMES kadar daha bekle - `self.dialogue.done` cok-replikli bir
-        # beat'te ikinci satirin da (onaylanarak ya da kendiliginden)
-        # gosterilmis olmasini garanti eder.
-        if (not self.dialogue.done
-                and self.beat_frames < length + DIALOGUE_GRACE_FRAMES):
+        # **Sure dolsa bile replik duruyorsa BEKLE - sinirsiz.**
+        #
+        # Arda, canli oynanis (31.08.2026): *"ilk sahnede koyde Rey ile
+        # Cemo konusurken cok hizli geciyor, kullanici basana kadar
+        # yazilar gecmesin."*
+        #
+        # Eskiden replikler `auto_advance=True` ile aciliyordu (50
+        # karede kendiliginden ilerliyor) ve buradaki bekleme
+        # `DIALOGUE_GRACE_FRAMES` ile 100 kareyle sinirliydi. Yani
+        # oyuncu okumaya baslamadan iki satir birden gecebiliyordu.
+        #
+        # Artik ok yon: **zamanlayici replige tabi**, replik
+        # zamanlayiciya degil. Yumusak kilit riski yok - onay tusu her
+        # zaman ilerletiyor (`Action.CONFIRM`: Enter, Bosluk, E).
+        #
+        # Repliksiz beat'ler ("taken", "chase" - Cemo'nun cekildigi
+        # sessiz an) etkilenmiyor: orada `dialogue.done` zaten True.
+        if not self.dialogue.done:
             return
         self.beat_index += 1
         self.beat_frames = 0
@@ -285,11 +295,9 @@ class Chapter01Scene(PlayScene):
         # Replikler jestin **yerine** degil yanina geliyor. Cemo'nun yariga
         # cekildigi an ("chase") hala kelimesiz - orada bir replik ani
         # ucuzlatirdi.
-        # `auto_advance=True`: bu repliklerin hepsi `_advance_prologue()`'un
-        # beat-zamanlayicisiyla yarisiyor (bkz. DIALOGUE_GRACE_FRAMES) -
-        # oyuncu onaylamasa bile dizinin tamami gosterilmeli. Asagidaki
-        # `sword`/`wall` replikleri (etkilesimle tetiklenir, zamanlayici
-        # yok) bilerek varsayilanda kaliyor.
+        # Replikler **oyuncu onaylayana kadar duruyor**: beat
+        # zamanlayicisi onlari bekliyor (`_advance_prologue`). Bir
+        # donem tersiydi ve prolog cok hizli akiyordu.
         # **Yanki Rey'in laneti** (docs/gdd.md 4) - Ardo onu DUYMAZ.
         # Olculdu (24.08.2026): prolog replikleri karakterden bagimsiz
         # oynuyordu, yani Ardo da mor sesi duyuyordu; ona yol gostermeyi
@@ -298,7 +306,7 @@ class Chapter01Scene(PlayScene):
         # Rey'in kafasinda bir rehber var, Ardo'nun yok.
         if self.beat == "wake" and self.has_echo:
             # Sesin ilk kelimesi. Tek kelime - Rey uyanirken.
-            self.say(Line("echo", "line.ch01_echo_first"), auto_advance=True)
+            self.say(Line("echo", "line.ch01_echo_first"))
         elif self.beat == "gift":
             # **Raze.mp3** - Arda: "cok nadir duygusal kisimlar icin Raze".
             # Oyunun butun hikayesi bu kolyeye asili ve bu, Cemo'yu diri
@@ -310,19 +318,16 @@ class Chapter01Scene(PlayScene):
             # Tesekkur OYNANAN karaktere ait. Sabit "rey" yaziliydi ve
             # Ardo oynarken replik "REY" etiketiyle cikiyordu.
             self.say(Line("cemo", "line.ch01_cemo_gift"),
-                     Line(self.character, self._thanks_key()),
-                     auto_advance=True)
+                     Line(self.character, self._thanks_key()))
         elif self.beat == "alone":
             if self.has_echo:
-                self.say(Line("echo", "line.ch01_echo_alone"),
-                         auto_advance=True)
+                self.say(Line("echo", "line.ch01_echo_alone"))
             else:
                 # Ardo'nun kendi gerekcesi. `docs/yapi.md` onu "egitimli
                 # yabanci" diye tanitiyor - asagida ne oldugunu BILIYOR,
                 # inme sebebi bu. Bu satir DEVIR'de acik duran "Ardo'nun
                 # motivasyonu hic yazilmadi" maddesini kapatiyor.
-                self.say(Line("ardo", "line.ch01_ardo_alone"),
-                         auto_advance=True)
+                self.say(Line("ardo", "line.ch01_ardo_alone"))
 
         if self.beat == "taken":
             # Yer sarsilir. Radyal - yarilmanin yonu yok.
@@ -341,9 +346,9 @@ class Chapter01Scene(PlayScene):
             # Ses ilk kez burada duyuluyor: yarik acilirken. Iki kelime.
             # Ardo'da ses yok - onun yerine kendi tanimasi geliyor.
             if self.has_echo:
-                self.say(Line("echo", "line.ch01_echo_rift"), auto_advance=True)
+                self.say(Line("echo", "line.ch01_echo_rift"))
             else:
-                self.say(Line("ardo", "line.ch01_ardo_rift"), auto_advance=True)
+                self.say(Line("ardo", "line.ch01_ardo_rift"))
         elif self.beat == "alone":
             # `self.necklace` burada DEGIL, kolye ucusu varinca ayarlaniyor
             # (bkz. _update_gift). Eskiden burada sessizce True oluyordu ve

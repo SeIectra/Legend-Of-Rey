@@ -67,6 +67,11 @@ class Chapter05Scene(PlayScene):
 
     chapter_number = 5
     chapter_name_key = "chapter.waters"
+    # **Kesif muzigi burada.** `docs/ekonomi-uretim.md` bu bolumu
+    # "bulmaca agirlikli" diye etiketliyor - dovus seyrek, yani
+    # muzigin degismesi nadir ve anlamli oluyor. Oteki bolumlerde
+    # varsayilan "combat" (gerekce `PlayScene.music_context`).
+    music_context = "explore"
     postfx_grade = "descent"
     ambience_preset = "dust"
 

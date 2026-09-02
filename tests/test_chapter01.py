@@ -71,6 +71,28 @@ def make_scene(game: Game, character: str) -> Chapter01Scene:
     return scene
 
 
+def confirm(game: Game, step: int, scene) -> None:
+    """Okuyan bir oyuncuyu taklit eder - yazi bitince onaylar.
+
+    31.08.2026'dan beri prolog replikleri oyuncuyu **bekliyor**
+    (Arda: *"kullanici basana kadar yazilar gecmesin"*). Yani prologun
+    icini test eden her dongu artik onaylamak zorunda; pasif bir
+    dongu ilk replikte duruyor.
+
+    KEYDOWN **ve** KEYUP birlikte gonderiliyor: `_activate` tus zaten
+    basiliysa yeni bir "press" saymiyor (dogru davranis - klavye
+    tekrari combo'yu bozardi), yani birakmadan ikinci kez basilamiyor.
+    """
+    if not (scene.dialogue.active and scene.dialogue.complete):
+        return
+    if step % 24:
+        return
+    game.input.handle_event(
+        pygame.event.Event(pygame.KEYDOWN, key=pygame.K_RETURN))
+    game.input.handle_event(
+        pygame.event.Event(pygame.KEYUP, key=pygame.K_RETURN))
+
+
 def idle(game: Game, scene, frames: int) -> None:
     for _ in range(frames):
         game.input.begin_frame()
@@ -125,22 +147,47 @@ def main() -> int:
     check(rey2.sword_pos is not None,
           "Rey icin yerde kilic prop'u duruyor (bulunacak)")
 
-    # --- Prolog: pasif oyuncu (hic onaylamiyor) hicbir repligi kaybetmez ----
-    # Arda'nin bildirdigi "bunlar cok anlamsiz cumleler" hatasi: cok-replikli
-    # bir beat'te ("gift": Cemo + Rey) ikinci satir onayla gecilmedigi surece
-    # bir sonraki beat baslayinca `self.say(...)` kuyrugu **sessizce**
-    # degistiriyordu - ilk oturumdaki bir oyuncunun "onayla" tusunu bilmesi
-    # beklenemez, o yuzden Rey'in tesekkuru hicbir zaman ekrana gelmiyordu.
-    # Bu test hic girdi vermeden butun prologu oynatir ve 5 repligin de
-    # (atlanmadan) en az bir kere gorundugunu dogrular.
-    print("\n--- prolog: pasif oyuncu replik kaybetmiyor ---")
+    # --- Prolog: replikler OYUNCUYU BEKLIYOR --------------------------------
+    # Arda, canli oynanis (31.08.2026): *"ilk sahnede koyde Rey ile Cemo
+    # konusurken cok hizli geciyor, kullanici basana kadar yazilar
+    # gecmesin."*
+    #
+    # Bu bolumun garantisi 31.08.2026'da **degisti**. Eskiden replikler
+    # `auto_advance=True` ile aciliyordu ve test "pasif oyuncu hicbir
+    # repligi kaybetmesin" diye yaziliydi. Artik beat zamanlayicisi
+    # replige tabi: pasif oyuncu **ilerlemiyor**, ve bu bir hata degil
+    # istenen davranis.
+    #
+    # Iki sey birden korunmali:
+    #   1. Onaylamayan oyuncu ilk repligin uzerinde DURUYOR.
+    #   2. Onaylayan oyuncu bes repligin hepsini SIRAYLA goruyor -
+    #      hicbiri bir sonraki beat tarafindan sessizce ezilmiyor
+    #      (Arda'nin "bunlar cok anlamsiz cumleler" hatasi buydu).
+    print("\n--- prolog: replikler oyuncuyu bekliyor ---")
+    game.scenes.set_root(Chapter01Scene, transition=False, character="rey")
+    game.scenes._flush()
+    idle_scene = game.scenes.current
+    for _ in range(sum(frames for frames, _ in PROLOGUE) + 300):
+        game.input.begin_frame()
+        game.input.end_frame()
+        idle_scene.update()
+    current = idle_scene.dialogue.current
+    check(current is not None and current.key == "line.ch01_echo_first",
+          "onaylamayan oyuncu ILK replikte duruyor",
+          current.key if current else "replik yok")
+    check(idle_scene.beat_index <= 1,
+          "prolog ilerlemedi - beat zamanlayicisi replige tabi",
+          f"beat {idle_scene.beat_index}")
+
+    print("\n--- prolog: onaylayan oyuncu hepsini goruyor ---")
     game.scenes.set_root(Chapter01Scene, transition=False, character="rey")
     game.scenes._flush()
     prolog_scene = game.scenes.current
     seen_keys: list[str] = []
     last_key = None
-    for _ in range(sum(frames for frames, _ in PROLOGUE) + 60):
+    for step in range(sum(frames for frames, _ in PROLOGUE) + 900):
         game.input.begin_frame()
+        confirm(game, step, prolog_scene)
         game.input.end_frame()
         prolog_scene.update()
         cur = prolog_scene.dialogue.current
@@ -152,7 +199,7 @@ def main() -> int:
                          "line.ch01_rey_thanks", "line.ch01_echo_rift",
                          "line.ch01_echo_alone"):
         check(expected_key in seen_keys,
-              f"pasif oyuncu da '{expected_key}' repligini goruyor",
+              f"onaylayan oyuncu '{expected_key}' repligini goruyor",
               ", ".join(seen_keys))
 
     # --- Kolye gercekten EL DEGISTIRIYOR ------------------------------------
@@ -173,8 +220,9 @@ def main() -> int:
     saw_flight = False
     flight_positions: list[tuple[float, float]] = []
     got_at = None
-    for frame in range(sum(f for f, _ in PROLOGUE) + 60):
+    for frame in range(sum(f for f, _ in PROLOGUE) + 900):
         game.input.begin_frame()
+        confirm(game, frame, gift)
         game.input.end_frame()
         gift.update()
         if gift.gift_flying:
@@ -225,8 +273,10 @@ def main() -> int:
           "hepsi hala gezinme durumunda")
 
     # Prologun geri kalanini oynat: yarik acilir, koyluler kacar.
-    for _ in range(sum(f for f, _ in PROLOGUE) + 240):
-        game.input.begin_frame(); game.input.end_frame()
+    for frame in range(sum(f for f, _ in PROLOGUE) + 900):
+        game.input.begin_frame()
+        confirm(game, frame, village)
+        game.input.end_frame()
         village.update()
     check(village.villagers_fled, "yarik acilinca kacis tetiklendi")
     check(not village.villagers,
@@ -247,8 +297,10 @@ def main() -> int:
         game.scenes._flush()
         scene = game.scenes.current
         seen, last = [], None
-        for _ in range(sum(f for f, _ in PROLOGUE) + 80):
-            game.input.begin_frame(); game.input.end_frame()
+        for frame in range(sum(f for f, _ in PROLOGUE) + 900):
+            game.input.begin_frame()
+            confirm(game, frame, scene)
+            game.input.end_frame()
             scene.update()
             cur = scene.dialogue.current
             key = (cur.speaker, cur.key) if cur else None

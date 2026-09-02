@@ -436,9 +436,31 @@ class PlayScene(Scene):
 
     # Dovus muzigi son uyanik dusmandan sonra bu kadar kare daha calar.
     _combat_frames: int = 0
-    # Dovus yokken calacak parca. Bos = "explore" (Fade). Alt sinif
-    # ezerek kendi havasini secebiliyor - Bolum 4 "sad" (Loki) veriyor.
-    music_context: str = ""
+    # Dovus yokken calacak parca. Alt sinif ezerek kendi havasini
+    # seciyor.
+    #
+    # ## Varsayilan neden "combat"
+    #
+    # Arda, canli oynanis (31.08.2026): *"combat ve kesif icin
+    # kullandigimiz sarkilar farkli oldugundan muzik hizli degisiyor.
+    # Arka planda sadece combat icin olan muzik kalsin."*
+    #
+    # Sebep yapisaldi: varsayilan "explore" idi ve bir dusman
+    # uyandiginda "combat"a geciliyordu. Zindanda dusmanlar surekli
+    # uyanip uyudugu icin parca dakikada birkac kez takas ediyordu -
+    # ve iki parca birbirinden cok farkli oldugu icin her takas
+    # duyuluyordu.
+    #
+    # Artik ikisi de "combat": `_update_music` dovuste de dovus
+    # disinda da ayni baglami hesapliyor, `MusicDirector.play` ayni
+    # baglamda **hicbir sey yapmiyor**, yani takas yok.
+    #
+    # Kesif parcasi (Fade) atilmadi - **saklandi**. Bulmaca agirlikli
+    # bolumlerde (`docs/ekonomi-uretim.md` boyle etiketliyor: B5, B11
+    # ve sirasi gelince B17) `music_context = "explore"` veriliyor.
+    # Orada dovus seyrek oldugu icin gecis nadir ve **anlamli**:
+    # muzigin degismesi bir sey oldugunu soyluyor.
+    music_context: str = "combat"
 
     def _update_music(self) -> None:
         """Sahnenin durumundan muzik baglamini turetir.
@@ -463,9 +485,10 @@ class PlayScene(Scene):
             if self._combat_frames > 0:
                 context = "combat"
             else:
-                # Sahne kendi sakin baglamini bildirebiliyor: Bolum 4
-                # (olu maceracinin kampi) "sad", digerleri "explore".
-                context = self.music_context or "explore"
+                # Sahne kendi sakin baglamini bildiriyor. Varsayilan
+                # "combat" (gerekce `music_context`te); Bolum 4 "sad",
+                # bulmaca bolumleri "explore".
+                context = self.music_context or "combat"
 
         from src.audio.music import COMBAT_FADE_IN_MS
         fade = COMBAT_FADE_IN_MS if context != "explore" else None
