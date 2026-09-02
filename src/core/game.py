@@ -52,6 +52,53 @@ def viewport_for(width: int, height: int) -> tuple[int, pygame.Rect]:
                               view_w, view_h)
 
 
+def window_origin(size: tuple[int, int],
+                  fullscreen: bool) -> tuple[int, int]:
+    """Pencerenin masaustundeki sol ust kosesi.
+
+    `set_mode` var olan bir pencereyi **tasimiyor** - yalnizca yeniden
+    boyutlandiriyor. Konum ayrica verilmezse pencere nerede idiyse
+    orada kaliyor, ve tam ekranda bu su hataya yol aciyordu:
+
+        pencere (2560, 1440) ama konum (560, 315)
+        -> solda 560, ustte 315 piksel masaustu goruluyor
+        -> sag alt kose ekran disinda kaliyor
+
+    **Tam ekran BIRINCIL ekranda aciliyor.** Windows'ta sanal masaustu
+    koordinatlarinda birincil ekranin sol ust kosesi daima (0, 0), ve
+    `desktop_size()` zaten birincil ekranin boyutunu donuyor - ikisi
+    ayni ekrani anlatmali, yoksa yanlis olculerde bir pencere kurulur.
+    (pygame-ce 2.5.8 pencerenin HANGI ekranda oldugunu sormanin bir
+    yolunu vermiyor: `get_desktop_sizes` yalnizca boyut doner ve
+    `set_mode(display=...)` bu SDL/Windows bileskesinde pencereyi
+    tasimiyor - olculdu.)
+
+    Pencereli kipte **ortalaniyor**: tam ekrandan cikinca pencere
+    (0, 0)'da kalirdi, yani sol ust koseye yapisik.
+    """
+    if fullscreen:
+        return (0, 0)
+    screen_w, screen_h = desktop_size()
+    return (max(0, (screen_w - size[0]) // 2),
+            max(0, (screen_h - size[1]) // 2))
+
+
+def place_window(size: tuple[int, int], fullscreen: bool) -> None:
+    """Pencereyi `window_origin`'in soyledigi yere koyar.
+
+    Konum hesabi ayri tutuldu ki pencere acmadan dogrulanabilsin
+    (`tests/test_window.py`); tasima isi burada.
+    """
+    move = getattr(pygame.display, "set_window_position", None)
+    if move is None:            # cok eski pygame - konum ayarlanamaz
+        return
+    try:
+        # Tek **dizi** aliyor, iki ayri sayi degil.
+        move(window_origin(size, fullscreen))
+    except pygame.error:
+        pass
+
+
 def desktop_size() -> tuple[int, int]:
     """Gercek masaustu cozunurlugu.
 
@@ -216,7 +263,16 @@ class Game:
 
         Bunun yerine olcegi kendimiz hesapliyoruz (`_recompute_viewport`):
         daima tam sayi kat, ortalanmis, artan yer siyah bant. 480x270 icin
-        1920x1080 tam 4x - bu makinede tam ekran hic bant birakmiyor.
+        1920x1080 tam 4x; 2560x1440'ta en buyuk tam kat 5 ve kenarlarda
+        80/45 piksel bant kaliyor - bant birakmak gerdirmekten iyi.
+
+        **Pencere konumu da burada kuruluyor** ve bu sonradan eklendi:
+        `set_mode` var olan bir pencereyi TASIMIYOR, yalnizca yeniden
+        boyutlandiriyor. Tam ekrana gecince 2560x1440'lik kenarliksiz
+        pencere eski konumunda (ornegin 560, 315) kaliyordu - solda ve
+        ustte masaustu goruluyor, sag alt kose ekran disina tasiyordu.
+        Arda 02.09.2026: *"tam ekran pencereli ekran ayari duzgun
+        calismiyor."*
         """
         fullscreen = bool(self.settings.get("fullscreen", False))
         if fullscreen:
@@ -267,6 +323,7 @@ class Game:
             self.screen = pygame.display.set_mode(size, flags)
 
         pygame.display.set_caption(WINDOW_TITLE)
+        place_window(size, fullscreen)
 
         # **Onbellekleri at.** Uretilen her yuzey `convert()` gormus ve
         # donusum O ANKI ekranin piksel bicimine gore yapilmis; ekran

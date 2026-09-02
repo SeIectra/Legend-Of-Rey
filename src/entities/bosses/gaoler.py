@@ -244,7 +244,7 @@ class Gaoler(Boss):
         if move == "call" and self.called >= GAOLER_CALL_LIMIT:
             move = "slam"
         elif move == "snuff" and self._nearest_lit() is None:
-            # Sonduruleсek mangal yoksa - zaten karanlik, saldirsin.
+            # Sondurulecek mangal yoksa - zaten karanlik, saldirsin.
             move = "chain"
         return move
 

@@ -120,7 +120,7 @@ class Echoing(Shambler):
         ayirt eder ve yalan hicbir sey ifade etmezdi.
 
         Ayirt etmenin tek yolu **kaynagi**: bu parilti bir duvarda
-        degil bosluktа duruyor, ve yakininda bir Yankilayan var.
+        degil boslukta duruyor, ve yakininda bir Yankilayan var.
         """
         if self.false_hint is None:
             return

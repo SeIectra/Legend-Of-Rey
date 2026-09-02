@@ -396,7 +396,7 @@ ARDO_AXE_SPEC = replace(ARDO_SPEC, name="ardo_axe", weapon="axe")
 #
 #   Suruklenen  uzun sarkan kollar, one egik - "surukleniyor"
 #   Tirmanan    kucuk govde, upuzun ince uzuvlar, genis omuz - boceksi
-#   Sismek      kocaman yuvarlak govde, minik kafa, gudук uzuvlar - balon
+#   Sismek      kocaman yuvarlak govde, minik kafa, guduk uzuvlar - balon
 
 # Suruklenen - combo hedef tahtasi. Yavas, tek saldiri.
 # ============================================================================
@@ -470,7 +470,7 @@ CLIMBER_SPEC = CharSpec(
 BLOATED_SPEC = CharSpec(
     name="bloated",
     cell_width=44, cell_height=40, foot_y=34,
-    # Govde genis ve yuvarlak, uzuvlar gudук: balon gibi okunsun.
+    # Govde genis ve yuvarlak, uzuvlar guduk: balon gibi okunsun.
     # 11 genislik denendi - yaratik degil kutu gibi gorunuyordu ve minik
     # kafa tamamen kayboluyordu.
     head_radius=2.8, torso_height=8.0, torso_width=12.0,

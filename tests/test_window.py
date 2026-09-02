@@ -30,7 +30,9 @@ sys.path.insert(0, str(ROOT))
 import pygame  # noqa: E402
 
 from src.config import INTERNAL_HEIGHT, INTERNAL_WIDTH  # noqa: E402
-from src.core.game import MIN_SCALE, viewport_for  # noqa: E402
+from src.core.game import (  # noqa: E402
+    MIN_SCALE, viewport_for, window_origin,
+)
 
 failures: list[str] = []
 
@@ -53,6 +55,67 @@ SCREENS: tuple[tuple[int, int, str], ...] = (
     (800, 600, "kucuk"),
     (400, 200, "ic cozunurlukten kucuk"),
 )
+
+
+def test_window_is_placed() -> None:
+    """Pencere **konumu** da hesaplaniyor - `set_mode` tasimiyor.
+
+    Arda 02.09.2026: *"tam ekran pencereli ekran ayari duzgun
+    calismiyor."* Sebep: `set_mode` var olan bir pencereyi yalnizca
+    yeniden boyutlandiriyor, tasimiyor. Tam ekrana gecince
+    2560x1440'lik kenarliksiz pencere eski konumunda (560, 315)
+    kaliyordu:
+
+        solda 560, ustte 315 piksel masaustu goruluyor
+        sag alt kose ekran DISINDA kaliyor
+
+    Olculdu ve duzeltildi. Bu kontrol tekrar bozulmasin diye.
+    """
+    print("\n--- pencere konumu ---")
+    for width, height, note in SCREENS:
+        scale, rect = viewport_for(width, height)
+
+        # Tam ekran: pencere ekranin sol ust kosesinde.
+        origin = window_origin((width, height), fullscreen=True)
+        check(origin == (0, 0),
+              f"{note}: tam ekran ekranin BASINDA", str(origin))
+
+        # Ve goruntu ekranin tam ortasinda kaliyor.
+        left = origin[0] + rect.x
+        top = origin[1] + rect.y
+        # **Ic cozunurlukten kucuk ekran haric.** Orada `MIN_SCALE = 1`
+        # en az bir kat zorluyor ve 480x270'lik goruntu ekrani tasiyor -
+        # bu bilincli bir denge (hic cizmemektense kirpmak) ve bu
+        # duzeltmeden once de boyleydi. 480x270'ten kucuk bir masaustu
+        # pratikte yok.
+        if width >= INTERNAL_WIDTH and height >= INTERNAL_HEIGHT:
+            check(left >= 0 and top >= 0
+                  and left + rect.width <= width
+                  and top + rect.height <= height,
+                  f"{note}: goruntu ekran ICINDE",
+                  f"({left},{top}) {rect.width}x{rect.height}")
+        check(left * 2 + rect.width == width
+              and top * 2 + rect.height == height,
+              f"{note}: goruntu ORTALANMIS")
+
+
+def test_windowed_is_centred() -> None:
+    """Pencereli kip ortalaniyor - tam ekrandan cikinca (0,0)'da kalmasin."""
+    print("\n--- pencereli kip ortalaniyor ---")
+    from src.core.game import desktop_size
+    screen_w, screen_h = desktop_size()
+    for scale in (2, 3, 4):
+        size = (INTERNAL_WIDTH * scale, INTERNAL_HEIGHT * scale)
+        if size[0] > screen_w or size[1] > screen_h:
+            continue
+        origin = window_origin(size, fullscreen=False)
+        check(origin[0] * 2 + size[0] in (screen_w, screen_w - 1),
+              f"{scale}x pencere yatayda ortali", str(origin))
+        check(origin[1] * 2 + size[1] in (screen_h, screen_h - 1),
+              f"{scale}x pencere dikeyde ortali", str(origin))
+    big = (INTERNAL_WIDTH * 99, INTERNAL_HEIGHT * 99)
+    check(window_origin(big, fullscreen=False) == (0, 0),
+          "ekrandan buyuk pencere negatif konuma KACMIYOR")
 
 
 def main() -> int:
@@ -110,6 +173,9 @@ def main() -> int:
             if isinstance(node, ast.Attribute) and node.attr == "SCALED"]
     check(not used, "game.py pygame.SCALED kullanmiyor",
           "satir " + ", ".join(str(n) for n in used[:3]))
+
+    test_window_is_placed()
+    test_windowed_is_centred()
 
     print("\n=== SONUC ===")
     if failures:

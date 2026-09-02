@@ -119,7 +119,7 @@ def put_down(scene, companion) -> None:
     # Sahnenin kendi dongusu - `Body`nin ayri bir `update`i yok ve
     # elle fizik cagirmak sahnenin yaptigindan sapardi. Burada
     # dusman yok (yalnizca ilk oda kurulu) ve en yakin tetikleyici
-    # on tile oteде, yani tarama gurultusuz.
+    # on tile otede, yani tarama gurultusuz.
     for _ in range(6):
         scene.update()
     companion.die()
@@ -470,7 +470,7 @@ def test_heart_appears_for_every_gesture() -> None:
                                  character="rey")
             game.scenes._flush()
             scene = game.scenes.current
-            # Secim panelinе kadar sur, sonra bu jesti sec.
+            # Secim paneline kadar sur, sonra bu jesti sec.
             for _ in range(300):
                 game.input.begin_frame(); game.input.end_frame()
                 game.scenes.update()

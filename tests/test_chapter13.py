@@ -359,7 +359,7 @@ def test_gaoler_call_and_snuff() -> None:
         check(not near.lit, "boss yakindaki mangali sonduruyor",
               f"{abs(near.x - boss.body.center_x):.0f} px uzakta")
 
-        # **Bos tell yok.** Sonduruleсek mangal kalmadiysa sira
+        # **Bos tell yok.** Sondurulecek mangal kalmadiysa sira
         # atlanmali - oyuncu bir tehdit gorup hicbir sey olmamasi
         # "okumak ise yaramiyor" dersini verir.
         for brazier in scene.braziers:
@@ -367,7 +367,7 @@ def test_gaoler_call_and_snuff() -> None:
         boss.phase = 2
         boss.move_index = list(MOVES[2]).index("snuff")
         check(boss._next_move() != "snuff",
-              "sonduruleсek mangal yokken sira ATLANIYOR")
+              "sondurulecek mangal yokken sira ATLANIYOR")
     finally:
         game.quit()
 

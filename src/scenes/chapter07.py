@@ -257,7 +257,7 @@ class Chapter07Scene(PlayScene):
         if not near_gap or not self.game.input.pressed(Action.INTERACT):
             return
         # Yoldasi catlagin OTESINE gonderiyoruz; `hold` oraya yuruyor ve
-        # sigдigi icin catlak onu durdurmuyor.
+        # sigdigi icin catlak onu durdurmuyor.
         self.companion.hold(float(WINCH_TILE[0] * TILE_SIZE))
         self.game.play_sound("ui_tick")
 

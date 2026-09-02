@@ -82,7 +82,7 @@ class Mimic(Enemy):
     Uc ozelligi var ve ucu de bilerek:
 
       * `echo_visible = True` - Yanki onu GOSTERIYOR (gercegini
-        gostermiyor). Bolumun tezi bu tersliktе.
+        gostermiyor). Bolumun tezi bu terslikte.
       * Tek canli: bir vurusla dagiliyor. Ceza hasar degil **zaman**;
         oyuncu yanlis hedefe vurdugu icin gercek olani dovemiyor.
       * Hicbir saldirisi yok. Zarar veren bir yalan bir tuzak olurdu;
