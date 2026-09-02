@@ -422,7 +422,35 @@
     "ch17_rey_held": "Kapıyı sen tutuyorsun. Bıraksan kapanır.",
     "ch17_ardo_held": "Tutuyor. Ben geçeyim diye orada duruyor.",
     "ch17_rey_held_face": "Bütün kule bunu öğretiyormuş.",
-    "ch17_ardo_held_face": "Yalnız tırmandığımı sanıyordum."
+    "ch17_ardo_held_face": "Yalnız tırmandığımı sanıyordum.",
+    "ch18_rey_bottom": "Daha aşağısı yok. Burası dibi.",
+    "ch18_ardo_bottom": "Zindan bitti. Buradan sonrası kaya.",
+    "ch18_rey_voice": "Cemo? — Sesi bu taraftan geliyor.",
+    "ch18_ardo_voice": "Bir çocuk sesi. Ama duvarlar da fısıldıyor.",
+    "ch18_rey_deep": "On sekiz kat indim. Sesler hep buraya çağırdı.",
+    "ch18_ardo_deep": "Aşağı inmek kolaydı. Asıl soru neden çağırdığı.",
+    "ch18_rey_deep_face": "Neredeyse geldim Cemo.",
+    "ch18_ardo_deep_face": "Onu bulacağım. Sonra buradan çıkarız.",
+    "ch18_rey_hear": "Cemo! Duyuyorum seni!",
+    "ch18_ardo_hear": "İşte. Tam ileride.",
+    "ch18_rey_empty": "...boş. Hiç kimse yok.",
+    "ch18_ardo_empty": "Elimi geçirdim. Orada bir şey yoktu.",
+    "ch18_rey_empty_face": "Onun sesiyle konuştu. Onun sesiyle.",
+    "ch18_ardo_empty_face": "Beni buraya kadar böyle getirdi.",
+    "ch18_rey_name": "Sen değildin. Hiç sen olmamışsın.",
+    "ch18_ardo_name": "Bunca yol. Ve çağıran hep buydu.",
+    "ch18_rey_name_face": "Kafamdaki ses. Hep senmişsin.",
+    "ch18_ardo_name_face": "Ona güvenmiştim. O da bunu biliyordu.",
+    "ch18_rey_ask": "Ölmüyor. Ben dinledikçe ölmüyor.",
+    "ch18_ardo_ask": "Yankı açıkken kalkıyor. Bağ o.",
+    "ch18_rey_ask_face": "Bırakırsam kör kalırım. Bırakmazsam bitmez.",
+    "ch18_ardo_ask_face": "Yardımsız. Zaten hep öyle dövüştüm.",
+    "ch18_rey_dawn": "Kolyen. Sende kalsın.",
+    "ch18_ardo_dawn": "Onu ablasına götürdüm. Kolye de yanında.",
+    "ch18_rey_three": "Üçümüz. Yukarı.",
+    "ch18_ardo_three": "Çıkış orada. Yürüyebiliyoruz.",
+    "ch18_rey_quiet": "Kafamda hiçbir şey yok. İlk kez.",
+    "ch18_ardo_quiet": "Sessiz. Onun için de sessiz artık."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",
@@ -467,7 +495,8 @@
     "source": "Yankı'nın Kaynağı",
     "silence": "Sessizlik",
     "backtoback": "Sırt Sırta",
-    "twintower": "İkili Kule"
+    "twintower": "İkili Kule",
+    "end": "Son"
   },
   "chapter_end": {
     "heading": "BÖLÜM TAMAMLANDI",
@@ -520,7 +549,8 @@
     "unknown": "İSİMSİZ",
     "rotted_one": "ÇÜRÜMÜŞ OLAN",
     "gaoler": "ZİNDANCI",
-    "source": "KAYNAK"
+    "source": "KAYNAK",
+    "caller": "ÇAĞIRAN"
   },
   "charm": {
     "bloody_whet": "KANLI BİLEME  ·  5+ combo'da hasar %15 artar",
@@ -656,7 +686,8 @@
     "dialogue": "[{key}] devam",
     "chime": "[{key}] rezonans — uzaktaki çanı çal",
     "rescue": "[{key}] basılı tut — onu kaldır",
-    "switch": "[{key}] öteki karaktere geç"
+    "switch": "[{key}] öteki karaktere geç",
+    "silence": "[{key}] basılı tut — sesi sustur"
   },
   "chapter08": {
     "first_crystal": "Kristal kırıldı — ses bir silah",
@@ -698,5 +729,21 @@
   },
   "chapter17": {
     "tidy": "Kuleyi az geçişle çözdün."
+  },
+  "chapter18": {
+    "silenced": "Sustu. İlk kez kendi başınasın."
+  },
+  "credits": {
+    "title": "REY EFSANESİ: YANKILAR",
+    "studio": "Ardeko Studios",
+    "design": "Tasarım — Arda Güner",
+    "code": "Kod — Arda Güner & Claude",
+    "art": "Sanat — prosedürel, 37 renk",
+    "thanks": "Oynadığın için teşekkürler.",
+    "path": "— senin yolun —",
+    "path_ghost": "Kimseyi uyandırmadan geçtin.",
+    "path_lifted": "Onu yerden kaldırdın.",
+    "path_tidy": "Kuleyi tereddütsüz çözdün.",
+    "path_clean": "Sesi erken bıraktın."
   }
 }

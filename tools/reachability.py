@@ -467,6 +467,14 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
     rooms.append(("bolum 17 - sag saft", open17,
                   (chapter17.SPAWN_RIGHT[0], chapter17.SPAWN_RIGHT[1] + 1),
                   chapter17.shaft_tiles(left=True)))
+
+    # Bolum 18: duz uc bolge. Arena muhru **calisma zamaninda** iniyor
+    # (B6'dan beri ayni desen), haritada yok - dogrulayici acik hali
+    # goruyor ve dogru olan bu: muhur bir engel degil bir kapanma.
+    from src.world.rooms import chapter18
+    spawn18 = chapter18.LEVEL.first("player")
+    rooms.append(("bolum 18 - son", chapter18.LEVEL.terrain_rows,
+                  (spawn18.tile_x, spawn18.tile_y + 1), set()))
     return rooms
 
 

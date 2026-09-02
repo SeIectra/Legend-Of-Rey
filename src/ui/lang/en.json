@@ -422,7 +422,35 @@
     "ch17_rey_held": "You're holding the door. Let go and it shuts.",
     "ch17_ardo_held": "She's holding it. Standing there so I can pass.",
     "ch17_rey_held_face": "The whole tower was teaching me this.",
-    "ch17_ardo_held_face": "I thought I climbed it alone."
+    "ch17_ardo_held_face": "I thought I climbed it alone.",
+    "ch18_rey_bottom": "There's nothing below this. This is the bottom.",
+    "ch18_ardo_bottom": "The dungeon ends here. Past this it's just rock.",
+    "ch18_rey_voice": "Cemo? — The voice is coming from over there.",
+    "ch18_ardo_voice": "A child's voice. But the walls whisper too.",
+    "ch18_rey_deep": "Eighteen floors down. The voices called me here the whole way.",
+    "ch18_ardo_deep": "Going down was easy. The question is why it called.",
+    "ch18_rey_deep_face": "I'm almost there, Cemo.",
+    "ch18_ardo_deep_face": "I'll find him. Then we get out.",
+    "ch18_rey_hear": "Cemo! I can hear you!",
+    "ch18_ardo_hear": "There. Straight ahead.",
+    "ch18_rey_empty": "...empty. There's no one here.",
+    "ch18_ardo_empty": "My hand went right through. Nothing was there.",
+    "ch18_rey_empty_face": "It spoke with his voice. With his voice.",
+    "ch18_ardo_empty_face": "That's how it walked me all the way down.",
+    "ch18_rey_name": "It was never you. It was never you at all.",
+    "ch18_ardo_name": "All this way. And the thing calling was this.",
+    "ch18_rey_name_face": "The voice in my head. It was always you.",
+    "ch18_ardo_name_face": "I trusted it. And it knew that.",
+    "ch18_rey_ask": "It won't die. It won't die while I'm listening.",
+    "ch18_ardo_ask": "It rises while the Echo is open. That's the tie.",
+    "ch18_rey_ask_face": "Let go and I'm blind. Hold on and it never ends.",
+    "ch18_ardo_ask_face": "Unaided. That's how I always fought anyway.",
+    "ch18_rey_dawn": "Your necklace. Keep it.",
+    "ch18_ardo_dawn": "I brought him back to his sister. The necklace too.",
+    "ch18_rey_three": "The three of us. Upward.",
+    "ch18_ardo_three": "The way out is there. We can walk.",
+    "ch18_rey_quiet": "There's nothing in my head. For the first time.",
+    "ch18_ardo_quiet": "Quiet. Quiet for her too, now."
   },
   "combat": {
     "counter": "COUNTER",
@@ -467,7 +495,8 @@
     "source": "The Source of the Echo",
     "silence": "Silence",
     "backtoback": "Back to Back",
-    "twintower": "Twin Tower"
+    "twintower": "Twin Tower",
+    "end": "The End"
   },
   "chapter_end": {
     "heading": "CHAPTER COMPLETE",
@@ -520,7 +549,8 @@
     "unknown": "NAMELESS",
     "rotted_one": "THE ROTTED ONE",
     "gaoler": "THE GAOLER",
-    "source": "THE SOURCE"
+    "source": "THE SOURCE",
+    "caller": "THE CALLER"
   },
   "charm": {
     "bloody_whet": "BLOODY WHET  -  +15% damage at 5+ combo",
@@ -656,7 +686,8 @@
     "dialogue": "[{key}] continue",
     "chime": "[{key}] resonance — ring a distant bell",
     "rescue": "Hold [{key}] — lift them up",
-    "switch": "[{key}] switch to the other"
+    "switch": "[{key}] switch to the other",
+    "silence": "Hold [{key}] — silence the voice"
   },
   "chapter08": {
     "first_crystal": "Crystal shattered — sound is a weapon",
@@ -698,5 +729,21 @@
   },
   "chapter17": {
     "tidy": "You solved the tower with few switches."
+  },
+  "chapter18": {
+    "silenced": "Silence. For the first time, you're alone."
+  },
+  "credits": {
+    "title": "LEGEND OF REY: ECHOES",
+    "studio": "Ardeko Studios",
+    "design": "Design — Arda Güner",
+    "code": "Code — Arda Güner & Claude",
+    "art": "Art — procedural, 37 colours",
+    "thanks": "Thank you for playing.",
+    "path": "— your path —",
+    "path_ghost": "You passed without waking anyone.",
+    "path_lifted": "You pulled them back up.",
+    "path_tidy": "You solved the tower without hesitating.",
+    "path_clean": "You let the voice go early."
   }
 }

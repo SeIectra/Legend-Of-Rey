@@ -84,6 +84,15 @@ SCENES = {
     # Bolum 17 "Ikili Kule" - iki oynanabilir karakter, `Y` ile gecis.
     "bolum17": ("src.scenes.chapter17", "Chapter17Scene"),
     "bolum17-kapi": ("src.scenes.chapter17_cinematics", "HeldDoorCinematic"),
+    # Bolum 18 "Son" - oyunun finali. Yanki acikken Cagiran olmuyor;
+    # kazanmanin tek yolu sesi susturmak ([K] basili tut).
+    "bolum18": ("src.scenes.chapter18", "Chapter18Scene"),
+    "bolum18-inis": ("src.scenes.chapter18_cinematics", "DescentCinematic"),
+    "bolum18-ses": ("src.scenes.chapter18_cinematics", "VoiceCinematic"),
+    "bolum18-ad": ("src.scenes.chapter18_cinematics", "NameCinematic"),
+    "bolum18-sessizlik": ("src.scenes.chapter18_cinematics",
+                          "SilenceCinematic"),
+    "safak": ("src.scenes.ending", "DawnCinematic"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }

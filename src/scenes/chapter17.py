@@ -268,8 +268,11 @@ class Chapter17Scene(PlayScene):
             data.secrets_found += result.secrets_found
             if tidy:
                 data.flags["ch17_tidy"] = True
-        # Bolum 18 henuz yok - ozet ekrani kapaninca ana menuye donuluyor.
-        self.scenes.push(ChapterEndScene, result=result)
+        from src.scenes.chapter18 import Chapter18Scene
+        self.scenes.push(
+            ChapterEndScene, result=result,
+            on_continue=lambda: self.scenes.set_root(
+                Chapter18Scene, character=self.character))
 
     # --- Cizim --------------------------------------------------------------
     def draw_background(self, surface: pygame.Surface, offset) -> None:

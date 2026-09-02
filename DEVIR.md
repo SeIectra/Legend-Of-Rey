@@ -35,7 +35,7 @@ Tasarım paketi `docs/` altında ve **bağlayıcı**: `gdd.md` (ana belge),
 
 ## 2. NEREDE DURUYORUZ
 
-**61.591 satır Python. 41 test paketi de yeşil — 91 saniyede.**
+**63.911 satır Python. 42 test paketi de yeşil — 112 saniyede.**
 (02.09.2026'da ölçüldü.)
 
 Oynanabilir akış:
@@ -44,11 +44,13 @@ Oynanabilir akış:
 **B6 ARDO** → **B7 Dar Geçit** → **B8 Ateş Başı** → **B9 Can Kulesi** →
 **B10 Ayrılık** → **B11 Ayna Salonu** → **B12 Mektup** → **B13 Cemo** →
 **B14 Yankı'nın Kaynağı** → **B15 Sessizlik** → **B16 Sırt Sırta** →
-**B17 İkili Kule** → bölüm sonu ekranı → ana menü`
+**B17 İkili Kule** → **B18 Son** → **Şafak + jenerik** → ana menü`
 
-**18 bölümün 17'si oynanabilir.** Kalan tek bölüm: **B18 "Son"**.
-B17'nin sonu ana menüye dönüyor çünkü B18 henüz yok — bilinçli bir uç,
-her bölümde aynı desen.
+## ★ OYUN BAŞTAN SONA OYNANABİLİR (02.09.2026)
+
+**18 bölümün 18'i bitti.** Zincir kesintisiz: B1→B2→…→B18→kapanış.
+Dört büyük boss'un dördü de yerinde. Artık "henüz yok" diye biten bir
+uç kalmadı — B18'in sonu ana menüye dönüyor çünkü **oyun bitiyor.**
 
 **Katman 1 (Çürüyenler, B1–B6) ve Katman 2 (Lanetli Muhafızlar, B7–B13)
 tamamlandı; Katman 3 (Yankı'nın Çocukları, B14–B18) başladı.**
@@ -1065,6 +1067,78 @@ erişilemez" sayılıyor, ve kapılar **açık** haritayla bakılıyor — araç
 geometriyi soruyor, bulmacayı değil. 70 + 70 nokta.
 
 Zincirleme: **B16 → B17.**
+
+### ★ Bölüm 18 "Son" — BOSS 4, susturma, kapanış (02.09.2026)
+
+`docs/yapi.md` B18: *"Yaratık, Yankı'yı kullanarak Cemo'nun sesiyle
+konuşur. Rey sesi susturmayı seçer — sessizlikte, **yardımsız**
+savaşır. Kazanır. Cemo kurtulur. Gün ışığı. Rey kolyeyi Cemo'ya geri
+takar, Ardo arkalarında. Rey'in kafası ilk kez sessiz."*
+
+Zorluk 9 — oyunun en zoru. Üç bölge, beş sinematik, sıfır normal
+düşman (tek düşman Çağıran).
+
+#### Finalin tezi MEKANİK
+
+    Yankı açıkken Çağıran ölmüyor.
+
+On sekiz bölümdür Yankı oyuncunun aracıydı: görüş, hasar, ipucu. B14
+onun bir çağrı olduğunu söyledi. B18 bunu bir **kurala** çeviriyor —
+oyuncunun kendi aracı düşmanı ayakta tutuyor. Canı bitiyor, yaratık
+diz çöküyor, sonra kalkıyor.
+
+Kazanmanın tek yolu sesi susturmak (`[K]` basılı tut, 120 kare, geri
+alınamaz) ve susturmak görüşü de hasarı da götürüyor. Belgenin
+"yardımsız" kelimesi böylece bir anlatım değil bir **oynanış**.
+
+`call` hamlesi Cemo'nun sesiyle bir **yem** koyuyor: yaklaşan oyuncu
+hasar alıyor, ama yeme vurulamıyor. Sustuktan sonra `call` boş
+dönüyor — yaratık çağırmaya devam ediyor ama artık kimse duymuyor.
+
+#### İki ölüm yolu, bir unutulmuş kanca
+
+Uçtan uca oynatınca çıktı: `take_damage` ve `die()` ayrı ayrı
+yazılmıştı ve `die()` sahne kancasını çağırmıyordu. Gerçek yol o —
+`Actor` can sıfıra inince `die()` çağırıyor. Sonuç: yaratık diz
+çöküyordu ama **susturma hiç açılmıyordu**, yani bölüm
+bitirilemiyordu. Finalin bitirilemez olması yapılabilecek en pahalı
+hataydı ve testler değil **oynamak** yakaladı.
+
+Düzeltme `_kneel()` — iki yol da oradan geçiyor. B16'daki
+`Companion._stand` ile aynı ders: iki çıkışı olan her şeyin tek gövdesi
+olmalı.
+
+#### Kapanış dört bayrağı okuyor
+
+`ch15_ghost`, `ch16_lifted`, `ch16_gesture`, `ch17_tidy`. Hiçbiri
+kapanışı **kilitlemiyor** — değiştirdikleri şey kimin nerede durduğu.
+Özellikle `ch16_gesture`: B16'da geri çekildiysen Ardo son panelde üç
+adım geride duruyor (44/62/88 px). Ceza değil; iki bölüm önce verilmiş
+bir cevabın hâlâ duruyor olması.
+
+Ve **vinyet yok**. On sekiz bölümdür ekranın kenarında duran Yankı
+karartması kalktı; *"Rey'in kafası ilk kez sessiz"* cümlesi bir
+replikle değil o karartmanın yokluğuyla söyleniyor.
+
+#### Bölüm sonu ekranı YOK
+
+Öteki on yedi bölüm `ChapterEndScene` açıyor. Final açmıyor: oyunun
+son dövüşünden çıkıp bir istatistik paneli görmek anın ağırlığını
+alırdı. Sayılar jeneriğe taşındı (`credits.path_*`) ve orada bir puan
+değil bir **hatırlatma** oluyorlar.
+
+#### Render edilip bakılarak düzeltilen üç şey
+
+1. **Açığa çıkma sahnesi neredeyse tamamen siyahtı** — silüet `void`
+   rengiyle karanlık zemine çiziliyordu. Çözüm silüeti aydınlatmak
+   değil **arkasını** aydınlatmak: yaratık hâlâ karanlık ama artık bir
+   şeyin önünde duruyor.
+2. **Ortak arka plan çok karanlıktı** — bir ton yukarı alındı.
+3. **Jenerik yazısı görünmüyordu** — `ink` rengi karanlık zeminde
+   kayboluyordu. Sahne hem çok aydınlık hem çok karanlık bölgeler
+   taşıyor, yani tek düz renk her yerde okunamaz: açık renk + kontur.
+
+Zincirleme: **B17 → B18 → Şafak → ana menü.**
 
 ## 9. AÇIK KALANLAR
 

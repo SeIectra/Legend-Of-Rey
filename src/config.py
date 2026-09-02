@@ -736,6 +736,48 @@ COMPANION_DOWN_FRAMES: Final[int] = 210
 # Emredilen noktaya bu kadar yaklasinca "durdu" sayiliyor.
 COMPANION_HOLD_TOLERANCE: Final[float] = 10.0
 
+# --- CAGIRAN ve SUSTURMA (Bolum 18, BOSS 4) ----------------------------------
+# `docs/yapi.md` B18: *"Yaratik, Yanki'yi kullanarak Cemo'nun sesiyle
+# konusur. Rey sesi susturmayi secer - sessizlikte, YARDIMSIZ savasir."*
+# `docs/ekonomi-uretim.md`: zorluk **9/10**, oyunun en zoru.
+#
+# ## Finalin tezi mekanik
+#
+# On sekiz bolumdur Yanki oyuncunun araci: gorus, hasar, ipucu. B14
+# onun bir lanet degil **cagri** oldugunu soyledi. B18 bunu bir kurala
+# ceviriyor:
+#
+#     Yanki acikken Cagiran OLMUYOR.
+#
+# Cani bitiyor, diz cokuyor, sonra geri kalkiyor - cunku onu ayakta
+# tutan sey oyuncunun kendi araci. Kazanmanin tek yolu sesi susturmak,
+# ve susturmak gorusu de hasari da goturuyor. "Yardimsiz" cumlesi
+# boylece bir anlatim degil bir **oynanis** oluyor.
+CALLER_HEALTH: Final[int] = 320
+CALLER_SPEED: Final[float] = 0.62
+# Yanki acikken can bu esigin altina inmiyor; darbe geciyor, olum
+# gecmiyor. Sifir olsaydi "oldu ama dirildi" gibi okunurdu; 1'de
+# kalmak "oldurulemiyor" diyor.
+CALLER_UNDYING_FLOOR: Final[int] = 1
+# Dizustu kalma suresi - oyuncunun "oldurdum" sanip sonra yanildigini
+# GORMESI icin yeterince uzun.
+CALLER_RISE_FRAMES: Final[int] = 96
+
+# Cagirmanin menzili: Cemo'nun sesi bu uzakliktan cekiyor.
+CALLER_CALL_RANGE: Final[float] = 220.0
+CALLER_CALL_DAMAGE: Final[int] = 12
+# Yem kac kare duruyor. Kisa olsaydi tuzak degil bir sus olurdu.
+CALLER_LURE_FRAMES: Final[int] = 150
+
+# --- Susturma (src/systems/silence.py) ---------------------------------------
+# Basili tutma suresi. Kaldirmadan (48) uzun ve bilerek: bu bir refleks
+# degil bir **karar**. Iki saniye boyunca hicbir sey yapmadan durmak
+# oyuncuya ne verdigini dusunecek zaman biraktiyor.
+#
+# Ve geri alinamiyor: `EchoState` sessize inince bu bolumde bir daha
+# yukselmiyor. Geri alinabilseydi karar bir dugme olurdu.
+SILENCE_HOLD_FRAMES: Final[int] = 120
+
 # --- IKILI KONTROL (Bolum 17, src/systems/duo.py) ----------------------------
 # `docs/yapi.md` mekanik 10: *"Karakterler arasi gecis, biri kolu tutar
 # biri gecer."*
