@@ -319,11 +319,29 @@ class Dialogue:
 
     def _draw_prompt(self, surface: pygame.Surface,
                      box: pygame.Rect) -> None:
-        """Devam isareti - yanip sonuyor, oyuncu bekledigini bilsin."""
+        """Devam isareti - yanip sonuyor, oyuncu bekledigini bilsin.
+
+        Arda, canli oynanis (31.08.2026): prolog artik oyuncuyu
+        bekliyor ve ilk tepki "donmus mu?" olabiliyor. Isaret zaten
+        vardi ama **fark edilmiyordu**: `ui_text_dim` ile tek bir
+        karakter, koyu bir zeminde.
+
+        Iki degisiklik. Rengi metnin kendisiyle ayni oldu - hala kucuk
+        ve hala yanip sonuyor, yani goze batmiyor ama goruluyor. Ve
+        ucgenin altina ince bir cizgi geldi: **sekil kanali**, cunku
+        `CLAUDE.md` 10 hicbir seyin yalnizca renkle anlatilmamasini
+        istiyor.
+
+        Tusun **adi** burada yazmiyor: o `PlayScene`in bir kerelik
+        ipucunda, ve orada tus tablosundan okunuyor (tuslar yeniden
+        atanabiliyor - sabit yazmak yalan olurdu).
+        """
         if (pygame.time.get_ticks() // 400) % 2 == 0:
             return
-        text.draw(surface, "▸", box.right - 12, box.bottom - 12,
-                  color=palette.role("ui_text_dim"))
+        x = box.right - 12
+        y = box.bottom - 12
+        text.draw(surface, "▸", x, y, color=palette.role("ui_text"))
+        surface.fill(palette.role("ui_text_dim"), (x, y + 7, 5, 1))
 
 
 def _wrap(value: str, width: int) -> list[str]:

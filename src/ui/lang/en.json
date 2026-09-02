@@ -607,7 +607,8 @@
     "resonance": "[{key}] resonance — break it with sound",
     "boost": "[{key}] beside them: they'll launch you",
     "lever": "[{key}] pull the lever — the gate is timed",
-    "rig_brake": "[{key}] hold — the rig slows"
+    "rig_brake": "[{key}] hold — the rig slows",
+    "dialogue": "[{key}] continue"
   },
   "chapter08": {
     "first_crystal": "Crystal shattered — sound is a weapon",

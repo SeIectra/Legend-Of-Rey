@@ -607,7 +607,8 @@
     "resonance": "[{key}] rezonans — sesle kır",
     "boost": "[{key}] yoldaşın yanında: seni fırlatır",
     "lever": "[{key}] kolu çevir — kapı süreli açılır",
-    "rig_brake": "[{key}] basılı tut — kafes yavaşlar"
+    "rig_brake": "[{key}] basılı tut — kafes yavaşlar",
+    "dialogue": "[{key}] devam"
   },
   "chapter08": {
     "first_crystal": "Kristal kırıldı — ses bir silah",

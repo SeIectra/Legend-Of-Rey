@@ -508,6 +508,30 @@ class PlayScene(Scene):
             return self.tracking.active
         return False
 
+    def _update_dialogue_hint(self) -> None:
+        """Ilk bekleyen replikte devam tusunu **bir kez** ogret.
+
+        Arda, canli oynanis (31.08.2026): prolog artik oyuncuyu
+        bekliyor (*"kullanici basana kadar yazilar gecmesin"*) ve
+        bunun bir yan etkisi var - ilk kez oynayan biri icin ekranda
+        duran bir yazi "donmus" gibi de okunabiliyor.
+
+        Kutudaki yanip sonen ucgen bunu soyluyor ama bir simge, bir
+        cumle degil. Tus **adiyla** bir kez soylenince belirsizlik
+        bitiyor; ikinci kez soylenirse ogut olur.
+
+        `hint_once` tus adini **tablodan** okuyor: tuslar yeniden
+        atanabiliyor (`src/systems/bindings.py`), "Enter'a bas"
+        yazmak tusu degistiren oyuncuya yalan soylerdi.
+
+        Burada, `PlayScene`de - yani her bolum bedavaya aliyor.
+        Bolum 1'e yazsaydik ikinci bolumde konusan ilk karakterde
+        oyuncu yine ayni soruyu sorardi.
+        """
+        if not self.dialogue.active or not self.dialogue.complete:
+            return
+        self.hint_once("hint_dialogue", "hint.dialogue", Action.CONFIRM)
+
     def _update_betrayal(self) -> None:
         """Duyuyu acmak seni **ele veriyor** - B14'ten sonra kalici.
 
@@ -618,6 +642,7 @@ class PlayScene(Scene):
 
         self._update_traces()
         self._update_betrayal()
+        self._update_dialogue_hint()
         if self.echo is not None:
             self.echo.update(self.echo_held())
             self._update_echo_audio()
