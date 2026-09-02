@@ -382,7 +382,21 @@
     "ch14_rey_decide": "Then I stop listening to you.",
     "ch14_ardo_decide": "Then I stop looking. I'll find it myself.",
     "ch09_echo_locked": "The door is waiting for three bells. None have rung — go back down.",
-    "ch09_trace_locked": "Three sockets in the door, all empty. The bells are below."
+    "ch09_trace_locked": "Three sockets in the door, all empty. The bells are below.",
+    "ch15_rey_sleep": "They're asleep. I can pass if I don't wake them.",
+    "ch15_ardo_sleep": "They're asleep. My footsteps are louder than they are.",
+    "ch15_rey_drip": "Water is dripping. They turn their heads at every drop.",
+    "ch15_ardo_drip": "They stir with each drop. There's a rhythm to it.",
+    "ch15_rey_narrow": "No bells here. Only slow.",
+    "ch15_ardo_narrow": "Narrow. Nowhere to run, nowhere to make noise either.",
+    "ch15_rey_ghost": "Not one of them woke.",
+    "ch15_ardo_ghost": "Not one of them stirred. They don't know I came through.",
+    "ch15_rey_ghost_face": "Turns out I can do it without you.",
+    "ch15_ardo_ghost_face": "So the blade isn't the answer to everything.",
+    "ch15_rey_woke": "They heard me. But I got through.",
+    "ch15_ardo_woke": "I made noise. They're still behind me.",
+    "ch15_rey_woke_face": "Slower, next time.",
+    "ch15_ardo_woke_face": "Getting through isn't enough. It had to be quiet."
   },
   "combat": {
     "counter": "COUNTER",
@@ -424,7 +438,8 @@
     "mirror_hall": "The Hall of Mirrors",
     "cemo": "Cemo",
     "letter": "The Letter",
-    "source": "The Source of the Echo"
+    "source": "The Source of the Echo",
+    "silence": "Silence"
   },
   "chapter_end": {
     "heading": "CHAPTER COMPLETE",
@@ -608,7 +623,8 @@
     "boost": "[{key}] beside them: they'll launch you",
     "lever": "[{key}] pull the lever — the gate is timed",
     "rig_brake": "[{key}] hold — the rig slows",
-    "dialogue": "[{key}] continue"
+    "dialogue": "[{key}] continue",
+    "chime": "[{key}] resonance — ring a distant bell"
   },
   "chapter08": {
     "first_crystal": "Crystal shattered — sound is a weapon",
@@ -640,5 +656,9 @@
     "betrayed": "The Echo opens both ways now.",
     "heard": "They heard you.",
     "not_dead": "It fell. It didn't die."
+  },
+  "chapter15": {
+    "walk": "Walk. They'll hear you if you run.",
+    "ghost": "Nobody woke. Reward for silence."
   }
 }

@@ -84,6 +84,15 @@ class Silent(Shambler):
         if self.roused:
             super()._update_awareness()
             return
+        # **Uyuyorsa pusu da kurmuyor.** `asleep` sahnenin koydugu bir
+        # kural (Bolum 15'in uyuyan surusu) ve her dusman ona uymali;
+        # Sessiz `_update_awareness`i ezdigi icin buraya elle yazmak
+        # gerekti. Olmasaydi uyuyan bir Sessiz yaklasan oyuncuyu
+        # yakalardi - yani gizlilik bolumunde sessiz yurumenin bir
+        # anlami kalmazdi.
+        if self.asleep:
+            self._update_alert()
+            return
         player = self.player
         if player is None:
             return

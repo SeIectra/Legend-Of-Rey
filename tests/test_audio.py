@@ -46,12 +46,14 @@ SFX_FILES = ("sfx.py", "sfx_combat.py", "sfx_enemies.py", "sfx_ui.py",
 #                bir katman, sesli degil
 #   journey_*    dikey yolculuk sahnesi kendi muziginden besleniyor
 #   step_gravel  Bolum 9+ zeminleri (su an tas ve toprak var)
-#   step_water   su sesi `water.py`e baglanmadi
 #   echo_loop    Yanki acikken surekli calacak katman
 #
 # Liste kisaliyor: `echo_reveal` Bolum 10'da (Yanki'nin yalani)
 # kullanildi ve listeden dustu - testin ucuncu kontrolu bunu
-# yakaladi.
+# yakaladi. `step_water` Bolum 15'te dustu: damla odasinin su
+# damlasi (`chapter15.py`) onu caliyor - ayak sesi olarak degil,
+# **metronom** olarak. Ses zaten dogru sesti, bekledigi kullanim
+# baskaymis.
 #   *_idle       dusman bosta sesleri - `Enemy` bunlari hic calmiyor
 #
 # Bu liste bir "yapilacaklar"; kisaldikca ses tasarimi tamamlaniyor.
@@ -61,7 +63,7 @@ PLANNED: frozenset[str] = frozenset({
     "echo_silent", "echo_sonar", "enemy_stagger",
     "intro_hum", "journey_cellar", "journey_night", "journey_wind",
     "shambler_attack",
-    "shambler_idle", "step_gravel", "step_water",
+    "shambler_idle", "step_gravel",
 })
 # `necklace_warm` ve `necklace_conflict` 30.08.2026'da listeden CIKTI:
 # Bolum 13'un ara sahneleri ikisini de caliyor (kafes goruldugunde

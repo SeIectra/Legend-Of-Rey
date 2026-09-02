@@ -70,6 +70,10 @@ SCENES = {
     "bolum14-kaynak": ("src.scenes.chapter14_cinematics", "SourceCinematic"),
     "bolum14-arena": ("src.scenes.chapter14_cinematics", "ArenaCinematic"),
     "bolum14-olmedi": ("src.scenes.chapter14_cinematics", "AfterCinematic"),
+    # Bolum 15 "Sessizlik" - gizlilik. B14'un ihaneti on kosulu zaten
+    # kurdu: duyuyu acmak suruyu uyandiriyor.
+    "bolum15": ("src.scenes.chapter15", "Chapter15Scene"),
+    "bolum15-gectin": ("src.scenes.chapter15_cinematics", "PassedCinematic"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }

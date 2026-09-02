@@ -434,6 +434,13 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
     spawn14 = chapter14.LEVEL.first("player")
     rooms.append(("bolum 14 - kaynak", chapter14.LEVEL.terrain_rows,
                   (spawn14.tile_x, spawn14.tile_y + 1), set()))
+
+    # Bolum 15: duz bir gizlilik bolumu - kapi, muhur ya da senaryolu
+    # gecis yok. Dogrulama oldugu gibi calisiyor.
+    from src.world.rooms import chapter15
+    spawn15 = chapter15.LEVEL.first("player")
+    rooms.append(("bolum 15 - sessizlik", chapter15.LEVEL.terrain_rows,
+                  (spawn15.tile_x, spawn15.tile_y + 1), set()))
     return rooms
 
 

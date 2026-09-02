@@ -157,6 +157,21 @@ class Chime:
         return self.tile_y * TILE_SIZE + TILE_SIZE * 0.5
 
     @property
+    def rect(self):
+        """`ResonanceState.reaches()` bunu ariyor.
+
+        Rezonans halkasi **nesnenin dikdortgeni** uzerinden geciyor
+        mu diye bakiyor (`resonance.py`). Kristal ve can zaten oyle
+        calisiyordu; can da ayni sozlesmeyi tasimali, yoksa
+        `reaches()` `AttributeError` verir - ve bu ancak oyuncu
+        rezonansi ilk kullandiginda ortaya cikardi.
+        """
+        import pygame
+        from src.config import TILE_SIZE
+        return pygame.Rect(self.tile_x * TILE_SIZE,
+                           self.tile_y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+
+    @property
     def ready(self) -> bool:
         return self.cooldown <= 0
 

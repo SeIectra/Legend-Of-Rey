@@ -35,17 +35,23 @@ Tasarım paketi `docs/` altında ve **bağlayıcı**: `gdd.md` (ana belge),
 
 ## 2. NEREDE DURUYORUZ
 
-**~37.000 satır Python. 26 test paketi de yeşil — ve artık 97 saniyede.**
+**57.703 satır Python. 39 test paketi de yeşil — 66 saniyede.**
+(02.09.2026'da ölçüldü.)
 
 Oynanabilir akış:
-`intro → menü → karakter seçimi → dikey yolculuk → **Bölüm 1 (Köy)** →
-**Bölüm 2 (İlk İniş)** → **Bölüm 3 (Meşale Mahzeni)** → **Bölüm 4 (Kayıt
-Odası)** → **Bölüm 5 (Sular)** → **Bölüm 6 (ARDO)** → **Bölüm 7 (Dar
-Geçit)** → bölüm sonu ekranı → ana menü`
+`intro → menü → karakter seçimi → dikey yolculuk → **B1 Köy** → **B2 İlk
+İniş** → **B3 Meşale Mahzeni** → **B4 Kayıt Odası** → **B5 Sular** →
+**B6 ARDO** → **B7 Dar Geçit** → **B8 Ateş Başı** → **B9 Can Kulesi** →
+**B10 Ayrılık** → **B11 Ayna Salonu** → **B12 Mektup** → **B13 Cemo** →
+**B14 Yankı'nın Kaynağı** → **B15 Sessizlik** → bölüm sonu ekranı → ana
+menü`
 
-Bölüm 7'nin sonu ana menüye dönüyor çünkü **Bölüm 8 henüz yok** — bilinçli
-bir uç. **Katman 1 (Çürüyenler, B1–B6) tamamlandı; Katman 2 (Lanetli
-Muhafızlar, B7–B13) başladı.**
+**18 bölümün 15'i oynanabilir.** Kalan: B16 "Sırt Sırta", B17 "İkili
+Kule", B18 "Son". B15'in sonu ana menüye dönüyor çünkü B16 henüz yok —
+bilinçli bir uç, her bölümde aynı desen.
+
+**Katman 1 (Çürüyenler, B1–B6) ve Katman 2 (Lanetli Muhafızlar, B7–B13)
+tamamlandı; Katman 3 (Yankı'nın Çocukları, B14–B18) başladı.**
 
 ### Açılış artık 0,4 saniye (30.08.2026)
 
@@ -642,9 +648,18 @@ ile ayrıca çiziliyor.
 Artı **4 büyük boss** (B6, B13, B14, B18) ve her bölümde bir mini-boss
 ("mevcut düşmanın büyütülmüş hâli, bir ek hamle" — bilinçli olarak ucuz).
 Yapılan mini-boss'lar: Şişmiş Olan (B2), Sönmüş Olan (B3).
-**Yapılan büyük boss: Çürümüş Olan (B6, BOSS 1)** — üç fazı Katman 1'in
-üç düşmanından alıyor, Faz 2'nin mührü ağırlık plakalarıyla kırılıyor.
-Kalan üçü (B13, B14, B18) sırası gelmedi.
+Yapılan büyük boss'lar — **dördün üçü**:
+
+- **Çürümüş Olan (B6, BOSS 1)** — üç fazı Katman 1'in üç düşmanından
+  alıyor, Faz 2'nin mührü ağırlık plakalarıyla kırılıyor.
+- **Zindancı (B13, BOSS 2)** — üç fazı Katman 2'yi aynalıyor, feneri
+  gerçek bir ışık kaynağı (`LightState`) ve söndükçe arena karanlığa
+  gömülüyor.
+- **Kaynak (B14, BOSS 3)** — tezi iki satır: `Source.echo_visible =
+  False` (gerçeğini Yankı **göstermiyor**), `Mimic.echo_visible = True`
+  (yalanını gösteriyor). Ölmüyor, düşüyor.
+
+Kalan tek boss **B18** — sırası gelmedi.
 
 ---
 
@@ -856,6 +871,62 @@ oluyor.
 
 Zincirleme: **B13 → B14.** `docs/gdd.md` §7'ye Katman 3'ün sahneye
 çıktığı not düşüldü.
+
+### Bölüm 15 "Sessizlik" — gizlilik, mekanik #12: gürültü (02.09.2026)
+
+`docs/yapi.md` B15: *"Yankı'yı kapalı oynamak zorundasın. Uyuyan sürü.
+Koşarsan uyanırlar. **Tamamen dövüşsüz geçilebilir — ve daha iyi ödül
+verir.**"*
+
+Altı oda, 148 tile, 10 uyuyan. `src/systems/noise.py` (halka + alan),
+`Enemy.alert_level/hear/wake/_investigate`, `src/scenes/chapter15.py`.
+
+**B14'ün mirasını oynuyor, yeniden kurmuyor.** Duyuyu açmak menzildeki
+herkesi uyandırıyor — bu `PlayScene._update_betrayal`, B14'te yazıldı.
+B15 bu konuda **tek satır bile yazmıyor.**
+
+#### Ayarlar hesapla değil ÖLÇÜMLE bulundu
+
+İlk `NOISE_RUN = 0.60` aritmetikle seçildi: "adım ~50 pikselde bir gelir,
+duyulma bölgesinde 6 adım olur, toplam 1.10 > eşik". Ölçünce **zirve
+0,687** çıktı, yani koşmak kimseyi uyandırmıyordu — bölümün tek kuralı
+sus olmuştu. Sebep: adım ~87 pikselde bir geliyor, bölgede **3** adım
+var, 6 değil. `NOISE_RUN = 0.90`'da ölçüm 10/10 uyandırdı.
+
+Aynı ders üçüncü kez: **B13'ün kapı penceresi, B12'nin fren hızı, B15'in
+adım sesi.** Hepsinde ilk sayı akla yatkındı ve hepsinde yanlıştı.
+
+`ALERT_DECAY` 0,005'te bırakıldı — hızlandırmak koşuyu duyulmaz yapıyor
+(adımlar arası birikimi yiyor). Testin "2 saniye" barı keyfiydi ve
+0,6'dan hesaplıyordu; artık eşiğin altından ölçülüyor ve bar
+`DRIP_INTERVAL` (240 kare): damla bu bölümün metronomu, "bir damla
+bekle" öğretilebilir bir kural.
+
+#### Ekran görüntüsü bir okunabilirlik hatası yakaladı
+
+Uyuyan düşman **dimdik ayaktaydı** — uyanıktan yalnızca kafasının
+üstündeki 2×2 piksellik üç noktayla ayrılıyordu. Bütün bölümün kuralı
+"uyuyan zararsız, uyanık tehlikeli" iken ayrım o kadar küçük bir işarete
+biniyordu. `CLAUDE.md` §7 bunu zaten reddediyor (*"durum görsel olarak
+okunur"*, *"siluet testi"*).
+
+Düzeltme `Enemy.silhouette_scale()`'e yazıldı — tell şişmesinin zaten
+kullandığı kanca, yani çizim tarafında iş yok ve **`asleep` koyan her
+bölüm bunu bedava alıyor.** `SLEEP_SQUASH = (1.12, 0.72)`: uyuyan çöküp
+genişliyor, uyanıklık arttıkça **doğruluyor** (oyuncu birinin kalkmakta
+olduğunu görüp geri çekilebiliyor). Değer üç seçenek render edilip
+bakılarak seçildi — 0,85 dik durandan ayırt edilemiyor, 0,55'te bacaklar
+kayboluyor (`build/testshots/b15_squash_*`).
+
+Davranış testleri bunu göremezdi çünkü hiçbiri görsel duruma bakmıyordu
+— projedeki aynı kör nokta daha önce iki kez çökmeyle patladı.
+`test_sleep_reads_in_silhouette` artık kuralı bağlıyor.
+
+`step_water` PLANNED listesinden düştü: damla odası onu çalıyor — ayak
+sesi olarak değil **metronom** olarak. Ses doğru sesti, beklediği
+kullanım başkaymış.
+
+Zincirleme: **B14 → B15.**
 
 ## 9. AÇIK KALANLAR
 

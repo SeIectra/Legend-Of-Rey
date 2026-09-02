@@ -36,7 +36,7 @@ from enum import Enum, auto
 from src.art import palette
 from src.combat.hitbox import Hitbox, Team, melee_rect
 from src.config import (
-    ALERT_DECAY, ALERT_STIR, ALERT_WAKE, INVESTIGATE_FRAMES,
+    ALERT_DECAY, ALERT_STIR, ALERT_WAKE, INVESTIGATE_FRAMES, SLEEP_SQUASH,
     INVESTIGATE_REACH, NOISE_RANGE,
     ENEMY_APPROACH_SPEED, ENEMY_LOSE_RANGE, ENEMY_MIN_TELL_FRAMES,
     ENEMY_ORBIT_SPEED, ENEMY_SIGHT_RANGE, ORBIT_RADIUS_MAX, ORBIT_RADIUS_MIN,
@@ -493,12 +493,31 @@ class Enemy(Actor):
         return palette.role("enemy_tell")
 
     def silhouette_scale(self) -> tuple[float, float]:
-        """Tell sirasinda siluet degisimi - renk korlugu icin sart.
+        """Tell ve **uyku** sirasinda siluet degisimi.
 
-        Renk gormeyen oyuncu sekli gorur: dusman tell boyunca kabarir.
-        Squash ile birlestigi icin cizim tarafinda ayrica is yok.
+        Renk gormeyen oyuncu sekli gorur: dusman tell boyunca kabarir,
+        uyurken cokup genisler. Squash ile birlestigi icin cizim
+        tarafinda ayrica is yok.
+
+        Uyku dali sonradan eklendi ve bir hatayi kapatiyor: Bolum 15
+        ekran goruntusunde uyuyan dusman **dimdik ayaktaydi**, uyanik
+        olandan yalnizca kafasinin ustundeki uc kucuk noktayla
+        ayriliyordu. Butun bolumun kurali "uyuyan zararsiz, uyanik
+        tehlikeli" iken bu ayrimin 2x2 piksele binmesi
+        `CLAUDE.md` 7'ye aykiri: *"durum gorsel olarak okunur"* ve
+        *"siluet testi"*.
+
+        Uyaniklik arttikca **dogruluyor** - yani oyuncu birinin
+        kalkmakta oldugunu gorup geri cekilebiliyor. Nokta sayaci
+        kalkmadi; artik iki kanal ayni seyi soyluyor (`CLAUDE.md` 10:
+        tehlike asla tek basina renkle anlatilmaz).
         """
         if self.state is EnemyState.TELL:
             grow = 0.18 * self.tell_progress
             return (1.0 - grow * 0.4, 1.0 + grow)
+        if self.asleep:
+            rise = min(1.0, self.alert_level / ALERT_WAKE)
+            wide, low = SLEEP_SQUASH
+            return (wide + (1.0 - wide) * rise,
+                    low + (1.0 - low) * rise)
         return (1.0, 1.0)

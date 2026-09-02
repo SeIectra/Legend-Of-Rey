@@ -61,6 +61,13 @@ MARKERS: dict[str, str] = {
     "y": "echoing",           # Yankilayan - sahte ipucu verir
     "p": "splitter",          # Bolunen - vurunca ikiye ayrilir
     "O": "source",            # Kaynak - BOSS 3, ucunun de atasi
+    # --- Bolum 15: gurultu kaynaklari (`src/systems/noise.py`) ----------
+    # Uyku ayri bir isaret DEGIL: dusman ayni dusman, degisen sey
+    # sahnenin ona verdigi durum (`chapter15.py` odaya girerken
+    # `asleep` veriyor). "Uyuyan Suruklenen" diye ikinci bir harf
+    # ortak sozlugu sisirirdi.
+    "h": "chime",             # Can - rezonansla calinir, dikkat dagitir
+    "H": "drip",              # Su damlasi - kendi calar, RITIM verir
 }
 
 

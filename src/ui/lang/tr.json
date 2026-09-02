@@ -382,7 +382,21 @@
     "ch14_rey_decide": "Öyleyse seni dinlemeyi bırakıyorum.",
     "ch14_ardo_decide": "Öyleyse artık bakmayacağım. Kendim bulurum.",
     "ch09_echo_locked": "Kapı üç çan bekliyor. Hiçbiri çalmadı — aşağı in.",
-    "ch09_trace_locked": "Kapıda üç yuva var, üçü de boş. Çanlar aşağıda kaldı."
+    "ch09_trace_locked": "Kapıda üç yuva var, üçü de boş. Çanlar aşağıda kaldı.",
+    "ch15_rey_sleep": "Uyuyorlar. Uyandırmazsam geçebilirim.",
+    "ch15_ardo_sleep": "Uyuyorlar. Ayak sesim onlardan yüksek.",
+    "ch15_rey_drip": "Su damlıyor. Onlar da her damlada başlarını çeviriyor.",
+    "ch15_ardo_drip": "Damla düştükçe kımıldıyorlar. Ritmi var.",
+    "ch15_rey_narrow": "Burada çan yok. Sadece yavaş.",
+    "ch15_ardo_narrow": "Dar. Kaçacak yer de yok, ses çıkaracak yer de.",
+    "ch15_rey_ghost": "Hiçbiri uyanmadı.",
+    "ch15_ardo_ghost": "Hiçbiri kalkmadı. Buradan geçtiğimi bilmiyorlar.",
+    "ch15_rey_ghost_face": "Sensiz de yapabiliyormuşum.",
+    "ch15_ardo_ghost_face": "Kılıç her sorunun cevabı değilmiş.",
+    "ch15_rey_woke": "Duydular. Ama geçtim.",
+    "ch15_ardo_woke": "Gürültü yaptım. Yine de arkamda kaldılar.",
+    "ch15_rey_woke_face": "Bir dahakine daha yavaş.",
+    "ch15_ardo_woke_face": "Geçmek yetmez. Sessiz geçmek gerekiyormuş."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",
@@ -424,7 +438,8 @@
     "mirror_hall": "Ayna Salonu",
     "cemo": "Cemo",
     "letter": "Mektup",
-    "source": "Yankı'nın Kaynağı"
+    "source": "Yankı'nın Kaynağı",
+    "silence": "Sessizlik"
   },
   "chapter_end": {
     "heading": "BÖLÜM TAMAMLANDI",
@@ -608,7 +623,8 @@
     "boost": "[{key}] yoldaşın yanında: seni fırlatır",
     "lever": "[{key}] kolu çevir — kapı süreli açılır",
     "rig_brake": "[{key}] basılı tut — kafes yavaşlar",
-    "dialogue": "[{key}] devam"
+    "dialogue": "[{key}] devam",
+    "chime": "[{key}] rezonans — uzaktaki çanı çal"
   },
   "chapter08": {
     "first_crystal": "Kristal kırıldı — ses bir silah",
@@ -640,5 +656,9 @@
     "betrayed": "Yankı artık iki tarafa da açık.",
     "heard": "Seni duydular.",
     "not_dead": "Düştü. Ama ölmedi."
+  },
+  "chapter15": {
+    "walk": "Yürü. Koşarsan duyarlar.",
+    "ghost": "Hiçbiri uyanmadı. Sessizlik ödülü."
   }
 }

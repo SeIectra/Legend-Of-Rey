@@ -1055,7 +1055,33 @@ SOURCE_SPLIT_LIMIT: Final[int] = 4
 # Ucu birden `docs/yapi.md`nin *"kosarsan uyanirlar"* cumlesini
 # sayiya ceviriyor.
 NOISE_WALK: Final[float] = 0.06
-NOISE_RUN: Final[float] = 0.30
+# 0.30 idi ve **kosmak hicbirini uyandirmiyordu** - yani belgenin
+# "kosarsan uyanirlar" cumlesi kodda karsiliksizdi. Sebep aritmetikti:
+#
+# Adim sesi mesafeye bagli (~50 pikselde bir), yani duyulma
+# bolgesinden (300 px cap) gecerken her hizda ~6 adim atiliyor. Ama
+# **gecis suresi** hiza bagli: kosarken 150 kare, yururken 500.
+# Sonme kare basina isledigi icin yavas gecen daha cok soluyor - ve
+# 0.30 ile hizli gecen de esige varamiyordu.
+#
+# Deger **olculdu**, hesaplanmadi. Ilk tahmin 0.60 idi ve tutmadi:
+# adim sesinin ~50 pikselde bir geldigini varsaymistim, gercekte
+# ~87 pikselde bir geliyor. Yani duyulma bolgesinden (300 px cap)
+# gecerken yalnizca **uc** kullanilabilir adim var, alti degil.
+#
+# Olculen gecis (kosu, tek uyuyan):
+#
+#     mesafe 122 -> +0.11
+#     mesafe  25 -> +0.50      zirve 0.687, esik 1.0 - UYANMIYOR
+#     mesafe  72 -> +0.31
+#
+# 0.90'da ayni gecis 1.0'i asiyor: en yakin adim tek basina 0.75,
+# ikincisi esigi geciriyor. Yani **kosmak iki adimda uyandiriyor.**
+#
+# Yuruyus hala imkansiz: 0.06 x 0.83 = 0.05 kazanc, adimlar arasi
+# 145 kare ve o surede sonme 0.72. Pay devasa - yanlislikla bir kare
+# kosan oyuncu cezalandirilmiyor.
+NOISE_RUN: Final[float] = 0.90
 NOISE_LAND: Final[float] = 0.85
 NOISE_ATTACK: Final[float] = 1.20      # tek vurus yeter - dovus cozum degil
 NOISE_DODGE: Final[float] = 0.34
@@ -1065,16 +1091,49 @@ NOISE_CHIME: Final[float] = 1.50
 
 # Gurultunun duyuldugu yaricap (piksel). Uzaklikla dogrusal soluyor.
 NOISE_RANGE: Final[float] = 150.0
-# Uyaniklik her karede bu kadar soluyor. 0.010 -> ~1.7 saniyede
-# sifirlaniyor: oyuncu bir hata yapip **bekleyerek** duzeltebilmeli.
-# Affetmeyen bir gizlilik bolumu kaydet-yukle oyununa doner.
-ALERT_DECAY: Final[float] = 0.010
+# Uyaniklik her karede bu kadar soluyor.
+#
+# 0.010 idi ve iki isi birden bozuyordu: hem kosmayi duyulmaz
+# yapiyordu (bkz. `NOISE_RUN`), hem de "kimildanma" esigi ekranda
+# neredeyse hic gorunmuyordu - oyuncu yaklastigini fark etmeden
+# uyandiriyordu.
+#
+# 0.005 -> tam dolu bir uyaniklik ~3.3 saniyede sifirlaniyor. Hata
+# yapan oyuncu hala **bekleyerek** duzeltebiliyor (affetmeyen bir
+# gizlilik bolumu kaydet-yukle oyununa doner) ama bekleme artik
+# gorulebilecek kadar uzun.
+ALERT_DECAY: Final[float] = 0.005
 # Bu esigin ustunde dusman uyaniyor ve bir daha uyumuyor.
 ALERT_WAKE: Final[float] = 1.0
 # Bu esigin ustunde henuz uyanmadi ama **kimildaniyor** - oyuncu
 # uyariyi gormeli. Sessiz bir esik oyuncuya haksiz gelir.
 ALERT_STIR: Final[float] = 0.45
+# Uyuyan dusmanin siluet deformasyonu (genislik, yukseklik).
+# `Enemy.silhouette_scale` bunu uyaniklikla (1.0, 1.0)'a dogru
+# yumusatiyor, yani uyanmakta olan dusman **dogruluyor.**
+#
+# Uc deger render edilip **bakildi** (`build/testshots/b15_squash_*`):
+#
+#   0.85  22 px -> 19 px. Dik durandan ayirt edilemiyor; ekranda fark
+#         secilmiyor, yani hicbir sey anlatmiyor.
+#   0.72  22 px -> 16 px. Rey'in yanindayken belirgin kisa - cokmus
+#         bir siluet, ama bacaklar hala okunuyor. ★
+#   0.55  22 px -> 12 px. Bacaklar kayboluyor, siluet okunmaz bir
+#         kutuge donuyor ve govde diyalog kutusunun arkasinda kaliyor.
+SLEEP_SQUASH: Final[tuple[float, float]] = (1.12, 0.72)
 # Sesin geldigi yere bu kadar yaklasinca arastirma bitiyor.
 INVESTIGATE_REACH: Final[float] = 20.0
 # Arastirma en fazla bu kadar surer, sonra dusman yerine doner.
 INVESTIGATE_FRAMES: Final[int] = 260
+
+
+# Rezonans darbesinin **kendi** gurultusu (Bolum 15).
+#
+# Darbe bedava olmamali: oyuncu bir cani uzaktan calarken kendi sesini
+# de cikariyor. Bu tek sayi bolumun bulmacasini kuruyor - **yeterince
+# uzak dur ki kendi darbeni duymasinlar, yeterince yakin dur ki cana
+# ulassin.** Sifir olsaydi dikkat dagitmak risksiz bir dugme olurdu.
+#
+# Kosmaktan (0.30) az, yurumekten (0.06) cok: acele etmekten sessiz,
+# yurumekten gurultulu.
+NOISE_RESONATE: Final[float] = 0.18
