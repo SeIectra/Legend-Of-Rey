@@ -35,7 +35,7 @@ Tasarım paketi `docs/` altında ve **bağlayıcı**: `gdd.md` (ana belge),
 
 ## 2. NEREDE DURUYORUZ
 
-**60.033 satır Python. 40 test paketi de yeşil — 86 saniyede.**
+**61.591 satır Python. 41 test paketi de yeşil — 91 saniyede.**
 (02.09.2026'da ölçüldü.)
 
 Oynanabilir akış:
@@ -44,10 +44,10 @@ Oynanabilir akış:
 **B6 ARDO** → **B7 Dar Geçit** → **B8 Ateş Başı** → **B9 Can Kulesi** →
 **B10 Ayrılık** → **B11 Ayna Salonu** → **B12 Mektup** → **B13 Cemo** →
 **B14 Yankı'nın Kaynağı** → **B15 Sessizlik** → **B16 Sırt Sırta** →
-bölüm sonu ekranı → ana menü`
+**B17 İkili Kule** → bölüm sonu ekranı → ana menü`
 
-**18 bölümün 16'sı oynanabilir.** Kalan: B17 "İkili Kule", B18 "Son".
-B16'nın sonu ana menüye dönüyor çünkü B17 henüz yok — bilinçli bir uç,
+**18 bölümün 17'si oynanabilir.** Kalan tek bölüm: **B18 "Son"**.
+B17'nin sonu ana menüye dönüyor çünkü B18 henüz yok — bilinçli bir uç,
 her bölümde aynı desen.
 
 **Katman 1 (Çürüyenler, B1–B6) ve Katman 2 (Lanetli Muhafızlar, B7–B13)
@@ -1002,6 +1002,69 @@ dördünü de tek bölümün özelliği için değiştirmek gerekirdi. Bayrak
 bu projede bir hatanın şekli.
 
 Zincirleme: **B15 → B16.**
+
+### Bölüm 17 "İkili Kule" — ikili kontrol, tutulan kapılar (02.09.2026)
+
+`docs/yapi.md` B17: *"Ayrı yollardan tırmanış, karakter arası geçiş.
+Bulmaca: Biri kolu tutar, diğeri geçer. **Sonra tersi.**"*
+
+Tek kule 26×48, ortadan iki tile'lık bir bölmeyle ikiye ayrılmış. Beş
+kat + zirve, altı kapı, sıfır düşman (`docs/gdd.md` §11 B17'yi dövüş
+döngüsünü bilerek kıran dört bölümden biri sayıyor).
+
+#### Mimariyi belge zaten yazmıştı — ve doğruydu
+
+`docs/yapi.md:119`: *"iki `Player` nesnesi, aktif olanı `active_player`
+işaretçisiyle değiştir. Mevcut kodun büyük kısmı yeniden kullanılır."*
+
+Ölçtüm: `scene.player` dışarıdan **yalnızca iki yerde** okunuyor, 51
+kullanımın hepsi `PlayScene` içinde. İşaretçiyi çevirmek kamerayı,
+HUD'u, düşman hedeflemesini ve kayıt yazmayı **birlikte** çeviriyor.
+
+Pasif oyuncu durdurulmuyor, `NEUTRAL_INPUT` ile sürülüyor —
+`Player.update`'in girdiye tek girişi var, tek satır yetti. Bu bir
+ayrıntı değil **bulmacanın temeli**: plakada bırakılan karakter orada
+durmaya devam ediyor.
+
+#### Arda'nın iki kararı
+
+1. **Kapılar basılı tutulduğu sürece açık.** `latching` bayrağı
+   eklendi, B6 varsayılanı aynen korundu. Hapsolma riski iki yerden
+   kapalı: kapı sütununda biri dururken kapanmıyor, ve kule yukarı tek
+   yön.
+2. **Geçiş tuşu Y.** Arda "F boşta mı?" diye sordu — değil, `ECHO_ASK`
+   onu kullanıyor. Kolda Back düğmesi `COMPANION_WAIT` ile
+   **paylaşılıyor**: sekiz düğmenin sekizi de dolu ve boş bırakılsaydı
+   B17 kolla kutudan çıktığı gibi oynanamazdı.
+
+`tests/test_settings.py` doğru yakaladı: 15 satır 14 yuvaya sığmıyordu.
+`CONTROL_ROWS` 7→8.
+
+#### Yazarken çıkan tasarım hatası
+
+İlk tasarım son kata **iki plaka** koyuyordu. Yazarken görüldü: iki
+karakter var ve ikisi de plakadaysa **geçecek kimse kalmıyor** —
+bulmaca çözülemezdi. Yerine geçen şey zaten belgede yazıyordu: zirvede
+çıkış sol şaftta, önündeki kapıyı sağdaki karakter tutuyor. Bölüm
+**"biri kapıyı tutarken öteki çıkıyor"** görüntüsüyle bitiyor.
+
+#### Haritada iki gerçek hata
+
+1. **Katlar tamamen doluydu** — çıkıntıda duran karakter yukarı
+   zıplayınca tavana çarpıyordu, kule hiç tırmanılamıyordu.
+2. **Geçit çıkıntı kadar genişti** — karakter delikten geçiyor, üstünde
+   boş hava buluyor, geri düşüyordu.
+
+Ayrıca kapı yüksekliği çıkıntının 2 tile üstüne çıkarıldı: apeks
+kapının tepesiyle aynı hizadaydı, üzerinden atlanabilirdi.
+
+#### Ulaşılabilirlik iki ayrı şaft olarak doğrulanıyor
+
+Her şaft **kendi doğumundan** ayrı doğrulanıyor, öteki "bilerek
+erişilemez" sayılıyor, ve kapılar **açık** haritayla bakılıyor — araç
+geometriyi soruyor, bulmacayı değil. 70 + 70 nokta.
+
+Zincirleme: **B16 → B17.**
 
 ## 9. AÇIK KALANLAR
 

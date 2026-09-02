@@ -449,6 +449,24 @@ def _known_rooms() -> list[tuple[str, list[str], Spot]]:
     spawn16 = chapter16.LEVEL.first("player")
     rooms.append(("bolum 16 - sirt sirta", chapter16.LEVEL.terrain_rows,
                   (spawn16.tile_x, spawn16.tile_y + 1), set()))
+
+    # Bolum 17: **iki ayri saft**, aralarinda gercek duvar. Tek
+    # dogumdan tarama yapmak yanlis olurdu - oteki safti elbette
+    # bulamaz. Her saft KENDI dogumundan ayri ayri dogrulaniyor ve
+    # oteki "bilerek erisilemez" sayiliyor.
+    #
+    # Kapilar ACIK haritayla bakiliyor: arac "bulmaca cozulmus mu"
+    # diye degil geometri saglam mi diye soruyor (ziplama yuksekligi,
+    # gecit genisligi).
+    from src.world.rooms import chapter17
+    open17 = chapter17.open_terrain()
+    spawn17 = chapter17.LEVEL.first("player")
+    rooms.append(("bolum 17 - sol saft", open17,
+                  (spawn17.tile_x, spawn17.tile_y + 1),
+                  chapter17.shaft_tiles(left=False)))
+    rooms.append(("bolum 17 - sag saft", open17,
+                  (chapter17.SPAWN_RIGHT[0], chapter17.SPAWN_RIGHT[1] + 1),
+                  chapter17.shaft_tiles(left=True)))
     return rooms
 
 

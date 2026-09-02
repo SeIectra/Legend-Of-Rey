@@ -736,6 +736,19 @@ COMPANION_DOWN_FRAMES: Final[int] = 210
 # Emredilen noktaya bu kadar yaklasinca "durdu" sayiliyor.
 COMPANION_HOLD_TOLERANCE: Final[float] = 10.0
 
+# --- IKILI KONTROL (Bolum 17, src/systems/duo.py) ----------------------------
+# `docs/yapi.md` mekanik 10: *"Karakterler arasi gecis, biri kolu tutar
+# biri gecer."*
+#
+# Iki gecis arasi bekleme. Gerekli degil ama faydali: beklemesiz
+# birakilinca tusa hizli basan oyuncu kamerayi iki nokta arasinda
+# titretiyor. 18 kare (0,3 sn) kacinmanin toplam suresiyle ayni - oyunun
+# zaten ogrettigi bir ritim.
+#
+# Uzun tutmak yanlis olurdu: bulmacayi cozerken gecis SIK yapiliyor ve
+# her seferinde beklemek bulmacayi degil tusu zorlastirirdi.
+SWITCH_COOLDOWN: Final[int] = 18
+
 # --- ASIST KOMBO (Bolum 16) --------------------------------------------------
 # `docs/yapi.md` B16: *"En uzun team-up. **Asist kombolar zirvede.**"*
 #

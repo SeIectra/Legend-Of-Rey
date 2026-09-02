@@ -46,11 +46,15 @@ VALUE_X = 244
 BAR_WIDTH = 70
 ROW_START_Y = 30           # Sekme seridinin altinda birakilan bosluk
 
-# Tus sekmesi IKI SUTUN. On bir tus + "varsayilanlara don" = on iki satir;
-# tek sutunda panele sigmiyordu (yer var: 10 satir). Kaydirma eklemek
-# yerine iki sutun: tus listesi zaten boyle okunuyor ve hicbir satir
-# gorunmez olmuyor.
-CONTROL_ROWS = 7
+# Tus sekmesi IKI SUTUN. Tek sutunda panele sigmiyordu (yer var: 10
+# satir). Kaydirma eklemek yerine iki sutun: tus listesi zaten boyle
+# okunuyor ve hicbir satir gorunmez olmuyor.
+#
+# 7 idi (14 yuva) ve Bolum 17'nin `SWITCH` tusu listeyi on bese
+# cikarinca `tests/test_settings.py` kirildi - dogru yakaladi, bir
+# satir gorunmez kalacakti. 8 sutun basina bir satir daha aliyor
+# (16 yuva) ve panelin 10 satirlik kapasitesinin altinda kaliyor.
+CONTROL_ROWS = 8
 CONTROL_COLUMN_WIDTH = (PANEL_WIDTH - 16) // 2
 # Yakalama sirasinda "bir tusa bas" kutusu.
 CAPTURE_BOX = (200, 54)

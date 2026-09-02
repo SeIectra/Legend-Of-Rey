@@ -110,6 +110,7 @@ REBINDABLE: tuple[Binding, ...] = (
     Binding(Action.ECHO_ASK, "controls.echo_ask"),
     Binding(Action.INTERACT, "controls.interact"),
     Binding(Action.COMPANION_WAIT, "controls.companion_wait"),
+    Binding(Action.SWITCH, "controls.switch"),
     Binding(Action.RESONATE, "controls.resonate"),
     Binding(Action.PAUSE, "controls.pause"),
 )

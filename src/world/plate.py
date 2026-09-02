@@ -120,14 +120,23 @@ class PlateGate:
     carpisma yolu acmaya gerek yok.
     """
 
-    __slots__ = ("column", "rows", "plates", "open", "_applied")
+    __slots__ = ("column", "rows", "plates", "open", "_applied", "latching")
 
-    def __init__(self, column: int, rows, plates) -> None:
+    def __init__(self, column: int, rows, plates,
+                 latching: bool = True) -> None:
         self.column = column
         self.rows = tuple(rows)
         self.plates = tuple(plates)
         self.open = False
         self._applied = False
+        # Bir kez acilinca acik kalir mi.
+        #
+        # **B6 icin True ve oyle kalmali** (gerekce `update`'te). Bolum
+        # 17 "Ikili Kule" False veriyor: `docs/yapi.md` mekanik 10
+        # *"biri kolu TUTAR, digeri gecer"* - kapi latch'lenseydi
+        # mekanik bir dizi tek seferlik dugmeye donerdi ve bolumun adi
+        # "bagimlilik" olmazdi (`docs/gdd.md` 11).
+        self.latching = latching
 
     @property
     def satisfied(self) -> bool:
@@ -145,19 +154,53 @@ class PlateGate:
         self.open = False
         self._applied = True
 
-    def update(self, tilemap) -> bool:
+    def blocked_by(self, actors) -> bool:
+        """Kapi sutununda duran biri var mi.
+
+        Kapanan kapi birini **tasin icinde birakmamali**: o an oyuncu
+        ya duvara sikisir ya da bir sonraki karede disari firlar. Ikisi
+        de hata gibi okunur.
+
+        Yalnizca latch'lenmeyen kapilar soruyor; latch'li olan zaten
+        hic kapanmiyor.
+        """
+        from src.config import TILE_SIZE
+        left = self.column * TILE_SIZE
+        top = min(self.rows) * TILE_SIZE
+        height = (max(self.rows) - min(self.rows) + 1) * TILE_SIZE
+        zone = pygame.Rect(left, top, TILE_SIZE, height)
+        return any(not getattr(actor, "dead", False)
+                   and zone.colliderect(actor.body.rect)
+                   for actor in actors)
+
+    def update(self, tilemap, actors=()) -> bool:
         """Durumu plakalardan turetir. Durum DEGISTIYSE True doner.
 
-        Kapi bir kez acilinca **acik kaliyor**: bulmaca cozuldukten sonra
-        plakadan inince kapinin tekrar kapanmasi oyuncuyu arenaya
-        hapsedebilirdi ve "cozdum" hissini geri alirdi.
+        `latching` (varsayilan, B6): kapi bir kez acilinca **acik
+        kaliyor**. Bulmaca cozuldukten sonra plakadan inince kapinin
+        tekrar kapanmasi oyuncuyu arenaya hapsedebilirdi ve "cozdum"
+        hissini geri alirdi.
+
+        `latching=False` (Bolum 17): plaka birakilinca kapi **kapaniyor**
+        - "biri kolu tutar, digeri gecer" cumlesinin gercek karsiligi.
+        Hapsolma riski iki sekilde kapali: sutunda biri dururken kapi
+        kapanmiyor (`blocked_by`), ve kule yukari tek yon oldugu icin
+        gecen karakterin geri donmesi gerekmiyor.
         """
-        if self.open:
+        from src.world.tilemap import EMPTY, SOLID
+        if self.satisfied:
+            if self.open:
+                return False
+            for row in self.rows:
+                tilemap.set_tile(self.column, row, EMPTY)
+            self.open = True
+            return True
+
+        if not self.open or self.latching:
             return False
-        if not self.satisfied:
-            return False
-        from src.world.tilemap import EMPTY
+        if self.blocked_by(actors):
+            return False           # temizlenene kadar bekliyor
         for row in self.rows:
-            tilemap.set_tile(self.column, row, EMPTY)
-        self.open = True
+            tilemap.set_tile(self.column, row, SOLID)
+        self.open = False
         return True

@@ -26,7 +26,7 @@ from src.config import (
 from src.art.animation import CHARACTERS
 from src.art.animator import Animator
 from src.art.trail import WeaponTrail
-from src.core.input import Action
+from src.core.input import NEUTRAL_INPUT, Action
 from src.entities.actor import Actor
 from src.entities.character_stats import CharacterStats, REY
 from src.combat import weapons
@@ -49,6 +49,14 @@ class Player(Actor):
     body_width = 10
     body_height = 22
     iframes_on_hit = PLAYER_IFRAMES_ON_HIT
+    # Girdiyi bu oyuncu mu aliyor.
+    #
+    # On alti bolumde sahnede tek bir `Player` var ve hep True. Bolum
+    # 17 "Ikili Kule" ikisini birden sahneye koyuyor
+    # (`docs/yapi.md` 119: *"iki `Player` nesnesi, aktif olani
+    # `active_player` isaretcisiyle degistir"*) ve pasif olani
+    # `NEUTRAL_INPUT` ile suruyor.
+    controlled = True
 
     def __init__(self, scene, x: float, y: float,
                  stats: CharacterStats = REY) -> None:
@@ -132,7 +140,15 @@ class Player(Actor):
             self._update_dead()
             return
 
-        inp = self.scene.game.input
+        # **Kontrol edilmeyen oyuncu komut almiyor** ama her seyi
+        # yapmaya devam ediyor: yer cekimi, animasyon, dokunulmazlik,
+        # ayak sesi. Bolum 17'de sahnede iki `Player` var ve girdiyi
+        # yalnizca aktif olan aliyor (`docs/yapi.md` mekanik 10).
+        #
+        # Tek satir, cunku girdinin bu metoda tek bir girisi var.
+        # `if self.controlled:` dallari serpistirmek ayni seyi bes
+        # yerde tekrarlamak olurdu ve biri gunun birinde unutulurdu.
+        inp = self.scene.game.input if self.controlled else NEUTRAL_INPUT
         if self.iframes > 0:
             self.iframes -= 1
         if self.hurt_frames > 0:

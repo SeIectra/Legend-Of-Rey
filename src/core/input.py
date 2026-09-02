@@ -43,6 +43,12 @@ class Action(Enum):
     # soruyor oteki nesne kiriyor. B9'un can bulmacasinda cani calmak
     # isterken soru sormak kotu olurdu.
     RESONATE = auto()
+    # Karakter arasi gecis - Bolum 17 "Ikili Kule".
+    # `docs/yapi.md` mekanik 10: *"Karakterler arasi gecis, biri kolu
+    # tutar biri gecer."* Ayri bir tus cunku B17'de iki karakter de
+    # OYNANABILIR; `COMPANION_WAIT` yapay zeka yoldasa emir veriyor,
+    # bu ise kimin oynandigini degistiriyor - ikisi ayni sey degil.
+    SWITCH = auto()
     PAUSE = auto()
     CONFIRM = auto()
     CANCEL = auto()
@@ -69,6 +75,9 @@ DEFAULT_KEYBOARD: dict[Action, tuple[int, ...]] = {
     Action.ECHO_ASK: (pygame.K_f,),
     Action.INTERACT: (pygame.K_e,),
     Action.COMPANION_WAIT: (pygame.K_u,),
+    # Arda "F bosta mi?" diye sordu - degil, `ECHO_ASK` onu kullaniyor.
+    # Y bos ve WASD'den uzak degil.
+    Action.SWITCH: (pygame.K_y,),
     Action.RESONATE: (pygame.K_g,),
     Action.PAUSE: (pygame.K_ESCAPE,),
     Action.CONFIRM: (pygame.K_RETURN, pygame.K_SPACE, pygame.K_e),
@@ -88,6 +97,15 @@ DEFAULT_GAMEPAD: dict[Action, tuple[int, ...]] = {
     Action.ECHO_ASK: (3,),      # Y
     Action.INTERACT: (0,),
     Action.COMPANION_WAIT: (6,),    # Back
+    # **Ayni dugme, bilerek.** Standart kolda sekiz dugme var ve
+    # sekizi de dolu. `RESONATE` gibi bos birakilsaydi Bolum 17 kolla
+    # kutudan ciktigi gibi OYNANAMAZDI - ve o bolum gecisi zorunlu
+    # kiliyor, istege bagli bir ek degil.
+    #
+    # Cakisma yok: B17'de yapay zeka yoldas yok (iki karakter de
+    # oynanabilir), yani "yoldas: bekle" o bolumde zaten anlamsiz.
+    # Yoldasi olan bolumlerde de gecis yok.
+    Action.SWITCH: (6,),            # Back - COMPANION_WAIT ile paylasik
     # `RESONATE` icin **varsayilan kol dugmesi yok**: standart bir
     # kolda sekiz dugme var ve sekizi de dolu (0-7). Bos bir dugme
     # uydurmak yerine bosluk birakiliyor - kolla oynayan oyuncu
@@ -369,3 +387,48 @@ class InputManager:
                 stick.rumble(low, high, milliseconds)
             except (pygame.error, AttributeError):
                 pass
+
+
+class NeutralInput:
+    """Hicbir sey basilmayan girdi - **kontrol edilmeyen** oyuncu icin.
+
+    `docs/yapi.md` mekanik 10 (Bolum 17 "Ikili Kule"): *"Karakterler
+    arasi gecis."* Sahnede iki `Player` var ama girdiyi yalnizca biri
+    almali.
+
+    Cozum `Player.update`'e "eger kontrol ediliyorsan" dallari
+    serpistirmek DEGIL. O metodun girdiye tek bir girisi var
+    (`inp = self.scene.game.input`) ve orada dort sey soruluyor:
+    `axis_x`, `held`, `buffered`, `consume`. Pasif oyuncuya bu dorde
+    "hayir" diyen bir nesne vermek yetiyor.
+
+    Boylece pasif karakter **her seyi yapmaya devam ediyor** - yer
+    cekimi, animasyon, dokunulmazlik sayaci, ayak sesi, squash - ama
+    hicbir komut almiyor. Bir plakanin ustunde birakildiginda orada
+    duruyor; bulmaca tam olarak buna dayaniyor.
+
+    Tekil: durumu yok, her sahne ayni ornegi kullanabilir.
+    """
+
+    __slots__ = ()
+
+    axis_x = 0.0
+    axis_y = 0.0
+
+    def held(self, action: Action) -> bool:
+        return False
+
+    def pressed(self, action: Action) -> bool:
+        return False
+
+    def released(self, action: Action) -> bool:
+        return False
+
+    def buffered(self, action: Action) -> bool:
+        return False
+
+    def consume(self, action: Action) -> bool:
+        return False
+
+
+NEUTRAL_INPUT = NeutralInput()

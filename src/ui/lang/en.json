@@ -412,7 +412,17 @@
     "ch16_rey_hold": "I'm reaching out. I won't let go until they take it.",
     "ch16_ardo_hold": "Take her arm. Don't let go.",
     "ch16_rey_stand": "It's over. We're both still standing.",
-    "ch16_ardo_stand": "All of them down. Not us."
+    "ch16_ardo_stand": "All of them down. Not us.",
+    "ch17_rey_split": "The path splits. You on that side, me on this one.",
+    "ch17_ardo_split": "Two separate ways. Iron between us.",
+    "ch17_rey_glass": "I can see you. My hand wouldn't reach.",
+    "ch17_ardo_glass": "An arm's length. And no way across.",
+    "ch17_rey_top": "The top. We both made it.",
+    "ch17_ardo_top": "We're up. Apart, but at the same time.",
+    "ch17_rey_held": "You're holding the door. Let go and it shuts.",
+    "ch17_ardo_held": "She's holding it. Standing there so I can pass.",
+    "ch17_rey_held_face": "The whole tower was teaching me this.",
+    "ch17_ardo_held_face": "I thought I climbed it alone."
   },
   "combat": {
     "counter": "COUNTER",
@@ -456,7 +466,8 @@
     "letter": "The Letter",
     "source": "The Source of the Echo",
     "silence": "Silence",
-    "backtoback": "Back to Back"
+    "backtoback": "Back to Back",
+    "twintower": "Twin Tower"
   },
   "chapter_end": {
     "heading": "CHAPTER COMPLETE",
@@ -628,7 +639,8 @@
     "err_reserved": "ESC can't be reassigned — it's how you leave menus",
     "err_last_key": "That's another action's only key",
     "companion_wait": "Companion: wait",
-    "resonate": "Resonance"
+    "resonate": "Resonance",
+    "switch": "Switch character"
   },
   "companion": {
     "waiting": "Waiting here",
@@ -643,7 +655,8 @@
     "rig_brake": "[{key}] hold — the rig slows",
     "dialogue": "[{key}] continue",
     "chime": "[{key}] resonance — ring a distant bell",
-    "rescue": "Hold [{key}] — lift them up"
+    "rescue": "Hold [{key}] — lift them up",
+    "switch": "[{key}] switch to the other"
   },
   "chapter08": {
     "first_crystal": "Crystal shattered — sound is a weapon",
@@ -682,5 +695,8 @@
   },
   "chapter16": {
     "lifted": "You pulled them back up."
+  },
+  "chapter17": {
+    "tidy": "You solved the tower with few switches."
   }
 }

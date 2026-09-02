@@ -81,6 +81,9 @@ SCENES = {
     "bolum16-donus": ("src.scenes.chapter16_cinematics", "ReturnCinematic"),
     "bolum16-kaldir": ("src.scenes.chapter16_cinematics", "LiftCinematic"),
     "bolum16-kalp": ("src.scenes.chapter16_cinematics", "HeartCinematic"),
+    # Bolum 17 "Ikili Kule" - iki oynanabilir karakter, `Y` ile gecis.
+    "bolum17": ("src.scenes.chapter17", "Chapter17Scene"),
+    "bolum17-kapi": ("src.scenes.chapter17_cinematics", "HeldDoorCinematic"),
     "dovus": ("src.scenes.combat_room", "CombatRoomScene"),
     "temel": ("src.scenes.foundation_check", "FoundationCheckScene"),
 }

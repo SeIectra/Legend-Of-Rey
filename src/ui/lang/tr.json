@@ -412,7 +412,17 @@
     "ch16_rey_hold": "Elimi uzatıyorum. Tutana kadar bırakmayacağım.",
     "ch16_ardo_hold": "Kolundan tut. Bırakma.",
     "ch16_rey_stand": "Bitti. İkimiz de ayaktayız.",
-    "ch16_ardo_stand": "Hepsi yerde. İkimiz değiliz."
+    "ch16_ardo_stand": "Hepsi yerde. İkimiz değiliz.",
+    "ch17_rey_split": "Yol ikiye ayrılıyor. Sen o tarafta, ben bu tarafta.",
+    "ch17_ardo_split": "İki ayrı yol. Aramızda demir var.",
+    "ch17_rey_glass": "Seni görüyorum. Uzatsam elim yetmez.",
+    "ch17_ardo_glass": "Bir kol boyu. Ve geçilmiyor.",
+    "ch17_rey_top": "Tepe. İkimiz de geldik.",
+    "ch17_ardo_top": "Çıktık. Ayrı ayrı ama aynı anda.",
+    "ch17_rey_held": "Kapıyı sen tutuyorsun. Bıraksan kapanır.",
+    "ch17_ardo_held": "Tutuyor. Ben geçeyim diye orada duruyor.",
+    "ch17_rey_held_face": "Bütün kule bunu öğretiyormuş.",
+    "ch17_ardo_held_face": "Yalnız tırmandığımı sanıyordum."
   },
   "combat": {
     "counter": "KARŞI VURUŞ",
@@ -456,7 +466,8 @@
     "letter": "Mektup",
     "source": "Yankı'nın Kaynağı",
     "silence": "Sessizlik",
-    "backtoback": "Sırt Sırta"
+    "backtoback": "Sırt Sırta",
+    "twintower": "İkili Kule"
   },
   "chapter_end": {
     "heading": "BÖLÜM TAMAMLANDI",
@@ -628,7 +639,8 @@
     "err_reserved": "ESC değiştirilemez — menüden çıkış ona bağlı",
     "err_last_key": "Bu tuş başka bir eylemin tek tuşu",
     "companion_wait": "Yoldaş: bekle",
-    "resonate": "Rezonans"
+    "resonate": "Rezonans",
+    "switch": "Karakter değiştir"
   },
   "companion": {
     "waiting": "Burada bekliyor",
@@ -643,7 +655,8 @@
     "rig_brake": "[{key}] basılı tut — kafes yavaşlar",
     "dialogue": "[{key}] devam",
     "chime": "[{key}] rezonans — uzaktaki çanı çal",
-    "rescue": "[{key}] basılı tut — onu kaldır"
+    "rescue": "[{key}] basılı tut — onu kaldır",
+    "switch": "[{key}] öteki karaktere geç"
   },
   "chapter08": {
     "first_crystal": "Kristal kırıldı — ses bir silah",
@@ -682,5 +695,8 @@
   },
   "chapter16": {
     "lifted": "Onu ayağa kaldırdın."
+  },
+  "chapter17": {
+    "tidy": "Kuleyi az geçişle çözdün."
   }
 }
